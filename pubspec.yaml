@@ -1,0 +1,25 @@
+name: nova
+description: "Nova IDE - mobile code editor with Termux run support."
+publish_to: 'none'
+version: 0.1.0+1
+environment:
+  sdk: ^3.13.3
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+  flutter_riverpod: ^2.5.1
+  riverpod: ^2.5.1
+  re_editor: ^0.7.0
+  re_highlight: ^0.0.3
+  dio: ^5.7.0
+  shared_preferences: ^2.3.2
+  flutter_secure_storage: ^9.2.2
+  path: ^1.9.0
+  file_picker: ^8.1.2
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+flutter:
+  uses-material-design: true
