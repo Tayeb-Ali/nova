@@ -1,6 +1,9 @@
-import "dart:io";
+﻿import "dart:io";
 
 import "package:flutter_riverpod/flutter_riverpod.dart";
+import "package:flutter_riverpod/legacy.dart";
+import "package:path/path.dart" as p;
+import "package:path_provider/path_provider.dart";
 
 import "../editor/editor_engine.dart";
 import "file_service.dart";
@@ -10,9 +13,15 @@ final fileServiceProvider = Provider<FileService>((ref) {
   return const FileService();
 });
 
-/// Workspace root. Defaults to the Termux shared folder.
-final rootDirProvider = StateProvider<Directory?>((ref) {
-  return Directory("/sdcard/Nova");
+/// Workspace root. Null until resolved to a writable folder.
+final rootDirProvider = StateProvider<Directory?>((ref) => null);
+
+/// App-private writable workspace (always permitted, no storage permission needed).
+final appRootProvider = FutureProvider<Directory>((ref) async {
+  final docs = await getApplicationDocumentsDirectory();
+  final nova = Directory(p.join(docs.path, "Nova"));
+  if (!await nova.exists()) await nova.create(recursive: true);
+  return nova;
 });
 
 /// Direct children of [dir], dirs-first sorted (see [FileService.listFiles]).

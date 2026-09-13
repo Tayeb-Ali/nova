@@ -1,4 +1,4 @@
-import "dart:io";
+﻿import "dart:io";
 
 import "package:flutter/material.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
@@ -67,7 +67,16 @@ class _EditorTabState extends ConsumerState<EditorTab> {
 
   Future<void> _save() async {
     final service = ref.read(fileServiceProvider);
-    await service.writeFile(File(widget.tab.path), _currentText);
+    try {
+      await service.writeFile(File(widget.tab.path), _currentText);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Save failed: $e")),
+        );
+      }
+      return;
+    }
     _savedText = _currentText;
     ref.read(openTabsProvider.notifier).markDirty(widget.tab.id, false);
     if (mounted) {

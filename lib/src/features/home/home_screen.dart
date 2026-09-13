@@ -1,14 +1,16 @@
-import "package:flutter/material.dart";
+﻿import "package:flutter/material.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:path/path.dart" as p;
 
 import "../editor/editor_tab.dart";
 import "../files/file_explorer.dart";
 import "../files/files_providers.dart";
-// ignore: uri_does_not_exist
 import "../run/output_panel.dart";
-// ignore: uri_does_not_exist
 import "../run/run_providers.dart";
+import "../run/termux_setup_guide.dart";
+import "../ai/ai_actions.dart";
+import "../settings/settings_screen.dart";
+import "dart:io";
 
 /// Main IDE shell: explorer drawer, tabbed editor, output panel.
 class HomeScreen extends ConsumerWidget {
@@ -24,13 +26,47 @@ class HomeScreen extends ConsumerWidget {
         title: const Text("Nova"),
         actions: [
           IconButton(
+            tooltip: "AI",
+            icon: const Icon(Icons.auto_awesome),
+            onPressed: activeTab == null
+                ? null
+                : () async {
+                    String code = "";
+                    try {
+                      code = await ref.read(fileServiceProvider).readFile(File(activeTab.path));
+                    } catch (_) {}
+                    if (context.mounted) {
+                      AiActionsSheet.show(context, selectedCode: code);
+                    }
+                  },
+          ),
+          IconButton(
+            tooltip: "Settings",
+            icon: const Icon(Icons.settings),
+            onPressed: () {
+              Navigator.of(context).push(MaterialPageRoute(builder: (_) => const SettingsScreen()));
+            },
+          ),
+          IconButton(
             tooltip: "Run",
             icon: const Icon(Icons.play_arrow),
-            onPressed: () {
-              // Implemented by the run agent in ../run/run_providers.dart
-              // as: Future<void> runCurrentFile(WidgetRef ref, String? path)
-                            runCurrentFile(ref, activeTab?.path); // ignore: undefined_method
-            },
+            onPressed: activeTab == null
+                ? null
+                : () async {
+                    final installed = await ref
+                        .read(termuxBridgeProvider)
+                        .isTermuxInstalled();
+                    if (!context.mounted) return;
+                    if (!installed) {
+                      showTermuxSetupDialog(context);
+                      return;
+                    }
+                    runCurrentFile(
+                      ref,
+                      filePath: activeTab.path,
+                      language: activeTab.language,
+                    );
+                  },
           ),
         ],
       ),
@@ -96,7 +132,7 @@ class HomeScreen extends ConsumerWidget {
           ),
         ],
       ),
-      bottomSheet: SizedBox(height: 200, child: OutputPanel()); // ignore: undefined_method
+      bottomSheet: const SizedBox(height: 200, child: OutputPanel()),
     );
   }
 }

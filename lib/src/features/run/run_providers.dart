@@ -1,6 +1,7 @@
 ﻿import 'dart:io';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/legacy.dart';
 
 import 'run_service.dart';
 import 'termux_bridge.dart';

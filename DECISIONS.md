@@ -31,3 +31,9 @@ Package: sd.adaa.codeide | App: Nova | Stack: Flutter + Riverpod
 ## 6. Module boundaries for parallel agents
 - Core owner: app_config, settings_store, app shell, manifest queries, this file.
 - Other agents own: home, editor, files, run bridge plus Termux service, AI service plus chat UI.
+
+## 2026-09-12: latest-packages upgrade
+- re_editor 0.7.0 -> 0.10.0 (0.7.0 broken on Flutter 3.47: missing TextInputClient.onFocusReceived).
+- riverpod/flutter_riverpod 2.6 -> 3.4; StateNotifier/StateProvider moved to package:*/legacy.dart — using legacy import (minimal diff, officially supported).
+
+`n## 2026-09-12: Termux direct download`n- No Termux SDK exists (separate app). Bundling rejected: +109MB APK bloat, signature/update conflicts.`n- Nova downloads official F-Droid APK (com.termux_1022, v0.119.0-beta.3) on demand + system installer via FileProvider + REQUEST_INSTALL_PACKAGES. Play Store build explicitly excluded (deprecated).`n- Emulator quirk: ACTION_VIEW install showed App installed but package vanished; identical APK via adb install persists. System-level, not app code.`n

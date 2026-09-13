@@ -1,4 +1,4 @@
-import "dart:io";
+﻿import "dart:io";
 
 import "package:flutter/material.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
@@ -21,9 +21,28 @@ class _FileExplorerState extends ConsumerState<FileExplorer> {
   @override
   void initState() {
     super.initState();
+    _rootController = TextEditingController();
     final root = ref.read(rootDirProvider);
-    _currentDir = root;
-    _rootController = TextEditingController(text: root?.path ?? "");
+    if (root != null) {
+      _currentDir = root;
+      _rootController.text = root.path;
+    } else {
+      ref.read(appRootProvider.future).then((dir) {
+        if (!mounted) return;
+        ref.read(rootDirProvider.notifier).state = dir;
+        setState(() {
+          _currentDir = dir;
+          _rootController.text = dir.path;
+        });
+      });
+    }
+  }
+
+  void _showFsError(Object e) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text("Storage not writable here: $e")),
+    );
   }
 
   @override
@@ -68,7 +87,12 @@ class _FileExplorerState extends ConsumerState<FileExplorer> {
       ),
     );
     if (ok != true) return;
-    await ref.read(fileServiceProvider).delete(entity);
+    try {
+      await ref.read(fileServiceProvider).delete(entity);
+    } catch (e) {
+      _showFsError(e);
+      return;
+    }
     final dir = _currentDir;
     if (dir != null) {
       // ignore: unused_result
@@ -104,8 +128,13 @@ class _FileExplorerState extends ConsumerState<FileExplorer> {
     if (name == null || name.isEmpty) return;
     final dir = _currentDir;
     if (dir == null) return;
-    final file =
-        await ref.read(fileServiceProvider).createFile(p.join(dir.path, name));
+    late final File file;
+    try {
+      file = await ref.read(fileServiceProvider).createFile(p.join(dir.path, name));
+    } catch (e) {
+      _showFsError(e);
+      return;
+    }
     // ignore: unused_result
     ref.refresh(fileListProvider(dir));
     _openFile(file.path);

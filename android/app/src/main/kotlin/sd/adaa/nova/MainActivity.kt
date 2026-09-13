@@ -8,6 +8,7 @@ class MainActivity : FlutterActivity() {
         super.configureFlutterEngine(flutterEngine)
         // Wire the Termux RUN_COMMAND bridge (channel "sd.adaa.codeide/run").
         TermuxBridge.configure(flutterEngine, this)
+        InstallBridge.configure(flutterEngine, this)
     }
 
     override fun onDestroy() {
