@@ -11,13 +11,80 @@ import "package:re_highlight/styles/vs.dart";
 import "package:re_highlight/styles/vs2015.dart";
 
 import "editor_theme_pack.dart";
+import "nova_tokens.dart";
 
 /// Built-in packs wrapping re_highlight's bundled styles.
 class BuiltinThemePacks {
-  static const String defaultLightPackId = "vs";
-  static const String defaultDarkPackId = "vs2015";
+  static const String defaultLightPackId = "nova-light";
+  static const String defaultDarkPackId = "nova-dark";
+
+  // Nova packs built from themes/developer_console/DESIGN.md tokens.
+  // These are the default packs; the re_highlight packs stay selectable.
+  static const EditorThemePack novaDark = EditorThemePack(
+    id: "nova-dark",
+    name: "Nova Dark",
+    brightness: Brightness.dark,
+    tokens: <String, TokenStyle>{
+      "keyword": TokenStyle(color: NovaSyntax.keyword, bold: true),
+      "type": TokenStyle(color: NovaSyntax.type),
+      "title": TokenStyle(color: NovaSyntax.function),
+      "string": TokenStyle(color: NovaSyntax.string),
+      "number": TokenStyle(color: NovaSyntax.number),
+      "comment": TokenStyle(color: NovaSyntax.comment, italic: true),
+    },
+    semantic: _novaSemantic,
+    chrome: EditorChrome(
+      background: NovaEditorChrome.darkBackground,
+      foreground: NovaEditorChrome.darkForeground,
+      cursor: NovaEditorChrome.darkCursor,
+      selection: NovaEditorChrome.darkSelection,
+      lineNumber: NovaEditorChrome.darkLineNumber,
+      lineHighlight: NovaEditorChrome.darkLineHighlight,
+    ),
+    accent: NovaColors.darkPrimary,
+  );
+
+  static const EditorThemePack novaLight = EditorThemePack(
+    id: "nova-light",
+    name: "Nova Light",
+    brightness: Brightness.light,
+    tokens: <String, TokenStyle>{
+      "keyword": TokenStyle(color: NovaSyntax.keyword, bold: true),
+      "type": TokenStyle(color: NovaSyntax.type),
+      "title": TokenStyle(color: NovaSyntax.function),
+      "string": TokenStyle(color: NovaSyntax.string),
+      "number": TokenStyle(color: NovaSyntax.number),
+      "comment": TokenStyle(color: NovaSyntax.comment, italic: true),
+    },
+    semantic: _novaSemantic,
+    chrome: EditorChrome(
+      background: NovaEditorChrome.lightBackground,
+      foreground: NovaEditorChrome.lightForeground,
+      cursor: NovaEditorChrome.lightCursor,
+      selection: NovaEditorChrome.lightSelection,
+      lineNumber: NovaEditorChrome.lightLineNumber,
+      lineHighlight: NovaEditorChrome.lightLineHighlight,
+    ),
+    accent: NovaColors.lightPrimary,
+  );
+
+  // Semantic colors shared by the nova packs (function/type roles from
+  // NovaSyntax, variable roles from the VSCode palettes per brightness role).
+  static const Map<String, TokenStyle> _novaSemantic = <String, TokenStyle>{
+    "function": TokenStyle(color: NovaSyntax.function),
+    "method": TokenStyle(color: NovaSyntax.function),
+    "variable": TokenStyle(color: Color(0xFF9CDCFE)),
+    "parameter": TokenStyle(color: Color(0xFF9CDCFE)),
+    "property": TokenStyle(color: Color(0xFF9CDCFE)),
+    "class": TokenStyle(color: NovaSyntax.type),
+    "interface": TokenStyle(color: NovaSyntax.type),
+    "enum": TokenStyle(color: NovaSyntax.type),
+    "type": TokenStyle(color: NovaSyntax.type),
+  };
 
   static final List<EditorThemePack> all = [
+    novaDark,
+    novaLight,
     _fromMap(
       id: "vs",
       name: "VSCode Light",

@@ -51,6 +51,10 @@ void main() {
     );
     await tester.pump(const Duration(seconds: 1));
 
+    // The shell boots on the Projects hub; switch to the Editor tab first.
+    await tester.tap(find.text("Editor"));
+    await tester.pump(const Duration(seconds: 1));
+
     // Collapse the console via the toggle IconButton.
     final toggle = find.byIcon(Icons.keyboard_arrow_down);
     expect(toggle, findsOneWidget);

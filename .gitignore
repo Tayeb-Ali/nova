@@ -53,3 +53,5 @@ app.*.map.json
 # Project-scoped agent skills (installed via `npx skills add`, see skills-lock.json)
 .agents/
 skills-lock.json
+
+/themes/

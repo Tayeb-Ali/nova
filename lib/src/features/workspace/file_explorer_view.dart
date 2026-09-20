@@ -39,20 +39,38 @@ class _FileExplorerViewState extends ConsumerState<FileExplorerView> {
     final name = await showDialog<String>(
       context: context,
       builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
         title: const Text("New file"),
         content: TextField(
           controller: nameController,
           autofocus: true,
-          decoration: const InputDecoration(hintText: "e.g. main.py"),
+          decoration: InputDecoration(
+            hintText: "e.g. main.py",
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(4),
+            ),
+          ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
+            style: TextButton.styleFrom(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(4),
+              ),
+            ),
             child: const Text("Cancel"),
           ),
           FilledButton(
             onPressed: () =>
                 Navigator.of(context).pop(nameController.text.trim()),
+            style: FilledButton.styleFrom(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(4),
+              ),
+            ),
             child: const Text("Create"),
           ),
         ],
@@ -78,20 +96,38 @@ class _FileExplorerViewState extends ConsumerState<FileExplorerView> {
     final newName = await showDialog<String>(
       context: context,
       builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
         title: const Text("Rename"),
         content: TextField(
           controller: nameController,
           autofocus: true,
-          decoration: const InputDecoration(hintText: "New name"),
+          decoration: InputDecoration(
+            hintText: "New name",
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(4),
+            ),
+          ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
+            style: TextButton.styleFrom(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(4),
+              ),
+            ),
             child: const Text("Cancel"),
           ),
           FilledButton(
             onPressed: () =>
                 Navigator.of(context).pop(nameController.text.trim()),
+            style: FilledButton.styleFrom(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(4),
+              ),
+            ),
             child: const Text("Rename"),
           ),
         ],
@@ -134,15 +170,28 @@ class _FileExplorerViewState extends ConsumerState<FileExplorerView> {
     final ok = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
         title: const Text("Delete?"),
         content: Text("Delete ${entry.name}?"),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
+            style: TextButton.styleFrom(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(4),
+              ),
+            ),
             child: const Text("Cancel"),
           ),
           FilledButton(
             onPressed: () => Navigator.of(context).pop(true),
+            style: FilledButton.styleFrom(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(4),
+              ),
+            ),
             child: const Text("Delete"),
           ),
         ],
@@ -173,6 +222,9 @@ class _FileExplorerViewState extends ConsumerState<FileExplorerView> {
   void _showEntryMenu(FileEntry entry) {
     showModalBottomSheet<void>(
       context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
+      ),
       builder: (context) => SafeArea(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -221,13 +273,24 @@ class _FileExplorerViewState extends ConsumerState<FileExplorerView> {
       child: Row(
         children: [
           for (var i = 0; i < crumbs.length; i++) ...[
-            if (i > 0) const Icon(Icons.chevron_right, size: 14),
+            if (i > 0)
+              Icon(Icons.chevron_right,
+                  size: 14,
+                  color: Theme.of(context).colorScheme.outline),
             InkWell(
+              borderRadius: BorderRadius.circular(4),
               onTap: () =>
                   ref.read(currentDirProvider.notifier).state = crumbs[i].$2,
-              child: Text(
-                i == 0 ? rootLabel : crumbs[i].$1,
-                style: Theme.of(context).textTheme.bodySmall,
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                child: Text(
+                  i == 0 ? rootLabel : crumbs[i].$1,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        fontFamily: "monospace",
+                      ),
+                ),
               ),
             ),
           ],
@@ -238,29 +301,66 @@ class _FileExplorerViewState extends ConsumerState<FileExplorerView> {
 
   Widget _fileList(WidgetRef ref, String? dir) {
     if (dir == null) {
-      return const Center(child: Text("Select a project"));
+      return Center(
+        child: Text(
+          "Select a project",
+          style: TextStyle(
+              color: Theme.of(context).colorScheme.onSurfaceVariant),
+        ),
+      );
     }
     final files = ref.watch(fileEntriesProvider(dir));
     return files.when(
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (e, _) => Center(child: Text("Error: $e")),
+      error: (e, _) => Center(
+        child: Text(
+          "Error: $e",
+          style:
+              TextStyle(color: Theme.of(context).colorScheme.error),
+        ),
+      ),
       data: (entries) {
         if (entries.isEmpty) {
-          return const Center(child: Text("Empty folder"));
+          return Center(
+            child: Text(
+              "Empty folder",
+              style: TextStyle(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant),
+            ),
+          );
         }
         return ListView.builder(
+          padding: const EdgeInsets.symmetric(horizontal: 8),
           itemCount: entries.length,
           itemBuilder: (context, i) {
             final entry = entries[i];
-            return ListTile(
-              dense: true,
-              leading: Icon(
-                entry.isDirectory ? Icons.folder : Icons.insert_drive_file,
-              ),
-              title: Text(
-                entry.name,
-                overflow: TextOverflow.ellipsis,
-              ),
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 2),
+              child: ListTile(
+                dense: true,
+                visualDensity: VisualDensity.compact,
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 8),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(4),
+                  side: BorderSide(
+                    color: Theme.of(context).colorScheme.outlineVariant,
+                  ),
+                ),
+                tileColor:
+                    Theme.of(context).colorScheme.surfaceContainerLow,
+                leading: Icon(
+                  entry.isDirectory ? Icons.folder : Icons.insert_drive_file,
+                  size: 18,
+                  color: entry.isDirectory
+                      ? Theme.of(context).colorScheme.primary
+                      : Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+                title: Text(
+                  entry.name,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
               onTap: () {
                 if (entry.isDirectory) {
                   ref.read(currentDirProvider.notifier).state = entry.path;
@@ -269,6 +369,7 @@ class _FileExplorerViewState extends ConsumerState<FileExplorerView> {
                 }
               },
               onLongPress: () => _showEntryMenu(entry),
+              ),
             );
           },
         );
@@ -286,7 +387,7 @@ class _FileExplorerViewState extends ConsumerState<FileExplorerView> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Padding(
-          padding: const EdgeInsets.fromLTRB(12, 8, 8, 4),
+          padding: const EdgeInsets.fromLTRB(8, 8, 8, 4),
           child: Text(
             "EXPLORER",
             style: Theme.of(context).textTheme.labelSmall?.copyWith(
@@ -296,20 +397,37 @@ class _FileExplorerViewState extends ConsumerState<FileExplorerView> {
           ),
         ),
         if (dir != null && project != null)
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8),
+          Container(
+            margin: const EdgeInsets.symmetric(horizontal: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surfaceContainerLow,
+              border: Border.all(
+                  color: Theme.of(context).colorScheme.outlineVariant),
+              borderRadius: BorderRadius.circular(4),
+            ),
             child: Row(
               children: [
                 IconButton(
                   icon: const Icon(Icons.arrow_upward, size: 18),
                   tooltip: "Go up",
                   visualDensity: VisualDensity.compact,
+                  style: IconButton.styleFrom(
+                    backgroundColor:
+                        Theme.of(context).colorScheme.surfaceContainerHigh,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    padding: const EdgeInsets.all(8),
+                  ),
                   onPressed: upEnabled
                       ? () => ref.read(currentDirProvider.notifier).state =
                           p.dirname(dir)
                       : null,
                 ),
-                const Icon(Icons.folder, size: 16),
+                Icon(Icons.folder,
+                    size: 16,
+                    color: Theme.of(context).colorScheme.primary),
                 const SizedBox(width: 4),
                 Expanded(child: _breadcrumb(ref, dir, project)),
               ],
@@ -319,11 +437,20 @@ class _FileExplorerViewState extends ConsumerState<FileExplorerView> {
           padding: const EdgeInsets.all(8),
           child: FilledButton.tonalIcon(
             onPressed: _newFile,
+            style: FilledButton.styleFrom(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(4),
+              ),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              visualDensity: VisualDensity.compact,
+            ),
             icon: const Icon(Icons.add, size: 18),
             label: const Text("New file"),
           ),
         ),
-        const Divider(height: 1),
+        Divider(
+            height: 1, color: Theme.of(context).colorScheme.outlineVariant),
         Expanded(child: _fileList(ref, dir)),
       ],
     );

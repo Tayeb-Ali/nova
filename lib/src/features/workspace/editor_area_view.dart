@@ -15,15 +15,28 @@ class EditorAreaView extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final tabs = ref.watch(workspaceTabsProvider);
     final active = ref.watch(activeEditorTabModelProvider);
+    final scheme = Theme.of(context).colorScheme;
     if (tabs.isEmpty || active == null) {
       return Center(
-        child: Text("Open a file from the explorer", style: Theme.of(context).textTheme.bodyMedium),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.description_outlined, size: 28, color: scheme.outline),
+            const SizedBox(height: 8),
+            Text(
+              "Open a file from the explorer",
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: scheme.onSurfaceVariant,
+                  ),
+            ),
+          ],
+        ),
       );
     }
     return Column(
       children: [
         _TabStrip(tabs: tabs, activeId: active.id),
-        const Divider(height: 1),
+        Divider(height: 1, color: scheme.outlineVariant),
         Expanded(child: _EditorTabBody(key: ValueKey(active.id), tab: active)),
       ],
     );
@@ -49,46 +62,75 @@ class _TabStrip extends ConsumerWidget {
   Widget _tabChip(BuildContext context, WidgetRef ref, EditorTabModel tab) {
     final selected = tab.id == activeId;
     final scheme = Theme.of(context).colorScheme;
-    return InkWell(
-      borderRadius: BorderRadius.circular(8),
-      onTap: () => ref.read(activeEditorTabProvider.notifier).state = tab.id,
-      child: Container(
-        margin: const EdgeInsets.symmetric(vertical: 6),
-        padding: const EdgeInsets.symmetric(horizontal: 10),
-        decoration: BoxDecoration(
-          color: selected ? scheme.primaryContainer : Colors.transparent,
-          border: Border.all(
-            color: selected ? scheme.primary : scheme.outlineVariant,
-          ),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (tab.dirty)
-              Padding(
-                padding: const EdgeInsets.only(right: 4),
-                child: Icon(Icons.circle, size: 8, color: scheme.tertiary),
+    return Padding(
+      padding: const EdgeInsets.only(right: 8),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          InkWell(
+            borderRadius: BorderRadius.circular(4),
+            onTap: () =>
+                ref.read(activeEditorTabProvider.notifier).state = tab.id,
+            child: Container(
+              margin: const EdgeInsets.only(top: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+              decoration: BoxDecoration(
+                color: selected
+                    ? scheme.surfaceContainerHigh
+                    : scheme.surfaceContainerLow,
+                border: Border.all(color: scheme.outlineVariant),
+                borderRadius: BorderRadius.circular(4),
               ),
-            Text(p.basename(tab.path), style: Theme.of(context).textTheme.bodySmall),
-            const SizedBox(width: 2),
-            InkWell(
-              onTap: () => _close(ref, tab.id),
-              child: const Padding(
-                padding: EdgeInsets.all(2),
-                child: Icon(Icons.close, size: 14),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (tab.dirty)
+                    Padding(
+                      padding: const EdgeInsets.only(right: 4),
+                      child: Icon(Icons.circle,
+                          size: 8, color: scheme.tertiary),
+                    ),
+                  Text(
+                    p.basename(tab.path),
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: selected
+                              ? scheme.onSurface
+                              : scheme.onSurfaceVariant,
+                          fontWeight:
+                              selected ? FontWeight.w600 : FontWeight.normal,
+                        ),
+                  ),
+                  const SizedBox(width: 2),
+                  InkWell(
+                    onTap: () => _close(ref, tab.id),
+                    child: Padding(
+                      padding: const EdgeInsets.all(2),
+                      child: Icon(Icons.close,
+                          size: 14, color: scheme.onSurfaceVariant),
+                    ),
+                  ),
+                ],
               ),
             ),
-          ],
-        ),
+          ),
+          // Active tab 2px primary underline (DESIGN.md tabs language).
+          Container(
+            height: 2,
+            margin: const EdgeInsets.only(top: 2),
+            color: selected ? scheme.primary : Colors.transparent,
+          ),
+        ],
       ),
     );
   }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return SizedBox(
-      height: 40,
+    final scheme = Theme.of(context).colorScheme;
+    return Container(
+      height: 48,
+      color: scheme.surfaceContainerLow,
       child: ListView(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -194,8 +236,15 @@ class _EditorTabBodyState extends ConsumerState<_EditorTabBody> {
         return Column(
           children: [
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              color: Theme.of(context).colorScheme.surfaceContainerHighest,
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surfaceContainerLow,
+                border: Border(
+                  bottom: BorderSide(
+                    color: Theme.of(context).colorScheme.outlineVariant,
+                  ),
+                ),
+              ),
               // Narrow panes (phone + explorer open) get an overflow menu
               // instead of inline buttons so the header never overflows.
               child: LayoutBuilder(
@@ -214,12 +263,24 @@ class _EditorTabBodyState extends ConsumerState<_EditorTabBody> {
                         ),
                       ),
                       if (widget.tab.dirty)
-                        const Padding(
-                          padding: EdgeInsets.only(right: 8),
-                          child: Icon(Icons.circle, size: 8),
+                        Padding(
+                          padding: const EdgeInsets.only(right: 8),
+                          child: Icon(Icons.circle,
+                              size: 8,
+                              color: Theme.of(context).colorScheme.tertiary),
                         ),
                       if (isMarkdown && !compact)
                         IconButton(
+                          visualDensity: VisualDensity.compact,
+                          style: IconButton.styleFrom(
+                            backgroundColor: Theme.of(context)
+                                .colorScheme
+                                .surfaceContainerHigh,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            padding: const EdgeInsets.all(8),
+                          ),
                           onPressed: _loaded
                               ? () => setState(
                                   () => _showPreview = !_showPreview)
@@ -235,7 +296,11 @@ class _EditorTabBodyState extends ConsumerState<_EditorTabBody> {
                       if (compact)
                         PopupMenuButton<String>(
                           tooltip: "Tab actions",
-                          icon: const Icon(Icons.more_vert, size: 18),
+                          icon: Icon(Icons.more_vert,
+                              size: 18,
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurfaceVariant),
                           onSelected: (value) {
                             if (value == "preview") {
                               setState(
@@ -260,6 +325,14 @@ class _EditorTabBodyState extends ConsumerState<_EditorTabBody> {
                       else
                         TextButton.icon(
                           onPressed: _loaded ? _save : null,
+                          style: TextButton.styleFrom(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 4),
+                            visualDensity: VisualDensity.compact,
+                          ),
                           icon: const Icon(Icons.save, size: 18),
                           label: const Text("Save"),
                         ),

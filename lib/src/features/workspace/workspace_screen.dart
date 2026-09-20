@@ -2,6 +2,9 @@ import "package:flutter/material.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 
 import "../../core/models/project.dart";
+import "../git/git_screen.dart";
+import "../process/process_screen.dart";
+import "../terminal/terminal_screen.dart";
 import "editor_area_view.dart";
 import "file_explorer_view.dart";
 import "run_panel.dart";
@@ -19,6 +22,65 @@ class WorkspaceScreen extends ConsumerStatefulWidget {
 class _WorkspaceScreenState extends ConsumerState<WorkspaceScreen> {
   bool _initialLoading = true;
   bool _explorerVisible = true;
+
+  // Bottom tool drawer tab: 0 Run, 1 Terminal, 2 Git, 3 Processes, -1 hidden.
+  // Only the selected tool is inserted so sessions start lazily on first open.
+  int _toolIndex = 0;
+
+  static const _toolLabels = ["Run", "Terminal", "Git", "Processes"];
+  static const _toolIcons = [
+    Icons.play_arrow,
+    Icons.terminal,
+    Icons.account_tree,
+    Icons.settings_input_component_outlined,
+  ];
+
+  Widget _toolDrawer(ColorScheme scheme) {
+    return Container(
+      decoration: BoxDecoration(
+        color: scheme.surfaceContainerLow,
+        border: Border(top: BorderSide(color: scheme.outlineVariant)),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SizedBox(
+            height: 40,
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: [
+                for (int i = 0; i < _toolLabels.length; i++)
+                  TextButton.icon(
+                    onPressed: () => setState(
+                      () => _toolIndex = _toolIndex == i ? -1 : i,
+                    ),
+                    icon: Icon(_toolIcons[i], size: 16),
+                    label: Text(_toolLabels[i]),
+                    style: TextButton.styleFrom(
+                      foregroundColor: _toolIndex == i
+                          ? scheme.primary
+                          : scheme.onSurfaceVariant,
+                      shape: const RoundedRectangleBorder(),
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      minimumSize: const Size(0, 40),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          if (_toolIndex == 0) const RunPanel(),
+          if (_toolIndex == 1)
+            const SizedBox(height: 320, child: TerminalScreen()),
+          if (_toolIndex == 2)
+            const SizedBox(height: 320, child: GitScreen()),
+          if (_toolIndex == 3)
+            const SizedBox(height: 320, child: ProcessScreen()),
+        ],
+      ),
+    );
+  }
 
   @override
   void initState() {
@@ -279,7 +341,7 @@ class _WorkspaceScreenState extends ConsumerState<WorkspaceScreen> {
                         ],
                       ),
                     ),
-                    const RunPanel(),
+                    _toolDrawer(Theme.of(context).colorScheme),
                   ],
                 ),
     );

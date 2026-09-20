@@ -15,6 +15,8 @@ class Settings {
   final bool followEditorTheme;
   final String editorFont;
   final double editorFontSize;
+  // Locale override: null follows the system, otherwise 'ar' or 'en'.
+  final String? appLocale;
   const Settings({
     this.themeMode = ThemeMode.system,
     this.timeoutMs = AppConfig.defaultTimeoutMs,
@@ -24,6 +26,7 @@ class Settings {
     this.followEditorTheme = true,
     this.editorFont = "system",
     this.editorFontSize = 13.0,
+    this.appLocale,
   });
   Settings copyWith({
     ThemeMode? themeMode,
@@ -34,6 +37,7 @@ class Settings {
     bool? followEditorTheme,
     String? editorFont,
     double? editorFontSize,
+    String? appLocale,
   }) {
     return Settings(
       themeMode: themeMode ?? this.themeMode,
@@ -44,6 +48,7 @@ class Settings {
       followEditorTheme: followEditorTheme ?? this.followEditorTheme,
       editorFont: editorFont ?? this.editorFont,
       editorFontSize: editorFontSize ?? this.editorFontSize,
+      appLocale: appLocale ?? this.appLocale,
     );
   }
 }
@@ -60,6 +65,7 @@ class SettingsStore extends StateNotifier<Settings> {
   static const kFollowTheme = "nova.followEditorTheme";
   static const kEditorFont = "nova.editorFont";
   static const kEditorFontSize = "nova.editorFontSize";
+  static const kAppLocale = "nova.appLocale";
   SettingsStore() : super(const Settings()) {
     load();
   }
@@ -73,6 +79,11 @@ class SettingsStore extends StateNotifier<Settings> {
     final followTheme = prefs.getBool(kFollowTheme);
     final editorFont = prefs.getString(kEditorFont);
     final editorFontSize = prefs.getDouble(kEditorFontSize);
+    final storedLocale = prefs.getString(kAppLocale);
+    // Only accepted locale codes survive; anything else falls back to system.
+    final appLocale = (storedLocale == "ar" || storedLocale == "en")
+        ? storedLocale
+        : null;
     ThemeMode mode = ThemeMode.system;
     if (themeIndex != null &&
         themeIndex >= 0 &&
@@ -88,6 +99,7 @@ class SettingsStore extends StateNotifier<Settings> {
       followEditorTheme: followTheme ?? true,
       editorFont: editorFont ?? "system",
       editorFontSize: (editorFontSize ?? 13.0).clamp(10.0, 24.0),
+      appLocale: appLocale,
     );
   }
 
@@ -141,6 +153,29 @@ class SettingsStore extends StateNotifier<Settings> {
     state = state.copyWith(editorFontSize: clamped);
     final prefs = await SharedPreferences.getInstance();
     await prefs.setDouble(kEditorFontSize, clamped);
+  }
+
+  // Sets the locale override (null follows the system); copyWith keeps the
+  // old value on null, so rebuild explicitly to allow clearing to system.
+  Future<void> setAppLocale(String? locale) async {
+    final v = (locale == "ar" || locale == "en") ? locale : null;
+    state = Settings(
+      themeMode: state.themeMode,
+      timeoutMs: state.timeoutMs,
+      aiBaseUrl: state.aiBaseUrl,
+      aiModel: state.aiModel,
+      autocompleteEnabled: state.autocompleteEnabled,
+      followEditorTheme: state.followEditorTheme,
+      editorFont: state.editorFont,
+      editorFontSize: state.editorFontSize,
+      appLocale: v,
+    );
+    final prefs = await SharedPreferences.getInstance();
+    if (v == null) {
+      await prefs.remove(kAppLocale);
+    } else {
+      await prefs.setString(kAppLocale, v);
+    }
   }
 }
 

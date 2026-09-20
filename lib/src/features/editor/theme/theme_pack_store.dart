@@ -95,6 +95,15 @@ class EditorThemeStore extends StateNotifier<EditorThemeState> {
     return pack;
   }
 
+  // Exports a pack (built-in or custom) as its JSON string for copy/share.
+  // Throws [StateError] for unknown ids.
+  Future<String> exportPackJson(String id) async {
+    for (final pack in allPacks) {
+      if (pack.id == id) return jsonEncode(pack.toJson());
+    }
+    throw StateError("Unknown theme pack $id");
+  }
+
   Future<void> deleteCustomPack(String id) async {
     if (BuiltinThemePacks.byId(id) != null) {
       throw StateError("Built-in pack $id cannot be deleted");

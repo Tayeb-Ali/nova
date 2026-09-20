@@ -201,7 +201,7 @@ class _RuntimeScreenState extends State<RuntimeScreen> {
       messenger.showSnackBar(
         SnackBar(
           content: Text('تم تثبيت $displayName بنجاح ✅'),
-          backgroundColor: Colors.green.shade600,
+          backgroundColor: Theme.of(context).colorScheme.inverseSurface,
           behavior: SnackBarBehavior.floating,
           duration: const Duration(seconds: 3),
         ),
@@ -372,15 +372,28 @@ class _RuntimeScreenState extends State<RuntimeScreen> {
     final bool? ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
         title: const Text('Uninstall'),
         content: Text('Uninstall ${runtime.displayName}?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
+            style: TextButton.styleFrom(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(4),
+              ),
+            ),
             child: const Text('Cancel'),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(ctx, true),
+            style: FilledButton.styleFrom(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(4),
+              ),
+            ),
             child: const Text('Uninstall'),
           ),
         ],
@@ -435,14 +448,21 @@ class _RuntimeScreenState extends State<RuntimeScreen> {
       body: RefreshIndicator(
         onRefresh: _refreshAll,
         child: ListView(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(8),
           children: [
             _buildSetupCard(),
-            const SizedBox(height: 24),
-            Text('Runtimes', style: Theme.of(context).textTheme.titleMedium),
+            const SizedBox(height: 8),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+              child: Text('Runtimes',
+                  style: Theme.of(context)
+                      .textTheme
+                      .titleSmall
+                      ?.copyWith(fontWeight: FontWeight.bold)),
+            ),
             const SizedBox(height: 8),
             _buildRuntimes(),
-            const SizedBox(height: 16),
+            const SizedBox(height: 8),
             _buildProgressSection(),
           ],
         ),
@@ -452,9 +472,17 @@ class _RuntimeScreenState extends State<RuntimeScreen> {
 
   Widget _buildSetupCard() {
     final bool ready = _setupStatus?.ready ?? false;
+    final scheme = Theme.of(context).colorScheme;
     return Card(
+      elevation: 0,
+      color: scheme.surfaceContainer,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: scheme.outlineVariant),
+      ),
+      margin: EdgeInsets.zero,
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(12),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -463,13 +491,25 @@ class _RuntimeScreenState extends State<RuntimeScreen> {
                 Expanded(
                   child: Text(
                     'Bootstrap',
-                    style: Theme.of(context).textTheme.titleMedium,
+                    style: Theme.of(context)
+                        .textTheme
+                        .titleSmall
+                        ?.copyWith(fontWeight: FontWeight.bold),
                   ),
                 ),
                 if (ready)
-                  const Chip(
-                    avatar: Icon(Icons.check, size: 16, color: Colors.green),
-                    label: Text('Ready'),
+                  Chip(
+                    avatar: Icon(Icons.check,
+                        size: 16, color: scheme.tertiary),
+                    label: const Text('Ready'),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    backgroundColor: scheme.tertiaryContainer,
+                    labelStyle:
+                        TextStyle(color: scheme.onTertiaryContainer),
+                    visualDensity: VisualDensity.compact,
+                    padding: const EdgeInsets.all(4),
                   ),
               ],
             ),
@@ -486,13 +526,16 @@ class _RuntimeScreenState extends State<RuntimeScreen> {
             else
               const Text('Bootstrap is not installed yet.'),
             if (_setupRunning) ...[
-              const SizedBox(height: 12),
+              const SizedBox(height: 8),
               LinearProgressIndicator(value: _setupFraction),
               if (_setupPhase != null) ...[
                 const SizedBox(height: 6),
                 Text(
                   '$_setupPhase  ${(_setupFraction * 100).round()}%',
-                  style: Theme.of(context).textTheme.bodySmall,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        fontFamily: 'monospace',
+                        color: scheme.onSurfaceVariant,
+                      ),
                 ),
               ],
             ],
@@ -504,10 +547,18 @@ class _RuntimeScreenState extends State<RuntimeScreen> {
               ),
             ],
             if (!ready && !_setupRunning) ...[
-              const SizedBox(height: 12),
+              const SizedBox(height: 8),
               FilledButton.icon(
                 onPressed: _startSetup,
-                icon: const Icon(Icons.build),
+                style: FilledButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 8, vertical: 4),
+                  visualDensity: VisualDensity.compact,
+                ),
+                icon: const Icon(Icons.build, size: 18),
                 label: const Text('Start setup'),
               ),
             ],
@@ -520,7 +571,7 @@ class _RuntimeScreenState extends State<RuntimeScreen> {
   Widget _buildRuntimes() {
     if (_loadingRuntimes) {
       return const Padding(
-        padding: EdgeInsets.all(24),
+        padding: EdgeInsets.all(8),
         child: Center(child: CircularProgressIndicator()),
       );
     }
@@ -540,7 +591,14 @@ class _RuntimeScreenState extends State<RuntimeScreen> {
 
   Widget _buildRuntimeTile(RuntimeInfo runtime) {
     final bool isActive = _activeId == runtime.id;
+    final scheme = Theme.of(context).colorScheme;
     return Card(
+      elevation: 0,
+      color: scheme.surfaceContainer,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: scheme.outlineVariant),
+      ),
       margin: const EdgeInsets.only(bottom: 8),
       child: Padding(
         padding: const EdgeInsets.all(12),
@@ -552,20 +610,46 @@ class _RuntimeScreenState extends State<RuntimeScreen> {
                 Expanded(
                   child: Text(
                     runtime.displayName,
-                    style: Theme.of(context).textTheme.titleMedium,
+                    style: Theme.of(context)
+                        .textTheme
+                        .titleSmall
+                        ?.copyWith(fontWeight: FontWeight.bold),
                   ),
                 ),
                 if (runtime.installed)
-                  const Chip(
-                    avatar: Icon(Icons.check, size: 16, color: Colors.green),
-                    label: Text('Installed'),
+                  Chip(
+                    avatar: Icon(Icons.check,
+                        size: 16, color: scheme.tertiary),
+                    label: const Text('Installed'),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    backgroundColor: scheme.tertiaryContainer,
+                    labelStyle:
+                        TextStyle(color: scheme.onTertiaryContainer),
+                    visualDensity: VisualDensity.compact,
+                    padding: const EdgeInsets.all(4),
                   )
                 else
-                  const Chip(label: Text('Available')),
+                  Chip(
+                    label: const Text('Available'),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    backgroundColor: scheme.surfaceContainerHigh,
+                    visualDensity: VisualDensity.compact,
+                    padding: const EdgeInsets.all(4),
+                  ),
               ],
             ),
             const SizedBox(height: 4),
-            Text('Version: ${runtime.version ?? '—'}'),
+            Text(
+              'Version: ${runtime.version ?? '—'}',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    fontFamily: 'monospace',
+                    color: scheme.onSurfaceVariant,
+                  ),
+            ),
             if (isActive) ...[
               const SizedBox(height: 8),
               LinearProgressIndicator(value: _runtimeFraction),
@@ -604,7 +688,15 @@ class _RuntimeScreenState extends State<RuntimeScreen> {
                   if (runtime.installed) ...[
                     OutlinedButton.icon(
                       onPressed: _busy ? null : () => _update(runtime.id),
-                      icon: const Icon(Icons.update),
+                      style: OutlinedButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 4),
+                        visualDensity: VisualDensity.compact,
+                      ),
+                      icon: const Icon(Icons.update, size: 18),
                       label: const Text('Update'),
                     ),
                     const SizedBox(width: 8),
@@ -612,7 +704,15 @@ class _RuntimeScreenState extends State<RuntimeScreen> {
                       onPressed: _busy
                           ? null
                           : () => _confirmUninstall(runtime),
-                      icon: const Icon(Icons.delete_outline),
+                      style: OutlinedButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 4),
+                        visualDensity: VisualDensity.compact,
+                      ),
+                      icon: const Icon(Icons.delete_outline, size: 18),
                       label: const Text('Uninstall'),
                     ),
                   ] else
@@ -620,7 +720,15 @@ class _RuntimeScreenState extends State<RuntimeScreen> {
                       onPressed: _busy
                           ? null
                           : () => _install(runtime.id),
-                      icon: const Icon(Icons.download),
+                      style: FilledButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 4),
+                        visualDensity: VisualDensity.compact,
+                      ),
+                      icon: const Icon(Icons.download, size: 18),
                       label: const Text('Install'),
                     ),
                 ],
@@ -639,8 +747,14 @@ class _RuntimeScreenState extends State<RuntimeScreen> {
       return const SizedBox.shrink();
     }
     return Card(
-      elevation: hasActive ? 3 : 1,
-      color: hasActive ? Theme.of(context).colorScheme.surfaceContainer : null,
+      elevation: 0,
+      color: Theme.of(context).colorScheme.surfaceContainer,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(
+            color: Theme.of(context).colorScheme.outlineVariant),
+      ),
+      margin: EdgeInsets.zero,
       child: Padding(
         padding: const EdgeInsets.all(12),
         child: Column(
@@ -666,10 +780,15 @@ class _RuntimeScreenState extends State<RuntimeScreen> {
                 ),
                 if (hasActive && _runtimeFraction != null)
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
                       color: Theme.of(context).colorScheme.primaryContainer,
-                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                          color: Theme.of(context)
+                              .colorScheme
+                              .outlineVariant),
+                      borderRadius: BorderRadius.circular(4),
                     ),
                     child: Text(
                       '${(_runtimeFraction! * 100).round()}%',
@@ -683,10 +802,17 @@ class _RuntimeScreenState extends State<RuntimeScreen> {
                 if (hasActive && _downloadRate != null) ...[
                   const SizedBox(width: 8),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.secondaryContainer,
-                      borderRadius: BorderRadius.circular(8),
+                      color: Theme.of(context)
+                          .colorScheme
+                          .secondaryContainer,
+                      border: Border.all(
+                          color: Theme.of(context)
+                              .colorScheme
+                              .outlineVariant),
+                      borderRadius: BorderRadius.circular(4),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
@@ -723,7 +849,10 @@ class _RuntimeScreenState extends State<RuntimeScreen> {
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
                   color: Theme.of(context).colorScheme.errorContainer,
-                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                      color:
+                          Theme.of(context).colorScheme.outlineVariant),
+                  borderRadius: BorderRadius.circular(4),
                 ),
                 child: Row(
                   children: [
@@ -746,7 +875,7 @@ class _RuntimeScreenState extends State<RuntimeScreen> {
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
                   color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(4),
                   border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
                 ),
                 child: Scrollbar(
@@ -781,7 +910,9 @@ class _RuntimeScreenState extends State<RuntimeScreen> {
                                       color: isError
                                           ? Theme.of(context).colorScheme.error
                                           : isSuccess
-                                              ? Colors.green.shade700
+                                              ? Theme.of(context)
+                                                  .colorScheme
+                                                  .tertiary
                                               : null,
                                     ),
                               ),

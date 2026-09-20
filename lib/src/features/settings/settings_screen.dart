@@ -2,12 +2,14 @@ import "dart:convert";
 
 import "package:file_picker/file_picker.dart";
 import "package:flutter/material.dart";
+import "package:flutter/services.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:re_editor/re_editor.dart";
 import "package:re_highlight/languages/dart.dart";
 
 import "../../core/settings_store.dart";
 import "../editor/theme/editor_fonts.dart";
+import "../editor/theme/editor_theme_pack.dart";
 import "../editor/theme/theme_pack_store.dart";
 
 // Settings UI: theme, run timeout, AI endpoint and model.
@@ -57,50 +59,142 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       _baseUrlCtrl.text = settings.aiBaseUrl;
     }
 
+    final scheme = Theme.of(context).colorScheme;
+    // Hub-style section card (12px radius, 1px outlineVariant border).
+    ShapeBorder sectionShape() => RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: BorderSide(color: scheme.outlineVariant),
+        );
+    Widget sectionTitle(String text) => Text(
+          text.toUpperCase(),
+          style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                color: scheme.primary,
+                letterSpacing: 1.2,
+              ),
+        );
+    InputBorder fieldBorder() => OutlineInputBorder(
+          borderRadius: BorderRadius.circular(4),
+        );
+
     return Scaffold(
       appBar: AppBar(title: const Text("Settings")),
       body: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(8),
         children: [
-          const Text("Appearance"),
-          const SizedBox(height: 8),
-          SegmentedButton<ThemeMode>(
-            segments: const [
-              ButtonSegment(value: ThemeMode.system, label: Text("System")),
-              ButtonSegment(value: ThemeMode.light, label: Text("Light")),
-              ButtonSegment(value: ThemeMode.dark, label: Text("Dark")),
-            ],
-            selected: {settings.themeMode},
-            onSelectionChanged: (sel) => store.setThemeMode(sel.first),
-          ),
-          const SizedBox(height: 24),
-          Text("Run timeout: ${settings.timeoutMs} ms"),
-          Slider(
-            min: 1000,
-            max: 120000,
-            divisions: 119,
-            value: settings.timeoutMs.toDouble().clamp(1000, 120000),
-            label: settings.timeoutMs.toString(),
-            onChanged: (v) => store.setTimeoutMs(v.round()),
-          ),
-          TextField(
-            controller: _timeoutCtrl,
-            keyboardType: TextInputType.number,
-            decoration: const InputDecoration(
-              labelText: "Timeout (ms, 1000-120000)",
-              border: OutlineInputBorder(),
+          Card(
+            elevation: 0,
+            color: scheme.surfaceContainer,
+            shape: sectionShape(),
+            margin: const EdgeInsets.only(bottom: 8),
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  sectionTitle("Appearance"),
+                  const SizedBox(height: 8),
+                  SegmentedButton<ThemeMode>(
+                    segments: const [
+                      ButtonSegment(
+                          value: ThemeMode.system, label: Text("System")),
+                      ButtonSegment(
+                          value: ThemeMode.light, label: Text("Light")),
+                      ButtonSegment(
+                          value: ThemeMode.dark, label: Text("Dark")),
+                    ],
+                    style: SegmentedButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      visualDensity: VisualDensity.compact,
+                    ),
+                    selected: {settings.themeMode},
+                    onSelectionChanged: (sel) =>
+                        store.setThemeMode(sel.first),
+                  ),
+                  const SizedBox(height: 8),
+                  DropdownButtonFormField<String?>(
+                    initialValue: settings.appLocale,
+                    decoration: InputDecoration(
+                      labelText: "Language",
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ),
+                    items: const [
+                      DropdownMenuItem(
+                        value: null,
+                        child: Text("System"),
+                      ),
+                      DropdownMenuItem(
+                        value: "en",
+                        child: Text("English"),
+                      ),
+                      DropdownMenuItem(
+                        value: "ar",
+                        child: Text("العربية"),
+                      ),
+                    ],
+                    onChanged: (v) => store.setAppLocale(v),
+                  ),
+                ],
+              ),
             ),
-            onSubmitted: (v) {
-              final ms = int.tryParse(v.trim());
-              if (ms != null) {
-                store.setTimeoutMs(ms);
-                _timeoutCtrl.text = ms.clamp(1000, 120000).toString();
-              }
-            },
           ),
-          const SizedBox(height: 24),
-          const Text("Editor"),
-          const SizedBox(height: 8),
+          Card(
+            elevation: 0,
+            color: scheme.surfaceContainer,
+            shape: sectionShape(),
+            margin: const EdgeInsets.only(bottom: 8),
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  sectionTitle("Run"),
+                  const SizedBox(height: 8),
+                  Text("Run timeout: ${settings.timeoutMs} ms"),
+                  Slider(
+                    min: 1000,
+                    max: 120000,
+                    divisions: 119,
+                    value:
+                        settings.timeoutMs.toDouble().clamp(1000, 120000),
+                    label: settings.timeoutMs.toString(),
+                    onChanged: (v) => store.setTimeoutMs(v.round()),
+                  ),
+                  TextField(
+                    controller: _timeoutCtrl,
+                    keyboardType: TextInputType.number,
+                    decoration: InputDecoration(
+                      labelText: "Timeout (ms, 1000-120000)",
+                      border: fieldBorder(),
+                    ),
+                    onSubmitted: (v) {
+                      final ms = int.tryParse(v.trim());
+                      if (ms != null) {
+                        store.setTimeoutMs(ms);
+                        _timeoutCtrl.text =
+                            ms.clamp(1000, 120000).toString();
+                      }
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ),
+          Card(
+            elevation: 0,
+            color: scheme.surfaceContainer,
+            shape: sectionShape(),
+            margin: const EdgeInsets.only(bottom: 8),
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  sectionTitle("Editor"),
+                  const SizedBox(height: 8),
           SwitchListTile(
             contentPadding: EdgeInsets.zero,
             title: const Text("Autocomplete"),
@@ -120,9 +214,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           const SizedBox(height: 8),
           DropdownButtonFormField<String>(
             initialValue: settings.editorFont,
-            decoration: const InputDecoration(
+            decoration: InputDecoration(
               labelText: "Editor font",
-              border: OutlineInputBorder(),
+              border: fieldBorder(),
             ),
             items: [
               for (final font in editorFonts)
@@ -156,45 +250,72 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           const SizedBox(height: 8),
           const _EditorPreview(),
           const _EditorThemePicker(),
-          const SizedBox(height: 24),
-          const Text("AI"),
-          const SizedBox(height: 8),
+                ],
+              ),
+            ),
+          ),
+          Card(
+            elevation: 0,
+            color: scheme.surfaceContainer,
+            shape: sectionShape(),
+            margin: const EdgeInsets.only(bottom: 8),
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  sectionTitle("AI"),
+                  const SizedBox(height: 8),
           TextField(
             controller: _baseUrlCtrl,
             keyboardType: TextInputType.url,
-            decoration: const InputDecoration(
+            decoration: InputDecoration(
               labelText: "Base URL (OpenAI compatible)",
               hintText: "https://api.openai.com/v1",
-              border: OutlineInputBorder(),
+              border: fieldBorder(),
             ),
             onSubmitted: (v) => store.setAiBaseUrl(v),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 8),
           TextField(
             controller: _modelCtrl,
-            decoration: const InputDecoration(
+            decoration: InputDecoration(
               labelText: "Model",
               hintText: "gpt-4o-mini",
-              border: OutlineInputBorder(),
+              border: fieldBorder(),
             ),
             onSubmitted: (v) => store.setAiModel(v),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 8),
           TextField(
             controller: _apiKeyCtrl,
             obscureText: true,
-            decoration: const InputDecoration(
+            decoration: InputDecoration(
               labelText: "API key (managed by AI feature)",
               hintText: "Optional placeholder",
-              border: OutlineInputBorder(),
+              border: fieldBorder(),
             ),
           ),
           const SizedBox(height: 8),
-          const Text(
+          Text(
             "Note: key persistence uses secure storage and is implemented by the AI agent.",
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: scheme.onSurfaceVariant,
+                ),
           ),
-          const SizedBox(height: 24),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
           FilledButton(
+            style: FilledButton.styleFrom(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(4),
+              ),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+            ),
             onPressed: () async {
               await store.setAiBaseUrl(_baseUrlCtrl.text);
               await store.setAiModel(_modelCtrl.text);
@@ -338,17 +459,44 @@ class _EditorThemePicker extends ConsumerWidget {
     }
   }
 
+  Future<void> _copyPack(BuildContext context, EditorThemePack pack) async {
+    // Style-track addition: export uses pack.toJson + jsonEncode directly,
+    // no new dependencies (copy + SnackBar only).
+    final json = jsonEncode(pack.toJson());
+    await Clipboard.setData(ClipboardData(text: json));
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Theme "${pack.name}" JSON copied')),
+      );
+    }
+  }
+
+  Future<void> _exportPack(BuildContext context, EditorThemePack pack) async {
+    // Kept dep-free like copy: writes the pack JSON to the clipboard and
+    // confirms via SnackBar instead of adding a file-saver dependency.
+    final json = jsonEncode(pack.toJson());
+    await Clipboard.setData(ClipboardData(text: json));
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Theme "${pack.name}" exported to clipboard')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final themeState = ref.watch(editorThemeStoreProvider);
     final store = ref.read(editorThemeStoreProvider.notifier);
+    final scheme = Theme.of(context).colorScheme;
     final packs = store.allPacks;
     Widget dropdown(String label, String value, Brightness brightness) {
       return DropdownButtonFormField<String>(
         initialValue: packs.any((p) => p.id == value) ? value : null,
         decoration: InputDecoration(
           labelText: label,
-          border: const OutlineInputBorder(),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(4),
+          ),
         ),
         items: [
           for (final pack in packs)
@@ -376,19 +524,80 @@ class _EditorThemePicker extends ConsumerWidget {
         const SizedBox(height: 8),
         OutlinedButton.icon(
           onPressed: () => _import(context, ref),
+          style: OutlinedButton.styleFrom(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(4),
+            ),
+            padding:
+                const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            visualDensity: VisualDensity.compact,
+          ),
           icon: const Icon(Icons.file_upload_outlined, size: 18),
           label: const Text("Import theme JSON"),
         ),
         for (final pack in themeState.customPacks)
-          ListTile(
-            contentPadding: EdgeInsets.zero,
-            dense: true,
-            leading: const Icon(Icons.palette_outlined, size: 18),
-            title: Text(pack.name, overflow: TextOverflow.ellipsis),
-            trailing: IconButton(
-              tooltip: "Delete theme",
-              icon: const Icon(Icons.delete_outline, size: 18),
-              onPressed: () => store.deleteCustomPack(pack.id),
+          Container(
+            margin: const EdgeInsets.only(top: 4),
+            decoration: BoxDecoration(
+              color: scheme.surfaceContainerLow,
+              border: Border.all(color: scheme.outlineVariant),
+              borderRadius: BorderRadius.circular(4),
+            ),
+            child: ListTile(
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 8),
+              dense: true,
+              visualDensity: VisualDensity.compact,
+              leading: Icon(Icons.palette_outlined,
+                  size: 18, color: scheme.primary),
+              title: Text(pack.name, overflow: TextOverflow.ellipsis),
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(
+                    tooltip: "Copy theme JSON",
+                    visualDensity: VisualDensity.compact,
+                    style: IconButton.styleFrom(
+                      backgroundColor: scheme.surfaceContainerHigh,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      padding: const EdgeInsets.all(8),
+                    ),
+                    icon: const Icon(Icons.copy_outlined, size: 18),
+                    onPressed: () => _copyPack(context, pack),
+                  ),
+                  const SizedBox(width: 4),
+                  IconButton(
+                    tooltip: "Export theme",
+                    visualDensity: VisualDensity.compact,
+                    style: IconButton.styleFrom(
+                      backgroundColor: scheme.surfaceContainerHigh,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      padding: const EdgeInsets.all(8),
+                    ),
+                    icon: const Icon(Icons.ios_share_outlined, size: 18),
+                    onPressed: () => _exportPack(context, pack),
+                  ),
+                  const SizedBox(width: 4),
+                  IconButton(
+                    tooltip: "Delete theme",
+                    visualDensity: VisualDensity.compact,
+                    style: IconButton.styleFrom(
+                      backgroundColor: scheme.surfaceContainerHigh,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      padding: const EdgeInsets.all(8),
+                    ),
+                    icon: Icon(Icons.delete_outline,
+                        size: 18, color: scheme.error),
+                    onPressed: () => store.deleteCustomPack(pack.id),
+                  ),
+                ],
+              ),
             ),
           ),
       ],
