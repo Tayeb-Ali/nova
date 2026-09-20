@@ -1,12 +1,23 @@
-﻿import 'package:flutter_riverpod/flutter_riverpod.dart';
+﻿import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:nova/app.dart';
 
 void main() {
-  testWidgets('NovaApp boots with home screen', (WidgetTester tester) async {
+  setUp(() {
+    // SettingsScreen loads settings through SharedPreferences; provide an
+    // in-memory store so the channel never touches the platform.
+    SharedPreferences.setMockInitialValues({});
+  });
+
+  testWidgets('NovaApp boots into the IDE shell', (WidgetTester tester) async {
     await tester.pumpWidget(const ProviderScope(child: NovaApp()));
+    // Let the first frame and any post-frame providers settle.
     await tester.pump();
-    expect(find.text('Nova'), findsOneWidget);
+    await tester.pump();
+    expect(find.byType(IdeShell), findsOneWidget);
+    expect(find.byType(NavigationBar), findsOneWidget);
   });
 }

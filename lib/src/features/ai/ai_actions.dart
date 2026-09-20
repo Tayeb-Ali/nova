@@ -2,34 +2,34 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
+import '../../core/settings_store.dart';
 import 'ai_client.dart';
 import 'ai_providers.dart';
 
 /// Bottom sheet with 3 AI code actions + key field + result preview.
 ///
-/// To avoid coupling to another agent's SettingsStore file, [baseUrl] and
-/// [model] are accepted as params with OpenAI-compatible defaults; callers
-/// may pass values from settings instead.
+/// When [baseUrl] / [model] are omitted they fall back to the persisted
+/// values in [SettingsStore] so the UI always reflects user settings.
 class AiActionsSheet extends ConsumerStatefulWidget {
   final String selectedCode;
-  final String baseUrl;
-  final String model;
+  final String? baseUrl;
+  final String? model;
   final AiClient? clientOverride;
 
   const AiActionsSheet({
     super.key,
     required this.selectedCode,
-    this.baseUrl = 'https://api.openai.com/v1',
-    this.model = 'gpt-4o-mini',
+    this.baseUrl,
+    this.model,
     this.clientOverride,
   });
 
-  /// Convenience helper to show the sheet.
+  /// Convenience helper to show the sheet (uses settings when omitted).
   static Future<void> show(
     BuildContext context, {
     required String selectedCode,
-    String baseUrl = 'https://api.openai.com/v1',
-    String model = 'gpt-4o-mini',
+    String? baseUrl,
+    String? model,
   }) {
     return showModalBottomSheet<void>(
       context: context,
@@ -51,11 +51,17 @@ class _AiActionsSheetState extends ConsumerState<AiActionsSheet> {
   final _storage = const FlutterSecureStorage();
   bool _keyLoaded = false;
 
-  @override
+@override
   void initState() {
     super.initState();
     _loadKey();
   }
+
+  /// Resolved endpoint; explicit param wins, otherwise the user setting.
+  String get _baseUrl => widget.baseUrl ?? ref.read(settingsStoreProvider).aiBaseUrl;
+
+  /// Resolved model name; explicit param wins, otherwise the user setting.
+  String get _model => widget.model ?? ref.read(settingsStoreProvider).aiModel;
 
   Future<void> _loadKey() async {
     final saved = await _storage.read(key: kNovaAiKeyStorageKey);
@@ -123,12 +129,12 @@ class _AiActionsSheetState extends ConsumerState<AiActionsSheet> {
 
     if (widget.clientOverride != null) {
       // Standalone path (useful in tests / previews): bypass provider.
-      try {
+try {
         notifier.setBusy();
         final content = await widget.clientOverride!.call(
-          baseUrl: widget.baseUrl,
+          baseUrl: _baseUrl,
           apiKey: apiKey,
-          model: widget.model,
+          model: _model,
           messages: <Map<String, String>>[
             {'role': 'user', 'content': prompt},
           ],
@@ -143,9 +149,9 @@ class _AiActionsSheetState extends ConsumerState<AiActionsSheet> {
     }
 
     await notifier.run(
-      baseUrl: widget.baseUrl,
+      baseUrl: _baseUrl,
       apiKey: apiKey,
-      model: widget.model,
+      model: _model,
       messages: <Map<String, String>>[
         {'role': 'user', 'content': prompt},
       ],
