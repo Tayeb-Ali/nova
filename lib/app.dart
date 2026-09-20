@@ -4,6 +4,7 @@ import "package:flutter_riverpod/flutter_riverpod.dart";
 import "l10n/generated/app_localizations.dart";
 import "src/core/services/setup_service.dart";
 import "src/core/settings_store.dart";
+import "src/features/editor/autocomplete/language_members.dart";
 import "src/features/editor/theme/app_theme.dart";
 import "src/features/editor/theme/theme_pack_store.dart";
 import "src/features/runtime/runtime_screen.dart";
@@ -61,6 +62,7 @@ class _IdeShellState extends State<IdeShell> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) => _checkBootstrap());
+    MemberRegistry.ensureLoaded();
   }
 
   Future<void> _checkBootstrap() async {

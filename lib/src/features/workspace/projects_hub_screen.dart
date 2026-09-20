@@ -353,10 +353,7 @@ class _ProjectsHubScreenState extends ConsumerState<ProjectsHubScreen> {
 
 /// Top ribbon: project count (bootstrap state lives on the runtime screen).
 class _StatsRibbon extends StatelessWidget {
-  const _StatsRibbon({
-    required this.colors,
-    required this.projectCount,
-  });
+  const _StatsRibbon({required this.colors, required this.projectCount});
 
   final ColorScheme colors;
   final int projectCount;

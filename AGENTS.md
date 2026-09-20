@@ -10,6 +10,12 @@ Nova: a Flutter/Android IDE app that runs code in an embedded Termux Linux runti
 - `flutter test` — 36 unit/widget tests, all native APIs mocked (`TestDefaultBinaryMessenger`); no device needed.
 - `flutter build apk --debug` — the only trustworthy APK path. Run via Gradle directly can produce stale APKs missing recent Dart changes.
 
+## Package naming (hard rule, user-ordered, never violate)
+
+- The Dart package name is `nova` forever (`pubspec.yaml`, all `package:nova/` imports). NEVER rename it to `codeide`.
+- The Android applicationId/namespace is `sd.adaa.codeide` forever. The two names are unrelated — do NOT unify them.
+- Pigeon channel strings are `dev.flutter.pigeon.codeide.*` on BOTH sides (the checked-in generated files are the source of truth and match). Regenerating with `pubspec=nova` would flip the Dart channels to `pigeon.nova` and break the bridge — do NOT regenerate unless the Kotlin output is regenerated in the same step and both files' channel strings are verified equal afterwards.
+
 ## The Pigeon bridge (hard rule)
 
 - `pigeons/ide_api.dart` is the single contract between Dart and Kotlin. Do NOT edit generated files by hand.

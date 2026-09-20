@@ -7,6 +7,7 @@ import "package:re_highlight/languages/php.dart";
 import "package:re_highlight/languages/python.dart";
 import "package:re_highlight/re_highlight.dart";
 
+import "language_members.dart";
 import "language_snippets.dart";
 
 /// Extracts identifier-like words from editor text.
@@ -85,12 +86,21 @@ class NovaPromptsBuilder implements CodeAutocompletePromptsBuilder {
     return normalizeLanguageId(mode.name);
   }
 
+  /// Matches `receiver.partial|` at the caret (VS Code member completion).
+  static final RegExp _memberPattern =
+      RegExp(r"([A-Za-z_$][A-Za-z0-9_$]*)\.([A-Za-z_$][A-Za-z0-9_$]*)?$");
+
   @override
   CodeAutocompleteEditingValue? build(
     BuildContext context,
     CodeLine codeLine,
     CodeLineSelection selection,
   ) {
+    // Member completions win over keywords: `console.` offers log/error/…
+    final memberResult = _memberCompletion(codeLine.text, selection);
+    if (memberResult != null) {
+      return memberResult;
+    }
     final CodeAutocompleteEditingValue? base =
         _delegate.build(context, codeLine, selection);
     final String input = base?.input ?? _extractInput(codeLine.text, selection);
@@ -129,6 +139,36 @@ class NovaPromptsBuilder implements CodeAutocompletePromptsBuilder {
       return base;
     }
     return base.copyWith(prompts: [...base.prompts, ...words]);
+  }
+
+  /// Detects a member access (`receiver.partial`) immediately before the
+  /// caret and returns its prompts, or null to use the normal flow.
+  CodeAutocompleteEditingValue? _memberCompletion(
+    String lineText,
+    CodeLineSelection selection,
+  ) {
+    final int end = selection.extentOffset.clamp(0, lineText.length);
+    if (_isInsideString(lineText, selection)) {
+      return null;
+    }
+    final match = _memberPattern.firstMatch(lineText.substring(0, end));
+    // Anchor at the caret: the match must end exactly where typing stopped.
+    if (match == null || match.end != end) {
+      return null;
+    }
+    final prompts = memberPrompts(
+      languageId,
+      match.group(1)!,
+      match.group(2) ?? "",
+    );
+    if (prompts == null) {
+      return null;
+    }
+    return CodeAutocompleteEditingValue(
+      input: match.group(2) ?? "",
+      prompts: prompts,
+      index: 0,
+    );
   }
 
   /// Collects identifier words from [source] that match [input], skipping

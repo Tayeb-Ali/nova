@@ -257,8 +257,10 @@ class _EditorTabBodyState extends ConsumerState<_EditorTabBody> {
   @override
   Widget build(BuildContext context) {
     // Dropping a pending auto-save when the toggle is switched off.
-    ref.listen(settingsStoreProvider.select((s) => s.autoSave),
-        (previous, next) {
+    ref.listen(settingsStoreProvider.select((s) => s.autoSave), (
+      previous,
+      next,
+    ) {
       if (next == false) _autoSaveTimer?.cancel();
     });
     return FutureBuilder<String>(
