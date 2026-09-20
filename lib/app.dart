@@ -2,6 +2,8 @@ import "package:flutter/material.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 
 import "src/core/settings_store.dart";
+import "src/features/editor/theme/app_theme.dart";
+import "src/features/editor/theme/theme_pack_store.dart";
 import "src/features/git/git_screen.dart";
 import "src/features/process/process_screen.dart";
 import "src/features/runtime/runtime_screen.dart";
@@ -16,20 +18,20 @@ class NovaApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final settings = ref.watch(settingsStoreProvider);
+    // Rebuild app themes when packs change; the whole app follows the
+    // editor colors while follow-mode is on.
+    ref.watch(editorThemeStoreProvider);
+    final themeStore = ref.read(editorThemeStoreProvider.notifier);
+    final follow = settings.followEditorTheme;
     return MaterialApp(
       title: "Nova",
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.indigo),
-        useMaterial3: true,
-      ),
-      darkTheme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.indigo,
-          brightness: Brightness.dark,
-        ),
-        useMaterial3: true,
-      ),
+      theme: follow
+          ? AppTheme.fromPack(themeStore.packFor(Brightness.light))
+          : AppTheme.fallback(Brightness.light),
+      darkTheme: follow
+          ? AppTheme.fromPack(themeStore.packFor(Brightness.dark))
+          : AppTheme.fallback(Brightness.dark),
       themeMode: settings.themeMode,
       home: const IdeShell(),
     );

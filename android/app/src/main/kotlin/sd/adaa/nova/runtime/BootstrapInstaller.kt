@@ -26,6 +26,7 @@ class BootstrapInstaller(private val context: Context) {
         if (prefix.exists()) {
             patchHardcodedPaths(prefix)
             configureApt(prefix)
+            configureInputrc()
         }
     }
 
@@ -78,6 +79,7 @@ class BootstrapInstaller(private val context: Context) {
         makeExecutable(File(prefix, "libexec"))
         patchHardcodedPaths(prefix)
         configureApt(prefix)
+        configureInputrc()
 
         File(context.filesDir, ".bootstrap-version")
             .writeText(expectedSha)
@@ -227,6 +229,32 @@ class BootstrapInstaller(private val context: Context) {
             )
         } catch (e: Exception) {
             android.util.Log.w("BootstrapInstaller", "configureApt failed: ${e.message}")
+        }
+    }
+
+    /**
+     * Drops a completion-friendly ~/.inputrc for the embedded bash (used by the
+     * terminal key bar's Tab key): list candidates immediately, ignore case,
+     * no bell, and prefix history search on Up/Down. Created once — an existing
+     * user file is never overwritten. Idempotent via [patchExisting].
+     */
+    private fun configureInputrc() {
+        try {
+            val home = EnvironmentManager.home(context)
+            home.mkdirs()
+            val inputrc = File(home, ".inputrc")
+            if (inputrc.exists()) return
+            inputrc.writeText(
+                "# Nova terminal defaults: friendlier completion on a phone keyboard.\n" +
+                    "set show-all-if-ambiguous on\n" +
+                    "set completion-ignore-case on\n" +
+                    "set colored-stats on\n" +
+                    "set bell-style none\n" +
+                    "\"\\e[A\": history-search-backward\n" +
+                    "\"\\e[B\": history-search-forward\n"
+            )
+        } catch (e: Exception) {
+            android.util.Log.w("BootstrapInstaller", "configureInputrc failed: ${e.message}")
         }
     }
 
