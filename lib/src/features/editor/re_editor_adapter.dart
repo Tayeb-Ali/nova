@@ -7,6 +7,7 @@ import "package:re_highlight/languages/javascript.dart";
 import "package:re_highlight/languages/php.dart";
 import "package:re_highlight/languages/python.dart";
 import "package:re_highlight/languages/json.dart";
+import "package:re_highlight/languages/latex.dart";
 
 import "../../core/settings_store.dart";
 import "autocomplete/autocomplete_popup.dart";
@@ -89,6 +90,8 @@ class _ReEditorAdapterState extends ConsumerState<ReEditorAdapter> {
         return langDart;
       case "json":
         return langJson;
+      case "latex":
+        return langLatex;
       default:
         return null;
     }

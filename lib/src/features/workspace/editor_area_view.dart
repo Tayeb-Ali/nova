@@ -4,6 +4,7 @@ import "package:path/path.dart" as p;
 
 import "../editor/editor_engine.dart";
 import "../editor/re_editor_adapter.dart";
+import "../markdown/markdown_editor_view.dart";
 import "workspace_providers.dart";
 
 /// Editor: tab strip + the active file edited with re_editor (task.md §35).
@@ -111,6 +112,8 @@ class _EditorTabBodyState extends ConsumerState<_EditorTabBody> {
   String _currentText = "";
   String _savedText = "";
   bool _loaded = false;
+  bool _showPreview = false;
+  final TabContentBridge _bridge = TabContentBridge();
 
   @override
   void initState() {
@@ -125,6 +128,8 @@ class _EditorTabBodyState extends ConsumerState<_EditorTabBody> {
       _loaded = false;
       _currentText = "";
       _savedText = "";
+      _showPreview = false;
+      _bridge.readContent = null;
       _loadFuture = _load();
     }
   }
@@ -160,13 +165,15 @@ class _EditorTabBodyState extends ConsumerState<_EditorTabBody> {
 
   Future<void> _save() async {
     final service = ref.read(projectServiceProvider);
+    final text = _bridge.readContent?.call() ?? _currentText;
     try {
-      await service.writeFile(widget.tab.path, _currentText);
+      await service.writeFile(widget.tab.path, text);
     } catch (e) {
       _toast("Save failed: $e");
       return;
     }
-    _savedText = _currentText;
+    _currentText = text;
+    _savedText = text;
     ref.read(workspaceTabsProvider.notifier).markDirty(widget.tab.id, false);
     _toast("Saved ${p.basename(widget.tab.path)}");
   }
@@ -183,40 +190,99 @@ class _EditorTabBodyState extends ConsumerState<_EditorTabBody> {
           return Center(child: Text("Could not open file: ${snapshot.error}"));
         }
         final initialText = snapshot.data ?? "";
+        final isMarkdown = widget.tab.kind == EditorKind.markdown;
         return Column(
           children: [
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               color: Theme.of(context).colorScheme.surfaceContainerHighest,
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      widget.tab.path,
-                      overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                  ),
-                  if (widget.tab.dirty)
-                    const Padding(
-                      padding: EdgeInsets.only(right: 8),
-                      child: Icon(Icons.circle, size: 8),
-                    ),
-                  TextButton.icon(
-                    onPressed: _loaded ? _save : null,
-                    icon: const Icon(Icons.save, size: 18),
-                    label: const Text("Save"),
-                  ),
-                ],
+              // Narrow panes (phone + explorer open) get an overflow menu
+              // instead of inline buttons so the header never overflows.
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final compact = constraints.maxWidth < 200;
+                  return Row(
+                    children: [
+                      Expanded(
+                        child: Tooltip(
+                          message: widget.tab.path,
+                          child: Text(
+                            p.basename(widget.tab.path),
+                            overflow: TextOverflow.ellipsis,
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                        ),
+                      ),
+                      if (widget.tab.dirty)
+                        const Padding(
+                          padding: EdgeInsets.only(right: 8),
+                          child: Icon(Icons.circle, size: 8),
+                        ),
+                      if (isMarkdown && !compact)
+                        IconButton(
+                          onPressed: _loaded
+                              ? () => setState(
+                                  () => _showPreview = !_showPreview)
+                              : null,
+                          tooltip: _showPreview ? "Edit" : "Preview",
+                          icon: Icon(
+                            _showPreview
+                                ? Icons.edit_outlined
+                                : Icons.visibility_outlined,
+                            size: 18,
+                          ),
+                        ),
+                      if (compact)
+                        PopupMenuButton<String>(
+                          tooltip: "Tab actions",
+                          icon: const Icon(Icons.more_vert, size: 18),
+                          onSelected: (value) {
+                            if (value == "preview") {
+                              setState(
+                                  () => _showPreview = !_showPreview);
+                            } else if (value == "save") {
+                              _save();
+                            }
+                          },
+                          itemBuilder: (context) => [
+                            if (isMarkdown)
+                              PopupMenuItem(
+                                value: "preview",
+                                child: Text(
+                                    _showPreview ? "Edit" : "Preview"),
+                              ),
+                            const PopupMenuItem(
+                              value: "save",
+                              child: Text("Save"),
+                            ),
+                          ],
+                        )
+                      else
+                        TextButton.icon(
+                          onPressed: _loaded ? _save : null,
+                          icon: const Icon(Icons.save, size: 18),
+                          label: const Text("Save"),
+                        ),
+                    ],
+                  );
+                },
               ),
             ),
             Expanded(
-              child: ReEditorAdapter(
-                key: ValueKey(widget.tab.path),
-                initialText: initialText,
-                language: widget.tab.language,
-                onChanged: _onChanged,
-              ),
+              child: isMarkdown
+                  ? MarkdownEditorView(
+                      key: ValueKey(widget.tab.path),
+                      initialText: initialText,
+                      onChanged: _onChanged,
+                      bridge: _bridge,
+                      preview: _showPreview,
+                    )
+                  : ReEditorAdapter(
+                      key: ValueKey(widget.tab.path),
+                      initialText: initialText,
+                      language: widget.tab.language,
+                      onChanged: _onChanged,
+                    ),
             ),
           ],
         );

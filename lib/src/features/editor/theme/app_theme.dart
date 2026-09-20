@@ -5,16 +5,23 @@ import "editor_theme_pack.dart";
 /// Builds the whole-app Material theme from an editor theme pack, so the
 /// entire app follows the editor colors (VSCode-dark app with VSCode-dark
 /// editor, and so on).
+///
+/// The final ColorScheme is assembled BEFORE constructing ThemeData so all
+/// derived colors (canvas, scaffold background, dialogs...) compute from it;
+/// mutating a scheme via copyWith after construction would leave them stale.
 class AppTheme {
-  static ThemeData fromPack(EditorThemePack pack) {
-    final scheme = ColorScheme.fromSeed(
+  static ColorScheme schemeFor(EditorThemePack pack) {
+    return ColorScheme.fromSeed(
       seedColor: pack.accent,
       brightness: pack.brightness,
     ).copyWith(
       surface: pack.chrome.background,
       onSurface: pack.chrome.foreground,
     );
-    return ThemeData(colorScheme: scheme, useMaterial3: true);
+  }
+
+  static ThemeData fromPack(EditorThemePack pack) {
+    return ThemeData(colorScheme: schemeFor(pack), useMaterial3: true);
   }
 
   static ThemeData fallback(Brightness brightness) {
