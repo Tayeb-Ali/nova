@@ -1,7 +1,11 @@
+import "dart:async";
+
 import "package:flutter/material.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
+import "package:nova/l10n/generated/app_localizations.dart";
 import "package:path/path.dart" as p;
 
+import "../../core/settings_store.dart";
 import "../editor/editor_engine.dart";
 import "../editor/re_editor_adapter.dart";
 import "../markdown/markdown_editor_view.dart";
@@ -24,10 +28,9 @@ class EditorAreaView extends ConsumerWidget {
             Icon(Icons.description_outlined, size: 28, color: scheme.outline),
             const SizedBox(height: 8),
             Text(
-              "Open a file from the explorer",
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: scheme.onSurfaceVariant,
-                  ),
+              AppLocalizations.of(context).editorEmptyHint,
+              style: Theme.of(context).textTheme.bodyMedium
+                  ?.copyWith(color: scheme.onSurfaceVariant),
             ),
           ],
         ),
@@ -37,7 +40,9 @@ class EditorAreaView extends ConsumerWidget {
       children: [
         _TabStrip(tabs: tabs, activeId: active.id),
         Divider(height: 1, color: scheme.outlineVariant),
-        Expanded(child: _EditorTabBody(key: ValueKey(active.id), tab: active)),
+        Expanded(
+          child: _EditorTabBody(key: ValueKey(active.id), tab: active),
+        ),
       ],
     );
   }
@@ -54,8 +59,9 @@ class _TabStrip extends ConsumerWidget {
     ref.read(workspaceTabsProvider.notifier).close(id);
     if (wasActive) {
       final remaining = ref.read(workspaceTabsProvider);
-      ref.read(activeEditorTabProvider.notifier).state =
-          remaining.isEmpty ? null : remaining.last.id;
+      ref.read(activeEditorTabProvider.notifier).state = remaining.isEmpty
+          ? null
+          : remaining.last.id;
     }
   }
 
@@ -88,26 +94,33 @@ class _TabStrip extends ConsumerWidget {
                   if (tab.dirty)
                     Padding(
                       padding: const EdgeInsets.only(right: 4),
-                      child: Icon(Icons.circle,
-                          size: 8, color: scheme.tertiary),
+                      child: Icon(
+                        Icons.circle,
+                        size: 8,
+                        color: scheme.tertiary,
+                      ),
                     ),
                   Text(
                     p.basename(tab.path),
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: selected
-                              ? scheme.onSurface
-                              : scheme.onSurfaceVariant,
-                          fontWeight:
-                              selected ? FontWeight.w600 : FontWeight.normal,
-                        ),
+                      color: selected
+                          ? scheme.onSurface
+                          : scheme.onSurfaceVariant,
+                      fontWeight: selected
+                          ? FontWeight.w600
+                          : FontWeight.normal,
+                    ),
                   ),
                   const SizedBox(width: 2),
                   InkWell(
                     onTap: () => _close(ref, tab.id),
                     child: Padding(
                       padding: const EdgeInsets.all(2),
-                      child: Icon(Icons.close,
-                          size: 14, color: scheme.onSurfaceVariant),
+                      child: Icon(
+                        Icons.close,
+                        size: 14,
+                        color: scheme.onSurfaceVariant,
+                      ),
                     ),
                   ),
                 ],
@@ -156,6 +169,7 @@ class _EditorTabBodyState extends ConsumerState<_EditorTabBody> {
   bool _loaded = false;
   bool _showPreview = false;
   final TabContentBridge _bridge = TabContentBridge();
+  Timer? _autoSaveTimer;
 
   @override
   void initState() {
@@ -164,9 +178,16 @@ class _EditorTabBodyState extends ConsumerState<_EditorTabBody> {
   }
 
   @override
+  void dispose() {
+    _autoSaveTimer?.cancel();
+    super.dispose();
+  }
+
+  @override
   void didUpdateWidget(covariant _EditorTabBody oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.tab.path != widget.tab.path) {
+      _autoSaveTimer?.cancel();
       _loaded = false;
       _currentText = "";
       _savedText = "";
@@ -194,34 +215,52 @@ class _EditorTabBodyState extends ConsumerState<_EditorTabBody> {
 
   void _toast(String message) {
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
-    );
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(message)));
   }
 
   void _onChanged(String text) {
     _currentText = text;
     final dirty = _loaded && text != _savedText;
     ref.read(workspaceTabsProvider.notifier).markDirty(widget.tab.id, dirty);
+    _scheduleAutoSave(dirty);
   }
 
-  Future<void> _save() async {
+  // Debounced auto-save: 1.5s after the last keystroke, reuses [_save].
+  void _scheduleAutoSave(bool dirty) {
+    _autoSaveTimer?.cancel();
+    if (!dirty || !_loaded) return;
+    if (!ref.read(settingsStoreProvider).autoSave) return;
+    _autoSaveTimer = Timer(const Duration(milliseconds: 1500), () {
+      if (!mounted) return;
+      if (!ref.read(settingsStoreProvider).autoSave) return;
+      _save(silent: true);
+    });
+  }
+
+  Future<void> _save({bool silent = false}) async {
+    final l10n = AppLocalizations.of(context);
     final service = ref.read(projectServiceProvider);
     final text = _bridge.readContent?.call() ?? _currentText;
     try {
       await service.writeFile(widget.tab.path, text);
     } catch (e) {
-      _toast("Save failed: $e");
+      _toast(l10n.editorSaveFailed("$e"));
       return;
     }
     _currentText = text;
     _savedText = text;
     ref.read(workspaceTabsProvider.notifier).markDirty(widget.tab.id, false);
-    _toast("Saved ${p.basename(widget.tab.path)}");
+    if (!silent) _toast(l10n.editorSaved(p.basename(widget.tab.path)));
   }
 
   @override
   Widget build(BuildContext context) {
+    // Dropping a pending auto-save when the toggle is switched off.
+    ref.listen(settingsStoreProvider.select((s) => s.autoSave),
+        (previous, next) {
+      if (next == false) _autoSaveTimer?.cancel();
+    });
     return FutureBuilder<String>(
       future: _loadFuture,
       builder: (context, snapshot) {
@@ -229,7 +268,12 @@ class _EditorTabBodyState extends ConsumerState<_EditorTabBody> {
           return const Center(child: CircularProgressIndicator());
         }
         if (snapshot.hasError) {
-          return Center(child: Text("Could not open file: ${snapshot.error}"));
+          return Center(
+            child: Text(
+              AppLocalizations.of(context)
+                  .editorOpenFailed("${snapshot.error}"),
+            ),
+          );
         }
         final initialText = snapshot.data ?? "";
         final isMarkdown = widget.tab.kind == EditorKind.markdown;
@@ -265,9 +309,11 @@ class _EditorTabBodyState extends ConsumerState<_EditorTabBody> {
                       if (widget.tab.dirty)
                         Padding(
                           padding: const EdgeInsets.only(right: 8),
-                          child: Icon(Icons.circle,
-                              size: 8,
-                              color: Theme.of(context).colorScheme.tertiary),
+                          child: Icon(
+                            Icons.circle,
+                            size: 8,
+                            color: Theme.of(context).colorScheme.tertiary,
+                          ),
                         ),
                       if (isMarkdown && !compact)
                         IconButton(
@@ -282,10 +328,12 @@ class _EditorTabBodyState extends ConsumerState<_EditorTabBody> {
                             padding: const EdgeInsets.all(8),
                           ),
                           onPressed: _loaded
-                              ? () => setState(
-                                  () => _showPreview = !_showPreview)
+                              ? () =>
+                                    setState(() => _showPreview = !_showPreview)
                               : null,
-                          tooltip: _showPreview ? "Edit" : "Preview",
+                          tooltip: _showPreview
+                              ? AppLocalizations.of(context).editorEdit
+                              : AppLocalizations.of(context).editorPreview,
                           icon: Icon(
                             _showPreview
                                 ? Icons.edit_outlined
@@ -295,16 +343,18 @@ class _EditorTabBodyState extends ConsumerState<_EditorTabBody> {
                         ),
                       if (compact)
                         PopupMenuButton<String>(
-                          tooltip: "Tab actions",
-                          icon: Icon(Icons.more_vert,
-                              size: 18,
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .onSurfaceVariant),
+                          tooltip: AppLocalizations.of(context)
+                              .editorTabActions,
+                          icon: Icon(
+                            Icons.more_vert,
+                            size: 18,
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onSurfaceVariant,
+                          ),
                           onSelected: (value) {
                             if (value == "preview") {
-                              setState(
-                                  () => _showPreview = !_showPreview);
+                              setState(() => _showPreview = !_showPreview);
                             } else if (value == "save") {
                               _save();
                             }
@@ -314,11 +364,17 @@ class _EditorTabBodyState extends ConsumerState<_EditorTabBody> {
                               PopupMenuItem(
                                 value: "preview",
                                 child: Text(
-                                    _showPreview ? "Edit" : "Preview"),
+                                  _showPreview
+                                      ? AppLocalizations.of(context).editorEdit
+                                      : AppLocalizations.of(context)
+                                            .editorPreview,
+                                ),
                               ),
-                            const PopupMenuItem(
+                            PopupMenuItem(
                               value: "save",
-                              child: Text("Save"),
+                              child: Text(
+                                AppLocalizations.of(context).actionSave,
+                              ),
                             ),
                           ],
                         )
@@ -330,11 +386,13 @@ class _EditorTabBodyState extends ConsumerState<_EditorTabBody> {
                               borderRadius: BorderRadius.circular(4),
                             ),
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 8, vertical: 4),
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
                             visualDensity: VisualDensity.compact,
                           ),
                           icon: const Icon(Icons.save, size: 18),
-                          label: const Text("Save"),
+                          label: Text(AppLocalizations.of(context).actionSave),
                         ),
                     ],
                   );

@@ -87,7 +87,7 @@
 
 ### 3. قناة الأحداث (Event Channel)
 
-الدوال تنفع للطلب والرد ("افتح ملف"، "ابدأ عملية")، لكن **الأحداث المستمرة** (سطر جديد في الكونسول، نسبة تقدّم تثبيت) تحتاج بثًا حيًا. لهذا توجد قناة أحداث واحدة باسم `sd.adaa.nova/events`.
+الدوال تنفع للطلب والرد ("افتح ملف"، "ابدأ عملية")، لكن **الأحداث المستمرة** (سطر جديد في الكونسول، نسبة تقدّم تثبيت) تحتاج بثًا حيًا. لهذا توجد قناة أحداث واحدة باسم `sd.adaa.codeide/events`.
 
 نقطة مهمة تعلّمناها بالتجربة: القناة تتحمّل **مستمعًا واحدًا فعليًا**. لذلك كل الاشتراكات تمر عبر **`IdeEventBus`** — مفترق واحد يستقبل البث ويوزّعه على (التيرمينال، العمليات، المعاينة، شاشة الرن-تايم). بدونه كانت الأحداث تضيع وتظهر أعراض مثل "التثبيت يبدأ ثم يتجمد".
 
@@ -128,7 +128,7 @@ nova/
 │       └── features/             # الشاشات: workspace، editor، terminal،
 │                                 # process، git، runtime، webpreview، lsp، ai
 ├── android/app/src/main/kotlin/   # المحرك (Kotlin)
-│   └── sd/adaa/nova/
+│   └── sd/adaa/codeide/
 │       ├── filesystem/ project/ process/ terminal/
 │       ├── git/ runtime/ webpreview/
 │       └── MainActivity · IdeCore · IdeService · IdeEvents · AllApis
@@ -176,7 +176,7 @@ nova/
 
 ### طرف أندرويد
 
-- **Kotlin** + Android SDK، `applicationId = sd.adaa.nova`.
+- **Kotlin** + Android SDK، `applicationId = sd.adaa.codeide`.
 - `targetSdk = 28` — **مقصود وليس إهمالًا**: من 29 فصاعدًا يمنع النظام (SELinux) تنفيذ الملفات داخل مجلد بيانات التطبيق، وهو ما يقتل بيئة التشغيل المضمّنة.
 - `useLegacyPackaging = true` لنفس السبب.
 
@@ -244,13 +244,13 @@ flutter test      # يجب: كل الاختبارات ناجحة (22 اختبا�
 
 ```bash
 # تثبيت git عبر مسار التثبيت الحقيقي داخل التطبيق
-adb shell am broadcast -a sd.adaa.nova.DEBUG_INSTALL_RUNTIME --es id git
+adb shell am broadcast -a sd.adaa.codeide.DEBUG_INSTALL_RUNTIME --es id git
 
 # مراقبة الأحداث
 adb logcat -s flutter:I | grep IDE-EVENT
 
 # فحص البيئة يدويًا
-adb shell "run-as sd.adaa.nova sh -c 'ls files/usr/bin | head'"
+adb shell "run-as sd.adaa.codeide sh -c 'ls files/usr/bin | head'"
 ```
 
 ---

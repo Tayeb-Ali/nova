@@ -13,6 +13,7 @@ import "../../core/settings_store.dart";
 import "autocomplete/autocomplete_popup.dart";
 import "autocomplete/nova_prompts_builder.dart";
 import "theme/editor_fonts.dart";
+import "theme/font_loader.dart";
 import "theme/theme_pack_store.dart";
 
 /// Thin wrapper around re_editor [CodeEditor].
@@ -48,6 +49,12 @@ class _ReEditorAdapterState extends ConsumerState<ReEditorAdapter> {
   @override
   void initState() {
     super.initState();
+    
+    EditorFontLoader.ensureLoaded(
+      ref.read(settingsStoreProvider).editorFont,
+    ).then((_) {
+      if (mounted) setState(() {});
+    });
     _controller = CodeLineEditingController.fromText(widget.initialText);
     _scrollController = CodeScrollController(
       verticalScroller: ScrollController(),
@@ -153,7 +160,7 @@ class _ReEditorAdapterState extends ConsumerState<ReEditorAdapter> {
         fontFamilyFor(appSettings.editorFont),
         appSettings.editorFontSize,
       ),
-      wordWrap: false,
+      wordWrap: appSettings.wordWrap,
       indicatorBuilder:
           (context, editingController, chunkController, notifier) {
         return Row(

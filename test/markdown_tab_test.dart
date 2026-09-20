@@ -17,7 +17,7 @@ class _FakeProjectService extends ProjectService {
     language: "php",
   );
   static const mdPath =
-      "/data/user/0/sd.adaa.nova/files/projects/main_py/docs/NOTES.md";
+      "/data/user/0/sd.adaa.codeide/files/projects/main_py/docs/NOTES.md";
 
   @override
   Future<List<ProjectInfo>> listProjects() async => [project];
@@ -61,8 +61,9 @@ void main() {
     await tester.tap(find.text("Editor"));
     await tester.pump(const Duration(seconds: 1));
 
-    final container =
-        ProviderScope.containerOf(tester.element(find.byType(IdeShell)));
+    final container = ProviderScope.containerOf(
+      tester.element(find.byType(IdeShell)),
+    );
     const path = _FakeProjectService.mdPath;
     final id = container.read(workspaceTabsProvider.notifier).open(path);
     container.read(activeEditorTabProvider.notifier).state = id;

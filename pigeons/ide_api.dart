@@ -3,8 +3,8 @@
 @ConfigurePigeon(PigeonOptions(
   dartOut: 'lib/src/core/bridge/generated/ide_api.g.dart',
   kotlinOut:
-      'android/app/src/main/kotlin/sd/adaa/nova/bridge/IdeApi.g.kt',
-  kotlinOptions: KotlinOptions(package: 'sd.adaa.nova.bridge'),
+      'android/app/src/main/kotlin/sd/adaa/codeide/bridge/IdeApi.g.kt',
+  kotlinOptions: KotlinOptions(package: 'sd.adaa.codeide.bridge'),
 ))
 
 /// Setup / bootstrap status.

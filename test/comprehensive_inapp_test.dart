@@ -23,20 +23,27 @@ void _mockPigeonChannel({
   required Object? Function(List<Object?>? args) replyFor,
 }) {
   messenger.setMockMessageHandler(channelName, (ByteData? message) async {
-    final args = message == null ? null : codec.decodeMessage(message) as List<Object?>?;
+    final args = message == null
+        ? null
+        : codec.decodeMessage(message) as List<Object?>?;
     log.add(_RecordedCall(channelName, args));
     return codec.encodeMessage(replyFor(args));
   });
 }
 
-void _registerAllMocks(TestDefaultBinaryMessenger messenger, List<_RecordedCall> log) {
+void _registerAllMocks(
+  TestDefaultBinaryMessenger messenger,
+  List<_RecordedCall> log,
+) {
   final tCodec = bridge.TerminalApi.pigeonChannelCodec;
   for (final entry in {
-    'dev.flutter.pigeon.nova.TerminalApi.createSession': () => <Object?>['sess-1'],
-    'dev.flutter.pigeon.nova.TerminalApi.write': () => <Object?>[null],
-    'dev.flutter.pigeon.nova.TerminalApi.resize': () => <Object?>[null],
-    'dev.flutter.pigeon.nova.TerminalApi.close': () => <Object?>[null],
-    'dev.flutter.pigeon.nova.TerminalApi.sendSignal': () => <Object?>[null],
+    'dev.flutter.pigeon.codeide.TerminalApi.createSession': () => <Object?>[
+      'sess-1',
+    ],
+    'dev.flutter.pigeon.codeide.TerminalApi.write': () => <Object?>[null],
+    'dev.flutter.pigeon.codeide.TerminalApi.resize': () => <Object?>[null],
+    'dev.flutter.pigeon.codeide.TerminalApi.close': () => <Object?>[null],
+    'dev.flutter.pigeon.codeide.TerminalApi.sendSignal': () => <Object?>[null],
   }.entries) {
     _mockPigeonChannel(
       messenger: messenger,
@@ -48,9 +55,9 @@ void _registerAllMocks(TestDefaultBinaryMessenger messenger, List<_RecordedCall>
   }
   final fCodec = bridge.FileApi.pigeonChannelCodec;
   for (final name in [
-    'dev.flutter.pigeon.nova.FileApi.writeFile',
-    'dev.flutter.pigeon.nova.FileApi.readFile',
-    'dev.flutter.pigeon.nova.FileApi.listFiles',
+    'dev.flutter.pigeon.codeide.FileApi.writeFile',
+    'dev.flutter.pigeon.codeide.FileApi.readFile',
+    'dev.flutter.pigeon.codeide.FileApi.listFiles',
   ]) {
     _mockPigeonChannel(
       messenger: messenger,
@@ -62,8 +69,8 @@ void _registerAllMocks(TestDefaultBinaryMessenger messenger, List<_RecordedCall>
   }
   final rCodec = bridge.RuntimeApi.pigeonChannelCodec;
   for (final name in [
-    'dev.flutter.pigeon.nova.RuntimeApi.getRuntimes',
-    'dev.flutter.pigeon.nova.RuntimeApi.installRuntime',
+    'dev.flutter.pigeon.codeide.RuntimeApi.getRuntimes',
+    'dev.flutter.pigeon.codeide.RuntimeApi.installRuntime',
   ]) {
     _mockPigeonChannel(
       messenger: messenger,
@@ -74,9 +81,19 @@ void _registerAllMocks(TestDefaultBinaryMessenger messenger, List<_RecordedCall>
         if (name.contains('getRuntimes')) {
           return <Object?>[
             <Object?>[
-              bridge.RuntimeInfo(id: 'node', displayName: 'Node.js', version: 'v20.0.0', installed: false),
-              bridge.RuntimeInfo(id: 'python', displayName: 'Python', version: '3.11.0', installed: false),
-            ]
+              bridge.RuntimeInfo(
+                id: 'node',
+                displayName: 'Node.js',
+                version: 'v20.0.0',
+                installed: false,
+              ),
+              bridge.RuntimeInfo(
+                id: 'python',
+                displayName: 'Python',
+                version: '3.11.0',
+                installed: false,
+              ),
+            ],
           ];
         }
         return <Object?>[null];
@@ -90,15 +107,17 @@ void main() {
 
   group('Comprehensive in-app test — Node/Python/Terminal', () {
     void emit(Map<String, Object?> payload) {
-      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
-        AppConfig.eventsChannel,
-        const StandardMethodCodec().encodeSuccessEnvelope(payload),
-        (_) {},
-      );
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .handlePlatformMessage(
+            AppConfig.eventsChannel,
+            const StandardMethodCodec().encodeSuccessEnvelope(payload),
+            (_) {},
+          );
     }
 
     test('writes Node sample files via FileApi and verifies content patterns', () async {
-      final messenger = TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
+      final messenger =
+          TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
       final log = <_RecordedCall>[];
       _registerAllMocks(messenger, log);
 
@@ -124,8 +143,14 @@ console.log('http-ok');
       expect(nodeHttp, contains('http-ok'));
 
       // Simulate FileApi writes
-      await NativeBridge.files.writeFile('/home/nova_test/test_node_hello.js', nodeHello);
-      await NativeBridge.files.writeFile('/home/nova_test/test_node_fs.js', nodeFs);
+      await NativeBridge.files.writeFile(
+        '/home/nova_test/test_node_hello.js',
+        nodeHello,
+      );
+      await NativeBridge.files.writeFile(
+        '/home/nova_test/test_node_fs.js',
+        nodeFs,
+      );
 
       expect(log.where((c) => c.channel.endsWith('writeFile')), hasLength(2));
       expect(log.first.args?[1], contains('node-hello'));
@@ -146,23 +171,36 @@ print('sqlite-ok')
       expect(pyIo, contains('io-ok'));
       expect(pyIo, contains('sqlite-ok'));
 
-      final messenger = TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
+      final messenger =
+          TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
       final log = <_RecordedCall>[];
       _registerAllMocks(messenger, log);
 
-      await NativeBridge.files.writeFile('/home/nova_test/test_python_hello.py', pyHello);
+      await NativeBridge.files.writeFile(
+        '/home/nova_test/test_python_hello.py',
+        pyHello,
+      );
       expect(log.where((c) => c.channel.endsWith('writeFile')), hasLength(1));
     });
 
     test('terminal session creates, writes Node/Python commands, handles batched output', () async {
-      final messenger = TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
+      final messenger =
+          TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
       final log = <_RecordedCall>[];
       _registerAllMocks(messenger, log);
 
       final terminal = TerminalService();
-      final sessionId = await terminal.createSession(cwd: '/home/nova_test', cols: 80, rows: 24);
+      final sessionId = await terminal.createSession(
+        cwd: '/home/nova_test',
+        cols: 80,
+        rows: 24,
+      );
       expect(sessionId, 'sess-1');
-      expect(log.singleWhere((c) => c.channel.endsWith('createSession')).args, ['/home/nova_test', 80, 24]);
+      expect(log.singleWhere((c) => c.channel.endsWith('createSession')).args, [
+        '/home/nova_test',
+        80,
+        24,
+      ]);
 
       // Simulate user typing: node test_node_hello.js
       await terminal.write(sessionId, 'node test_node_hello.js\n');
@@ -183,7 +221,9 @@ print('sqlite-ok')
       emit({
         'event': 'terminalOutput',
         'sessionId': sessionId,
-        'data': base64Encode(utf8.encode('python-hello:3.11.0\nio-ok:hello-py\n')),
+        'data': base64Encode(
+          utf8.encode('python-hello:3.11.0\nio-ok:hello-py\n'),
+        ),
       });
       await pumpEventQueue();
 
@@ -204,7 +244,8 @@ print('sqlite-ok')
     });
 
     test('runtime get/install flow for node/python', () async {
-      final messenger = TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
+      final messenger =
+          TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
       final log = <_RecordedCall>[];
       _registerAllMocks(messenger, log);
 
@@ -213,21 +254,37 @@ print('sqlite-ok')
       expect(runtimes.firstWhere((r) => r.id == 'node').installed, isFalse);
 
       await NativeBridge.runtime.installRuntime('node');
-      expect(log.any((c) => c.channel.endsWith('installRuntime') && c.args?.first == 'node'), isTrue);
+      expect(
+        log.any(
+          (c) =>
+              c.channel.endsWith('installRuntime') && c.args?.first == 'node',
+        ),
+        isTrue,
+      );
 
       await NativeBridge.runtime.installRuntime('python');
-      expect(log.any((c) => c.channel.endsWith('installRuntime') && c.args?.first == 'python'), isTrue);
+      expect(
+        log.any(
+          (c) =>
+              c.channel.endsWith('installRuntime') && c.args?.first == 'python',
+        ),
+        isTrue,
+      );
     });
 
     test('terminal resize and signal propagate', () async {
-      final messenger = TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
+      final messenger =
+          TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
       final log = <_RecordedCall>[];
       _registerAllMocks(messenger, log);
       final terminal = TerminalService();
       final id = await terminal.createSession(cwd: '', cols: 80, rows: 24);
       await terminal.resize(id, 100, 30);
       await terminal.sendSignal(id, 'SIGTERM');
-      expect(log.any((c) => c.channel.endsWith('resize') && c.args?[1] == 100), isTrue);
+      expect(
+        log.any((c) => c.channel.endsWith('resize') && c.args?[1] == 100),
+        isTrue,
+      );
       expect(log.any((c) => c.channel.endsWith('sendSignal')), isTrue);
       await terminal.close(id);
       expect(log.any((c) => c.channel.endsWith('close')), isTrue);

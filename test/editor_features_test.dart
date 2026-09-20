@@ -7,23 +7,23 @@ import "package:nova/src/features/editor/theme/editor_theme_pack.dart";
 void main() {
   group("theme pack JSON", () {
     Map<String, dynamic> minimal({String type = "dark"}) => {
-          "name": "Test",
-          "type": type,
-          "colors": {
-            "editor.background": "#1e1e1e",
-            "editor.foreground": "#d4d4d4",
-          },
-          "tokenColors": [
-            {
-              "scope": ["keyword", "storage.type"],
-              "settings": {"foreground": "#569cd6", "fontStyle": "bold"}
-            },
-            {
-              "scope": "comment",
-              "settings": {"foreground": "#6a9955", "fontStyle": "italic"}
-            },
-          ],
-        };
+      "name": "Test",
+      "type": type,
+      "colors": {
+        "editor.background": "#1e1e1e",
+        "editor.foreground": "#d4d4d4",
+      },
+      "tokenColors": [
+        {
+          "scope": ["keyword", "storage.type"],
+          "settings": {"foreground": "#569cd6", "fontStyle": "bold"},
+        },
+        {
+          "scope": "comment",
+          "settings": {"foreground": "#6a9955", "fontStyle": "italic"},
+        },
+      ],
+    };
 
     test("parses valid pack with aliases and defaults", () {
       final pack = EditorThemePack.fromJson("t", minimal());
@@ -73,10 +73,7 @@ void main() {
         EditorThemePack.fromJson("t", minimal(type: "light")).accent,
         const Color(0xFF3F51B5),
       );
-      final custom = minimal()
-        ..["colors"] = {
-          "ui.accent": "#ff0000",
-        };
+      final custom = minimal()..["colors"] = {"ui.accent": "#ff0000"};
       expect(
         EditorThemePack.fromJson("t", custom).accent,
         const Color(0xFFFF0000),
@@ -92,8 +89,8 @@ void main() {
         ..["tokenColors"] = [
           {
             "scope": "keyword",
-            "settings": {"foreground": "not-a-color"}
-          }
+            "settings": {"foreground": "not-a-color"},
+          },
         ];
       expect(
         () => EditorThemePack.fromJson("t", badHex),
@@ -103,13 +100,10 @@ void main() {
         ..["tokenColors"] = [
           {
             "scope": "keyword",
-            "settings": {"fontStyle": "bold"}
-          }
+            "settings": {"fontStyle": "bold"},
+          },
         ];
-      expect(
-        () => EditorThemePack.fromJson("t", noFg),
-        throwsFormatException,
-      );
+      expect(() => EditorThemePack.fromJson("t", noFg), throwsFormatException);
     });
 
     test("hex parsing accepts #rgb and #rrggbb", () {

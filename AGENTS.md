@@ -1,6 +1,6 @@
 # AGENTS.md
 
-Nova: a Flutter/Android IDE app that runs code in an embedded Termux Linux runtime inside the app itself. UI/state is Dart (`lib/`), the engine is Kotlin (`android/app/src/main/kotlin/sd/adaa/nova/`). State management is Riverpod 3. Flutter 3.47 / Dart 3.13. README is in Arabic; code comments are English.
+Nova: a Flutter/Android IDE app that runs code in an embedded Termux Linux runtime inside the app itself. UI/state is Dart (`lib/`), the engine is Kotlin (`android/app/src/main/kotlin/sd/adaa/codeide/`). State management is Riverpod 3. Flutter 3.47 / Dart 3.13. README is in Arabic; code comments are English.
 
 ## Commands
 
@@ -13,18 +13,18 @@ Nova: a Flutter/Android IDE app that runs code in an embedded Termux Linux runti
 ## The Pigeon bridge (hard rule)
 
 - `pigeons/ide_api.dart` is the single contract between Dart and Kotlin. Do NOT edit generated files by hand.
-- Outputs are configured in the `@ConfigurePigeon` annotation: `lib/src/core/bridge/generated/ide_api.g.dart` and `android/app/src/main/kotlin/sd/adaa/nova/bridge/IdeApi.g.kt`. Regenerate, then commit both.
+- Outputs are configured in the `@ConfigurePigeon` annotation: `lib/src/core/bridge/generated/ide_api.g.dart` and `android/app/src/main/kotlin/sd/adaa/codeide/bridge/IdeApi.g.kt`. Regenerate, then commit both.
 - Flutter side talks to the platform through `NativeBridge` (`lib/src/core/bridge/native_bridge.dart`); screen-facing services wrap it in `lib/src/core/services/`.
 
 ## Event channel (hard rule)
 
-- The native→Dart event stream is one `EventChannel` (`sd.adaa.nova/events`, name in `AppConfig.eventsChannel`), and it supports effectively ONE live listener. Subscribing to `NativeBridge.events.receiveBroadcastStream()` directly from multiple places silently drops events for the others — symptom: "install starts then stalls".
+- The native→Dart event stream is one `EventChannel` (`sd.adaa.codeide/events`, name in `AppConfig.eventsChannel`), and it supports effectively ONE live listener. Subscribing to `NativeBridge.events.receiveBroadcastStream()` directly from multiple places silently drops events for the others — symptom: "install starts then stalls".
 - All consumers must subscribe via the `IdeEventBus` singleton (`lib/src/core/bridge/events_bus.dart`), which owns the single native subscription and fans out.
 
 ## Android constraints (deliberate, don't "fix")
 
 - `targetSdk = 28` is INTENTIONAL (comment in `android/app/build.gradle.kts`): targetSdk 29+ blocks exec from the app data dir via SELinux, killing the embedded runtime. Same reason for `useLegacyPackaging = true`. The "TODO: check this line" comment does not mean change it.
-- Internal storage path `run-as sd.adaa.nova` is used because `pm clear` does not truly wipe app files.
+- Internal storage path `run-as sd.adaa.codeide` is used because `pm clear` does not truly wipe app files.
 - Release build currently signs with debug keys (fine, it's how it ships).
 - Native C (`pty`) lives in `android/app/src/main/cpp` via CMake; ABIs are arm64-v8a + x86_64.
 
@@ -38,11 +38,11 @@ Nova: a Flutter/Android IDE app that runs code in an embedded Termux Linux runti
 App must be in the foreground; broadcast with the explicit component (registered in `MainActivity`):
 
 ```
-adb shell am broadcast -a sd.adaa.nova.DEBUG_SETUP -n sd.adaa.nova/.MainActivity
-adb shell am broadcast -a sd.adaa.nova.DEBUG_INSTALL_RUNTIME --es id git -n sd.adaa.nova/.MainActivity
-adb shell am broadcast -a sd.adaa.nova.DEBUG_COMPREHENSIVE_TEST -n sd.adaa.nova/.MainActivity   # Kotlin DebugTestHarness: Node/Python/Terminal, must all PASS pre-release
+adb shell am broadcast -a sd.adaa.codeide.DEBUG_SETUP -n sd.adaa.codeide/.MainActivity
+adb shell am broadcast -a sd.adaa.codeide.DEBUG_INSTALL_RUNTIME --es id git -n sd.adaa.codeide/.MainActivity
+adb shell am broadcast -a sd.adaa.codeide.DEBUG_COMPREHENSIVE_TEST -n sd.adaa.codeide/.MainActivity   # Kotlin DebugTestHarness: Node/Python/Terminal, must all PASS pre-release
 adb logcat -s flutter:I | grep IDE-EVENT
-adb shell "run-as sd.adaa.nova sh -c 'ls files/usr/bin | head'"
+adb shell "run-as sd.adaa.codeide sh -c 'ls files/usr/bin | head'"
 ```
 
 ## Layout
@@ -51,7 +51,7 @@ adb shell "run-as sd.adaa.nova sh -c 'ls files/usr/bin | head'"
 - `lib/src/core/services/` — service classes used by screens (files, process, terminal, git, runtime, setup, webpreview).
 - `lib/src/core/models/` — self-contained data models (see comment in `project.dart`).
 - `lib/src/features/<feature>/` — screens/widgets, each usually with a `<feature>_providers.dart`.
-- Kotlin `sd/adaa/nova/`: one manager per concern (`ProjectManager`, `ProcessManager`, `TerminalManager`, `GitManager`, `RuntimeManager`, `WebPreviewApiImpl`), plus `IdeCore` (bootstrap/self-heal), `IdeService` (foreground service), `IdeEvents`.
+- Kotlin `sd/adaa/codeide/`: one manager per concern (`ProjectManager`, `ProcessManager`, `TerminalManager`, `GitManager`, `RuntimeManager`, `WebPreviewApiImpl`), plus `IdeCore` (bootstrap/self-heal), `IdeService` (foreground service), `IdeEvents`.
 - Edit for Markdown is `fleather`+`parchment`; code editor is `re_editor` behind adapters (`editor_engine.dart`, `re_editor_adapter.dart`) so it can be swapped later.
 - Entry: `lib/main.dart` → `NovaApp` (`lib/app.dart`) → `IdeShell` (bottom nav; switches to `NavigationRail` at width ≥ 700px).
 

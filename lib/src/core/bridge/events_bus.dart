@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'native_bridge.dart';
 
-/// A single shared subscription to the native `sd.adaa.nova/events` channel,
+/// A single shared subscription to the native `sd.adaa.codeide/events` channel,
 /// fanning out to every consumer.
 ///
 /// Flutter's EventChannel supports effectively one active listener per channel

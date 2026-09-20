@@ -609,7 +609,7 @@ class SetupApi {
 
 
   Future<SetupStatus> getStatus() async {
-    final pigeonVar_channelName = 'dev.flutter.pigeon.nova.SetupApi.getStatus$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channelName = 'dev.flutter.pigeon.codeide.SetupApi.getStatus$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
@@ -628,7 +628,7 @@ class SetupApi {
   }
 
   Future<void> startSetup() async {
-    final pigeonVar_channelName = 'dev.flutter.pigeon.nova.SetupApi.startSetup$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channelName = 'dev.flutter.pigeon.codeide.SetupApi.startSetup$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
@@ -664,7 +664,7 @@ class RuntimeApi {
 
 
   Future<List<RuntimeInfo>> getRuntimes() async {
-    final pigeonVar_channelName = 'dev.flutter.pigeon.nova.RuntimeApi.getRuntimes$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channelName = 'dev.flutter.pigeon.codeide.RuntimeApi.getRuntimes$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
@@ -683,7 +683,7 @@ class RuntimeApi {
   }
 
   Future<RuntimeInfo> getRuntime(String id) async {
-    final pigeonVar_channelName = 'dev.flutter.pigeon.nova.RuntimeApi.getRuntime$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channelName = 'dev.flutter.pigeon.codeide.RuntimeApi.getRuntime$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
@@ -702,7 +702,7 @@ class RuntimeApi {
   }
 
   Future<void> installRuntime(String id) async {
-    final pigeonVar_channelName = 'dev.flutter.pigeon.nova.RuntimeApi.installRuntime$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channelName = 'dev.flutter.pigeon.codeide.RuntimeApi.installRuntime$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
@@ -720,7 +720,7 @@ class RuntimeApi {
   }
 
   Future<void> uninstallRuntime(String id) async {
-    final pigeonVar_channelName = 'dev.flutter.pigeon.nova.RuntimeApi.uninstallRuntime$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channelName = 'dev.flutter.pigeon.codeide.RuntimeApi.uninstallRuntime$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
@@ -738,7 +738,7 @@ class RuntimeApi {
   }
 
   Future<void> updateRuntime(String id) async {
-    final pigeonVar_channelName = 'dev.flutter.pigeon.nova.RuntimeApi.updateRuntime$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channelName = 'dev.flutter.pigeon.codeide.RuntimeApi.updateRuntime$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
@@ -774,7 +774,7 @@ class TerminalApi {
 
 
   Future<String> createSession(String cwd, int cols, int rows) async {
-    final pigeonVar_channelName = 'dev.flutter.pigeon.nova.TerminalApi.createSession$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channelName = 'dev.flutter.pigeon.codeide.TerminalApi.createSession$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
@@ -793,7 +793,7 @@ class TerminalApi {
   }
 
   Future<void> write(String sessionId, String data) async {
-    final pigeonVar_channelName = 'dev.flutter.pigeon.nova.TerminalApi.write$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channelName = 'dev.flutter.pigeon.codeide.TerminalApi.write$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
@@ -811,7 +811,7 @@ class TerminalApi {
   }
 
   Future<void> resize(String sessionId, int cols, int rows) async {
-    final pigeonVar_channelName = 'dev.flutter.pigeon.nova.TerminalApi.resize$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channelName = 'dev.flutter.pigeon.codeide.TerminalApi.resize$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
@@ -829,7 +829,7 @@ class TerminalApi {
   }
 
   Future<void> close(String sessionId) async {
-    final pigeonVar_channelName = 'dev.flutter.pigeon.nova.TerminalApi.close$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channelName = 'dev.flutter.pigeon.codeide.TerminalApi.close$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
@@ -847,7 +847,7 @@ class TerminalApi {
   }
 
   Future<void> sendSignal(String sessionId, String signal) async {
-    final pigeonVar_channelName = 'dev.flutter.pigeon.nova.TerminalApi.sendSignal$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channelName = 'dev.flutter.pigeon.codeide.TerminalApi.sendSignal$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
@@ -883,7 +883,7 @@ class ProcessApi {
 
 
   Future<ProcessInfo> startProcess(ProcessRequest request) async {
-    final pigeonVar_channelName = 'dev.flutter.pigeon.nova.ProcessApi.startProcess$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channelName = 'dev.flutter.pigeon.codeide.ProcessApi.startProcess$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
@@ -902,7 +902,7 @@ class ProcessApi {
   }
 
   Future<void> killProcess(String pid) async {
-    final pigeonVar_channelName = 'dev.flutter.pigeon.nova.ProcessApi.killProcess$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channelName = 'dev.flutter.pigeon.codeide.ProcessApi.killProcess$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
@@ -920,7 +920,7 @@ class ProcessApi {
   }
 
   Future<List<ProcessInfo>> listProcesses() async {
-    final pigeonVar_channelName = 'dev.flutter.pigeon.nova.ProcessApi.listProcesses$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channelName = 'dev.flutter.pigeon.codeide.ProcessApi.listProcesses$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
@@ -957,7 +957,7 @@ class ProjectApi {
 
 
   Future<ProjectInfo> createProject(String name, String language) async {
-    final pigeonVar_channelName = 'dev.flutter.pigeon.nova.ProjectApi.createProject$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channelName = 'dev.flutter.pigeon.codeide.ProjectApi.createProject$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
@@ -976,7 +976,7 @@ class ProjectApi {
   }
 
   Future<List<ProjectInfo>> listProjects() async {
-    final pigeonVar_channelName = 'dev.flutter.pigeon.nova.ProjectApi.listProjects$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channelName = 'dev.flutter.pigeon.codeide.ProjectApi.listProjects$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
@@ -995,7 +995,7 @@ class ProjectApi {
   }
 
   Future<void> openProject(String path) async {
-    final pigeonVar_channelName = 'dev.flutter.pigeon.nova.ProjectApi.openProject$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channelName = 'dev.flutter.pigeon.codeide.ProjectApi.openProject$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
@@ -1013,7 +1013,7 @@ class ProjectApi {
   }
 
   Future<void> deleteProject(String path) async {
-    final pigeonVar_channelName = 'dev.flutter.pigeon.nova.ProjectApi.deleteProject$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channelName = 'dev.flutter.pigeon.codeide.ProjectApi.deleteProject$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
@@ -1049,7 +1049,7 @@ class FileApi {
 
 
   Future<String> readFile(String path) async {
-    final pigeonVar_channelName = 'dev.flutter.pigeon.nova.FileApi.readFile$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channelName = 'dev.flutter.pigeon.codeide.FileApi.readFile$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
@@ -1068,7 +1068,7 @@ class FileApi {
   }
 
   Future<void> writeFile(String path, String content) async {
-    final pigeonVar_channelName = 'dev.flutter.pigeon.nova.FileApi.writeFile$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channelName = 'dev.flutter.pigeon.codeide.FileApi.writeFile$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
@@ -1086,7 +1086,7 @@ class FileApi {
   }
 
   Future<List<FileEntry>> listFiles(String path) async {
-    final pigeonVar_channelName = 'dev.flutter.pigeon.nova.FileApi.listFiles$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channelName = 'dev.flutter.pigeon.codeide.FileApi.listFiles$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
@@ -1105,7 +1105,7 @@ class FileApi {
   }
 
   Future<bool> rename(String oldPath, String newPath) async {
-    final pigeonVar_channelName = 'dev.flutter.pigeon.nova.FileApi.rename$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channelName = 'dev.flutter.pigeon.codeide.FileApi.rename$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
@@ -1124,7 +1124,7 @@ class FileApi {
   }
 
   Future<bool> delete(String path) async {
-    final pigeonVar_channelName = 'dev.flutter.pigeon.nova.FileApi.delete$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channelName = 'dev.flutter.pigeon.codeide.FileApi.delete$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
@@ -1143,7 +1143,7 @@ class FileApi {
   }
 
   Future<bool> mkdir(String path) async {
-    final pigeonVar_channelName = 'dev.flutter.pigeon.nova.FileApi.mkdir$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channelName = 'dev.flutter.pigeon.codeide.FileApi.mkdir$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
@@ -1180,7 +1180,7 @@ class GitApi {
 
 
   Future<GitStatus> status(String projectPath) async {
-    final pigeonVar_channelName = 'dev.flutter.pigeon.nova.GitApi.status$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channelName = 'dev.flutter.pigeon.codeide.GitApi.status$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
@@ -1199,7 +1199,7 @@ class GitApi {
   }
 
   Future<void> add(String projectPath, List<String> paths) async {
-    final pigeonVar_channelName = 'dev.flutter.pigeon.nova.GitApi.add$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channelName = 'dev.flutter.pigeon.codeide.GitApi.add$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
@@ -1217,7 +1217,7 @@ class GitApi {
   }
 
   Future<void> commit(String projectPath, String message) async {
-    final pigeonVar_channelName = 'dev.flutter.pigeon.nova.GitApi.commit$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channelName = 'dev.flutter.pigeon.codeide.GitApi.commit$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
@@ -1235,7 +1235,7 @@ class GitApi {
   }
 
   Future<String> diff(String projectPath) async {
-    final pigeonVar_channelName = 'dev.flutter.pigeon.nova.GitApi.diff$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channelName = 'dev.flutter.pigeon.codeide.GitApi.diff$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
@@ -1272,7 +1272,7 @@ class WebPreviewApi {
 
 
   Future<String?> previewUrl() async {
-    final pigeonVar_channelName = 'dev.flutter.pigeon.nova.WebPreviewApi.previewUrl$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channelName = 'dev.flutter.pigeon.codeide.WebPreviewApi.previewUrl$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,

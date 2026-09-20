@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:nova/l10n/generated/app_localizations.dart';
 import 'package:xterm/xterm.dart';
 
 import '../../core/models/terminal_session.dart';
@@ -43,59 +44,100 @@ const _lightTerminalTheme = TerminalTheme(
   searchHitForeground: Color(0xFF000000),
 );
 
+/// Per-tab PTY state. Each tab owns its xterm [Terminal] (scrollback +
+/// emulator state) and its own [TerminalController] (per-view selection),
+/// plus the native session id and per-tab error/exited banners.
+class _TerminalTab {
+  _TerminalTab({
+    required this.title,
+    required this.terminal,
+    required this.controller,
+  });
+
+  final String title;
+  final Terminal terminal;
+  final TerminalController controller;
+  String? sessionId;
+  bool creating = true;
+  String? error;
+  String? exited;
+}
+
 class _TerminalScreenState extends State<TerminalScreen> {
   final _terminalService = TerminalService();
-  final _terminalController = TerminalController();
+  final List<_TerminalTab> _tabs = [];
 
-  late final Terminal _terminal;
   late final StreamSubscription<TerminalOutput> _outputSub;
   late final StreamSubscription<TerminalOutput> _exitSub;
 
-  String? _sessionId;
+  static const int _maxTabs = 5;
+
+  int _activeIndex = 0;
+  int _nextNumber = 1;
   int _cols = 80;
   int _rows = 24;
-  bool _creating = false;
-  String? _error;
-  String? _exited;
+
+  _TerminalTab? get _activeTab =>
+      _tabs.isEmpty ? null : _tabs[_activeIndex.clamp(0, _tabs.length - 1)];
 
   @override
   void initState() {
     super.initState();
-    _terminal = Terminal(
-      maxLines: 4000,
-      onOutput: _onOutput,
-      onResize: _onResize,
-      onBell: () => HapticFeedback.selectionClick(),
-    );
     _outputSub = _terminalService.outputStream.listen(_onOutputData);
     _exitSub = _terminalService.exitStream.listen(_onExit);
-    unawaited(_createSession());
+    _addTab();
   }
 
   @override
   void dispose() {
     _outputSub.cancel();
     _exitSub.cancel();
-    final sessionId = _sessionId;
-    if (sessionId != null) {
-      unawaited(_terminalService.close(sessionId));
+    for (final tab in _tabs) {
+      final sessionId = tab.sessionId;
+      tab.sessionId = null;
+      if (sessionId != null) {
+        unawaited(_terminalService.close(sessionId));
+      }
+      tab.controller.dispose();
     }
-    _terminalController.dispose();
     super.dispose();
   }
 
-  Future<void> _createSession() async {
-    final previous = _sessionId;
-    setState(() {
-      _creating = true;
-      _error = null;
-      _exited = null;
-    });
-    if (previous != null) {
-      unawaited(_terminalService.close(previous));
+  void _addTab() {
+    if (_tabs.length >= _maxTabs) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Maximum of 5 terminal tabs reached')),
+      );
+      return;
     }
-    _sessionId = null;
-    _terminalController.clearSelection();
+    late final _TerminalTab tab;
+    final terminal = Terminal(
+      maxLines: 4000,
+      onOutput: (data) => _onTabInput(tab, data),
+      onResize: (width, height, pixelWidth, pixelHeight) =>
+          _onTabResize(tab, width, height),
+      onBell: () => HapticFeedback.selectionClick(),
+    );
+    tab = _TerminalTab(
+      title: 'Terminal ${_nextNumber++}',
+      terminal: terminal,
+      controller: TerminalController(),
+    );
+    setState(() {
+      _tabs.add(tab);
+      _activeIndex = _tabs.length - 1;
+    });
+    unawaited(_createSessionFor(tab));
+  }
+
+  Future<void> _createSessionFor(_TerminalTab tab) async {
+    final l10n = AppLocalizations.of(context);
+    setState(() {
+      tab.creating = true;
+      tab.error = null;
+      tab.exited = null;
+    });
+    tab.controller.clearSelection();
     try {
       final sessionId = await _terminalService.createSession(
         cwd: '',
@@ -103,33 +145,81 @@ class _TerminalScreenState extends State<TerminalScreen> {
         rows: _rows,
       );
       if (!mounted) return;
+      // Tab may have been closed while the session was being created.
+      if (!_tabs.contains(tab)) {
+        unawaited(_terminalService.close(sessionId));
+        return;
+      }
       setState(() {
-        _sessionId = sessionId;
-        _creating = false;
+        tab.sessionId = sessionId;
+        tab.creating = false;
       });
       unawaited(_terminalService.resize(sessionId, _cols, _rows));
     } on Exception {
       if (!mounted) return;
+      if (!_tabs.contains(tab)) return;
       setState(() {
-        _creating = false;
-        _error = 'Failed to start terminal session';
+        tab.creating = false;
+        tab.error = l10n.terminalStartFailed;
       });
     }
   }
 
+  void _switchTo(int index) {
+    if (index == _activeIndex) return;
+    setState(() {
+      _activeIndex = index;
+    });
+    final tab = _activeTab;
+    final sessionId = tab?.sessionId;
+    if (sessionId != null) {
+      unawaited(_terminalService.resize(sessionId, _cols, _rows));
+    }
+  }
+
+  void _closeTab(int index) {
+    if (index < 0 || index >= _tabs.length) return;
+    final tab = _tabs[index];
+    final sessionId = tab.sessionId;
+    tab.sessionId = null;
+    if (sessionId != null) {
+      unawaited(_terminalService.close(sessionId));
+    }
+    tab.controller.dispose();
+    setState(() {
+      _tabs.removeAt(index);
+      if (_tabs.isEmpty) {
+        _activeIndex = 0;
+      } else if (_activeIndex >= _tabs.length) {
+        _activeIndex = _tabs.length - 1;
+      } else if (index < _activeIndex) {
+        _activeIndex -= 1;
+      }
+    });
+    if (_tabs.isEmpty) {
+      _addTab();
+      return;
+    }
+    final active = _activeTab;
+    final activeSession = active?.sessionId;
+    if (activeSession != null) {
+      unawaited(_terminalService.resize(activeSession, _cols, _rows));
+    }
+  }
+
   /// Terminal <- user input. User typed into xterm; forward to the PTY.
-  void _onOutput(String data) {
-    final sessionId = _sessionId;
+  void _onTabInput(_TerminalTab tab, String data) {
+    final sessionId = tab.sessionId;
     if (sessionId != null) {
       unawaited(_terminalService.write(sessionId, data));
     }
   }
 
   /// Terminal dimension change; propagate to the PTY so apps reflow.
-  void _onResize(int width, int height, int pixelWidth, int pixelHeight) {
+  void _onTabResize(_TerminalTab tab, int width, int height) {
     _cols = width;
     _rows = height;
-    final sessionId = _sessionId;
+    final sessionId = tab.sessionId;
     if (sessionId != null) {
       unawaited(_terminalService.resize(sessionId, width, height));
     }
@@ -137,39 +227,50 @@ class _TerminalScreenState extends State<TerminalScreen> {
 
   /// Terminal <- PTY output. Batched events feed the emulator.
   void _onOutputData(TerminalOutput output) {
-    if (output.sessionId != _sessionId) return;
     if (!mounted) return;
-    _terminal.write(output.data);
+    for (final tab in _tabs) {
+      if (tab.sessionId != null && output.sessionId == tab.sessionId) {
+        tab.terminal.write(output.data);
+        return;
+      }
+    }
   }
 
   void _onExit(TerminalOutput output) {
-    if (output.exitCode == null || output.sessionId != _sessionId) return;
+    final int? code = output.exitCode;
+    if (code == null) return;
     if (!mounted) return;
-    _terminal.write('\r\n');
-    setState(() {
-      _exited = 'Session exited (code ${output.exitCode})';
-      _sessionId = null;
-    });
+    for (final tab in _tabs) {
+      if (tab.sessionId != null && output.sessionId == tab.sessionId) {
+        tab.terminal.write('\r\n');
+        setState(() {
+          tab.exited = AppLocalizations.of(context).terminalSessionExited(code);
+          tab.sessionId = null;
+        });
+        return;
+      }
+    }
   }
 
   Future<void> _paste() async {
     final data = await Clipboard.getData(Clipboard.kTextPlain);
     final text = data?.text;
     if (text != null && text.isNotEmpty) {
-      _terminal.paste(text);
+      _activeTab?.terminal.paste(text);
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final creating = _activeTab?.creating ?? false;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Terminal'),
+        title: Text(AppLocalizations.of(context).terminalTitle),
         actions: [
           IconButton(
-            tooltip: 'New session',
-            onPressed: _creating ? null : _createSession,
-            icon: _creating
+            tooltip: AppLocalizations.of(context).terminalNewSession,
+            onPressed: creating ? null : _addTab,
+            icon: creating
                 ? const SizedBox(
                     width: 18,
                     height: 18,
@@ -178,7 +279,7 @@ class _TerminalScreenState extends State<TerminalScreen> {
                 : const Icon(Icons.add_box_outlined),
           ),
           IconButton(
-            tooltip: 'Paste',
+            tooltip: AppLocalizations.of(context).terminalPaste,
             onPressed: _paste,
             icon: const Icon(Icons.content_paste_go),
           ),
@@ -188,10 +289,102 @@ class _TerminalScreenState extends State<TerminalScreen> {
     );
   }
 
+  /// Slim tab strip in the editor tabs language: 4px chips with a 2px
+  /// primary underline under the active tab, x to close any tab, + to add.
+  Widget _buildTabStrip() {
+    final scheme = Theme.of(context).colorScheme;
+    return Container(
+      color: scheme.surfaceContainerLow,
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          children: [
+            for (int i = 0; i < _tabs.length; i++) _tabChip(i),
+            Padding(
+              padding: const EdgeInsets.only(top: 8, bottom: 4),
+              child: IconButton(
+                tooltip: 'Add terminal',
+                visualDensity: VisualDensity.compact,
+                onPressed: _tabs.length >= _maxTabs ? null : _addTab,
+                icon: const Icon(Icons.add, size: 18),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _tabChip(int index) {
+    final tab = _tabs[index];
+    final selected = index == _activeIndex;
+    final scheme = Theme.of(context).colorScheme;
+    return Padding(
+      padding: const EdgeInsets.only(right: 8),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          InkWell(
+            borderRadius: BorderRadius.circular(4),
+            onTap: () => _switchTo(index),
+            child: Container(
+              margin: const EdgeInsets.only(top: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+              decoration: BoxDecoration(
+                color: selected
+                    ? scheme.surfaceContainerHigh
+                    : scheme.surfaceContainerLow,
+                border: Border.all(color: scheme.outlineVariant),
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    tab.title,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: selected
+                          ? scheme.onSurface
+                          : scheme.onSurfaceVariant,
+                      fontWeight: selected
+                          ? FontWeight.w600
+                          : FontWeight.normal,
+                    ),
+                  ),
+                  const SizedBox(width: 2),
+                  InkWell(
+                    onTap: () => _closeTab(index),
+                    child: Padding(
+                      padding: const EdgeInsets.all(2),
+                      child: Icon(
+                        Icons.close,
+                        size: 14,
+                        color: scheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          // Active tab 2px primary underline (DESIGN.md tabs language).
+          Container(
+            height: 2,
+            margin: const EdgeInsets.only(top: 2),
+            color: selected ? scheme.primary : Colors.transparent,
+          ),
+        ],
+      ),
+    );
+  }
+
   /// Compact accessory bar with keys missing from mobile soft keyboards
-  /// (Tab/Esc/Ctrl/arrows). Sends raw bytes via [_onOutput] like xterm input.
+  /// (Tab/Esc/Ctrl/arrows). Sends raw bytes via [_onTabInput] like xterm input.
   Widget _buildAccessoryBar() {
     final colorScheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context);
     return Container(
       color: colorScheme.surfaceContainer,
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
@@ -199,27 +392,27 @@ class _TerminalScreenState extends State<TerminalScreen> {
         scrollDirection: Axis.horizontal,
         child: Row(
           children: [
-            _accessoryTextKey('Tab', '\t'),
-            _accessoryTextKey('Esc', '\x1b'),
+            _accessoryTextKey(l10n.terminalKeyTab, '\t'),
+            _accessoryTextKey(l10n.terminalKeyEsc, '\x1b'),
             _accessoryTextKey('^C', '\x03'),
             _accessoryIconKey(
               Icons.keyboard_arrow_up,
-              'Up',
+              l10n.terminalKeyUp,
               '\x1b[A',
             ),
             _accessoryIconKey(
               Icons.keyboard_arrow_down,
-              'Down',
+              l10n.terminalKeyDown,
               '\x1b[B',
             ),
             _accessoryIconKey(
               Icons.keyboard_arrow_left,
-              'Left',
+              l10n.terminalKeyLeft,
               '\x1b[D',
             ),
             _accessoryIconKey(
               Icons.keyboard_arrow_right,
-              'Right',
+              l10n.terminalKeyRight,
               '\x1b[C',
             ),
             _accessoryTextKey('|', '|'),
@@ -238,7 +431,10 @@ class _TerminalScreenState extends State<TerminalScreen> {
       child: SizedBox(
         height: 36,
         child: FilledButton.tonal(
-          onPressed: () => _onOutput(data),
+          onPressed: () {
+            final tab = _activeTab;
+            if (tab != null) _onTabInput(tab, data);
+          },
           style: FilledButton.styleFrom(
             padding: const EdgeInsets.symmetric(horizontal: 12),
             tapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -257,7 +453,10 @@ class _TerminalScreenState extends State<TerminalScreen> {
       child: SizedBox(
         height: 36,
         child: FilledButton.tonal(
-          onPressed: () => _onOutput(data),
+          onPressed: () {
+            final tab = _activeTab;
+            if (tab != null) _onTabInput(tab, data);
+          },
           style: FilledButton.styleFrom(
             padding: const EdgeInsets.symmetric(horizontal: 10),
             tapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -270,18 +469,32 @@ class _TerminalScreenState extends State<TerminalScreen> {
   }
 
   Widget _buildBody() {
-    if (_error != null) {
+    final tab = _activeTab;
+    if (tab == null) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    return Column(
+      children: [
+        _buildTabStrip(),
+        Divider(height: 1, color: Theme.of(context).colorScheme.outlineVariant),
+        Expanded(child: _buildActiveTabBody(tab)),
+      ],
+    );
+  }
+
+  Widget _buildActiveTabBody(_TerminalTab tab) {
+    if (tab.error != null) {
       return Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             const Icon(Icons.error_outline, size: 32),
             const SizedBox(height: 8),
-            Text(_error!),
+            Text(tab.error!),
             const SizedBox(height: 12),
             FilledButton.tonal(
-              onPressed: _createSession,
-              child: const Text('Retry'),
+              onPressed: tab.creating ? null : () => _createSessionFor(tab),
+              child: Text(AppLocalizations.of(context).actionRetry),
             ),
           ],
         ),
@@ -295,8 +508,9 @@ class _TerminalScreenState extends State<TerminalScreen> {
             children: [
               Positioned.fill(
                 child: TerminalView(
-                  _terminal,
-                  controller: _terminalController,
+                  key: ValueKey(tab),
+                  tab.terminal,
+                  controller: tab.controller,
                   autofocus: true,
                   padding: const EdgeInsets.all(8),
                   theme: Theme.of(context).brightness == Brightness.dark
@@ -304,20 +518,27 @@ class _TerminalScreenState extends State<TerminalScreen> {
                       : _lightTerminalTheme,
                 ),
               ),
-              if (_exited != null)
+              if (tab.exited != null)
                 Positioned(
                   left: 0,
                   right: 0,
                   bottom: 0,
                   child: Container(
                     color: Theme.of(context).colorScheme.tertiaryContainer,
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 10,
+                    ),
                     child: Row(
                       children: [
-                        Expanded(child: Text(_exited!)),
+                        Expanded(child: Text(tab.exited!)),
                         TextButton(
-                          onPressed: _createSession,
-                          child: const Text('New session'),
+                          onPressed: tab.creating
+                              ? null
+                              : () => _createSessionFor(tab),
+                          child: Text(
+                            AppLocalizations.of(context).terminalNewSession,
+                          ),
                         ),
                       ],
                     ),

@@ -1,9 +1,8 @@
 import "package:flutter/material.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
+import "package:nova/l10n/generated/app_localizations.dart";
 
-import "../../core/bridge/generated/ide_api.g.dart" as bridge;
 import "../../core/models/project.dart";
-import "../../core/services/setup_service.dart";
 import "workspace_providers.dart";
 
 /// Projects hub: stats ribbon + quick actions + searchable project list.
@@ -24,14 +23,12 @@ class ProjectsHubScreen extends ConsumerStatefulWidget {
 }
 
 class _ProjectsHubScreenState extends ConsumerState<ProjectsHubScreen> {
-  final _setupService = SetupService();
   final _searchController = TextEditingController();
 
   bool _loading = true;
   bool _actionBusy = false;
   String _query = "";
   String? _languageFilter;
-  bridge.SetupStatus? _setupStatus;
 
   @override
   void initState() {
@@ -50,25 +47,14 @@ class _ProjectsHubScreenState extends ConsumerState<ProjectsHubScreen> {
 
   void _toast(String message) {
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
-    );
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(message)));
   }
 
   Future<void> _init() async {
-    await Future.wait([_loadProjects(), _loadSetupStatus()]);
+    await Future.wait([_loadProjects(), _loadRecentFiles()]);
     if (!mounted) return;
     setState(() => _loading = false);
-  }
-
-  Future<void> _loadSetupStatus() async {
-    try {
-      final status = await _setupService.getStatus();
-      if (!mounted) return;
-      setState(() => _setupStatus = status);
-    } catch (_) {
-      // Leave _setupStatus null; the ribbon shows "unavailable".
-    }
   }
 
   Future<void> _loadProjects({ProjectInfo? select}) async {
@@ -97,6 +83,12 @@ class _ProjectsHubScreenState extends ConsumerState<ProjectsHubScreen> {
     }
   }
 
+  Future<void> _loadRecentFiles() async {
+    final stored = await loadRecentFiles();
+    if (!mounted) return;
+    ref.read(recentFilesProvider.notifier).state = stored;
+  }
+
   void _selectProject(ProjectInfo project, {bool openEditor = false}) {
     final current = ref.read(activeProjectProvider);
     if (current == null || current.path != project.path) {
@@ -115,14 +107,39 @@ class _ProjectsHubScreenState extends ConsumerState<ProjectsHubScreen> {
     if (openEditor) widget.onOpenEditor();
   }
 
+  void _openRecentFile(String path) {
+    // Keep the workspace project in sync when the file belongs to a
+    // known project, reusing the existing select flow (which resets
+    // tabs/run state on project switch), then open the tab.
+    final projects = ref.read(projectsProvider);
+    if (projects != null) {
+      ProjectInfo? owner;
+      for (final p in projects) {
+        final root = p.path.endsWith("/") || p.path.endsWith("\\")
+            ? p.path.substring(0, p.path.length - 1)
+            : p.path;
+        if (path == root ||
+            path.startsWith("$root/") ||
+            path.startsWith("$root\\")) {
+          if (owner == null || root.length > owner.path.length) owner = p;
+        }
+      }
+      if (owner != null) _selectProject(owner);
+    }
+    final id = ref.read(workspaceTabsProvider.notifier).open(path);
+    ref.read(activeEditorTabProvider.notifier).state = id;
+    widget.onOpenEditor();
+  }
+
   Future<void> _newProject() async {
+    final l10n = AppLocalizations.of(context);
     final nameController = TextEditingController();
     var selectedLanguage = "php";
     final result = await showDialog<(String, String)>(
       context: context,
       builder: (context) => StatefulBuilder(
         builder: (context, setDialogState) => AlertDialog(
-          title: const Text("New project"),
+          title: Text(l10n.projectsNewProject),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -130,23 +147,28 @@ class _ProjectsHubScreenState extends ConsumerState<ProjectsHubScreen> {
               TextField(
                 controller: nameController,
                 autofocus: true,
-                decoration: const InputDecoration(hintText: "Project name"),
+                decoration: InputDecoration(
+                  hintText: l10n.projectsProjectNameHint,
+                ),
               ),
               const SizedBox(height: 16),
               SegmentedButton<String>(
                 segments: const [
                   ButtonSegment(
-                      value: "php",
-                      label: Text("PHP"),
-                      icon: Icon(Icons.language)),
+                    value: "php",
+                    label: Text("PHP"),
+                    icon: Icon(Icons.language),
+                  ),
                   ButtonSegment(
-                      value: "node",
-                      label: Text("Node"),
-                      icon: Icon(Icons.integration_instructions)),
+                    value: "node",
+                    label: Text("Node"),
+                    icon: Icon(Icons.integration_instructions),
+                  ),
                   ButtonSegment(
-                      value: "python",
-                      label: Text("Python"),
-                      icon: Icon(Icons.terminal)),
+                    value: "python",
+                    label: Text("Python"),
+                    icon: Icon(Icons.terminal),
+                  ),
                 ],
                 selected: {selectedLanguage},
                 showSelectedIcon: false,
@@ -158,7 +180,7 @@ class _ProjectsHubScreenState extends ConsumerState<ProjectsHubScreen> {
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: const Text("Cancel"),
+              child: Text(l10n.actionCancel),
             ),
             FilledButton(
               onPressed: () {
@@ -166,7 +188,7 @@ class _ProjectsHubScreenState extends ConsumerState<ProjectsHubScreen> {
                 if (name.isEmpty) return;
                 Navigator.of(context).pop((name, selectedLanguage));
               },
-              child: const Text("Create"),
+              child: Text(l10n.actionCreate),
             ),
           ],
         ),
@@ -181,26 +203,27 @@ class _ProjectsHubScreenState extends ConsumerState<ProjectsHubScreen> {
           .createProject(result.$1, result.$2);
       await _loadProjects(select: created);
     } catch (e) {
-      _toast("Create failed: $e");
+      _toast(l10n.commonCreateFailed("$e"));
     } finally {
       if (mounted) setState(() => _actionBusy = false);
     }
   }
 
   Future<void> _deleteProject(ProjectInfo project) async {
+    final l10n = AppLocalizations.of(context);
     final ok = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text("Delete project?"),
-        content: Text("Delete '${project.name}' and all its files?"),
+        title: Text(l10n.projectsDeleteTitle),
+        content: Text(l10n.projectsDeleteMessage(project.name)),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text("Cancel"),
+            child: Text(l10n.actionCancel),
           ),
           FilledButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text("Delete"),
+            child: Text(l10n.actionDelete),
           ),
         ],
       ),
@@ -219,7 +242,7 @@ class _ProjectsHubScreenState extends ConsumerState<ProjectsHubScreen> {
     try {
       await ref.read(projectServiceProvider).deleteProject(project.path);
     } catch (e) {
-      _toast("Delete failed: $e");
+      _toast(l10n.commonDeleteFailed("$e"));
       return;
     } finally {
       if (mounted) setState(() => _actionBusy = false);
@@ -241,8 +264,9 @@ class _ProjectsHubScreenState extends ConsumerState<ProjectsHubScreen> {
     final colors = Theme.of(context).colorScheme;
     final projects = ref.watch(projectsProvider);
     final active = ref.watch(activeProjectProvider);
+    final recentFiles = ref.watch(recentFilesProvider);
     return Scaffold(
-      appBar: AppBar(title: const Text("Projects")),
+      appBar: AppBar(title: Text(AppLocalizations.of(context).navProjects)),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : RefreshIndicator(
@@ -253,7 +277,6 @@ class _ProjectsHubScreenState extends ConsumerState<ProjectsHubScreen> {
                   _StatsRibbon(
                     colors: colors,
                     projectCount: projects?.length ?? 0,
-                    setupStatus: _setupStatus,
                   ),
                   const SizedBox(height: 12),
                   _HubActions(
@@ -272,8 +295,8 @@ class _ProjectsHubScreenState extends ConsumerState<ProjectsHubScreen> {
                   const SizedBox(height: 12),
                   TextField(
                     controller: _searchController,
-                    decoration: const InputDecoration(
-                      hintText: "Search projects...",
+                    decoration: InputDecoration(
+                      hintText: AppLocalizations.of(context).projectsSearchHint,
                       prefixIcon: Icon(Icons.search),
                       border: OutlineInputBorder(),
                     ),
@@ -286,25 +309,40 @@ class _ProjectsHubScreenState extends ConsumerState<ProjectsHubScreen> {
                         setState(() => _languageFilter = language),
                   ),
                   const SizedBox(height: 12),
-                  Text("Recent projects",
-                      style: Theme.of(context).textTheme.titleMedium),
+                  Text(
+                    AppLocalizations.of(context).projectsRecentProjects,
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
                   const SizedBox(height: 8),
                   if (projects == null || projects.isEmpty)
-                    _EmptyProjects(
-                        colors: colors, onNewProject: _newProject)
+                    _EmptyProjects(colors: colors, onNewProject: _newProject)
                   else
-                    ..._filtered(projects).map((p) => Padding(
-                          padding: const EdgeInsets.only(bottom: 8),
-                          child: _ProjectCard(
-                            colors: colors,
-                            project: p,
-                            isActive: active?.path == p.path,
-                            onOpen: () =>
-                                _selectProject(p, openEditor: true),
-                            onDelete: () => _deleteProject(p),
-                          ),
-                        )),
+                    ..._filtered(projects).map(
+                      (p) => Padding(
+                        padding: const EdgeInsets.only(bottom: 8),
+                        child: _ProjectCard(
+                          colors: colors,
+                          project: p,
+                          isActive: active?.path == p.path,
+                          onOpen: () => _selectProject(p, openEditor: true),
+                          onDelete: () => _deleteProject(p),
+                        ),
+                      ),
+                    ),
                   const SizedBox(height: 12),
+                  if (recentFiles.isNotEmpty) ...[
+                    Text(
+                      AppLocalizations.of(context).projectsRecentFiles,
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                    const SizedBox(height: 8),
+                    _RecentFilesCard(
+                      colors: colors,
+                      files: recentFiles,
+                      onOpen: _openRecentFile,
+                    ),
+                    const SizedBox(height: 12),
+                  ],
                   _TipsCard(colors: colors),
                 ],
               ),
@@ -313,60 +351,31 @@ class _ProjectsHubScreenState extends ConsumerState<ProjectsHubScreen> {
   }
 }
 
-/// Top ribbon: bootstrap status + project count.
+/// Top ribbon: project count (bootstrap state lives on the runtime screen).
 class _StatsRibbon extends StatelessWidget {
   const _StatsRibbon({
     required this.colors,
     required this.projectCount,
-    required this.setupStatus,
   });
 
   final ColorScheme colors;
   final int projectCount;
-  final bridge.SetupStatus? setupStatus;
 
   @override
   Widget build(BuildContext context) {
-    final status = setupStatus;
-    final String statusText;
-    final IconData statusIcon;
-    if (status == null) {
-      statusText = "Runtime status unavailable";
-      statusIcon = Icons.help_outline;
-    } else if (status.error != null) {
-      statusText = "Setup error: ${status.error}";
-      statusIcon = Icons.error_outline;
-    } else if (status.ready) {
-      final version = status.bootstrapVersion;
-      statusText =
-          version == null ? "Runtime ready" : "Runtime ready ($version)";
-      statusIcon = Icons.check_circle_outline;
-    } else {
-      statusText = "Runtime setup needed";
-      statusIcon = Icons.download_outlined;
-    }
+    final l10n = AppLocalizations.of(context);
     return Card(
       color: colors.surfaceContainerHighest,
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Row(
           children: [
-            Icon(statusIcon, color: colors.primary),
+            Icon(Icons.folder_open, color: colors.primary),
             const SizedBox(width: 12),
             Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(statusText,
-                      style: Theme.of(context).textTheme.titleSmall),
-                  const SizedBox(height: 4),
-                  Text(
-                    "$projectCount project${projectCount == 1 ? "" : "s"}",
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: colors.onSurfaceVariant,
-                        ),
-                  ),
-                ],
+              child: Text(
+                l10n.projectsCount(projectCount),
+                style: Theme.of(context).textTheme.titleSmall,
               ),
             ),
           ],
@@ -397,44 +406,46 @@ class _HubActions extends StatelessWidget {
   final VoidCallback? onDelete;
 
   @override
+  @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return GridView.count(
       crossAxisCount: 2,
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       mainAxisSpacing: 8,
       crossAxisSpacing: 8,
-      childAspectRatio: 1.6,
+      childAspectRatio: 1.45,
       children: [
         _ActionTile(
           colors: colors,
           icon: Icons.create_new_folder,
-          label: "New project",
-          hint: "Start from a template",
+          label: l10n.projectsNewProject,
+          hint: l10n.projectsHintTemplate,
           enabled: !busy,
           onTap: onNewProject,
         ),
         _ActionTile(
           colors: colors,
           icon: Icons.code,
-          label: "Open editor",
-          hint: "Continue working",
+          label: l10n.projectsOpenEditor,
+          hint: l10n.projectsHintContinue,
           enabled: canOpenEditor && !busy,
           onTap: onOpenEditor,
         ),
         _ActionTile(
           colors: colors,
           icon: Icons.refresh,
-          label: "Refresh",
-          hint: "Reload project list",
+          label: l10n.actionRefresh,
+          hint: l10n.projectsHintReload,
           enabled: !busy,
           onTap: onRefresh,
         ),
         _ActionTile(
           colors: colors,
           icon: Icons.delete_outline,
-          label: "Delete project",
-          hint: "Remove active project",
+          label: l10n.projectsDeleteProject,
+          hint: l10n.projectsHintRemoveActive,
           enabled: canOpenEditor && !busy,
           onTap: onDelete,
         ),
@@ -473,17 +484,24 @@ class _ActionTile extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(icon,
-                  color: enabled
-                      ? colors.primary
-                      : colors.onSurfaceVariant),
-              const SizedBox(height: 8),
-              Text(label, style: Theme.of(context).textTheme.titleSmall),
+              Icon(
+                icon,
+                size: 22,
+                color: enabled ? colors.primary : colors.onSurfaceVariant,
+              ),
+              const SizedBox(height: 6),
+              Text(
+                label,
+                style: Theme.of(context).textTheme.titleSmall,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
               Text(
                 hint,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: colors.onSurfaceVariant,
-                    ),
+                style: Theme.of(context).textTheme.bodySmall
+                    ?.copyWith(color: colors.onSurfaceVariant),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
             ],
           ),
@@ -507,6 +525,7 @@ class _LanguageChips extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final languages = <String>[];
     for (final p in projects) {
       final language = p.language;
@@ -520,7 +539,7 @@ class _LanguageChips extends StatelessWidget {
       spacing: 8,
       children: [
         ChoiceChip(
-          label: Text("All (${projects.length})"),
+          label: Text(l10n.projectsFilterAll(projects.length)),
           selected: selected == null,
           onSelected: (_) => onSelected(null),
         ),
@@ -560,9 +579,11 @@ class _ProjectCard extends StatelessWidget {
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(project.path,
-                overflow: TextOverflow.ellipsis,
-                style: Theme.of(context).textTheme.bodySmall),
+            Text(
+              project.path,
+              overflow: TextOverflow.ellipsis,
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
             if (project.language != null && project.language!.isNotEmpty)
               Padding(
                 padding: const EdgeInsets.only(top: 4),
@@ -575,7 +596,7 @@ class _ProjectCard extends StatelessWidget {
         ),
         trailing: IconButton(
           icon: const Icon(Icons.delete_outline),
-          tooltip: "Delete project",
+          tooltip: AppLocalizations.of(context).projectsDeleteProject,
           onPressed: onDelete,
         ),
         onTap: onOpen,
@@ -597,16 +618,17 @@ class _EmptyProjects extends StatelessWidget {
         padding: const EdgeInsets.all(24),
         child: Column(
           children: [
-            Icon(Icons.folder_open,
-                size: 48, color: colors.onSurfaceVariant),
+            Icon(Icons.folder_open, size: 48, color: colors.onSurfaceVariant),
             const SizedBox(height: 12),
-            Text("No projects yet",
-                style: Theme.of(context).textTheme.titleMedium),
+            Text(
+              AppLocalizations.of(context).projectsEmptyTitle,
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
             const SizedBox(height: 12),
             FilledButton.icon(
               onPressed: onNewProject,
               icon: const Icon(Icons.create_new_folder),
-              label: const Text("New project"),
+              label: Text(AppLocalizations.of(context).projectsNewProject),
             ),
           ],
         ),
@@ -633,22 +655,147 @@ class _TipsCard extends StatelessWidget {
               children: [
                 Icon(Icons.lightbulb_outline, color: colors.primary),
                 const SizedBox(width: 8),
-                Text("Tips",
-                    style: Theme.of(context).textTheme.titleSmall),
+                Text(
+                  AppLocalizations.of(context).projectsTipsTitle,
+                  style: Theme.of(context).textTheme.titleSmall,
+                ),
               ],
             ),
             const SizedBox(height: 8),
             Text(
-              "Tap a project to open it in the editor. "
-              "Use the Packages tab to install runtimes before "
-              "creating Node or Python projects.",
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: colors.onSurfaceVariant,
-                  ),
+              AppLocalizations.of(context).projectsTipsBody,
+              style: Theme.of(context).textTheme.bodySmall
+                  ?.copyWith(color: colors.onSurfaceVariant),
             ),
           ],
         ),
       ),
     );
   }
+}
+
+/// Recent-files card below recent projects. Same card language:
+/// surfaceContainer, 12px radius, 1px outlineVariant border.
+/// Hidden entirely when the list is empty.
+class _RecentFilesCard extends StatelessWidget {
+  const _RecentFilesCard({
+    required this.colors,
+    required this.files,
+    required this.onOpen,
+  });
+
+  final ColorScheme colors;
+  final List<String> files;
+  final ValueChanged<String> onOpen;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      color: colors.surfaceContainer,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: colors.outlineVariant, width: 1),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          for (var i = 0; i < files.length; i++) ...[
+            if (i > 0) Divider(height: 1, color: colors.outlineVariant),
+            ListTile(
+              leading: Icon(_iconForPath(files[i]), color: colors.primary),
+              title: Directionality(
+                textDirection: TextDirection.ltr,
+                child: Text(
+                  _fileName(files[i]),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              subtitle: Directionality(
+                textDirection: TextDirection.ltr,
+                child: Text(
+                  _parentDir(files[i]),
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.bodySmall
+                      ?.copyWith(color: colors.onSurfaceVariant),
+                ),
+              ),
+              onTap: () => onOpen(files[i]),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+IconData _iconForPath(String path) {
+  final slash = path.lastIndexOf("/");
+  final backslash = path.lastIndexOf("\\");
+  final sep = slash > backslash ? slash : backslash;
+  final dot = path.lastIndexOf(".");
+  if (dot < 0 || dot < sep || dot == path.length - 1) {
+    return Icons.description_outlined;
+  }
+  switch (path.substring(dot + 1).toLowerCase()) {
+    case "dart":
+    case "java":
+    case "kt":
+    case "kts":
+    case "swift":
+    case "py":
+    case "js":
+    case "ts":
+    case "jsx":
+    case "tsx":
+    case "php":
+    case "rb":
+    case "go":
+    case "rs":
+    case "c":
+    case "h":
+    case "cpp":
+    case "cs":
+      return Icons.code;
+    case "md":
+    case "markdown":
+    case "mdown":
+    case "txt":
+      return Icons.article_outlined;
+    case "json":
+    case "yaml":
+    case "yml":
+    case "xml":
+      return Icons.data_object;
+    case "png":
+    case "jpg":
+    case "jpeg":
+    case "gif":
+    case "webp":
+    case "svg":
+      return Icons.image_outlined;
+    case "pdf":
+      return Icons.picture_as_pdf_outlined;
+    case "zip":
+    case "tar":
+    case "gz":
+    case "deb":
+    case "apk":
+      return Icons.archive_outlined;
+    default:
+      return Icons.description_outlined;
+  }
+}
+
+String _fileName(String path) {
+  final slash = path.lastIndexOf("/");
+  final backslash = path.lastIndexOf("\\");
+  final sep = slash > backslash ? slash : backslash;
+  return sep < 0 ? path : path.substring(sep + 1);
+}
+
+String _parentDir(String path) {
+  final slash = path.lastIndexOf("/");
+  final backslash = path.lastIndexOf("\\");
+  final sep = slash > backslash ? slash : backslash;
+  return sep <= 0 ? path : path.substring(0, sep);
 }

@@ -46,17 +46,16 @@ void _registerTerminalApis(
   final codec = bridge.TerminalApi.pigeonChannelCodec;
   _mockPigeonChannel(
     messenger: messenger,
-    channelName:
-        'dev.flutter.pigeon.nova.TerminalApi.createSession',
+    channelName: 'dev.flutter.pigeon.codeide.TerminalApi.createSession',
     codec: codec,
     log: log,
     replyFor: (args) => <Object?>['abc'],
   );
   for (final name in <String>[
-    'dev.flutter.pigeon.nova.TerminalApi.write',
-    'dev.flutter.pigeon.nova.TerminalApi.resize',
-    'dev.flutter.pigeon.nova.TerminalApi.close',
-    'dev.flutter.pigeon.nova.TerminalApi.sendSignal',
+    'dev.flutter.pigeon.codeide.TerminalApi.write',
+    'dev.flutter.pigeon.codeide.TerminalApi.resize',
+    'dev.flutter.pigeon.codeide.TerminalApi.close',
+    'dev.flutter.pigeon.codeide.TerminalApi.sendSignal',
   ]) {
     _mockPigeonChannel(
       messenger: messenger,
@@ -74,21 +73,27 @@ void main() {
   });
 
   group('TerminalService channels', () {
-    test('createSession routes to TerminalApi.createSession and returns id',
-        () async {
-      final messenger =
-          TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
-      final log = <_RecordedCall>[];
-      _registerTerminalApis(messenger, log);
+    test(
+      'createSession routes to TerminalApi.createSession and returns id',
+      () async {
+        final messenger =
+            TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
+        final log = <_RecordedCall>[];
+        _registerTerminalApis(messenger, log);
 
-      final sessionId = await NativeBridge.terminal.createSession('/a', 80, 24);
+        final sessionId = await NativeBridge.terminal.createSession(
+          '/a',
+          80,
+          24,
+        );
 
-      expect(log, hasLength(1));
-      final call = log.single;
-      expect(call.channel.endsWith('TerminalApi.createSession'), isTrue);
-      expect(call.args, ['/a', 80, 24]);
-      expect(sessionId, 'abc');
-    });
+        expect(log, hasLength(1));
+        final call = log.single;
+        expect(call.channel.endsWith('TerminalApi.createSession'), isTrue);
+        expect(call.args, ['/a', 80, 24]);
+        expect(sessionId, 'abc');
+      },
+    );
 
     test('write routes sessionId + data to TerminalApi.write', () async {
       final messenger =
@@ -109,10 +114,10 @@ void main() {
     void emitEvent(Map<String, Object?> payload) {
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
           .handlePlatformMessage(
-        AppConfig.eventsChannel,
-        const StandardMethodCodec().encodeSuccessEnvelope(payload),
-        (ByteData? reply) {},
-      );
+            AppConfig.eventsChannel,
+            const StandardMethodCodec().encodeSuccessEnvelope(payload),
+            (ByteData? reply) {},
+          );
     }
 
     test('outputStream decodes base64 payloads', () async {
@@ -149,23 +154,25 @@ void main() {
       expect(received, isEmpty);
     });
 
-    test('outputStream falls back to raw text when data is not base64',
-        () async {
-      final service = TerminalService();
-      final received = <TerminalOutput>[];
-      final sub = service.outputStream.listen(received.add);
-      addTearDown(sub.cancel);
-      await pumpEventQueue();
+    test(
+      'outputStream falls back to raw text when data is not base64',
+      () async {
+        final service = TerminalService();
+        final received = <TerminalOutput>[];
+        final sub = service.outputStream.listen(received.add);
+        addTearDown(sub.cancel);
+        await pumpEventQueue();
 
-      emitEvent({
-        'event': 'terminalOutput',
-        'sessionId': 's1',
-        'data': 'plain text, not base64',
-      });
-      await pumpEventQueue();
+        emitEvent({
+          'event': 'terminalOutput',
+          'sessionId': 's1',
+          'data': 'plain text, not base64',
+        });
+        await pumpEventQueue();
 
-      expect(received.single.data, 'plain text, not base64');
-    });
+        expect(received.single.data, 'plain text, not base64');
+      },
+    );
 
     test('exitStream decodes terminalExit with exit code', () async {
       final service = TerminalService();

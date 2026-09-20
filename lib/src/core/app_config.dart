@@ -9,7 +9,7 @@ abstract final class AppConfig {
   static const int stdinLimit = 45000;
 
   /// Kotlin -> Flutter event stream channel.
-  static const String eventsChannel = 'sd.adaa.nova/events';
+  static const String eventsChannel = 'sd.adaa.codeide/events';
 
   /// File extension -> interpreter binary.
   static const Map<String, String> languageCommands = {

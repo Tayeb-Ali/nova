@@ -29,7 +29,8 @@ void main() {
   });
 
   group("markdown round-trip", () {
-    const sample = "# Title\n\nHello **bold** and *italic*.\n\n"
+    const sample =
+        "# Title\n\nHello **bold** and *italic*.\n\n"
         "- one\n- two\n\n"
         "> quote\n\n"
         "```dart\nvoid main() {}\n```\n";

@@ -2,6 +2,7 @@ import "package:flutter/material.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 
 import "l10n/generated/app_localizations.dart";
+import "src/core/services/setup_service.dart";
 import "src/core/settings_store.dart";
 import "src/features/editor/theme/app_theme.dart";
 import "src/features/editor/theme/theme_pack_store.dart";
@@ -10,15 +11,13 @@ import "src/features/settings/settings_screen.dart";
 import "src/features/workspace/projects_hub_screen.dart";
 import "src/features/workspace/workspace_screen.dart";
 
-/// Nova IDE root widget (task.md §1 §35).
 class NovaApp extends ConsumerWidget {
   const NovaApp({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final settings = ref.watch(settingsStoreProvider);
-    // Rebuild app themes when packs change; the whole app follows the
-    // editor colors while follow-mode is on.
+    
     ref.watch(editorThemeStoreProvider);
     final themeStore = ref.read(editorThemeStoreProvider.notifier);
     final follow = settings.followEditorTheme;
@@ -52,10 +51,56 @@ class IdeShell extends StatefulWidget {
 
 class _IdeShellState extends State<IdeShell> {
   int _index = 0;
+  bool _bootstrapPromptShown = false;
 
   void _selectNav(int nav) => setState(() => _index = nav);
 
   void _openEditor() => setState(() => _index = 1);
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _checkBootstrap());
+  }
+
+  Future<void> _checkBootstrap() async {
+    if (_bootstrapPromptShown) return;
+    _bootstrapPromptShown = true;
+    bool missing = false;
+    try {
+      final status = await SetupService().getStatus();
+      missing = !status.ready;
+    } catch (_) {
+      return;
+    }
+    if (!missing || !mounted) return;
+    final l10n = AppLocalizations.of(context);
+    final download = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.bootstrapRequired),
+        content: Text(l10n.bootstrapRequiredBody),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text(l10n.actionLater),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: Text(l10n.actionDownload),
+          ),
+        ],
+      ),
+    );
+    if (download != true || !mounted) return;
+    _selectNav(2);
+    try {
+      await SetupService().startSetup();
+    } catch (_) {
+      //nothing to do.
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -66,22 +111,24 @@ class _IdeShellState extends State<IdeShell> {
       const SettingsScreen(),
     ];
     final body = SafeArea(child: IndexedStack(index: _index, children: screens));
-    const destinations = [
+    // Nav labels only: localized via existing keys.
+    final l10n = AppLocalizations.of(context);
+    final destinations = [
       NavigationDestination(
         icon: Icon(Icons.folder_open),
-        label: "Projects",
+        label: l10n.navProjects,
       ),
       NavigationDestination(
         icon: Icon(Icons.code),
-        label: "Editor",
+        label: l10n.navEditor,
       ),
       NavigationDestination(
         icon: Icon(Icons.inventory_2),
-        label: "Packages",
+        label: l10n.navPackagesSdk,
       ),
       NavigationDestination(
         icon: Icon(Icons.tune),
-        label: "Settings",
+        label: l10n.navSettings,
       ),
     ];
     // Wide screens (tablet/landscape/desktop): side rail instead of bottom bar.
@@ -93,22 +140,22 @@ class _IdeShellState extends State<IdeShell> {
               selectedIndex: _index,
               onDestinationSelected: _selectNav,
               labelType: NavigationRailLabelType.all,
-              destinations: const [
+              destinations: [
                 NavigationRailDestination(
                   icon: Icon(Icons.folder_open),
-                  label: Text("Projects"),
+                  label: Text(l10n.navProjects),
                 ),
                 NavigationRailDestination(
                   icon: Icon(Icons.code),
-                  label: Text("Editor"),
+                  label: Text(l10n.navEditor),
                 ),
                 NavigationRailDestination(
                   icon: Icon(Icons.inventory_2),
-                  label: Text("Packages"),
+                  label: Text(l10n.navPackagesSdk),
                 ),
                 NavigationRailDestination(
                   icon: Icon(Icons.tune),
-                  label: Text("Settings"),
+                  label: Text(l10n.navSettings),
                 ),
               ],
             ),

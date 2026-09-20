@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:nova/l10n/generated/app_localizations.dart';
 
 import '../../core/bridge/events_bus.dart';
 import '../../core/bridge/generated/ide_api.g.dart' as bridge;
@@ -93,7 +94,9 @@ class _RuntimeScreenState extends State<RuntimeScreen> {
         if (!mounted) return;
         setState(() {
           _setupRunning = false;
-          _setupError = raw['error'] as String? ?? 'Setup failed';
+          _setupError =
+              raw['error'] as String? ??
+              AppLocalizations.of(context).runtimeSetupFailed;
         });
         break;
       case 'runtimeProgress':
@@ -135,7 +138,10 @@ class _RuntimeScreenState extends State<RuntimeScreen> {
   void _parseProgress(String line) {
     // Parse apt output for percentage like "12%" or "[12%]" and download rate like "1.2 MB/s"
     final RegExp percentReg = RegExp(r'(\d{1,3})\s*%');
-    final RegExp rateReg = RegExp(r'(\d+(?:\.\d+)?\s*(?:B|kB|KB|MB|GB)/s)', caseSensitive: false);
+    final RegExp rateReg = RegExp(
+      r'(\d+(?:\.\d+)?\s*(?:B|kB|KB|MB|GB)/s)',
+      caseSensitive: false,
+    );
     final RegExp statusReg = RegExp(
       r'(Get:|Hit:|Ign|Reading|Building|Unpacking|Setting up|Preparing|Selecting|Fetched)',
       caseSensitive: false,
@@ -213,7 +219,10 @@ class _RuntimeScreenState extends State<RuntimeScreen> {
           backgroundColor: Theme.of(context).colorScheme.error,
           behavior: SnackBarBehavior.floating,
           duration: const Duration(seconds: 4),
-          action: SnackBarAction(label: 'إعادة المحاولة', onPressed: () => _install(id ?? '')),
+          action: SnackBarAction(
+            label: AppLocalizations.of(context).actionRetry,
+            onPressed: () => _install(id ?? ''),
+          ),
         ),
       );
     }
@@ -372,11 +381,11 @@ class _RuntimeScreenState extends State<RuntimeScreen> {
     final bool? ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        title: Text(AppLocalizations.of(ctx).actionUninstall),
+        content: Text(
+          AppLocalizations.of(ctx).runtimeUninstallConfirm(runtime.displayName),
         ),
-        title: const Text('Uninstall'),
-        content: Text('Uninstall ${runtime.displayName}?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
@@ -385,7 +394,7 @@ class _RuntimeScreenState extends State<RuntimeScreen> {
                 borderRadius: BorderRadius.circular(4),
               ),
             ),
-            child: const Text('Cancel'),
+            child: Text(AppLocalizations.of(ctx).actionCancel),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(ctx, true),
@@ -394,7 +403,7 @@ class _RuntimeScreenState extends State<RuntimeScreen> {
                 borderRadius: BorderRadius.circular(4),
               ),
             ),
-            child: const Text('Uninstall'),
+            child: Text(AppLocalizations.of(ctx).actionUninstall),
           ),
         ],
       ),
@@ -411,7 +420,10 @@ class _RuntimeScreenState extends State<RuntimeScreen> {
     });
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('إزالة ${runtime.displayName}...'), behavior: SnackBarBehavior.floating),
+      SnackBar(
+        content: Text('إزالة ${runtime.displayName}...'),
+        behavior: SnackBarBehavior.floating,
+      ),
     );
     try {
       await _runtimeService.uninstall(runtime.id);
@@ -444,7 +456,7 @@ class _RuntimeScreenState extends State<RuntimeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Runtime')),
+      appBar: AppBar(title: Text(AppLocalizations.of(context).runtimeTitle)),
       body: RefreshIndicator(
         onRefresh: _refreshAll,
         child: ListView(
@@ -454,11 +466,11 @@ class _RuntimeScreenState extends State<RuntimeScreen> {
             const SizedBox(height: 8),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 4),
-              child: Text('Runtimes',
-                  style: Theme.of(context)
-                      .textTheme
-                      .titleSmall
-                      ?.copyWith(fontWeight: FontWeight.bold)),
+              child: Text(
+                AppLocalizations.of(context).runtimeTitle,
+                style: Theme.of(context).textTheme.titleSmall
+                    ?.copyWith(fontWeight: FontWeight.bold),
+              ),
             ),
             const SizedBox(height: 8),
             _buildRuntimes(),
@@ -490,24 +502,20 @@ class _RuntimeScreenState extends State<RuntimeScreen> {
               children: [
                 Expanded(
                   child: Text(
-                    'Bootstrap',
-                    style: Theme.of(context)
-                        .textTheme
-                        .titleSmall
+                    AppLocalizations.of(context).runtimeBootstrap,
+                    style: Theme.of(context).textTheme.titleSmall
                         ?.copyWith(fontWeight: FontWeight.bold),
                   ),
                 ),
                 if (ready)
                   Chip(
-                    avatar: Icon(Icons.check,
-                        size: 16, color: scheme.tertiary),
-                    label: const Text('Ready'),
+                    avatar: Icon(Icons.check, size: 16, color: scheme.tertiary),
+                    label: Text(AppLocalizations.of(context).runtimeReady),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(4),
                     ),
                     backgroundColor: scheme.tertiaryContainer,
-                    labelStyle:
-                        TextStyle(color: scheme.onTertiaryContainer),
+                    labelStyle: TextStyle(color: scheme.onTertiaryContainer),
                     visualDensity: VisualDensity.compact,
                     padding: const EdgeInsets.all(4),
                   ),
@@ -517,14 +525,12 @@ class _RuntimeScreenState extends State<RuntimeScreen> {
             if (_loadingSetup)
               const LinearProgressIndicator()
             else if (ready)
-              Text(
-                'Bootstrap v${_setupStatus?.bootstrapVersion ?? '?'} is ready. '
-                'Runtimes can be installed below.',
-              )
+              // Ready chip above says it all; keep one short line, no hash.
+              Text(AppLocalizations.of(context).runtimeBootstrapReady)
             else if (_setupStatus == null)
-              const Text('Bootstrap state unavailable.')
+              Text(AppLocalizations.of(context).runtimeBootstrapUnavailable)
             else
-              const Text('Bootstrap is not installed yet.'),
+              Text(AppLocalizations.of(context).runtimeBootstrapNotInstalled),
             if (_setupRunning) ...[
               const SizedBox(height: 8),
               LinearProgressIndicator(value: _setupFraction),
@@ -533,16 +539,16 @@ class _RuntimeScreenState extends State<RuntimeScreen> {
                 Text(
                   '$_setupPhase  ${(_setupFraction * 100).round()}%',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        fontFamily: 'monospace',
-                        color: scheme.onSurfaceVariant,
-                      ),
+                    fontFamily: 'monospace',
+                    color: scheme.onSurfaceVariant,
+                  ),
                 ),
               ],
             ],
             if (_setupError != null) ...[
               const SizedBox(height: 8),
               Text(
-                'Error: $_setupError',
+                AppLocalizations.of(context).commonError('$_setupError'),
                 style: TextStyle(color: Theme.of(context).colorScheme.error),
               ),
             ],
@@ -555,11 +561,13 @@ class _RuntimeScreenState extends State<RuntimeScreen> {
                     borderRadius: BorderRadius.circular(4),
                   ),
                   padding: const EdgeInsets.symmetric(
-                      horizontal: 8, vertical: 4),
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
                   visualDensity: VisualDensity.compact,
                 ),
                 icon: const Icon(Icons.build, size: 18),
-                label: const Text('Start setup'),
+                label: Text(AppLocalizations.of(context).runtimeStartSetup),
               ),
             ],
           ],
@@ -577,12 +585,12 @@ class _RuntimeScreenState extends State<RuntimeScreen> {
     }
     if (_runtimesError != null) {
       return Text(
-        'Failed to load runtimes: $_runtimesError',
+        AppLocalizations.of(context).commonError('$_runtimesError'),
         style: TextStyle(color: Theme.of(context).colorScheme.error),
       );
     }
     if (_runtimes.isEmpty) {
-      return const Text('No runtimes available.');
+      return Text(AppLocalizations.of(context).runtimeEmpty);
     }
     return Column(
       children: [for (final RuntimeInfo r in _runtimes) _buildRuntimeTile(r)],
@@ -610,29 +618,25 @@ class _RuntimeScreenState extends State<RuntimeScreen> {
                 Expanded(
                   child: Text(
                     runtime.displayName,
-                    style: Theme.of(context)
-                        .textTheme
-                        .titleSmall
+                    style: Theme.of(context).textTheme.titleSmall
                         ?.copyWith(fontWeight: FontWeight.bold),
                   ),
                 ),
                 if (runtime.installed)
                   Chip(
-                    avatar: Icon(Icons.check,
-                        size: 16, color: scheme.tertiary),
-                    label: const Text('Installed'),
+                    avatar: Icon(Icons.check, size: 16, color: scheme.tertiary),
+                    label: Text(AppLocalizations.of(context).runtimeInstalled),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(4),
                     ),
                     backgroundColor: scheme.tertiaryContainer,
-                    labelStyle:
-                        TextStyle(color: scheme.onTertiaryContainer),
+                    labelStyle: TextStyle(color: scheme.onTertiaryContainer),
                     visualDensity: VisualDensity.compact,
                     padding: const EdgeInsets.all(4),
                   )
                 else
                   Chip(
-                    label: const Text('Available'),
+                    label: Text(AppLocalizations.of(context).runtimeAvailable),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(4),
                     ),
@@ -644,11 +648,12 @@ class _RuntimeScreenState extends State<RuntimeScreen> {
             ),
             const SizedBox(height: 4),
             Text(
-              'Version: ${runtime.version ?? '—'}',
+              AppLocalizations.of(context)
+                  .runtimeVersion(runtime.version ?? '—'),
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    fontFamily: 'monospace',
-                    color: scheme.onSurfaceVariant,
-                  ),
+                fontFamily: 'monospace',
+                color: scheme.onSurfaceVariant,
+              ),
             ),
             if (isActive) ...[
               const SizedBox(height: 8),
@@ -664,7 +669,8 @@ class _RuntimeScreenState extends State<RuntimeScreen> {
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      _runtimeStatus ?? 'جاري العمل على ${runtime.displayName}...',
+                      _runtimeStatus ??
+                          'جاري العمل على ${runtime.displayName}...',
                       style: Theme.of(context).textTheme.bodySmall,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -672,13 +678,21 @@ class _RuntimeScreenState extends State<RuntimeScreen> {
                   if (_runtimeFraction != null)
                     Text(
                       '${(_runtimeFraction! * 100).round()}%',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold),
+                      style: Theme.of(context).textTheme.bodySmall
+                          ?.copyWith(fontWeight: FontWeight.bold),
                     ),
                   if (_downloadRate != null) ...[
                     const SizedBox(width: 8),
-                    Icon(Icons.download, size: 14, color: Theme.of(context).colorScheme.primary),
+                    Icon(
+                      Icons.download,
+                      size: 14,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
                     const SizedBox(width: 2),
-                    Text(_downloadRate!, style: Theme.of(context).textTheme.bodySmall),
+                    Text(
+                      _downloadRate!,
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
                   ],
                 ],
               ),
@@ -693,11 +707,13 @@ class _RuntimeScreenState extends State<RuntimeScreen> {
                           borderRadius: BorderRadius.circular(4),
                         ),
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 4),
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
                         visualDensity: VisualDensity.compact,
                       ),
                       icon: const Icon(Icons.update, size: 18),
-                      label: const Text('Update'),
+                      label: Text(AppLocalizations.of(context).actionUpdate),
                     ),
                     const SizedBox(width: 8),
                     OutlinedButton.icon(
@@ -709,27 +725,29 @@ class _RuntimeScreenState extends State<RuntimeScreen> {
                           borderRadius: BorderRadius.circular(4),
                         ),
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 4),
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
                         visualDensity: VisualDensity.compact,
                       ),
                       icon: const Icon(Icons.delete_outline, size: 18),
-                      label: const Text('Uninstall'),
+                      label: Text(AppLocalizations.of(context).actionUninstall),
                     ),
                   ] else
                     FilledButton.icon(
-                      onPressed: _busy
-                          ? null
-                          : () => _install(runtime.id),
+                      onPressed: _busy ? null : () => _install(runtime.id),
                       style: FilledButton.styleFrom(
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(4),
                         ),
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 4),
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
                         visualDensity: VisualDensity.compact,
                       ),
                       icon: const Icon(Icons.download, size: 18),
-                      label: const Text('Install'),
+                      label: Text(AppLocalizations.of(context).actionInstall),
                     ),
                 ],
               ),
@@ -751,8 +769,7 @@ class _RuntimeScreenState extends State<RuntimeScreen> {
       color: Theme.of(context).colorScheme.surfaceContainer,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(
-            color: Theme.of(context).colorScheme.outlineVariant),
+        side: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
       ),
       margin: EdgeInsets.zero,
       child: Padding(
@@ -763,9 +780,15 @@ class _RuntimeScreenState extends State<RuntimeScreen> {
             Row(
               children: [
                 Icon(
-                  hasActive ? Icons.downloading : hasError ? Icons.error_outline : Icons.terminal,
+                  hasActive
+                      ? Icons.downloading
+                      : hasError
+                      ? Icons.error_outline
+                      : Icons.terminal,
                   size: 18,
-                  color: hasError ? Theme.of(context).colorScheme.error : Theme.of(context).colorScheme.primary,
+                  color: hasError
+                      ? Theme.of(context).colorScheme.error
+                      : Theme.of(context).colorScheme.primary,
                 ),
                 const SizedBox(width: 8),
                 Expanded(
@@ -773,21 +796,23 @@ class _RuntimeScreenState extends State<RuntimeScreen> {
                     hasActive
                         ? 'جاري تنفيذ: $_activeName'
                         : hasError
-                            ? 'آخر عملية: $_activeName'
-                            : 'سجل العمليات',
-                    style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+                        ? 'آخر عملية: $_activeName'
+                        : 'سجل العمليات',
+                    style: Theme.of(context).textTheme.titleSmall
+                        ?.copyWith(fontWeight: FontWeight.bold),
                   ),
                 ),
                 if (hasActive && _runtimeFraction != null)
                   Container(
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 8, vertical: 4),
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: Theme.of(context).colorScheme.primaryContainer,
                       border: Border.all(
-                          color: Theme.of(context)
-                              .colorScheme
-                              .outlineVariant),
+                        color: Theme.of(context).colorScheme.outlineVariant,
+                      ),
                       borderRadius: BorderRadius.circular(4),
                     ),
                     child: Text(
@@ -802,16 +827,15 @@ class _RuntimeScreenState extends State<RuntimeScreen> {
                 if (hasActive && _downloadRate != null) ...[
                   const SizedBox(width: 8),
                   Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
-                      color: Theme.of(context)
-                          .colorScheme
-                          .secondaryContainer,
+                      color: Theme.of(context).colorScheme.secondaryContainer,
                       border: Border.all(
-                          color: Theme.of(context)
-                              .colorScheme
-                              .outlineVariant),
+                        color: Theme.of(context).colorScheme.outlineVariant,
+                      ),
                       borderRadius: BorderRadius.circular(4),
                     ),
                     child: Row(
@@ -819,7 +843,13 @@ class _RuntimeScreenState extends State<RuntimeScreen> {
                       children: [
                         const Icon(Icons.speed, size: 12),
                         const SizedBox(width: 4),
-                        Text(_downloadRate!, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600)),
+                        Text(
+                          _downloadRate!,
+                          style: const TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -834,9 +864,9 @@ class _RuntimeScreenState extends State<RuntimeScreen> {
                 Text(
                   _runtimeStatus!,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        fontStyle: FontStyle.italic,
-                      ),
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    fontStyle: FontStyle.italic,
+                  ),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -850,18 +880,25 @@ class _RuntimeScreenState extends State<RuntimeScreen> {
                 decoration: BoxDecoration(
                   color: Theme.of(context).colorScheme.errorContainer,
                   border: Border.all(
-                      color:
-                          Theme.of(context).colorScheme.outlineVariant),
+                    color: Theme.of(context).colorScheme.outlineVariant,
+                  ),
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: Row(
                   children: [
-                    Icon(Icons.error, size: 16, color: Theme.of(context).colorScheme.error),
+                    Icon(
+                      Icons.error,
+                      size: 16,
+                      color: Theme.of(context).colorScheme.error,
+                    ),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
                         'خطأ: $_runtimeError',
-                        style: TextStyle(color: Theme.of(context).colorScheme.onErrorContainer, fontSize: 13),
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.onErrorContainer,
+                          fontSize: 13,
+                        ),
                       ),
                     ),
                   ],
@@ -876,7 +913,9 @@ class _RuntimeScreenState extends State<RuntimeScreen> {
                 decoration: BoxDecoration(
                   color: Theme.of(context).colorScheme.surfaceContainerHighest,
                   borderRadius: BorderRadius.circular(4),
-                  border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
+                  border: Border.all(
+                    color: Theme.of(context).colorScheme.outlineVariant,
+                  ),
                 ),
                 child: Scrollbar(
                   controller: _logScrollController,
@@ -886,8 +925,12 @@ class _RuntimeScreenState extends State<RuntimeScreen> {
                     itemCount: _progressLog.length,
                     itemBuilder: (context, i) {
                       final String line = _progressLog[i];
-                      final bool isError = line.toLowerCase().contains('error') || line.toLowerCase().contains('failed');
-                      final bool isSuccess = line.toLowerCase().contains('setting up') || line.toLowerCase().contains('done');
+                      final bool isError =
+                          line.toLowerCase().contains('error') ||
+                          line.toLowerCase().contains('failed');
+                      final bool isSuccess =
+                          line.toLowerCase().contains('setting up') ||
+                          line.toLowerCase().contains('done');
                       return Padding(
                         padding: const EdgeInsets.only(bottom: 3),
                         child: Row(
@@ -904,16 +947,17 @@ class _RuntimeScreenState extends State<RuntimeScreen> {
                             Expanded(
                               child: Text(
                                 line,
-                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                style: Theme.of(context).textTheme.bodySmall
+                                    ?.copyWith(
                                       fontFamily: 'monospace',
                                       fontSize: 11.5,
                                       color: isError
                                           ? Theme.of(context).colorScheme.error
                                           : isSuccess
-                                              ? Theme.of(context)
-                                                  .colorScheme
-                                                  .tertiary
-                                              : null,
+                                          ? Theme.of(context)
+                                                .colorScheme
+                                                .tertiary
+                                          : null,
                                     ),
                               ),
                             ),
@@ -930,14 +974,18 @@ class _RuntimeScreenState extends State<RuntimeScreen> {
                 children: [
                   Text(
                     '${_progressLog.length} سطر',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.outline),
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Theme.of(context).colorScheme.outline,
+                    ),
                   ),
                   const Spacer(),
                   TextButton.icon(
                     onPressed: () => setState(() => _progressLog.clear()),
                     icon: const Icon(Icons.clear_all, size: 14),
                     label: const Text('مسح', style: TextStyle(fontSize: 12)),
-                    style: TextButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 8)),
+                    style: TextButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                    ),
                   ),
                 ],
               ),

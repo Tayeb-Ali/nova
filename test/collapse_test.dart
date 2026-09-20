@@ -36,7 +36,9 @@ void main() {
     SharedPreferences.setMockInitialValues({});
   });
 
-  testWidgets('run panel collapsed does not overflow', (WidgetTester tester) async {
+  testWidgets('run panel collapsed does not overflow', (
+    WidgetTester tester,
+  ) async {
     tester.view.physicalSize = const Size(360, 800);
     tester.view.devicePixelRatio = 1.0;
     addTearDown(() => tester.view.resetPhysicalSize());
