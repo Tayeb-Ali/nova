@@ -49,3 +49,7 @@ app.*.map.json
 
 #docs and examples
 /docs
+
+# Project-scoped agent skills (installed via `npx skills add`, see skills-lock.json)
+.agents/
+skills-lock.json
