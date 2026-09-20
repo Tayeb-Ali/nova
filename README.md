@@ -8,6 +8,11 @@
 ![State](https://img.shields.io/badge/State-Riverpod-FF6B6B)
 ![Tests](https://img.shields.io/badge/Tests-22_passing-success)
 [![License: Waqf-1.0](https://img.shields.io/badge/License-Waqf--1.0-green)](LICENSE)
+[![Google Play](https://img.shields.io/badge/Google_Play-Download-414D0B?logo=google-play&logoColor=white)](https://play.google.com/store/apps/details?id=sd.adaa.codeide)
+
+<a href="https://play.google.com/store/apps/details?id=sd.adaa.codeide">
+  <img alt="احصل عليه على Google Play" src="https://play.google.com/intl/en_us/badges/static/images/badges/ar_badge_web_generic.png" height="70"/>
+</a>
 
 > **نوفا** محرر كود يشتغل على موبايلك الأندرويد، ويشغّل الكود **فعليًا** على الجهاز نفسه — بايثون، جافاسكربت، PHP — مع تيرمينال حقيقي، Git، ومعاينة ويب. لا سيرفر خارجي، لا محاكاة: تكتب، تضغط تشغيل، وتشوف النتيجة.
 
@@ -175,6 +180,8 @@ nova/
 ---
 
 ## التثبيت والتشغيل
+
+> **مستخدم عادي؟** ثبّت التطبيق مباشرة من [Google Play](https://play.google.com/store/apps/details?id=sd.adaa.codeide) — ما تحتاجه من خطوات تحت مخصّص للمطوّرين.
 
 ### المتطلبات
 

@@ -114,7 +114,7 @@ class _RunPanelState extends ConsumerState<RunPanel> {
     return Material(
       color: scheme.surfaceContainerLow,
       child: SizedBox(
-        height: _consoleVisible ? 220 : 40,
+        height: _consoleVisible ? 220 : 60,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
