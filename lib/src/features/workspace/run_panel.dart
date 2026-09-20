@@ -18,6 +18,7 @@ class RunPanel extends ConsumerStatefulWidget {
 class _RunPanelState extends ConsumerState<RunPanel> {
   final ScrollController _scrollController = ScrollController();
   StreamSubscription<ProcessEvent>? _sub;
+  bool _consoleVisible = true;
 
   @override
   void dispose() {
@@ -33,6 +34,10 @@ class _RunPanelState extends ConsumerState<RunPanel> {
   Future<void> _run(IdeTask task) async {
     final project = ref.read(activeProjectProvider);
     if (project == null) return;
+    // Re-show the console when the user runs a task even if it was collapsed.
+    if (!_consoleVisible) {
+      setState(() => _consoleVisible = true);
+    }
     ref.read(runOutputProvider.notifier).clear();
     final script =
         'cd "${project.path}" && ${task.command} ${task.args ?? ""}'.trim();
@@ -109,7 +114,7 @@ class _RunPanelState extends ConsumerState<RunPanel> {
     return Material(
       color: scheme.surfaceContainerLow,
       child: SizedBox(
-        height: 220,
+        height: _consoleVisible ? 220 : 40,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -167,33 +172,46 @@ class _RunPanelState extends ConsumerState<RunPanel> {
                     tooltip: "Clear output",
                     icon: const Icon(Icons.cleaning_services_outlined, size: 18),
                   ),
+                  IconButton(
+                    onPressed: () =>
+                        setState(() => _consoleVisible = !_consoleVisible),
+                    tooltip: _consoleVisible ? "Hide console" : "Show console",
+                    icon: Icon(
+                      _consoleVisible
+                          ? Icons.keyboard_arrow_down
+                          : Icons.keyboard_arrow_up,
+                      size: 18,
+                    ),
+                  ),
                 ],
               ),
             ),
-            const Divider(height: 1),
-            Expanded(
-              child: output.isEmpty
-                  ? Padding(
-                      padding: const EdgeInsets.all(10),
-                      child: Text(
-                        pid != null
-                            ? "Starting process\u2026"
-                            : "Press \u25b6 Run to execute the selected task. Output appears here.",
-                        style: Theme.of(context).textTheme.bodySmall,
-                      ),
-                    )
-                  : SingleChildScrollView(
-                      controller: _scrollController,
-                      padding: const EdgeInsets.all(8),
-                      child: SelectableText(
-                        output,
-                        style: const TextStyle(
-                          fontFamily: "monospace",
-                          fontSize: 11,
+            if (_consoleVisible) ...[
+              const Divider(height: 1),
+              Expanded(
+                child: output.isEmpty
+                    ? Padding(
+                        padding: const EdgeInsets.all(10),
+                        child: Text(
+                          pid != null
+                              ? "Starting process\u2026"
+                              : "Press \u25b6 Run to execute the selected task. Output appears here.",
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                      )
+                    : SingleChildScrollView(
+                        controller: _scrollController,
+                        padding: const EdgeInsets.all(8),
+                        child: SelectableText(
+                          output,
+                          style: const TextStyle(
+                            fontFamily: "monospace",
+                            fontSize: 11,
+                          ),
                         ),
                       ),
-                    ),
-            ),
+              ),
+            ],
           ],
         ),
       ),

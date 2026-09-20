@@ -18,6 +18,7 @@ class WorkspaceScreen extends ConsumerStatefulWidget {
 
 class _WorkspaceScreenState extends ConsumerState<WorkspaceScreen> {
   bool _initialLoading = true;
+  bool _explorerVisible = true;
 
   @override
   void initState() {
@@ -244,6 +245,12 @@ class _WorkspaceScreenState extends ConsumerState<WorkspaceScreen> {
         title: _projectSelector(projects, activeProject),
         actions: [
           IconButton(
+            onPressed: () =>
+                setState(() => _explorerVisible = !_explorerVisible),
+            tooltip: _explorerVisible ? "Hide explorer" : "Show explorer",
+            icon: Icon(_explorerVisible ? Icons.menu_open : Icons.menu),
+          ),
+          IconButton(
             onPressed: _newProject,
             tooltip: "New project",
             icon: const Icon(Icons.create_new_folder),
@@ -264,8 +271,10 @@ class _WorkspaceScreenState extends ConsumerState<WorkspaceScreen> {
                     Expanded(
                       child: Row(
                         children: [
-                          const SizedBox(width: 264, child: FileExplorerView()),
-                          const VerticalDivider(width: 1),
+                          if (_explorerVisible) ...[
+                            const SizedBox(width: 264, child: FileExplorerView()),
+                            const VerticalDivider(width: 1),
+                          ],
                           const Expanded(child: EditorAreaView()),
                         ],
                       ),
