@@ -1,0 +1,148 @@
+# Nova binary repository + bootstrap builder (Phase 2).
+#
+# Runs entirely on GitHub Actions (Ubuntu) — no local Linux needed. Pipeline:
+#   1. Clone the official termux-packages at a pinned ref.
+#   2. Point the build system at sd.adaa.codeide (TERMUX_APP__PACKAGE_NAME),
+#      so every built binary/deb/heap already targets OUR app — no byte-patch.
+#   3. Build the bootstrap + full package set for aarch64 and x86_64 using the
+#      official termux/package-builder docker image.
+#   4. Sign the .debs into an apt repo layout (suite "stable"/comp "main")
+#      with the Nova GPG key (set NOVA_GPG_PRIVATE_KEY + NOVA_GPG_FINGERPRINT
+#      from the nova-keygen workflow artifact).
+#   5. Bake the signing keyring into the bootstrap zips and upload artifacts:
+#        bootstrap-aarch64.zip / bootstrap-x86_64.zip
+#        apt-repo/   (dists/... ready for static hosting)
+#        nova-fingerprint.txt / sha256.txt
+#   Optional (input publish=true): push apt-repo/ to the gh-pages branch of
+#   this repo so it is served at https://<owner>.github.io/nova/apt/...
+#
+# After a successful run: download the artifacts, replace
+# android/app/src/main/assets/bootstrap-{aarch64,x86_64}.zip with the new zips,
+# paste the new sha256 into EnvironmentManager, put assets/apt/nova.gpg in the
+# APK, set NOVA_REPO_URL in build.gradle.kts, and ship. The app then migrates
+# the prefix automatically (.nova-origin transitions legacy -> nova).
+
+name: nova-build
+
+on:
+  workflow_dispatch:
+    inputs:
+      termux_packages_ref:
+        description: 'termux-packages ref to build from (pin once validated)'
+        required: true
+        default: 'master'
+      publish_to_pages:
+        description: 'Push apt-repo/ to the gh-pages branch (needs a PUBLIC repo for free Pages)'
+        required: true
+        default: false
+        type: boolean
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout termux-packages (pinned ref)
+        run: |
+          set -euo pipefail
+          git clone --depth 1 --branch "${{ github.event.inputs.termux_packages_ref }}" \
+            https://github.com/termux/termux-packages.git
+          cd termux-packages
+          git rev-parse --short HEAD > "$RUNNER_TEMP/termux-pkgs-sha.txt"
+
+      - name: Point the whole build at sd.adaa.codeide
+        working-directory: termux-packages
+        run: |
+          set -euo pipefail
+          sed -i 's/^TERMUX_APP__PACKAGE_NAME="com.termux"/TERMUX_APP__PACKAGE_NAME="sd.adaa.codeide"/' scripts/properties.sh
+          grep -n '^TERMUX_APP__PACKAGE_NAME' scripts/properties.sh | head -1
+
+      - name: Import Nova signing key (from secrets)
+        run: |
+          set -euo pipefail
+          mkdir -p "${HOME}/.gnupg"
+          chmod 700 "${HOME}/.gnupg"
+          printf '%s\n' "${{ secrets.NOVA_GPG_PRIVATE_KEY }}" > "${HOME}/nova-key.asc"
+          gpg --batch --import "${HOME}/nova-key.asc"
+          # Fails loudly if the fingerprint does not match the imported key.
+          gpg --batch --fingerprint "${{ secrets.NOVA_GPG_FINGERPRINT }}" >/dev/null
+
+      - name: Build bootstraps + packages (aarch64 + x86_64, docker)
+        working-directory: termux-packages
+        timeout-minutes: 720
+        run: |
+          set -euo pipefail
+          # CI=true + docker daemon shipped on ubuntu-latest; run-docker.sh is
+          # what upstream uses in .github/workflows/packages.yml.
+          ./scripts/run-docker.sh ./scripts/build-bootstraps.sh -f \
+            --architectures aarch64,x86_64 \
+            --add "nodejs,npm,python,python-pip,python-ensurepip-wheels,git,php,composer,openssh"
+          ls -la bootstrap-*.zip
+
+      - name: Sign debs into an apt repository layout
+        working-directory: termux-packages
+        run: |
+          set -euo pipefail
+          mkdir -p debs
+          # build-bootstraps writes built packages under $REPO_ROOT/output/
+          find output -name '*.deb' -exec mv -t debs {} +
+          python3 -m pip install --quiet termux-apt-repo
+          termux-apt-repo -s debs apt-repo stable main
+          find apt-repo -maxdepth 5 -type f | sort
+
+      - name: Bake keyring into bootstraps + hash everything
+        working-directory: termux-packages
+        run: |
+          set -euo pipefail
+          gpg --batch --armor --export "${{ secrets.NOVA_GPG_FINGERPRINT }}" > nova-gpg-key.pub
+          gpg --batch --output nova.gpg --export "${{ secrets.NOVA_GPG_FINGERPRINT }}"
+          grep -h '' > /dev/null
+          for a in aarch64 x86_64; do
+            if [ -f "bootstrap-${a}.zip" ]; then
+              rm -rf "work-${a}"
+              mkdir -p "work-${a}/usr/etc/apt/trusted.gpg.d"
+              unzip -qo "bootstrap-${a}.zip" -d "work-${a}"
+              cp nova.gpg "work-${a}/usr/etc/apt/trusted.gpg.d/nova.gpg"
+              (cd "work-${a}" && zip -qr "../bootstrap-${a}.zip" .)
+              sha256sum "bootstrap-${a}.zip"
+            fi
+          done
+          echo "termux-packages-ref: ${{ github.event.inputs.termux_packages_ref }} ($(cat "$RUNNER_TEMP/termux-pkgs-sha.txt"))" > sha256.txt
+          sha256sum bootstrap-*.zip >> sha256.txt
+          cat sha256.txt
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: nova-repo-build
+          path: |
+            termux-packages/bootstrap-*.zip
+            termux-packages/apt-repo/**
+            termux-packages/nova.gpg
+            termux-packages/nova-gpg-key.pub
+            termux-packages/sha256.txt
+          if-no-files-found: error
+
+      - name: Publish repo to gh-pages (static apt source)
+        if: github.event.inputs.publish_to_pages == 'true'
+        working-directory: termux-packages
+        run: |
+          set -euo pipefail
+          rm -rf pages
+          mkdir -p pages/apt
+          cp -r apt-repo/. pages/apt/
+          touch pages/.nojekyll
+          ( cd pages && git init -b gh-pages \
+            && git config user.email "actions@users.noreply.github.com" \
+            && git config user.name "GitHub Actions" \
+            && git add -A \
+            && git -c user.email="actions@users.noreply.github.com" \
+                 -c user.name="GitHub Actions" \
+                 commit -m "nova apt repo (stable/main) $(date -u +%F)" )
+          cd pages
+          git remote add origin "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          git push --force origin gh-pages
+          echo "Published. apt source line:"
+          echo "  deb [signed-by=/data/user/0/sd.adaa.codeide/files/usr/etc/apt/trusted.gpg.d/nova.gpg] https://$(echo $GITHUB_REPOSITORY | cut -d/ -f1).github.io/$(echo $GITHUB_REPOSITORY | cut -d/ -f2)/apt stable main"

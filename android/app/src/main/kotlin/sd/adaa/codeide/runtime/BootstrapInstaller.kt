@@ -4,6 +4,7 @@ import android.content.Context
 import android.system.Os
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry
 import org.apache.commons.compress.archivers.zip.ZipFile
+import sd.adaa.codeide.BuildConfig
 import sd.adaa.codeide.EnvironmentManager
 import sd.adaa.codeide.bridge.SetupStatus
 import java.io.File
@@ -24,10 +25,15 @@ class BootstrapInstaller(private val context: Context) {
     fun patchExisting() {
         val prefix = EnvironmentManager.prefix(context)
         if (prefix.exists()) {
-            patchHardcodedPaths(prefix)
+            // Phase 2: byte-patching is a LEGACY-termux migration only. A
+            // Nova-built bootstrap already points at this app's paths, so the
+            // full-tree binary walk would be a pointless 100% hit; skip it.
+            if (EnvironmentManager.readOrigin(context) != EnvironmentManager.ORIGIN_NOVA) {
+                patchHardcodedPaths(prefix)
+            }
             configureApt(prefix)
-            configureInputrc()
         }
+        stageNovaExec(prefix)
     }
 
     fun getStatus(): SetupStatus = if (isInstalled()) {
@@ -72,6 +78,7 @@ class BootstrapInstaller(private val context: Context) {
         }
 
         onProgress("extracting", 0.6f)
+        migratePrefix(prefix)
         extract(zipFile, prefix)
 
         onProgress("configuring", 0.9f)
@@ -80,17 +87,67 @@ class BootstrapInstaller(private val context: Context) {
         patchHardcodedPaths(prefix)
         configureApt(prefix)
         configureInputrc()
+        stageNovaExec(prefix)
 
         File(context.filesDir, ".bootstrap-version")
             .writeText(expectedSha)
+        EnvironmentManager.originMarker(context)
+            .writeText(EnvironmentManager.currentOrigin())
 
         onProgress("done", 1.0f)
+    }
+
+    /**
+     * Phase 2 migration: when the origin the prefix was BUILT with differs
+     * from the bundled bootstrap's origin (legacy Termux layout vs Nova-built
+     * layout), the old tree is incompatible and must be rebuilt. Wipe PREFIX
+     * only — HOME lives at files/home, outside the prefix, so user files
+     * survive. Same-origin reinstalls skip the wipe to preserve installed
+     * runtimes (node, python, ...).
+     */
+    private fun migratePrefix(prefix: File) {
+        if (!prefix.exists()) return
+        val stored = EnvironmentManager.readOrigin(context) ?: EnvironmentManager.ORIGIN_LEGACY
+        val current = EnvironmentManager.currentOrigin()
+        if (stored == current) return
+        android.util.Log.i(
+            "BootstrapInstaller",
+            "Origin changed ($stored -> $current): wiping prefix for rebuild (home preserved)"
+        )
+        prefix.listFiles()?.forEach { f ->
+            try {
+                f.deleteRecursively()
+            } catch (_: Exception) {
+            }
+        }
     }
 
     private fun copyAsset(asset: String, dest: File) {
         dest.parentFile?.mkdirs()
         context.assets.open(asset).use { input ->
             FileOutputStream(dest).use { output -> input.copyTo(output) }
+        }
+    }
+
+    /**
+     * Ships OUR exec interceptor (Phase 1 production integration): copies
+     * libnova-exec.so built with the APK (Nova paths baked in) over
+     * `$PREFIX/lib/libnova-exec.so`, which is what linker-mode
+     * `LD_PRELOAD` points at. The bootstrap zip keeps the legacy file so its
+     * SHA stays valid; this overlay always wins. Re-applied by
+     * [patchExisting], so updates and repairs restore it. Best-effort:
+     * no-op when the APK has no nova-exec build for this ABI.
+     */
+    private fun stageNovaExec(prefix: File) {
+        try {
+            val src = File(context.applicationInfo.nativeLibraryDir, "libnova-exec.so")
+            if (!src.isFile) return
+            val dest = File(prefix, "lib/libnova-exec.so")
+            if (dest.isFile && dest.length() == src.length()) return
+            dest.parentFile?.mkdirs()
+            src.copyTo(dest, overwrite = true)
+        } catch (_: Exception) {
+            // Best-effort: linker mode degrades to legacy preload behavior.
         }
     }
 
@@ -177,11 +234,15 @@ class BootstrapInstaller(private val context: Context) {
     }
 
     /**
-     * Persist the apt configuration that the embedded Termux bootstrap needs to
-     * work under this app (previously applied by hand on the device and lost on
+     * Persist the apt configuration that the embedded bootstrap needs to work
+     * under this app (previously applied by hand on the device and lost on
      * re-extraction):
-     *  - point sources.list at the Cloudflare mirror with [trusted=yes] (the
-     *    termux-keyring/gpgv snapshot in the bootstrap cannot verify NO_PUBKEY);
+     *  - while the Phase-2 Nova repository is configured (NOVA_REPO_URL), list
+     *    it FIRST via sources.list.d/nova.list, signed by the bundled keyring
+     *    when present (best-effort [trusted=yes] until the key ships);
+     *  - keep the Cloudflare termux-main mirror as fallback with [trusted=yes]
+     *    (the termux-keyring/gpgv snapshot in the bootstrap cannot verify
+     *    NO_PUBKEY);
      *  - allow unauthenticated/insecure repositories in 99-nova.conf;
      *  - rebind apt's cache/archive directories to paths under our data dir so
      *    dpkg can write them.
@@ -191,9 +252,26 @@ class BootstrapInstaller(private val context: Context) {
         try {
             val filesDir = context.filesDir
             val etc = File(prefix, "etc/apt")
+            val confDir = File(etc, "apt.conf.d")
+            val sourcesListDir = File(etc, "sources.list.d")
             etc.mkdirs()
+            confDir.mkdirs()
+            sourcesListDir.mkdirs()
 
-            // 1. Trusted mirror (overwrites stock sources.list).
+            // 0. Nova binary repository (Phase 2). Not written until a release
+            // build sets NOVA_REPO_URL; debug/github builds keep the legacy
+            // mirror and current behavior byte-for-byte.
+            val novaUrl = BuildConfig.NOVA_REPO_URL
+            if (novaUrl.isNotBlank()) {
+                val keyring = installNovaKeyring(etc)
+                val pin =
+                    if (keyring != null) "signed-by=${keyring.absolutePath}" else "trusted=yes"
+                File(sourcesListDir, "nova.list").writeText(
+                    "deb [$pin] $novaUrl ${BuildConfig.NOVA_REPO_SUITE} main\n"
+                )
+            }
+
+            // 1. Legacy Termux fallback while the Nova repo is not live.
             val sources = File(etc, "sources.list")
             sources.writeText(
                 "# The main termux repository, with cloudflare cache (trusted for embedded keyless bootstrap)\n" +
@@ -201,8 +279,6 @@ class BootstrapInstaller(private val context: Context) {
             )
 
             // 2. Allow unauthenticated + rebind caches under our data dir.
-            val confDir = File(etc, "apt.conf.d")
-            confDir.mkdirs()
             val novaConf = File(confDir, "99-nova.conf")
             val cacheRoot = File(filesDir, "cache")
             novaConf.writeText(
@@ -229,6 +305,30 @@ class BootstrapInstaller(private val context: Context) {
             )
         } catch (e: Exception) {
             android.util.Log.w("BootstrapInstaller", "configureApt failed: ${e.message}")
+        }
+    }
+
+    /**
+     * Best-effort install of the Nova repository signing key shipped as an APK
+     * asset (`assets/apt/nova.gpg`). Returns the keyring path when present, or
+     * null when the build has no key yet (then configureApt falls back to
+     * [trusted=yes], which is fine for pre-release builds).
+     */
+    private fun installNovaKeyring(etc: File): File? {
+        return try {
+            val dir = "apt"
+            val name = "nova.gpg"
+            if (context.assets.list(dir)?.contains(name) != true) return null
+            val dest = File(File(etc, "trusted.gpg.d"), name)
+            dest.parentFile?.mkdirs()
+            context.assets.open("$dir/$name").use { input ->
+                FileOutputStream(dest).use { output -> input.copyTo(output) }
+            }
+            android.util.Log.i("BootstrapInstaller", "Installed Nova keyring at ${dest.absolutePath}")
+            dest
+        } catch (e: Exception) {
+            android.util.Log.w("BootstrapInstaller", "installNovaKeyring failed: ${e.message}")
+            null
         }
     }
 

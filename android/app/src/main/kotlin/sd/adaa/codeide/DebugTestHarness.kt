@@ -106,12 +106,12 @@ object DebugTestHarness {
                 check("apt", aptOut.contains("apt"),
                     aptOut.lineSequence().firstOrNull { it.contains("apt") }?.take(120) ?: "no apt output")
 
-                // PTY session in linker mode (first hop via pty.c rewrite).
+                // PTY session via the DEFAULT path (no explicit mode): exactly
+                // what the UI bridge calls, so this proves the production
+                // terminal route per flavor (linker on play, direct on github).
                 try {
                     val tm = TerminalManager(context)
-                    val sid = tm.createSession(
-                        home, 80, 24, EnvironmentManager.EXEC_MODE_LINKER
-                    )
+                    val sid = tm.createSession(home, 80, 24)
                     tm.write(sid, "echo PTY_LINKER_OK\n")
                     Thread.sleep(800)
                     tm.close(sid)
@@ -137,6 +137,7 @@ object DebugTestHarness {
         Thread({
             try {
                 Log.i(TAG, "=== Full linker matrix START (mode=linker, target 36) ===")
+                Log.i(TAG, "[MATRIX] build-marker v4-spawn-trace")
                 val prefix = EnvironmentManager.prefix(context)
                 val home = EnvironmentManager.home(context)
                 val testDir = File(home, "nova_linker_matrix")
@@ -155,20 +156,47 @@ object DebugTestHarness {
 
                 // Nested exec: bash children (ls, wc) spawn through LD_PRELOAD.
                 // NOTE: full output logged untruncated for diagnosis.
-                // Experiment: force the preload's system-linker mode explicitly
-                // (bundled .so is com.termux-built; default gating may reject
-                // Nova paths). Isolated variable for the nested call only.
-                val nestedEnv = linkerEnv +
-                    ("TERMUX_EXEC__SYSTEM_LINKER_EXEC__MODE" to "force")
+                // Phase 1 gate: stage OUR libnova-exec.so (built from the
+                // fork with Nova paths) from the APK native lib dir and use
+                // it as the preload for this call only. No force-mode var:
+                // defaults must work on their own to count as PASS.
+                val stagedDir = File(home, "novaexec-stage").apply { mkdirs() }
+                val stagedSo = File(stagedDir, "libnova-exec.so")
+                try {
+                    val src = File(context.applicationInfo.nativeLibraryDir, "libnova-exec.so")
+                    if (src.exists()) {
+                        src.copyTo(stagedSo, overwrite = true)
+                        Log.i(TAG, "[MATRIX] staged-intercept path=" +
+                            stagedSo.absolutePath + " bytes=" + stagedSo.length())
+                    } else {
+                        Log.e(TAG, "[MATRIX] staged-intercept MISSING")
+                    }
+                } catch (e: Throwable) {
+                    Log.e(TAG, "[MATRIX] staged-intercept copy failed: " + e.message)
+                }
+                val nestedEnv = if (stagedSo.exists()) {
+                    linkerEnv + ("LD_PRELOAD" to stagedSo.absolutePath) +
+                        // Trace the interceptor's decision per exec (stderr
+                        // merged into our captured output by ShellExecutor).
+                        ("TERMUX_EXEC_DEBUG" to "1")
+                } else {
+                    linkerEnv
+                }
                 val nested = shell.execute(
                     File(prefix, "bin/bash").absolutePath,
                     listOf("-c", "ls \$PREFIX/bin | wc -l"),
                     cwd, nestedEnv, 30_000,
                 )
-                val nestedOut = nested.getOrNull()?.trim() ?: ""
+                val nestedOut = nested.getOrNull() ?: ""
+                // Debug spam ([nova-exec] trace on merged stderr) may precede
+                // the real output: take the last bare-numeric line.
+                val nestedCount = nestedOut.lineSequence()
+                    .map { it.trim() }
+                    .lastOrNull { it.matches(Regex("\\d+")) }
+                    ?.toIntOrNull()
                 check("nested-exec",
-                    nestedOut.toIntOrNull()?.let { it > 100 } == true,
-                    "out=[" + nestedOut + "] err=[" +
+                    nestedCount?.let { it > 100 } == true,
+                    "count=[" + (nestedCount?.toString() ?: "none") + "] err=[" +
                         (nested.exceptionOrNull()?.message ?: "") + "]")
 
                 // Shebang direct exec: script resolved to interpreter by NovaExecLauncher.
@@ -194,10 +222,37 @@ object DebugTestHarness {
                 }
                 check("shebang", shebangOk, shebangDetail)
 
+                // /proc/self/exe interception: the readlink helper itself is
+                // spawned through the linker, so without the hook it would
+                // report linker64. Expect the real prefix path instead.
+                // Uses the STAGED preload (nestedEnv), not the old production one.
+                val exeSelf = shell.execute(
+                    File(prefix, "bin/bash").absolutePath,
+                    listOf("-c", "readlink /proc/self/exe"),
+                    cwd, nestedEnv, 15_000,
+                )
+                val exeSelfOut = exeSelf.getOrNull() ?: ""
+                // Debug trace lines precede the real output: judge by the
+                // last bare-path line only.
+                val exeSelfLast = exeSelfOut.lineSequence()
+                    .map { it.trim() }
+                    .lastOrNull { it.startsWith("/") } ?: ""
+                check("proc-self-exe",
+                    exeSelfLast.contains("sd.adaa.codeide") && !exeSelfLast.contains("linker"),
+                    "last=[" + exeSelfLast + "] err=[" +
+                        (exeSelf.exceptionOrNull()?.message ?: "") + "]")
+
                 // Apt update output (not ignored here) + lists dir census.
+                // Uses the STAGED preload too: apt spawns its https method as
+                // a nested child, which needs the working interceptor.
+                val aptEnv = if (stagedSo.exists()) {
+                    nestedEnv
+                } else {
+                    linkerEnv
+                }
                 val aptUpdate = shell.execute(
                     File(prefix, "bin/apt").absolutePath, listOf("update"),
-                    cwd, linkerEnv, 120_000,
+                    cwd, aptEnv, 120_000,
                 )
                 val listsDir = File(home, "../cache/apt/lists")
                 val listsCount = listsDir.listFiles()?.size ?: -1
@@ -206,11 +261,35 @@ object DebugTestHarness {
                     aptUpdate.getOrElse { it.message ?: "" }.trim().take(300) + "]")
 
                 // Node + Python via RuntimeManager in linker mode.
-                for (id in listOf("node", "python")) {
-                    val ok = tryInstallRuntime(id, EnvironmentManager.EXEC_MODE_LINKER)
-                    check("install-$id", ok, if (ok) "installed" else "install failed - needs network")
-                    if (!ok) continue
-                }
+                // Swap the production preload path to OUR staged .so first
+                // (backup + restore in finally): this exercises the EXACT
+                // production configuration with zero production code changes.
+                val prodPreload = File(prefix, "lib/libtermux-exec-ld-preload.so")
+                val prodBackup = File(prefix, "lib/libtermux-exec-ld-preload.so.nova-bak")
+                var swapped = false
+                try {
+                    if (stagedSo.exists() && prodPreload.exists() && !prodBackup.exists()) {
+                        prodPreload.copyTo(prodBackup, overwrite = false)
+                    }
+                    if (stagedSo.exists() && prodBackup.exists()) {
+                        stagedSo.copyTo(prodPreload, overwrite = true)
+                        swapped = true
+                        Log.i(TAG, "[MATRIX] production preload swapped to staged build")
+                    }
+                    for (id in listOf("node", "python")) {
+                        val ok = tryInstallRuntime(id, EnvironmentManager.EXEC_MODE_LINKER)
+                        // apt downloads nothing when the newest version is
+                        // already installed (correct behavior, not failure):
+                        // the binary's presence is the real gate.
+                        val binPresent = when (id) {
+                            "node" -> File(prefix, "bin/node").exists()
+                            else -> File(prefix, "bin/python3").exists() ||
+                                File(prefix, "bin/python").exists()
+                        }
+                        check("install-$id", ok || binPresent,
+                            if (ok) "installed" else if (binPresent) "already installed" else "install failed - needs network")
+                        if (!ok && !binPresent) continue
+                    }
                 val nodeBin = File(prefix, "bin/node")
                 if (nodeBin.exists()) {
                     File(testDir, "m_hello.js").writeText("console.log('node-hello:'+process.version);")
@@ -218,6 +297,24 @@ object DebugTestHarness {
                         listOf(File(testDir, "m_hello.js").absolutePath), cwd, linkerEnv, 30_000)
                     check("node", out.getOrNull()?.contains("node-hello") == true,
                         out.getOrElse { it.message ?: "error" }.trim().take(120))
+                    // Node's own spawn path (libuv posix_spawn) nesting out.
+                    // Trace interceptor decisions for diagnosis.
+                    val spawnEnv = linkerEnv + ("TERMUX_EXEC_DEBUG" to "1")
+                    val spawn = shell.execute(nodeBin.absolutePath,
+                        listOf("-e", "process.stdout.write(require('child_process').execSync('echo SPAWN_OK').toString())"),
+                        cwd, spawnEnv, 30_000)
+                    check("node-spawn",
+                        spawn.getOrNull()?.contains("SPAWN_OK") == true,
+                        spawn.getOrElse { it.message ?: "error" }.trim().take(600))
+                    // Direct-binary spawn (no shell): does libuv reach our
+                    // interceptor at all? Uses $PREFIX/bin/echo absolute.
+                    val echoAbs = File(prefix, "bin/echo").absolutePath.replace("'", "'\\''")
+                    val spawn2 = shell.execute(nodeBin.absolutePath,
+                        listOf("-e", "process.stdout.write(require('child_process').spawnSync('" + echoAbs + "',['SPAWN2_OK']).stdout.toString())"),
+                        cwd, spawnEnv, 30_000)
+                    check("node-spawn-direct",
+                        spawn2.getOrNull()?.contains("SPAWN2_OK") == true,
+                        spawn2.getOrElse { it.message ?: "error" }.trim().take(300))
                 } else {
                     check("node", false, "bin/node missing after install attempt")
                 }
@@ -228,8 +325,26 @@ object DebugTestHarness {
                         listOf(File(testDir, "m_hello.py").absolutePath), cwd, linkerEnv, 30_000)
                     check("python", out.getOrNull()?.contains("python-hello") == true,
                         out.getOrElse { it.message ?: "error" }.trim().take(120))
+                    // Python's own spawn path (fork+execve) nesting out.
+                    val sub = shell.execute(pyBin.absolutePath,
+                        listOf("-c", "import subprocess;print(subprocess.run(['echo','SUBPROC_OK'],capture_output=True,text=True).stdout)"),
+                        cwd, linkerEnv, 30_000)
+                    check("python-subprocess",
+                        sub.getOrNull()?.contains("SUBPROC_OK") == true,
+                        sub.getOrElse { it.message ?: "error" }.trim().take(200))
                 } else {
                     check("python", false, "python binary missing after install attempt")
+                }
+                } finally {
+                    if (swapped) {
+                        try {
+                            prodBackup.copyTo(prodPreload, overwrite = true)
+                            prodBackup.delete()
+                            Log.i(TAG, "[MATRIX] production preload restored")
+                        } catch (e: Throwable) {
+                            Log.e(TAG, "[MATRIX] preload restore FAILED: " + e.message)
+                        }
+                    }
                 }
 
                 Log.i(TAG, "=== Full linker matrix DONE: $pass PASS, $fail FAIL ===")

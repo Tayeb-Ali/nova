@@ -84,11 +84,45 @@ object EnvironmentManager {
     }
 
     /**
+     * Bootstrap origin marker (Phase 2 migration bookkeeping).
+     *  - ORIGIN_LEGACY: Termux-built bootstrap (com.termux paths, byte-patched)
+     *    — the only kind bundled today.
+     *  - ORIGIN_NOVA: Nova-prefix-built bootstrap from the Nova repository —
+     *    byte-patching is unnecessary (paths are already ours) and dpkg-deb
+     *    unpacking uses different stripping. The stored value is always the
+     *    origin the bundled bootstrap was BUILT with, so the marker only flips
+     *    once a Nova bootstrap actually ships (i.e. NOVA_REPO_URL configured).
+     */
+    const val ORIGIN_LEGACY = "legacy-com-termux"
+    const val ORIGIN_NOVA = "nova-prefix-v1"
+
+    fun currentOrigin(): String =
+        if (BuildConfig.NOVA_REPO_URL.isBlank()) ORIGIN_LEGACY else ORIGIN_NOVA
+
+    fun originMarker(context: Context): File = File(filesDir(context), ".nova-origin")
+
+    fun readOrigin(context: Context): String? {
+        val marker = originMarker(context)
+        return if (marker.exists()) marker.readText().trim() else null
+    }
+
+    /**
      * Environment for every spawned shell/process (task.md §18 §19).
      */
-    fun buildEnvironment(context: Context, projectPath: String? = null, execMode: String = EXEC_MODE_DIRECT): Map<String, String> {
+    fun buildEnvironment(
+        context: Context,
+        projectPath: String? = null,
+        execMode: String = BuildConfig.DEFAULT_EXEC_MODE,
+    ): Map<String, String> {
         val prefix = prefix(context)
         val home = home(context)
+        // Linker mode preloads OUR interceptor (shipped by BootstrapInstaller);
+        // direct mode keeps the legacy one: zero behavior change for github.
+        val preloadLib = if (execMode == EXEC_MODE_LINKER) {
+            "libnova-exec.so"
+        } else {
+            "libtermux-exec-ld-preload.so"
+        }
         val base = mapOf(
             "PREFIX" to prefix.absolutePath,
             "HOME" to home.absolutePath,
@@ -97,7 +131,7 @@ object EnvironmentManager {
             "TERM" to "xterm-256color",
             "PATH" to "${prefix.absolutePath}/bin",
             "LD_LIBRARY_PATH" to "${prefix.absolutePath}/lib",
-            "LD_PRELOAD" to "${prefix.absolutePath}/lib/libtermux-exec-ld-preload.so",
+            "LD_PRELOAD" to "${prefix.absolutePath}/lib/$preloadLib",
             "TERMUX_APP__PACKAGE_NAME" to PACKAGE_NAME,
             "TERMUX_MAIN_PACKAGE_FORMAT" to "debian",
             "ANDROID_DATA" to "/data",

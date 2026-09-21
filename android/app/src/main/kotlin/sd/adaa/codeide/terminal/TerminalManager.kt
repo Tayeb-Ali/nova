@@ -2,8 +2,10 @@ package sd.adaa.codeide.terminal
 
 import android.content.Context
 import android.util.Base64
+import sd.adaa.codeide.BuildConfig
 import sd.adaa.codeide.EnvironmentManager
 import sd.adaa.codeide.IdeEvents
+import sd.adaa.codeide.IdeService
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.util.UUID
@@ -34,7 +36,16 @@ class TerminalManager(private val context: Context) {
         ensureFlusher()
     }
 
-    fun createSession(cwd: String, cols: Int, rows: Int, execMode: String = EnvironmentManager.EXEC_MODE_DIRECT): String {
+    // Default follows the flavor (github=direct, play=linker): the UI bridge
+    // calls without a mode, so THIS default is the production terminal path.
+    fun createSession(cwd: String, cols: Int, rows: Int, execMode: String = BuildConfig.DEFAULT_EXEC_MODE): String {
+        // Production FGS policy (target 34+): engine-init start can be denied
+        // on background launches, so (re)start keep-alive here — an explicit
+        // user action, which exempts the foreground-service start.
+        try {
+            IdeService.start(context)
+        } catch (_: Exception) {
+        }
         val id = UUID.randomUUID().toString()
         val workDir =
             if (File(cwd).isDirectory) cwd else EnvironmentManager.home(context).absolutePath

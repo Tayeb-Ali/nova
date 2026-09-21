@@ -1,7 +1,9 @@
 package sd.adaa.codeide.runtime
 
 import android.content.Context
+import sd.adaa.codeide.BuildConfig
 import sd.adaa.codeide.EnvironmentManager
+import sd.adaa.codeide.IdeService
 import sd.adaa.codeide.bridge.RuntimeInfo
 import sd.adaa.codeide.process.ShellExecutor
 import java.io.File
@@ -46,8 +48,13 @@ class RuntimeManager(
         id: String,
         onProgress: (String) -> Unit,
         done: (Result<Unit>) -> Unit,
-        execMode: String = EnvironmentManager.EXEC_MODE_DIRECT,
+        execMode: String = BuildConfig.DEFAULT_EXEC_MODE,
     ) {
+        // User-initiated install: (re)start keep-alive (see TerminalManager).
+        try {
+            IdeService.start(context)
+        } catch (_: Exception) {
+        }
         val def = byId(id)
         val env = EnvironmentManager.buildEnvironment(context, execMode = execMode)
         onProgress("apt update")
@@ -66,7 +73,7 @@ class RuntimeManager(
             )
         }
         download
-            .mapCatching { unpacking(debsInArchives(), onProgress) }
+            .mapCatching { unpacking(debsInArchives(), onProgress, env) }
             .onSuccess {
                 installer.patchExisting()
                 done(Result.success(Unit))
@@ -98,8 +105,13 @@ class RuntimeManager(
         id: String,
         onProgress: (String) -> Unit,
         done: (Result<Unit>) -> Unit,
-        execMode: String = EnvironmentManager.EXEC_MODE_DIRECT,
+        execMode: String = BuildConfig.DEFAULT_EXEC_MODE,
     ) {
+        // User-initiated install: (re)start keep-alive (see TerminalManager).
+        try {
+            IdeService.start(context)
+        } catch (_: Exception) {
+        }
         val def = byId(id)
         val env = EnvironmentManager.buildEnvironment(context, execMode = execMode)
         onProgress("apt update")
@@ -118,7 +130,7 @@ class RuntimeManager(
             )
         }
         download
-            .mapCatching { unpacking(debsInArchives(), onProgress) }
+            .mapCatching { unpacking(debsInArchives(), onProgress, env) }
             .onSuccess {
                 installer.patchExisting()
                 done(Result.success(Unit))
@@ -145,21 +157,32 @@ class RuntimeManager(
 
     /**
      * Unpack every .deb currently in the apt archive cache into the prefix.
-     * Termux .deb data paths start `./data/data/com.termux/files/usr/...`;
-     * GNU tar counts `./` as leading component, so --strip-components=5 turns
-     * `./data/data/com.termux/files/usr/bin/git` into `bin/git` relative to
-     * filesDir (which holds `usr/`), i.e. it lands at `files/usr/bin/git`.
+     * Termux debs embed the full jail path; GNU tar's --transform rewrites the
+     * known prefix layouts down to `usr/...` relative to filesDir (the parent
+     * of `usr/`), so the exact component count never matters:
+     *   legacy:  ./data/data/com.termux/files/usr/bin/git
+     *   nova:    ./data/data/sd.adaa.codeide/files/usr/bin/git
+     *   (a /data/user/0/... canonical variant for nova is covered too)
+     * Paths that match none (e.g. already prefix-relative `./usr/...`) pass
+     * through untouched and still land correctly.
      */
-    private fun unpacking(debs: List<File>, onProgress: (String) -> Unit): Unit {
+    private fun unpacking(
+        debs: List<File>,
+        onProgress: (String) -> Unit,
+        env: Map<String, String>,
+    ): Unit {
         if (debs.isEmpty()) {
             throw IllegalStateException("No .deb archives found after download. Check network / repository.")
         }
         val dpkgDeb = File(prefix, "bin/dpkg-deb").absolutePath
         val tar = File(prefix, "bin/tar").absolutePath
+        val transform = "s#^\\./data/data/com\\.termux/files/usr/#usr/#;" +
+            "s#^(\\./)?data/user/0/sd\\.adaa\\.codeide/files/usr/#usr/#;" +
+            "s#^(\\./)?data/data/sd\\.adaa\\.codeide/files/usr/#usr/#"
         for (deb in debs) {
             onProgress("unpacking ${deb.name}")
             // Extract via dpkg-deb -> tar pipe in one go.
-            val pipeCmd = "$dpkgDeb --fsys-tarfile '${deb.absolutePath}' | $tar -x --strip-components=5 -C '${filesDir.absolutePath}'"
+            val pipeCmd = "$dpkgDeb --fsys-tarfile '${deb.absolutePath}' | $tar -x --transform='$transform' -C '${filesDir.absolutePath}'"
             val res = shell.execute(
                 File(prefix, "bin/bash").absolutePath,
                 listOf("-c", pipeCmd),

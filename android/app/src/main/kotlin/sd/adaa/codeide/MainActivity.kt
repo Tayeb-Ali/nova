@@ -39,6 +39,9 @@ class MainActivity : FlutterActivity() {
         }
         ensureNotificationPermission()
         checkLinkerProbeIntent(intent)
+        // Debug receivers (arbitrary setup/install triggers): debug builds
+        // only. Release/play builds must never export them.
+        if (BuildConfig.DEBUG) {
         // Debug: trigger setup via `adb shell am broadcast -a sd.adaa.codeide.DEBUG_SETUP -n sd.adaa.codeide/.MainActivity`
         val filter = IntentFilter("sd.adaa.codeide.DEBUG_SETUP")
         registerReceiver(object : BroadcastReceiver() {
@@ -87,6 +90,7 @@ class MainActivity : FlutterActivity() {
                 DebugTestHarness.runLinkerProbe(ctx)
             }
         }, probeFilter, RECEIVER_EXPORTED)
+        } // if (BuildConfig.DEBUG)
     }
 
     override fun onNewIntent(intent: Intent) {
@@ -101,6 +105,7 @@ class MainActivity : FlutterActivity() {
      * `adb shell am start -n sd.adaa.codeide/.MainActivity --es nova_linker_probe true`
      */
     private fun checkLinkerProbeIntent(intent: Intent?) {
+        if (!BuildConfig.DEBUG) return
         if (intent?.getStringExtra("nova_probe") == "full") {
             Log.i("NovaTest", "full matrix requested via start intent")
             DebugTestHarness.runFullProbe(this)
