@@ -69,6 +69,29 @@ jobs:
           # Fails loudly if the fingerprint does not match the imported key.
           gpg --batch --fingerprint "${{ secrets.NOVA_GPG_FINGERPRINT }}" >/dev/null
 
+      - name: Install SDK deps termux-am needs (root, inside builder image)
+        working-directory: termux-packages
+        run: |
+          set -euo pipefail
+          # With a custom app package name build-package.sh -i is disabled, so
+          # every dependency including termux-am is built from source. Its
+          # Gradle build pins platforms;android-33 + build-tools;30.0.3, which
+          # the package-builder image does not ship (it ships 35/28/24 + 37).
+          # AGP auto-install fails with "Failed to read or create install
+          # properties file" inside the container, so pre-install both
+          # components as root before building anything.
+          ./scripts/run-docker.sh bash -c '
+            set -euo pipefail
+            REV="$(grep -m1 "^TERMUX_SDK_REVISION=" scripts/properties.sh | cut -d= -f2 | tr -d "[:space:]")"
+            export ANDROID_HOME="/home/builder/lib/android-sdk-${REV:-9123335}"
+            SDKMANAGER="$(command -v sdkmanager || find "$ANDROID_HOME" -type f -name sdkmanager | head -1)"
+            test -n "$SDKMANAGER"
+            yes | sudo -E "$SDKMANAGER" --sdk_root="$ANDROID_HOME" --licenses >/dev/null 2>&1 || true
+            sudo -E "$SDKMANAGER" --sdk_root="$ANDROID_HOME" "platforms;android-33" "build-tools;30.0.3"
+            ls "$ANDROID_HOME/platforms/android-33" >/dev/null
+            ls "$ANDROID_HOME/build-tools/30.0.3" >/dev/null
+          '
+
       - name: Build bootstraps + packages (aarch64 + x86_64, docker)
         working-directory: termux-packages
         timeout-minutes: 720
