@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:nova/src/features/editor/autocomplete/language_members.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:re_editor/re_editor.dart';
@@ -61,6 +64,46 @@ void main() {
 
     test('malformed receiver entries are skipped', () {
       expect(memberPrompts('javascript', 'broken', ''), isNull);
+    });
+  });
+
+  group('shipped JSON tables', () {
+    Map<String, dynamic> loadTable(String language) {
+      final raw = File('assets/autocomplete/$language.json')
+          .readAsStringSync();
+      return jsonDecode(raw) as Map<String, dynamic>;
+    }
+
+    test('javascript table has console and Math', () {
+      final table =
+          MemberRegistry.parseReceivers(loadTable('javascript'));
+      expect(table['console']!.map((p) => p.word), contains('log'));
+      expect(table['Math']!.map((p) => p.word), contains('random'));
+    });
+
+    test('python table has os and sys', () {
+      final table = MemberRegistry.parseReceivers(loadTable('python'));
+      expect(table['os']!.map((p) => p.word), contains('getcwd'));
+      expect(table['sys']!.map((p) => p.word), contains('exit'));
+    });
+
+    test('dart table has DateTime and Future', () {
+      final table = MemberRegistry.parseReceivers(loadTable('dart'));
+      expect(table['DateTime']!.map((p) => p.word), contains('now'));
+      expect(table['Future']!.map((p) => p.word), contains('delayed'));
+    });
+
+    test('typescript mirrors javascript receivers', () {
+      final table =
+          MemberRegistry.parseReceivers(loadTable('typescript'));
+      expect(table['console']!.map((p) => p.word), contains('log'));
+    });
+
+    test('java and go tables have their globals', () {
+      final java = MemberRegistry.parseReceivers(loadTable('java'));
+      expect(java['System']!.map((p) => p.word), contains('out'));
+      final go = MemberRegistry.parseReceivers(loadTable('go'));
+      expect(go['fmt']!.map((p) => p.word), contains('Println'));
     });
   });
 }

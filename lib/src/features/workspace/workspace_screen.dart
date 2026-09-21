@@ -9,6 +9,7 @@ import "../terminal/terminal_screen.dart";
 import "editor_area_view.dart";
 import "command_palette.dart";
 import "file_explorer_view.dart";
+import "new_project_dialog.dart";
 import "run_panel.dart";
 import "task_detector.dart";
 import "workspace_providers.dart";
@@ -213,65 +214,30 @@ class _WorkspaceScreenState extends ConsumerState<WorkspaceScreen> {
   }
 
   Future<void> _refreshTasks(ProjectInfo project) async {
-    final tasks = await TaskDetector(ref.read(projectServiceProvider)).detect(project);
+    final detector = TaskDetector(ref.read(projectServiceProvider));
+    final tasks = await detector.detect(project);
+    // Auto-detected project type overrides an unset/generic template
+    // choice so badges and tasks follow the actual files on disk.
+    final stored = project.language;
+    final detected = (stored == null ||
+            stored.isEmpty ||
+            stored == "general")
+        ? await detector.detectLanguage(project)
+        : null;
     if (!mounted) return;
     if (ref.read(activeProjectProvider)?.path != project.path) return;
     ref.read(runTasksProvider.notifier).state = tasks;
     ref.read(runTaskProvider.notifier).state =
         tasks.isNotEmpty ? tasks.first : null;
+    if (detected != null && detected != stored) {
+      ref.read(activeProjectProvider.notifier).state =
+          project.copyWith(language: detected);
+    }
   }
 
   Future<void> _newProject() async {
     final l10n = AppLocalizations.of(context);
-    final nameController = TextEditingController();
-    var selectedLanguage = "php";
-    final result = await showDialog<(String, String)>(
-      context: context,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setDialogState) => AlertDialog(
-          title: Text(l10n.projectNew),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              TextField(
-                controller: nameController,
-                autofocus: true,
-                decoration:
-                    InputDecoration(hintText: l10n.projectNameHint),
-              ),
-              const SizedBox(height: 16),
-              SegmentedButton<String>(
-                segments: const [
-                  ButtonSegment(value: "php", label: Text("PHP"), icon: Icon(Icons.language)),
-                  ButtonSegment(value: "node", label: Text("Node"), icon: Icon(Icons.integration_instructions)),
-                  ButtonSegment(value: "python", label: Text("Python"), icon: Icon(Icons.terminal)),
-                ],
-                selected: {selectedLanguage},
-                showSelectedIcon: false,
-                onSelectionChanged: (selection) =>
-                    setDialogState(() => selectedLanguage = selection.first),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text(l10n.actionCancel),
-            ),
-            FilledButton(
-              onPressed: () {
-                final name = nameController.text.trim();
-                if (name.isEmpty) return;
-                Navigator.of(context).pop((name, selectedLanguage));
-              },
-              child: Text(l10n.actionCreate),
-            ),
-          ],
-        ),
-      ),
-    );
-    nameController.dispose();
+    final result = await showNewProjectDialog(context);
     if (result == null) return;
     ProjectInfo created;
     try {

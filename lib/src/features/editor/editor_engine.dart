@@ -65,6 +65,21 @@ class EditorTabModel {
   /// py -> python, js -> javascript, php -> php, dart -> dart,
   /// tex -> latex, md -> markdown, everything else -> plaintext.
   static String languageForPath(String filePath) {
+    final normalized = filePath.replaceAll("\\", "/");
+    final slash = normalized.lastIndexOf("/");
+    final basename = (slash >= 0
+            ? normalized.substring(slash + 1)
+            : normalized)
+        .toLowerCase();
+    switch (basename) {
+      case "dockerfile":
+        return "dockerfile";
+      case "makefile":
+        return "makefile";
+      case "gemfile":
+      case "vagrantfile":
+        return "ruby";
+    }
     final dot = filePath.lastIndexOf(".");
     if (dot < 0 || dot == filePath.length - 1) return "plaintext";
     final ext = filePath.substring(dot + 1).toLowerCase();
@@ -73,6 +88,49 @@ class EditorTabModel {
         return "python";
       case "js":
         return "javascript";
+      case "ts":
+      case "tsx":
+      case "mts":
+        return "typescript";
+      case "java":
+        return "java";
+      case "kt":
+      case "kts":
+        return "kotlin";
+      case "go":
+        return "go";
+      case "rs":
+        return "rust";
+      case "c":
+      case "h":
+        return "c";
+      case "cpp":
+      case "hpp":
+      case "cc":
+        return "cpp";
+      case "cs":
+        return "csharp";
+      case "swift":
+        return "swift";
+      case "rb":
+        return "ruby";
+      case "sql":
+        return "sql";
+      case "css":
+        return "css";
+      case "scss":
+        return "scss";
+      case "xml":
+      case "html":
+      case "vue":
+        return "xml";
+      case "yaml":
+      case "yml":
+        return "yaml";
+      case "sh":
+        return "shell";
+      case "gradle":
+        return "gradle";
       case "php":
         return "php";
       case "dart":

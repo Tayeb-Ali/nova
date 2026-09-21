@@ -3,6 +3,7 @@ import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:nova/l10n/generated/app_localizations.dart";
 
 import "../../core/models/project.dart";
+import "new_project_dialog.dart";
 import "workspace_providers.dart";
 
 /// Projects hub: stats ribbon + quick actions + searchable project list.
@@ -133,68 +134,7 @@ class _ProjectsHubScreenState extends ConsumerState<ProjectsHubScreen> {
 
   Future<void> _newProject() async {
     final l10n = AppLocalizations.of(context);
-    final nameController = TextEditingController();
-    var selectedLanguage = "php";
-    final result = await showDialog<(String, String)>(
-      context: context,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setDialogState) => AlertDialog(
-          title: Text(l10n.projectsNewProject),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              TextField(
-                controller: nameController,
-                autofocus: true,
-                decoration: InputDecoration(
-                  hintText: l10n.projectsProjectNameHint,
-                ),
-              ),
-              const SizedBox(height: 16),
-              SegmentedButton<String>(
-                segments: const [
-                  ButtonSegment(
-                    value: "php",
-                    label: Text("PHP"),
-                    icon: Icon(Icons.language),
-                  ),
-                  ButtonSegment(
-                    value: "node",
-                    label: Text("Node"),
-                    icon: Icon(Icons.integration_instructions),
-                  ),
-                  ButtonSegment(
-                    value: "python",
-                    label: Text("Python"),
-                    icon: Icon(Icons.terminal),
-                  ),
-                ],
-                selected: {selectedLanguage},
-                showSelectedIcon: false,
-                onSelectionChanged: (selection) =>
-                    setDialogState(() => selectedLanguage = selection.first),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text(l10n.actionCancel),
-            ),
-            FilledButton(
-              onPressed: () {
-                final name = nameController.text.trim();
-                if (name.isEmpty) return;
-                Navigator.of(context).pop((name, selectedLanguage));
-              },
-              child: Text(l10n.actionCreate),
-            ),
-          ],
-        ),
-      ),
-    );
-    nameController.dispose();
+    final result = await showNewProjectDialog(context);
     if (result == null) return;
     setState(() => _actionBusy = true);
     try {
@@ -542,7 +482,7 @@ class _LanguageChips extends StatelessWidget {
         ),
         for (final language in languages)
           ChoiceChip(
-            label: Text(language),
+            label: Text(displayLanguage(language)),
             selected: selected == language,
             onSelected: (_) => onSelected(language),
           ),
@@ -585,7 +525,7 @@ class _ProjectCard extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.only(top: 4),
                 child: Chip(
-                  label: Text(project.language!),
+                  label: Text(displayLanguage(project.language)),
                   visualDensity: VisualDensity.compact,
                 ),
               ),

@@ -45,6 +45,58 @@ class TaskDetector {
     return tasks;
   }
 
+  Future<String?> detectLanguage(ProjectInfo project) async {
+    try {
+      final entries = await service.listFiles(project.path);
+      return detectProjectLanguage([for (final e in entries) e.name]);
+    } catch (_) {
+      // Project root unreadable or not ready; unknown language.
+      return null;
+    }
+  }
+
+  /// Detects the project language from top-level file basenames.
+  ///
+  /// Pure function, no IO. Matching is case-insensitive and uses
+  /// first-match priority order (see body). Returns null when no
+  /// marker matches. `Makefile` alone is intentionally ignored as
+  /// ambiguous.
+  static String? detectProjectLanguage(List<String> fileNames) {
+    final names = <String>{
+      for (final f in fileNames) _basenameLower(f),
+    };
+    if (names.contains('pubspec.yaml')) return 'dart';
+    if (names.contains('package.json')) return 'node';
+    if (names.contains('cargo.toml')) return 'rust';
+    if (names.contains('go.mod')) return 'go';
+    if (names.contains('composer.json')) return 'php';
+    if (names.contains('requirements.txt') ||
+        names.contains('pyproject.toml') ||
+        names.contains('setup.py')) {
+      return 'python';
+    }
+    if (names.any((n) => n.endsWith('.sln') || n.endsWith('.csproj'))) {
+      return 'csharp';
+    }
+    if (names.contains('gemfile')) return 'ruby';
+    if (names.contains('pom.xml') ||
+        names.any((n) => n.startsWith('build.gradle'))) {
+      return 'java';
+    }
+    if (names.contains('package.swift')) return 'swift';
+    if (names.contains('cmakelists.txt')) return 'cpp';
+    return null;
+  }
+
+  /// Lowercases and strips any directory prefix, so callers may pass
+  /// either basenames or paths without changing the result.
+  static String _basenameLower(String fileName) {
+    final slash = fileName.lastIndexOf(RegExp(r'[/\\]'));
+    final base =
+        slash >= 0 ? fileName.substring(slash + 1) : fileName;
+    return base.toLowerCase();
+  }
+
   Future<void> _collectJsonScripts(
     String filePath,
     List<IdeTask> out, {

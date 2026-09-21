@@ -8,8 +8,11 @@ import "package:re_editor/re_editor.dart";
 class MemberRegistry {
   static const Map<String, String> _assetForLanguage = {
     "javascript": "assets/autocomplete/javascript.json",
+    "typescript": "assets/autocomplete/typescript.json",
     "python": "assets/autocomplete/python.json",
     "dart": "assets/autocomplete/dart.json",
+    "java": "assets/autocomplete/java.json",
+    "go": "assets/autocomplete/go.json",
   };
 
   static final Map<String, Map<String, List<CodePrompt>>> _tables = {};

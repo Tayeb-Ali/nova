@@ -8,6 +8,25 @@ import "package:re_highlight/languages/php.dart";
 import "package:re_highlight/languages/python.dart";
 import "package:re_highlight/languages/json.dart";
 import "package:re_highlight/languages/latex.dart";
+import "package:re_highlight/languages/typescript.dart";
+import "package:re_highlight/languages/java.dart";
+import "package:re_highlight/languages/kotlin.dart";
+import "package:re_highlight/languages/go.dart";
+import "package:re_highlight/languages/rust.dart";
+import "package:re_highlight/languages/c.dart";
+import "package:re_highlight/languages/cpp.dart";
+import "package:re_highlight/languages/csharp.dart";
+import "package:re_highlight/languages/swift.dart";
+import "package:re_highlight/languages/ruby.dart";
+import "package:re_highlight/languages/sql.dart";
+import "package:re_highlight/languages/css.dart";
+import "package:re_highlight/languages/scss.dart";
+import "package:re_highlight/languages/xml.dart";
+import "package:re_highlight/languages/yaml.dart";
+import "package:re_highlight/languages/shell.dart";
+import "package:re_highlight/languages/gradle.dart";
+import "package:re_highlight/languages/dockerfile.dart";
+import "package:re_highlight/languages/makefile.dart";
 
 import "../../core/settings_store.dart";
 import "autocomplete/autocomplete_popup.dart";
@@ -91,6 +110,44 @@ class _ReEditorAdapterState extends ConsumerState<ReEditorAdapter> {
         return langPython;
       case "javascript":
         return langJavascript;
+      case "typescript":
+        return langTypescript;
+      case "java":
+        return langJava;
+      case "kotlin":
+        return langKotlin;
+      case "go":
+        return langGo;
+      case "rust":
+        return langRust;
+      case "c":
+        return langC;
+      case "cpp":
+        return langCpp;
+      case "csharp":
+        return langCsharp;
+      case "swift":
+        return langSwift;
+      case "ruby":
+        return langRuby;
+      case "sql":
+        return langSql;
+      case "css":
+        return langCss;
+      case "scss":
+        return langScss;
+      case "xml":
+        return langXml;
+      case "yaml":
+        return langYaml;
+      case "shell":
+        return langShell;
+      case "gradle":
+        return langGradle;
+      case "dockerfile":
+        return langDockerfile;
+      case "makefile":
+        return langMakefile;
       case "php":
         return langPhp;
       case "dart":

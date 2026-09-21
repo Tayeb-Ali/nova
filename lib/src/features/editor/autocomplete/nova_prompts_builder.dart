@@ -5,6 +5,25 @@ import "package:re_highlight/languages/javascript.dart";
 import "package:re_highlight/languages/json.dart";
 import "package:re_highlight/languages/php.dart";
 import "package:re_highlight/languages/python.dart";
+import "package:re_highlight/languages/typescript.dart";
+import "package:re_highlight/languages/java.dart";
+import "package:re_highlight/languages/kotlin.dart";
+import "package:re_highlight/languages/go.dart";
+import "package:re_highlight/languages/rust.dart";
+import "package:re_highlight/languages/c.dart";
+import "package:re_highlight/languages/cpp.dart";
+import "package:re_highlight/languages/csharp.dart";
+import "package:re_highlight/languages/swift.dart";
+import "package:re_highlight/languages/ruby.dart";
+import "package:re_highlight/languages/sql.dart";
+import "package:re_highlight/languages/css.dart";
+import "package:re_highlight/languages/scss.dart";
+import "package:re_highlight/languages/xml.dart";
+import "package:re_highlight/languages/yaml.dart";
+import "package:re_highlight/languages/shell.dart";
+import "package:re_highlight/languages/gradle.dart";
+import "package:re_highlight/languages/dockerfile.dart";
+import "package:re_highlight/languages/makefile.dart";
 import "package:re_highlight/re_highlight.dart";
 
 import "language_members.dart";
@@ -73,6 +92,63 @@ class NovaPromptsBuilder implements CodeAutocompletePromptsBuilder {
     }
     if (identical(mode, langJavascript)) {
       return "javascript";
+    }
+    if (identical(mode, langTypescript)) {
+      return "typescript";
+    }
+    if (identical(mode, langJava)) {
+      return "java";
+    }
+    if (identical(mode, langKotlin)) {
+      return "kotlin";
+    }
+    if (identical(mode, langGo)) {
+      return "go";
+    }
+    if (identical(mode, langRust)) {
+      return "rust";
+    }
+    if (identical(mode, langC)) {
+      return "c";
+    }
+    if (identical(mode, langCpp)) {
+      return "cpp";
+    }
+    if (identical(mode, langCsharp)) {
+      return "csharp";
+    }
+    if (identical(mode, langSwift)) {
+      return "swift";
+    }
+    if (identical(mode, langRuby)) {
+      return "ruby";
+    }
+    if (identical(mode, langSql)) {
+      return "sql";
+    }
+    if (identical(mode, langCss)) {
+      return "css";
+    }
+    if (identical(mode, langScss)) {
+      return "scss";
+    }
+    if (identical(mode, langXml)) {
+      return "xml";
+    }
+    if (identical(mode, langYaml)) {
+      return "yaml";
+    }
+    if (identical(mode, langShell)) {
+      return "shell";
+    }
+    if (identical(mode, langGradle)) {
+      return "gradle";
+    }
+    if (identical(mode, langDockerfile)) {
+      return "dockerfile";
+    }
+    if (identical(mode, langMakefile)) {
+      return "makefile";
     }
     if (identical(mode, langPhp)) {
       return "php";

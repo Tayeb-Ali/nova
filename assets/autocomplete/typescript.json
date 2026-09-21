@@ -1,0 +1,251 @@
+{
+  "receivers": {
+    "console": {
+      "methods": {
+        "log": "void",
+        "info": "void",
+        "debug": "void",
+        "warn": "void",
+        "error": "void",
+        "table": "void",
+        "assert": "void",
+        "clear": "void",
+        "count": "void",
+        "countReset": "void",
+        "dir": "void",
+        "group": "void",
+        "groupCollapsed": "void",
+        "groupEnd": "void",
+        "time": "void",
+        "timeLog": "void",
+        "timeEnd": "void",
+        "trace": "void"
+      },
+      "fields": {}
+    },
+    "Math": {
+      "methods": {
+        "abs": "number",
+        "ceil": "number",
+        "floor": "number",
+        "round": "number",
+        "trunc": "number",
+        "sign": "number",
+        "max": "number",
+        "min": "number",
+        "pow": "number",
+        "sqrt": "number",
+        "cbrt": "number",
+        "hypot": "number",
+        "random": "number",
+        "log": "number",
+        "log10": "number",
+        "log2": "number",
+        "exp": "number",
+        "sin": "number",
+        "cos": "number",
+        "tan": "number"
+      },
+      "fields": {
+        "PI": "number",
+        "E": "number",
+        "LN2": "number",
+        "LN10": "number",
+        "SQRT2": "number"
+      }
+    },
+    "JSON": {
+      "methods": { "parse": "any", "stringify": "string" },
+      "fields": {}
+    },
+    "Object": {
+      "methods": {
+        "keys": "string[]",
+        "values": "any[]",
+        "entries": "any[][]",
+        "assign": "object",
+        "create": "object",
+        "freeze": "object",
+        "seal": "object",
+        "fromEntries": "object",
+        "hasOwn": "boolean",
+        "getOwnPropertyNames": "string[]"
+      },
+      "fields": {}
+    },
+    "Array": {
+      "methods": { "isArray": "boolean", "from": "any[]", "of": "any[]" },
+      "fields": {}
+    },
+    "String": {
+      "methods": {
+        "fromCharCode": "string",
+        "fromCodePoint": "string",
+        "raw": "string"
+      },
+      "fields": {}
+    },
+    "Number": {
+      "methods": {
+        "isInteger": "boolean",
+        "isNaN": "boolean",
+        "isFinite": "boolean",
+        "isSafeInteger": "boolean",
+        "parseFloat": "number",
+        "parseInt": "number"
+      },
+      "fields": {
+        "MAX_VALUE": "number",
+        "MIN_VALUE": "number",
+        "MAX_SAFE_INTEGER": "number",
+        "EPSILON": "number"
+      }
+    },
+    "Promise": {
+      "methods": {
+        "all": "Promise",
+        "allSettled": "Promise",
+        "any": "Promise",
+        "race": "Promise",
+        "resolve": "Promise",
+        "reject": "Promise"
+      },
+      "fields": {}
+    },
+    "Reflect": {
+      "methods": {
+        "apply": "any",
+        "construct": "any",
+        "defineProperty": "boolean",
+        "deleteProperty": "boolean",
+        "get": "any",
+        "has": "boolean",
+        "set": "boolean",
+        "ownKeys": "any[]"
+      },
+      "fields": {}
+    },
+    "Symbol": {
+      "methods": { "for": "symbol", "keyFor": "string" },
+      "fields": {
+        "iterator": "symbol",
+        "asyncIterator": "symbol",
+        "hasInstance": "symbol",
+        "species": "symbol"
+      }
+    },
+    "Error": {
+      "methods": { "captureStackTrace": "void" },
+      "fields": {
+        "name": "string",
+        "message": "string",
+        "stack": "string"
+      }
+    },
+    "process": {
+      "methods": {
+        "exit": "void",
+        "cwd": "string",
+        "uptime": "number",
+        "hrtime": "any",
+        "memoryUsage": "object",
+        "nextTick": "void",
+        "on": "void"
+      },
+      "fields": {
+        "env": "object",
+        "argv": "string[]",
+        "version": "string",
+        "platform": "string",
+        "pid": "number",
+        "stdout": "stream",
+        "stdin": "stream",
+        "stderr": "stream"
+      }
+    },
+    "module": {
+      "methods": {},
+      "fields": { "exports": "any" }
+    },
+    "document": {
+      "methods": {
+        "getElementById": "Element",
+        "querySelector": "Element",
+        "querySelectorAll": "Element[]",
+        "createElement": "Element",
+        "createTextNode": "Text",
+        "addEventListener": "void",
+        "removeEventListener": "void"
+      },
+      "fields": {
+        "body": "Element",
+        "head": "Element",
+        "title": "string",
+        "cookie": "string"
+      }
+    },
+    "window": {
+      "methods": {
+        "alert": "void",
+        "confirm": "boolean",
+        "prompt": "string",
+        "fetch": "Promise",
+        "setTimeout": "number",
+        "setInterval": "number",
+        "clearTimeout": "void",
+        "clearInterval": "void",
+        "open": "Window",
+        "close": "void",
+        "addEventListener": "void"
+      },
+      "fields": {
+        "localStorage": "Storage",
+        "sessionStorage": "Storage",
+        "location": "Location",
+        "navigator": "Navigator",
+        "document": "Document",
+        "innerWidth": "number",
+        "innerHeight": "number"
+      }
+    },
+    "localStorage": {
+      "methods": {
+        "getItem": "string",
+        "setItem": "void",
+        "removeItem": "void",
+        "clear": "void",
+        "key": "string"
+      },
+      "fields": { "length": "number" }
+    },
+    "sessionStorage": {
+      "methods": {
+        "getItem": "string",
+        "setItem": "void",
+        "removeItem": "void",
+        "clear": "void",
+        "key": "string"
+      },
+      "fields": { "length": "number" }
+    },
+    "location": {
+      "methods": { "reload": "void", "assign": "void", "replace": "void" },
+      "fields": {
+        "href": "string",
+        "hostname": "string",
+        "pathname": "string",
+        "search": "string",
+        "hash": "string"
+      }
+    },
+    "navigator": {
+      "methods": {},
+      "fields": {
+        "userAgent": "string",
+        "language": "string",
+        "onLine": "boolean",
+        "clipboard": "object"
+      }
+    }
+  }
+}

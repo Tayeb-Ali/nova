@@ -199,6 +199,8 @@ const Map<String, String> _languageIdAliases = {
   "py": "python",
   "js": "javascript",
   "ts": "javascript",
+  "tsx": "javascript",
+  "mts": "javascript",
 };
 
 /// Normalizes a user supplied language id ("Dart", " py ", ...) to the
