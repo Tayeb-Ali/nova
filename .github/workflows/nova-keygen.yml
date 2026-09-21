@@ -36,8 +36,19 @@ jobs:
           chmod 700 "${workdir}"
           export GNUPGHOME="${workdir}"
 
-          gpg --batch --pinentry-mode loopback --quick-generate-key \
-            'Nova APT Repository <apt@nova-ide.local>' rsa4096 sign,encrypt 5y
+          # %no-protection = no passphrase, so `--batch` never prompts for
+          # input (the "can't get input" failure of --quick-generate-key).
+          cat > "${RUNNER_TEMP}/key.params" <<'EOF'
+Key-Type: RSA
+Key-Length: 4096
+Key-Usage: sign
+Name-Real: Nova APT Repository
+Name-Email: apt@nova-ide.local
+Expire-Date: 5y
+%no-protection
+%commit
+EOF
+          gpg --batch --pinentry-mode loopback --gen-key "${RUNNER_TEMP}/key.params"
           fpr="$(gpg --batch --with-colons --list-keys | awk -F: '/^fpr:/{print $10; exit}')"
           echo "fingerprint=${fpr}" >> "${GITHUB_OUTPUT}"
           echo "${fpr}" > "${RUNNER_TEMP}/nova-fingerprint.txt"
