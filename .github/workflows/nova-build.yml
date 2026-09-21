@@ -76,31 +76,30 @@ jobs:
           # With a custom app package name build-package.sh -i is disabled, so
           # every dependency including termux-am is built from source. Its
           # Gradle build pins platforms;android-33 + build-tools;30.0.3, which
-          # the package-builder image does not ship (it ships 35/28/24 + 37).
-          # AGP auto-install fails with "Failed to read or create install
-          # properties file" inside the container, so pre-install both
-          # components before building anything.
-          # Two traps:
-          #  1. The SDK in the image is owned by root, and run-docker.sh skips
-          #     its chown step on CI runners (uid == 1001). sdkmanager then
-          #     cannot create install properties files.
-          #  2. The restricted AppArmor profile blocks setuid, so 'sudo'
-          #     panics; we cannot chown from inside the exec.
-          # Fix: start the persistent container via run-docker.sh, chown as
-          # root with docker exec (same container, so the fix persists), then
-          # run sdkmanager as the normal container user.
-          ./scripts/run-docker.sh true
-          docker exec -u root termux-package-builder \
-            chown -R builder:builder /home/builder/lib
+          # the package-builder image does not ship (it ships 35/28/24 + 37),
+          # and AGP's auto-install cannot write into the image's read-only SDK
+          # dir (/home/builder/lib/... - even root can't chown it - "Failed to
+          # read or create install properties file").
+          # Fix: stand up a brand-new writable SDK root owned by the builder
+          # user, install the two components there with the image's own
+          # sdkmanager, and remember the path for the build step below.
+          # properties.sh assigns ANDROID_HOME with ':=' so a pre-exported
+          # value survives into build-bootstraps.sh.
           ./scripts/run-docker.sh bash -c '
             set -euo pipefail
+            export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+            export PATH="$JAVA_HOME/bin:$PATH"
             REV="$(grep -m1 "^TERMUX_SDK_REVISION=" scripts/properties.sh | cut -d= -f2 | tr -d "[:space:]")"
-            export ANDROID_HOME="/home/builder/lib/android-sdk-${REV:-9123335}"
-            SDKMANAGER="$(command -v sdkmanager || find "$ANDROID_HOME" -type f -name sdkmanager | head -1)"
+            IMAGE_SDK="/home/builder/lib/android-sdk-${REV:-9123335}"
+            NOVA_SDK="/home/builder/android-sdk-nova"
+            mkdir -p "$NOVA_SDK"
+            SDKMANAGER="$(command -v sdkmanager || find "$IMAGE_SDK" -type f -name sdkmanager | head -1)"
             test -n "$SDKMANAGER"
-            "$SDKMANAGER" --sdk_root="$ANDROID_HOME" "platforms;android-33" "build-tools;30.0.3"
-            ls "$ANDROID_HOME/platforms/android-33" >/dev/null
-            ls "$ANDROID_HOME/build-tools/30.0.3" >/dev/null
+            yes | "$SDKMANAGER" --sdk_root="$NOVA_SDK" --licenses >/dev/null 2>&1 || true
+            "$SDKMANAGER" --sdk_root="$NOVA_SDK" "platforms;android-33" "build-tools;30.0.3"
+            ls "$NOVA_SDK/platforms/android-33" >/dev/null
+            ls "$NOVA_SDK/build-tools/30.0.3" >/dev/null
+            echo "$NOVA_SDK" > /tmp/nova_android_home
           '
 
       - name: Build bootstraps + packages (aarch64 + x86_64, docker)
@@ -114,10 +113,17 @@ jobs:
           # "$TERMUX_BUILT_PACKAGES_DIRECTORY_FOR_ARCH"/* which is not set yet at
           # that point inside run-docker.sh, expanding to 'rm -f /*'. The runner
           # is always a fresh VM + fresh clone, so a clean is unnecessary anyway.
-          ./scripts/run-docker.sh ./scripts/build-bootstraps.sh \
-            --architectures aarch64,x86_64 \
-            --add "nodejs,npm,python,python-pip,python-ensurepip-wheels,git,php,composer,openssh"
-          ls -la bootstrap-*.zip
+          # ANDROID_HOME must point at the writable SDK root from the previous
+          # step (properties.sh keeps a pre-exported value because it uses ':=').
+          ./scripts/run-docker.sh bash -c '
+            set -euo pipefail
+            export ANDROID_HOME="$(cat /tmp/nova_android_home)"
+            test -d "$ANDROID_HOME/platforms/android-33"
+            ./scripts/build-bootstraps.sh \
+              --architectures aarch64,x86_64 \
+              --add "nodejs,npm,python,python-pip,python-ensurepip-wheels,git,php,composer,openssh"
+            ls -la bootstrap-*.zip
+          '
 
       - name: Sign debs into an apt repository layout
         working-directory: termux-packages
