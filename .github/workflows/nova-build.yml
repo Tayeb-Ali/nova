@@ -58,6 +58,11 @@ jobs:
           set -euo pipefail
           sed -i 's/^TERMUX_APP__PACKAGE_NAME="com.termux"/TERMUX_APP__PACKAGE_NAME="sd.adaa.codeide"/' scripts/properties.sh
           grep -n '^TERMUX_APP__PACKAGE_NAME' scripts/properties.sh | head -1
+          # Track renames in termux-packages master so build-bootstraps.sh stays
+          # consistent: bzip2 was merged into libbz2 (same binaries+library).
+          # All other ~40 PACKAGES names were validated against the master tree.
+          sed -i 's/PACKAGES+=("bzip2")/PACKAGES+=("libbz2")/' scripts/build-bootstraps.sh
+          grep -n 'libbz2' scripts/build-bootstraps.sh | head -2
 
       - name: Import Nova signing key (from secrets)
         run: |
@@ -121,7 +126,7 @@ jobs:
             test -d "$ANDROID_HOME/platforms/android-33"
             ./scripts/build-bootstraps.sh \
               --architectures aarch64,x86_64 \
-              --add "nodejs,npm,python,python-pip,python-ensurepip-wheels,git,php,composer,openssh"
+              --add "nodejs,npm,python,python-pip,git,php,composer,openssh"
             ls -la bootstrap-*.zip
           '
 
