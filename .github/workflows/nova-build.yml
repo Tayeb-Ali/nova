@@ -76,7 +76,11 @@ jobs:
           set -euo pipefail
           # CI=true + docker daemon shipped on ubuntu-latest; run-docker.sh is
           # what upstream uses in .github/workflows/packages.yml.
-          ./scripts/run-docker.sh ./scripts/build-bootstraps.sh -f \
+          # NOTE: do NOT pass -f. build-bootstraps.sh -f wipes
+          # "$TERMUX_BUILT_PACKAGES_DIRECTORY_FOR_ARCH"/* which is not set yet at
+          # that point inside run-docker.sh, expanding to 'rm -f /*'. The runner
+          # is always a fresh VM + fresh clone, so a clean is unnecessary anyway.
+          ./scripts/run-docker.sh ./scripts/build-bootstraps.sh \
             --architectures aarch64,x86_64 \
             --add "nodejs,npm,python,python-pip,python-ensurepip-wheels,git,php,composer,openssh"
           ls -la bootstrap-*.zip
