@@ -20,6 +20,11 @@
 #define LOGI(...) __android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__)
 #define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__)
 
+/* First-hop exec policy lives in NovaExecLauncher (Kotlin); these spellings
+ * mirror EnvironmentManager.ENV_EXEC_MODE/EXEC_MODE_LINKER/SYSTEM_LINKER. */
+#define NOVA_EXEC_MODE_ENTRY "NOVA_EXEC_MODE=linker"
+#define NOVA_SYSTEM_LINKER "/system/bin/linker64"
+
 typedef struct {
     int master_fd;
     pid_t child_pid;
@@ -73,7 +78,7 @@ static void* reader_thread(void* arg) {
 }
 
 JNIEXPORT jlong JNICALL
-Java_sd_adaa_nova_terminal_PtyNative_nativeOpen(
+Java_sd_adaa_codeide_terminal_PtyNative_nativeOpen(
         JNIEnv* env, jclass clazz,
         jstring exe, jobjectArray argv, jobjectArray envp, jstring cwd,
         jint cols, jint rows) {
@@ -118,6 +123,32 @@ Java_sd_adaa_nova_terminal_PtyNative_nativeOpen(
         }
         extern char** environ;
         environ = envp_c;
+        /* Final execve only — policy lives in NovaExecLauncher (Kotlin).
+         * LD_PRELOAD never covers this first hop, so in linker mode name the
+         * system linker explicitly with the real target as its argument.
+         * exe is always an absolute prefix ELF here (bash); scripts are
+         * handled Kotlin-side. */
+        int linker_mode = 0;
+        for (jsize e = 0; e < envc; e++) {
+            if (strncmp(envp_c[e], NOVA_EXEC_MODE_ENTRY, sizeof(NOVA_EXEC_MODE_ENTRY) - 1) == 0) {
+                linker_mode = 1;
+                break;
+            }
+        }
+        if (linker_mode && exe_c[0] == '/') {
+            char** largv = calloc((size_t)argc + 3, sizeof(char*));
+            if (largv) {
+                largv[0] = (char*)NOVA_SYSTEM_LINKER;
+                largv[1] = (char*)exe_c;
+                for (jsize i = 1; i < argc; i++) largv[i + 1] = argv_c[i];
+                largv[argc + 1] = NULL;
+                LOGI("linker first-hop: %s", exe_c);
+                execve(NOVA_SYSTEM_LINKER, largv, envp_c);
+                perror("execve linker64");
+                free(largv);
+                _exit(127);
+            }
+        }
         execve(exe_c, argv_c, envp_c);
         perror("execve");
         _exit(127);
@@ -150,7 +181,7 @@ Java_sd_adaa_nova_terminal_PtyNative_nativeOpen(
 }
 
 JNIEXPORT jint JNICALL
-Java_sd_adaa_nova_terminal_PtyNative_nativeWrite(
+Java_sd_adaa_codeide_terminal_PtyNative_nativeWrite(
         JNIEnv* env, jclass clazz, jlong handle, jbyteArray data) {
     pty_handle* h = (pty_handle*)(intptr_t)handle;
     if (!h || h->master_fd < 0) return -1;
@@ -162,7 +193,7 @@ Java_sd_adaa_nova_terminal_PtyNative_nativeWrite(
 }
 
 JNIEXPORT jint JNICALL
-Java_sd_adaa_nova_terminal_PtyNative_nativeResize(
+Java_sd_adaa_codeide_terminal_PtyNative_nativeResize(
         JNIEnv* env, jclass clazz, jlong handle, jint cols, jint rows) {
     pty_handle* h = (pty_handle*)(intptr_t)handle;
     if (!h || h->master_fd < 0) return -1;
@@ -175,7 +206,7 @@ Java_sd_adaa_nova_terminal_PtyNative_nativeResize(
 }
 
 JNIEXPORT void JNICALL
-Java_sd_adaa_nova_terminal_PtyNative_nativeSignal(
+Java_sd_adaa_codeide_terminal_PtyNative_nativeSignal(
         JNIEnv* env, jclass clazz, jlong handle, jint signal) {
     pty_handle* h = (pty_handle*)(intptr_t)handle;
     if (!h || h->child_pid <= 0) return;
@@ -183,7 +214,7 @@ Java_sd_adaa_nova_terminal_PtyNative_nativeSignal(
 }
 
 JNIEXPORT void JNICALL
-Java_sd_adaa_nova_terminal_PtyNative_nativeClose(
+Java_sd_adaa_codeide_terminal_PtyNative_nativeClose(
         JNIEnv* env, jclass clazz, jlong handle) {
     pty_handle* h = (pty_handle*)(intptr_t)handle;
     if (!h) return;
@@ -197,7 +228,7 @@ Java_sd_adaa_nova_terminal_PtyNative_nativeClose(
 }
 
 JNIEXPORT void JNICALL
-Java_sd_adaa_nova_terminal_PtyNative_nativeStartReader(
+Java_sd_adaa_codeide_terminal_PtyNative_nativeStartReader(
         JNIEnv* env, jclass clazz, jlong handle, jobject callback) {
     pty_handle* h = (pty_handle*)(intptr_t)handle;
     if (!h) return;

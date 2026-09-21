@@ -56,6 +56,189 @@ object DebugTestHarness {
         }, "nova-comprehensive-test").start()
     }
 
+    /**
+     * Phase 0 linker-exec spike probe.
+     * Trigger via: adb shell am broadcast -a sd.adaa.codeide.DEBUG_LINKER_PROBE -n sd.adaa.codeide/.MainActivity
+     * Forces NOVA_EXEC_MODE=linker (works even with targetSdk 28) and runs
+     * bash/ls/apt through ShellExecutor plus one PTY session, logging
+     * LINKER-PROBE PASS/FAIL lines to NovaTest. Proves the first-hop chain
+     * before any targetSdk bump.
+     */
+    fun runLinkerProbe(context: Context) {
+        Thread({
+            try {
+                Log.i(TAG, "=== Linker-exec probe START (mode=linker, target unchanged) ===")
+                val prefix = EnvironmentManager.prefix(context)
+                val home = EnvironmentManager.home(context).absolutePath
+                val shell = ShellExecutor(context)
+                val linkerEnv = mapOf(
+                    EnvironmentManager.ENV_EXEC_MODE to EnvironmentManager.EXEC_MODE_LINKER
+                )
+                var pass = 0
+                var fail = 0
+                fun check(tag: String, ok: Boolean, detail: String) {
+                    if (ok) { pass++; Log.i(TAG, "[LINKER-PROBE] PASS $tag: $detail") }
+                    else { fail++; Log.e(TAG, "[LINKER-PROBE] FAIL $tag: $detail") }
+                }
+
+                val bash = File(prefix, "bin/bash")
+                val echo = shell.execute(
+                    bash.absolutePath, listOf("-c", "echo LINKER_OK"),
+                    home, linkerEnv, 15_000,
+                )
+                check("bash-echo", echo.getOrNull()?.contains("LINKER_OK") == true,
+                    echo.getOrElse { it.message ?: "error" }.trim().take(120))
+
+                val ls = shell.execute(
+                    File(prefix, "bin/ls").absolutePath,
+                    listOf(File(prefix, "bin").absolutePath),
+                    home, linkerEnv, 15_000,
+                )
+                check("ls", ls.getOrNull()?.contains("bash") == true,
+                    ls.getOrNull()?.lineSequence()?.count()?.toString()?.plus(" entries")
+                        ?: ls.exceptionOrNull()?.message?.take(120) ?: "error")
+
+                val apt = shell.execute(
+                    File(prefix, "bin/apt").absolutePath, listOf("--version"),
+                    home, linkerEnv, 15_000,
+                )
+                val aptOut = apt.getOrElse { it.message ?: "" }
+                check("apt", aptOut.contains("apt"),
+                    aptOut.lineSequence().firstOrNull { it.contains("apt") }?.take(120) ?: "no apt output")
+
+                // PTY session in linker mode (first hop via pty.c rewrite).
+                try {
+                    val tm = TerminalManager(context)
+                    val sid = tm.createSession(
+                        home, 80, 24, EnvironmentManager.EXEC_MODE_LINKER
+                    )
+                    tm.write(sid, "echo PTY_LINKER_OK\n")
+                    Thread.sleep(800)
+                    tm.close(sid)
+                    check("pty-open", true, "session $sid opened+wrote+closed without exception")
+                } catch (e: Throwable) {
+                    check("pty-open", false, "${e.message}")
+                }
+
+                Log.i(TAG, "=== Linker-exec probe DONE: $pass PASS, $fail FAIL ===")
+            } catch (e: Throwable) {
+                Log.e(TAG, "Linker probe failed: ${e.message}", e)
+            }
+        }, "nova-linker-probe").start()
+    }
+
+    /**
+     * Full 0A–0F matrix on the live device (target 36): apt update, install
+     * nodejs+python through the linker, run node/python hellos, nested exec
+     * through LD_PRELOAD, and direct shebang-script exec.
+     * Trigger: `adb shell am start -n sd.adaa.codeide/.MainActivity --es nova_probe full`
+     */
+    fun runFullProbe(context: Context) {
+        Thread({
+            try {
+                Log.i(TAG, "=== Full linker matrix START (mode=linker, target 36) ===")
+                val prefix = EnvironmentManager.prefix(context)
+                val home = EnvironmentManager.home(context)
+                val testDir = File(home, "nova_linker_matrix")
+                testDir.mkdirs()
+                val shell = ShellExecutor(context)
+                val cwd = testDir.absolutePath
+                val linkerEnv = mapOf(
+                    EnvironmentManager.ENV_EXEC_MODE to EnvironmentManager.EXEC_MODE_LINKER
+                )
+                var pass = 0
+                var fail = 0
+                fun check(tag: String, ok: Boolean, detail: String) {
+                    if (ok) { pass++; Log.i(TAG, "[MATRIX] PASS $tag: $detail") }
+                    else { fail++; Log.e(TAG, "[MATRIX] FAIL $tag: $detail") }
+                }
+
+                // Nested exec: bash children (ls, wc) spawn through LD_PRELOAD.
+                // NOTE: full output logged untruncated for diagnosis.
+                // Experiment: force the preload's system-linker mode explicitly
+                // (bundled .so is com.termux-built; default gating may reject
+                // Nova paths). Isolated variable for the nested call only.
+                val nestedEnv = linkerEnv +
+                    ("TERMUX_EXEC__SYSTEM_LINKER_EXEC__MODE" to "force")
+                val nested = shell.execute(
+                    File(prefix, "bin/bash").absolutePath,
+                    listOf("-c", "ls \$PREFIX/bin | wc -l"),
+                    cwd, nestedEnv, 30_000,
+                )
+                val nestedOut = nested.getOrNull()?.trim() ?: ""
+                check("nested-exec",
+                    nestedOut.toIntOrNull()?.let { it > 100 } == true,
+                    "out=[" + nestedOut + "] err=[" +
+                        (nested.exceptionOrNull()?.message ?: "") + "]")
+
+                // Shebang direct exec: script resolved to interpreter by NovaExecLauncher.
+                val script = File(testDir, "shebang_probe.sh")
+                script.writeText("#!/usr/bin/env sh\necho SHEBANG_OK\n")
+                shell.execute(File(prefix, "bin/chmod").absolutePath,
+                    listOf("+x", script.absolutePath), cwd, linkerEnv, 15_000)
+                var shebangDetail = ""
+                var shebangOk = false
+                try {
+                    val res = shell.execute(script.absolutePath, emptyList(), cwd, linkerEnv, 15_000)
+                    shebangOk = res.getOrNull()?.contains("SHEBANG_OK") == true
+                    shebangDetail = "out=[" + (res.getOrNull() ?: "") + "] err=[" +
+                        (res.exceptionOrNull()?.toString() ?: "") + "]"
+                } catch (e: Throwable) {
+                    var c: Throwable? = e
+                    val chain = StringBuilder()
+                    while (c != null) {
+                        chain.append(c.javaClass.name).append(": ").append(c.message).append(" <- ")
+                        c = c.cause
+                    }
+                    shebangDetail = "thrown=[" + chain.toString() + "]"
+                }
+                check("shebang", shebangOk, shebangDetail)
+
+                // Apt update output (not ignored here) + lists dir census.
+                val aptUpdate = shell.execute(
+                    File(prefix, "bin/apt").absolutePath, listOf("update"),
+                    cwd, linkerEnv, 120_000,
+                )
+                val listsDir = File(home, "../cache/apt/lists")
+                val listsCount = listsDir.listFiles()?.size ?: -1
+                Log.i(TAG, "[MATRIX] apt-update ok=" + aptUpdate.isSuccess +
+                    " lists=" + listsCount + " head=[" +
+                    aptUpdate.getOrElse { it.message ?: "" }.trim().take(300) + "]")
+
+                // Node + Python via RuntimeManager in linker mode.
+                for (id in listOf("node", "python")) {
+                    val ok = tryInstallRuntime(id, EnvironmentManager.EXEC_MODE_LINKER)
+                    check("install-$id", ok, if (ok) "installed" else "install failed - needs network")
+                    if (!ok) continue
+                }
+                val nodeBin = File(prefix, "bin/node")
+                if (nodeBin.exists()) {
+                    File(testDir, "m_hello.js").writeText("console.log('node-hello:'+process.version);")
+                    val out = shell.execute(nodeBin.absolutePath,
+                        listOf(File(testDir, "m_hello.js").absolutePath), cwd, linkerEnv, 30_000)
+                    check("node", out.getOrNull()?.contains("node-hello") == true,
+                        out.getOrElse { it.message ?: "error" }.trim().take(120))
+                } else {
+                    check("node", false, "bin/node missing after install attempt")
+                }
+                val pyBin = File(prefix, "bin/python3").let { if (it.exists()) it else File(prefix, "bin/python") }
+                if (pyBin.exists()) {
+                    File(testDir, "m_hello.py").writeText("print('python-hello')")
+                    val out = shell.execute(pyBin.absolutePath,
+                        listOf(File(testDir, "m_hello.py").absolutePath), cwd, linkerEnv, 30_000)
+                    check("python", out.getOrNull()?.contains("python-hello") == true,
+                        out.getOrElse { it.message ?: "error" }.trim().take(120))
+                } else {
+                    check("python", false, "python binary missing after install attempt")
+                }
+
+                Log.i(TAG, "=== Full linker matrix DONE: $pass PASS, $fail FAIL ===")
+            } catch (e: Throwable) {
+                Log.e(TAG, "Full matrix failed: ${e.message}", e)
+            }
+        }, "nova-linker-matrix").start()
+    }
+
     private fun testBash(context: Context, prefix: File) {
         val shell = ShellExecutor(context)
         val env = EnvironmentManager.buildEnvironment(context)
@@ -274,7 +457,7 @@ object DebugTestHarness {
         }
     }
 
-    private fun tryInstallRuntime(id: String): Boolean {
+    private fun tryInstallRuntime(id: String, execMode: String = EnvironmentManager.EXEC_MODE_DIRECT): Boolean {
         return try {
             val latch = CountDownLatch(1)
             var success = false
@@ -285,7 +468,8 @@ object DebugTestHarness {
                         onSuccess = { Log.i(TAG, "[INSTALL-$id] DONE OK"); success = true; latch.countDown() },
                         onFailure = { e -> Log.e(TAG, "[INSTALL-$id] FAILED: ${e.message}"); latch.countDown() }
                     )
-                }
+                },
+                execMode = execMode,
             )
             // Wait up to 5 minutes for apt install (node/python are a few MB)
             val completed = latch.await(5, TimeUnit.MINUTES)

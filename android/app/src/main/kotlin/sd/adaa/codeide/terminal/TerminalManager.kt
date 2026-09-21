@@ -34,15 +34,20 @@ class TerminalManager(private val context: Context) {
         ensureFlusher()
     }
 
-    fun createSession(cwd: String, cols: Int, rows: Int): String {
+    fun createSession(cwd: String, cols: Int, rows: Int, execMode: String = EnvironmentManager.EXEC_MODE_DIRECT): String {
         val id = UUID.randomUUID().toString()
         val workDir =
             if (File(cwd).isDirectory) cwd else EnvironmentManager.home(context).absolutePath
-        val envp = EnvironmentManager.buildEnvironment(context)
+        val envp = EnvironmentManager.buildEnvironment(context, execMode = execMode)
             .map { "${it.key}=${it.value}" }
             .toTypedArray()
         val handle = PtyNative.nativeOpen(bashPath, arrayOf(bashPath), envp, workDir, cols, rows)
-        if (handle <= 0L) error("Failed to open PTY for $bashPath")
+        // NOTE: the handle is an opaque native pointer, NOT a small int.
+        // On modern devices the pointer's high bit is routinely set, so it
+        // reads negative as a signed Long. Only -1 (forkpty failure from the
+        // JNI shim) is an error; any other bit pattern round-trips back to
+        // native intact.
+        if (handle == -1L) error("Failed to open PTY for $bashPath")
 
         val session = SessionHandle(id, handle)
         sessions[id] = session

@@ -42,6 +42,14 @@ android {
         }
     }
 
+    flavorDimensions += "spike"
+    productFlavors {
+        create("target36spike") {
+            dimension = "spike"
+            targetSdk = 36
+        }
+    }
+
     externalNativeBuild {
         cmake {
             path = file("src/main/cpp/CMakeLists.txt")

@@ -20,12 +20,25 @@ class MainActivity : FlutterActivity() {
         super.configureFlutterEngine(flutterEngine)
         IdeCore.init(applicationContext)
         AllApis.register(flutterEngine.dartExecutor.binaryMessenger, applicationContext)
-        IdeService.start(this)
+        // Never let FGS startup crash the activity: on targetSdk 34+ a
+        // background launch (adb, boot, some OEM paths) throws
+        // ForegroundServiceStartNotAllowedException here. The service is
+        // best-effort keep-alive; terminals/processes still work, and the
+        // service is (re)started on user-initiated session creation.
+        try {
+            IdeService.start(this)
+        } catch (e: Exception) {
+            Log.w("IdeService", "deferred foreground start: ${e.message}")
+        }
     }
 
     override fun onCreate(savedInstanceState: android.os.Bundle?) {
         super.onCreate(savedInstanceState)
+        intent?.extras?.keySet()?.takeIf { it.isNotEmpty() }?.let {
+            Log.i("NovaTest", "onCreate extras=" + it.joinToString())
+        }
         ensureNotificationPermission()
+        checkLinkerProbeIntent(intent)
         // Debug: trigger setup via `adb shell am broadcast -a sd.adaa.codeide.DEBUG_SETUP -n sd.adaa.codeide/.MainActivity`
         val filter = IntentFilter("sd.adaa.codeide.DEBUG_SETUP")
         registerReceiver(object : BroadcastReceiver() {
@@ -63,6 +76,40 @@ class MainActivity : FlutterActivity() {
                 sd.adaa.codeide.runtime.RuntimeApiImpl.installRuntime(id)
             }
         }, installFilter, RECEIVER_EXPORTED)
+
+        // Phase 0 linker-exec spike probe (debug only; stripped in the Play
+        // flavor later): forces NOVA_EXEC_MODE=linker with targetSdk still 28.
+        // `adb shell am broadcast -a sd.adaa.codeide.DEBUG_LINKER_PROBE -n sd.adaa.codeide/.MainActivity`
+        val probeFilter = IntentFilter("sd.adaa.codeide.DEBUG_LINKER_PROBE")
+        registerReceiver(object : BroadcastReceiver() {
+            override fun onReceive(ctx: android.content.Context, intent: Intent?) {
+                Log.i("NovaTest", "DEBUG_LINKER_PROBE received")
+                DebugTestHarness.runLinkerProbe(ctx)
+            }
+        }, probeFilter, RECEIVER_EXPORTED)
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        checkLinkerProbeIntent(intent)
+    }
+
+    /**
+     * Deterministic Phase-0 probe trigger (broadcasts are unreliable on some
+     * OEM skins when the app is backgrounded):
+     * `adb shell am start -n sd.adaa.codeide/.MainActivity --es nova_linker_probe true`
+     */
+    private fun checkLinkerProbeIntent(intent: Intent?) {
+        if (intent?.getStringExtra("nova_probe") == "full") {
+            Log.i("NovaTest", "full matrix requested via start intent")
+            DebugTestHarness.runFullProbe(this)
+            return
+        }
+        if (intent?.getBooleanExtra("nova_linker_probe", false) == true) {
+            Log.i("NovaTest", "linker probe requested via start intent")
+            DebugTestHarness.runLinkerProbe(this)
+        }
     }
 
     private fun ensureNotificationPermission() {

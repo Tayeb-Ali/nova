@@ -27,6 +27,18 @@ object EnvironmentManager {
 
     const val EVENTS_CHANNEL = "sd.adaa.codeide/events"
 
+    /**
+     * First-hop execution mode for spawned prefix binaries.
+     * Phase 0 linker-exec spike: `direct` preserves current behavior exactly;
+     * `linker` routes the first hop through `/system/bin/linker64` so the
+     * kernel only ever sees a system binary being exec'd (the mechanism the
+     * target-36 model will rely on). Opt-in only — default is `direct`.
+     */
+    const val EXEC_MODE_DIRECT = "direct"
+    const val EXEC_MODE_LINKER = "linker"
+    const val ENV_EXEC_MODE = "NOVA_EXEC_MODE"
+    const val SYSTEM_LINKER = "/system/bin/linker64"
+
     fun filesDir(context: Context): File = context.filesDir
 
     fun prefix(context: Context): File = File(filesDir(context), "usr")
@@ -74,7 +86,7 @@ object EnvironmentManager {
     /**
      * Environment for every spawned shell/process (task.md §18 §19).
      */
-    fun buildEnvironment(context: Context, projectPath: String? = null): Map<String, String> {
+    fun buildEnvironment(context: Context, projectPath: String? = null, execMode: String = EXEC_MODE_DIRECT): Map<String, String> {
         val prefix = prefix(context)
         val home = home(context)
         val base = mapOf(
@@ -90,6 +102,7 @@ object EnvironmentManager {
             "TERMUX_MAIN_PACKAGE_FORMAT" to "debian",
             "ANDROID_DATA" to "/data",
             "EXTERNAL_STORAGE" to "/sdcard",
+            ENV_EXEC_MODE to execMode,
         )
         return if (projectPath != null) {
             base + mapOf("APP_WORKSPACE" to projectPath)

@@ -42,8 +42,14 @@ class RuntimeManager(
     }
 
     /** Downloads + unpacks a runtime and its dependency closure into PREFIX. */
-    fun install(id: String, onProgress: (String) -> Unit, done: (Result<Unit>) -> Unit) {
+    fun install(
+        id: String,
+        onProgress: (String) -> Unit,
+        done: (Result<Unit>) -> Unit,
+        execMode: String = EnvironmentManager.EXEC_MODE_DIRECT,
+    ) {
         val def = byId(id)
+        val env = EnvironmentManager.buildEnvironment(context, execMode = execMode)
         onProgress("apt update")
         runCatching {
             shell.execute(File(prefix, "bin/apt").absolutePath, listOf("update"), cwd.absolutePath, env, 120_000)
@@ -88,8 +94,14 @@ class RuntimeManager(
             .onFailure { done(Result.failure(it)) }
     }
 
-    fun update(id: String, onProgress: (String) -> Unit, done: (Result<Unit>) -> Unit) {
+    fun update(
+        id: String,
+        onProgress: (String) -> Unit,
+        done: (Result<Unit>) -> Unit,
+        execMode: String = EnvironmentManager.EXEC_MODE_DIRECT,
+    ) {
         val def = byId(id)
+        val env = EnvironmentManager.buildEnvironment(context, execMode = execMode)
         onProgress("apt update")
         runCatching {
             shell.execute(File(prefix, "bin/apt").absolutePath, listOf("update"), cwd.absolutePath, env, 120_000)
