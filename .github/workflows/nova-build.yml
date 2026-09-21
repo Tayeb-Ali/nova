@@ -69,7 +69,7 @@ jobs:
           # Fails loudly if the fingerprint does not match the imported key.
           gpg --batch --fingerprint "${{ secrets.NOVA_GPG_FINGERPRINT }}" >/dev/null
 
-      - name: Install SDK deps termux-am needs (root, inside builder image)
+      - name: Install SDK deps termux-am needs (inside builder image)
         working-directory: termux-packages
         run: |
           set -euo pipefail
@@ -79,15 +79,17 @@ jobs:
           # the package-builder image does not ship (it ships 35/28/24 + 37).
           # AGP auto-install fails with "Failed to read or create install
           # properties file" inside the container, so pre-install both
-          # components as root before building anything.
+          # components before building anything.
+          # NOTE: run-docker.sh execs as the container user (builder). Its
+          # restricted AppArmor profile blocks setuid, so 'sudo' panics here -
+          # run sdkmanager directly as the current user instead.
           ./scripts/run-docker.sh bash -c '
             set -euo pipefail
             REV="$(grep -m1 "^TERMUX_SDK_REVISION=" scripts/properties.sh | cut -d= -f2 | tr -d "[:space:]")"
             export ANDROID_HOME="/home/builder/lib/android-sdk-${REV:-9123335}"
             SDKMANAGER="$(command -v sdkmanager || find "$ANDROID_HOME" -type f -name sdkmanager | head -1)"
             test -n "$SDKMANAGER"
-            yes | sudo -E "$SDKMANAGER" --sdk_root="$ANDROID_HOME" --licenses >/dev/null 2>&1 || true
-            sudo -E "$SDKMANAGER" --sdk_root="$ANDROID_HOME" "platforms;android-33" "build-tools;30.0.3"
+            "$SDKMANAGER" --sdk_root="$ANDROID_HOME" "platforms;android-33" "build-tools;30.0.3"
             ls "$ANDROID_HOME/platforms/android-33" >/dev/null
             ls "$ANDROID_HOME/build-tools/30.0.3" >/dev/null
           '
