@@ -80,9 +80,18 @@ jobs:
           # AGP auto-install fails with "Failed to read or create install
           # properties file" inside the container, so pre-install both
           # components before building anything.
-          # NOTE: run-docker.sh execs as the container user (builder). Its
-          # restricted AppArmor profile blocks setuid, so 'sudo' panics here -
-          # run sdkmanager directly as the current user instead.
+          # Two traps:
+          #  1. The SDK in the image is owned by root, and run-docker.sh skips
+          #     its chown step on CI runners (uid == 1001). sdkmanager then
+          #     cannot create install properties files.
+          #  2. The restricted AppArmor profile blocks setuid, so 'sudo'
+          #     panics; we cannot chown from inside the exec.
+          # Fix: start the persistent container via run-docker.sh, chown as
+          # root with docker exec (same container, so the fix persists), then
+          # run sdkmanager as the normal container user.
+          ./scripts/run-docker.sh true
+          docker exec -u root termux-package-builder \
+            chown -R builder:builder /home/builder/lib
           ./scripts/run-docker.sh bash -c '
             set -euo pipefail
             REV="$(grep -m1 "^TERMUX_SDK_REVISION=" scripts/properties.sh | cut -d= -f2 | tr -d "[:space:]")"
