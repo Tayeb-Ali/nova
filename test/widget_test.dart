@@ -13,6 +13,11 @@ void main() {
   });
 
   testWidgets('NovaApp boots into the IDE shell', (WidgetTester tester) async {
+    // Phone-sized viewport: bottom navigation. (Wide viewports render a
+    // NavigationRail instead; covered by layout logic, not here.)
+    tester.view.physicalSize = const Size(360, 800);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(() => tester.view.resetPhysicalSize());
     await tester.pumpWidget(const ProviderScope(child: NovaApp()));
     // Let the first frame and any post-frame providers settle.
     await tester.pump();

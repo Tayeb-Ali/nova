@@ -36,9 +36,12 @@ void main() {
     SharedPreferences.setMockInitialValues({});
   });
 
-  testWidgets('run panel collapsed does not overflow', (WidgetTester tester) async {
-    await tester.binding.setSurfaceSize(const Size(360, 800));
-    addTearDown(() => tester.binding.setSurfaceSize(null));
+  testWidgets('run panel collapsed does not overflow', (
+    WidgetTester tester,
+  ) async {
+    tester.view.physicalSize = const Size(360, 800);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(() => tester.view.resetPhysicalSize());
 
     await tester.pumpWidget(
       ProviderScope(
@@ -48,6 +51,10 @@ void main() {
         child: const NovaApp(),
       ),
     );
+    await tester.pump(const Duration(seconds: 1));
+
+    // The shell boots on the Projects hub; switch to the Editor tab first.
+    await tester.tap(find.text("Editor"));
     await tester.pump(const Duration(seconds: 1));
 
     // Collapse the console via the toggle IconButton.

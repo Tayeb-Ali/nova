@@ -46,7 +46,7 @@ void main() {
     final log = <_RecordedCall>[];
     _mockPigeonChannel(
       messenger: messenger,
-      channelName: 'dev.flutter.pigeon.nova.RuntimeApi.getRuntimes',
+      channelName: 'dev.flutter.pigeon.codeide.RuntimeApi.getRuntimes',
       codec: bridge.RuntimeApi.pigeonChannelCodec,
       log: log,
       replyFor: (args) {
@@ -73,10 +73,7 @@ void main() {
     final runtimes = await RuntimeService().getRuntimes();
 
     expect(log, hasLength(1));
-    expect(
-      log.single.channel.endsWith('RuntimeApi.getRuntimes'),
-      isTrue,
-    );
+    expect(log.single.channel.endsWith('RuntimeApi.getRuntimes'), isTrue);
     expect(runtimes, hasLength(2));
     final php = runtimes[0];
     expect(php.id, 'php');
@@ -96,7 +93,7 @@ void main() {
     final log = <_RecordedCall>[];
     _mockPigeonChannel(
       messenger: messenger,
-      channelName: 'dev.flutter.pigeon.nova.RuntimeApi.installRuntime',
+      channelName: 'dev.flutter.pigeon.codeide.RuntimeApi.installRuntime',
       codec: bridge.RuntimeApi.pigeonChannelCodec,
       log: log,
       replyFor: (args) => <Object?>[null],

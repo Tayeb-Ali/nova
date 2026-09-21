@@ -1,0 +1,133 @@
+{
+  "receivers": {
+    "os": {
+      "methods": {
+        "getcwd": "str",
+        "listdir": "list",
+        "makedirs": "None",
+        "remove": "None",
+        "rename": "None",
+        "system": "int",
+        "getenv": "str",
+        "walk": "generator"
+      },
+      "fields": {
+        "environ": "dict",
+        "sep": "str",
+        "linesep": "str",
+        "name": "str"
+      }
+    },
+    "path": {
+      "methods": {
+        "join": "str",
+        "exists": "bool",
+        "abspath": "str",
+        "dirname": "str",
+        "basename": "str",
+        "splitext": "tuple",
+        "isfile": "bool",
+        "isdir": "bool",
+        "getsize": "int",
+        "expanduser": "str",
+        "relpath": "str"
+      },
+      "fields": {}
+    },
+    "sys": {
+      "methods": { "exit": "None" },
+      "fields": {
+        "argv": "list",
+        "path": "list",
+        "version": "str",
+        "platform": "str",
+        "stdin": "file",
+        "stdout": "file",
+        "stderr": "file",
+        "modules": "dict",
+        "executable": "str",
+        "maxsize": "int"
+      }
+    },
+    "json": {
+      "methods": {
+        "load": "Any",
+        "loads": "Any",
+        "dump": "None",
+        "dumps": "str"
+      },
+      "fields": {}
+    },
+    "math": {
+      "methods": {
+        "sqrt": "float",
+        "floor": "int",
+        "ceil": "int",
+        "pow": "float",
+        "factorial": "int",
+        "gcd": "int",
+        "log": "float",
+        "log10": "float",
+        "exp": "float",
+        "sin": "float",
+        "cos": "float"
+      },
+      "fields": {
+        "pi": "float",
+        "e": "float",
+        "tau": "float",
+        "inf": "float"
+      }
+    },
+    "re": {
+      "methods": {
+        "search": "Match",
+        "match": "Match",
+        "fullmatch": "Match",
+        "findall": "list",
+        "finditer": "iterator",
+        "sub": "str",
+        "split": "list",
+        "compile": "Pattern"
+      },
+      "fields": {
+        "IGNORECASE": "flag",
+        "MULTILINE": "flag",
+        "DOTALL": "flag"
+      }
+    },
+    "random": {
+      "methods": {
+        "random": "float",
+        "randint": "int",
+        "choice": "Any",
+        "shuffle": "None",
+        "sample": "list",
+        "uniform": "float",
+        "seed": "None"
+      },
+      "fields": {}
+    },
+    "datetime": {
+      "methods": {},
+      "fields": {
+        "date": "class",
+        "time": "class",
+        "datetime": "class",
+        "timedelta": "class",
+        "timezone": "class"
+      }
+    },
+    "requests": {
+      "methods": {
+        "get": "Response",
+        "post": "Response",
+        "put": "Response",
+        "delete": "Response",
+        "patch": "Response",
+        "head": "Response"
+      },
+      "fields": {}
+    }
+  }
+}

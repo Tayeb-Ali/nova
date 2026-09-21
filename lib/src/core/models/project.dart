@@ -17,6 +17,14 @@ class ProjectInfo {
         path: p.path,
         language: p.language,
       );
+
+  ProjectInfo copyWith({String? name, String? path, String? language}) {
+    return ProjectInfo(
+      name: name ?? this.name,
+      path: path ?? this.path,
+      language: language ?? this.language,
+    );
+  }
 }
 
 /// A file system entry returned by the explorer.

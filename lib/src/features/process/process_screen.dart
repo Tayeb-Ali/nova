@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:nova/l10n/generated/app_localizations.dart';
 
 import '../../core/models/process_info.dart';
 import '../../core/services/process_service.dart';
@@ -46,10 +47,7 @@ class _ProcessScreenState extends State<ProcessScreen> {
         _outputs.remove(event.pid);
         _error = null;
       } else if (event.output.isNotEmpty) {
-        final buffer = _outputs.putIfAbsent(
-          event.pid,
-          () => StringBuffer(),
-        );
+        final buffer = _outputs.putIfAbsent(event.pid, () => StringBuffer());
         if (buffer.length > 8000) {
           buffer.clear();
         }
@@ -59,6 +57,7 @@ class _ProcessScreenState extends State<ProcessScreen> {
   }
 
   Future<void> _refresh() async {
+    final l10n = AppLocalizations.of(context);
     setState(() {
       _loading = true;
       _error = null;
@@ -70,16 +69,17 @@ class _ProcessScreenState extends State<ProcessScreen> {
         _processes = processes;
         _loading = false;
       });
-    } on Exception {
+    } on Exception catch (e) {
       if (!mounted) return;
       setState(() {
         _loading = false;
-        _error = 'Failed to list processes';
+        _error = l10n.commonError('$e');
       });
     }
   }
 
   Future<void> _kill(String pid) async {
+    final l10n = AppLocalizations.of(context);
     try {
       await _processService.kill(pid);
       if (!mounted) return;
@@ -87,15 +87,15 @@ class _ProcessScreenState extends State<ProcessScreen> {
         _processes.removeWhere((p) => p.pid == pid);
         _outputs.remove(pid);
       });
-    } on Exception {
+    } on Exception catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Failed to kill process')),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(l10n.commonError('$e'))));
     }
   }
 
   Future<void> _runCommand(String line) async {
+    final l10n = AppLocalizations.of(context);
     final trimmed = line.trim();
     if (trimmed.isEmpty) return;
     setState(() => _running = true);
@@ -114,14 +114,13 @@ class _ProcessScreenState extends State<ProcessScreen> {
       await _refresh();
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Started ${started.pid} · $trimmed')),
+        SnackBar(content: Text(l10n.processStarted(started.pid, trimmed))),
       );
-    } on Exception {
+    } on Exception catch (e) {
       if (!mounted) return;
       setState(() => _running = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Failed to start command')),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(l10n.commonError('$e'))));
     }
   }
 
@@ -129,10 +128,10 @@ class _ProcessScreenState extends State<ProcessScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Processes'),
+        title: Text(AppLocalizations.of(context).processTitle),
         actions: [
           IconButton(
-            tooltip: 'Refresh',
+            tooltip: AppLocalizations.of(context).actionRefresh,
             onPressed: _loading ? null : _refresh,
             icon: const Icon(Icons.refresh),
           ),
@@ -156,8 +155,8 @@ class _ProcessScreenState extends State<ProcessScreen> {
           Expanded(
             child: TextField(
               controller: _commandController,
-              decoration: const InputDecoration(
-                hintText: 'Run command… e.g. npm run dev',
+              decoration: InputDecoration(
+                hintText: AppLocalizations.of(context).processRunHint,
                 isDense: true,
                 border: OutlineInputBorder(),
               ),
@@ -167,8 +166,10 @@ class _ProcessScreenState extends State<ProcessScreen> {
           ),
           const SizedBox(width: 8),
           IconButton.filled(
-            tooltip: 'Run',
-            onPressed: (_running) ? null : () => _runCommand(_commandController.text),
+            tooltip: AppLocalizations.of(context).actionRun,
+            onPressed: (_running)
+                ? null
+                : () => _runCommand(_commandController.text),
             icon: _running
                 ? const SizedBox(
                     width: 18,
@@ -185,19 +186,16 @@ class _ProcessScreenState extends State<ProcessScreen> {
   Widget _buildBody() {
     if (_error != null && _processes.isEmpty) {
       return Center(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Text(_error!),
-        ),
+        child: Padding(padding: const EdgeInsets.all(16), child: Text(_error!)),
       );
     }
     if (_loading && _processes.isEmpty) {
       return const Center(child: CircularProgressIndicator());
     }
     if (_processes.isEmpty) {
-      return const Center(
+      return Center(
         child: Text(
-          'No running processes.\nStart a task to see it here.',
+          AppLocalizations.of(context).processEmpty,
           textAlign: TextAlign.center,
         ),
       );
@@ -236,9 +234,7 @@ class _ProcessTile extends StatelessWidget {
         process.status == 'running'
             ? Icons.play_circle_outline
             : Icons.stop_circle_outlined,
-        color: process.status == 'running'
-            ? Colors.green
-            : theme.disabledColor,
+        color: process.status == 'running' ? Colors.green : theme.disabledColor,
       ),
       title: Text(
         '${process.pid}  ·  ${process.command}',
@@ -248,12 +244,13 @@ class _ProcessTile extends StatelessWidget {
       subtitle: Text(
         output != null && output!.isNotEmpty
             ? output!.trim().split('\n').last
-            : (process.cwd ?? 'Started by Nova'),
+            : (process.cwd ??
+                  AppLocalizations.of(context).processStartedByNova),
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
       ),
       trailing: IconButton(
-        tooltip: 'Kill ${process.pid}',
+        tooltip: '${AppLocalizations.of(context).actionStop} ${process.pid}',
         onPressed: onKill,
         icon: const Icon(Icons.close),
         color: theme.colorScheme.error,

@@ -1,0 +1,24 @@
+{
+  "receivers": {
+    "fmt": {
+      "methods": {
+        "Println": "void",
+        "Printf": "void",
+        "Sprint": "string",
+        "Errorf": "error"
+      },
+      "fields": {}
+    },
+    "os": {
+      "methods": {
+        "Getenv": "string",
+        "Exit": "void"
+      },
+      "fields": {
+        "Args": "list",
+        "Stderr": "file",
+        "Stdout": "file"
+      }
+    }
+  }
+}

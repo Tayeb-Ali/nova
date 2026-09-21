@@ -46,3 +46,12 @@ app.*.map.json
 
 # Widget Preview related
 .widget_preview/
+
+#docs and examples
+/docs
+
+# Project-scoped agent skills (installed via `npx skills add`, see skills-lock.json)
+.agents/
+skills-lock.json
+
+/themes/

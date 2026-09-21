@@ -2,6 +2,7 @@ import "dart:async";
 
 import "package:flutter/material.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
+import "package:nova/l10n/generated/app_localizations.dart";
 
 import "../../core/models/task.dart";
 import "../../core/services/process_service.dart";
@@ -32,6 +33,7 @@ class _RunPanelState extends ConsumerState<RunPanel> {
   }
 
   Future<void> _run(IdeTask task) async {
+    final l10n = AppLocalizations.of(context);
     final project = ref.read(activeProjectProvider);
     if (project == null) return;
     // Re-show the console when the user runs a task even if it was collapsed.
@@ -39,18 +41,16 @@ class _RunPanelState extends ConsumerState<RunPanel> {
       setState(() => _consoleVisible = true);
     }
     ref.read(runOutputProvider.notifier).clear();
-    final script =
-        'cd "${project.path}" && ${task.command} ${task.args ?? ""}'.trim();
+    final script = 'cd "${project.path}" && ${task.command} ${task.args ?? ""}'
+        .trim();
     String pid;
     try {
-      final info = await ref.read(processServiceProvider).start(
-            command: "sh",
-            args: ["-lc", script],
-            cwd: project.path,
-          );
+      final info = await ref
+          .read(processServiceProvider)
+          .start(command: "sh", args: ["-lc", script], cwd: project.path);
       pid = info.pid;
     } catch (e) {
-      _append("Failed to start task: $e\n");
+      _append("${l10n.runStartFailed("$e")}\n");
       return;
     }
     _append("[$script]\n");
@@ -60,7 +60,10 @@ class _RunPanelState extends ConsumerState<RunPanel> {
 
   void _listen(String pid) {
     _sub?.cancel();
-    _sub = ref.read(processServiceProvider).eventStream.listen(
+    _sub = ref
+        .read(processServiceProvider)
+        .eventStream
+        .listen(
           (event) {
             if (event.pid != pid) return;
             if (event.output.isNotEmpty) _append(event.output);
@@ -114,7 +117,7 @@ class _RunPanelState extends ConsumerState<RunPanel> {
     return Material(
       color: scheme.surfaceContainerLow,
       child: SizedBox(
-        height: _consoleVisible ? 220 : 60,
+        height: _consoleVisible ? 220 : 64,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -122,30 +125,56 @@ class _RunPanelState extends ConsumerState<RunPanel> {
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
               child: Row(
                 children: [
-                  Icon(pid == null ? Icons.play_arrow : Icons.stop,
-                      size: 18, color: scheme.primary),
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: scheme.surfaceContainerHigh,
+                      border: Border.all(color: scheme.outlineVariant),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: Icon(
+                      pid == null ? Icons.play_arrow : Icons.stop,
+                      size: 18,
+                      color: scheme.primary,
+                    ),
+                  ),
                   const SizedBox(width: 8),
                   Expanded(
-                    child: DropdownButton<IdeTask>(
-                      value: safeSelected,
-                      isExpanded: true,
-                      hint: const Text("No tasks detected"),
-                      selectedItemBuilder: (context) => [
-                        for (final task in tasks)
-                          Text(task.name, overflow: TextOverflow.ellipsis),
-                      ],
-                      items: [
-                        for (final task in tasks)
-                          DropdownMenuItem(
-                            value: task,
-                            child: Text(task.name, overflow: TextOverflow.ellipsis),
-                          ),
-                      ],
-                      onChanged: (task) {
-                        if (task != null) {
-                          ref.read(runTaskProvider.notifier).state = task;
-                        }
-                      },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      decoration: BoxDecoration(
+                        color: scheme.surfaceContainerHighest,
+                        border: Border.all(color: scheme.outlineVariant),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: DropdownButton<IdeTask>(
+                        value: safeSelected,
+                        isExpanded: true,
+                        underline: const SizedBox.shrink(),
+                        hint: Text(
+                          AppLocalizations.of(context).runNoTasks,
+                          style: TextStyle(color: scheme.onSurfaceVariant),
+                        ),
+                        selectedItemBuilder: (context) => [
+                          for (final task in tasks)
+                            Text(task.name, overflow: TextOverflow.ellipsis),
+                        ],
+                        items: [
+                          for (final task in tasks)
+                            DropdownMenuItem(
+                              value: task,
+                              child: Text(
+                                task.name,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                        ],
+                        onChanged: (task) {
+                          if (task != null) {
+                            ref.read(runTaskProvider.notifier).state = task;
+                          }
+                        },
+                      ),
                     ),
                   ),
                   const SizedBox(width: 8),
@@ -154,8 +183,18 @@ class _RunPanelState extends ConsumerState<RunPanel> {
                       onPressed: (safeSelected == null || project == null)
                           ? null
                           : () => _run(safeSelected),
+                      style: FilledButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
+                        visualDensity: VisualDensity.compact,
+                      ),
                       icon: const Icon(Icons.play_arrow, size: 18),
-                      label: const Text("Run"),
+                      label: Text(AppLocalizations.of(context).actionRun),
                     )
                   else
                     FilledButton.icon(
@@ -163,19 +202,51 @@ class _RunPanelState extends ConsumerState<RunPanel> {
                       style: FilledButton.styleFrom(
                         backgroundColor: scheme.errorContainer,
                         foregroundColor: scheme.onErrorContainer,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
+                        visualDensity: VisualDensity.compact,
                       ),
                       icon: const Icon(Icons.stop, size: 18),
-                      label: const Text("Stop"),
+                      label: Text(AppLocalizations.of(context).actionStop),
                     ),
+                  const SizedBox(width: 4),
                   IconButton(
-                    onPressed: () => ref.read(runOutputProvider.notifier).clear(),
-                    tooltip: "Clear output",
-                    icon: const Icon(Icons.cleaning_services_outlined, size: 18),
+                    onPressed: () =>
+                        ref.read(runOutputProvider.notifier).clear(),
+                    tooltip: AppLocalizations.of(context).runClearOutput,
+                    visualDensity: VisualDensity.compact,
+                    style: IconButton.styleFrom(
+                      backgroundColor: scheme.surfaceContainerHigh,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      padding: const EdgeInsets.all(8),
+                    ),
+                    icon: const Icon(
+                      Icons.cleaning_services_outlined,
+                      size: 18,
+                    ),
                   ),
+                  const SizedBox(width: 4),
                   IconButton(
                     onPressed: () =>
                         setState(() => _consoleVisible = !_consoleVisible),
-                    tooltip: _consoleVisible ? "Hide console" : "Show console",
+                    tooltip: _consoleVisible
+                        ? AppLocalizations.of(context).runHideConsole
+                        : AppLocalizations.of(context).runShowConsole,
+                    visualDensity: VisualDensity.compact,
+                    style: IconButton.styleFrom(
+                      backgroundColor: scheme.surfaceContainerHigh,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      padding: const EdgeInsets.all(8),
+                    ),
                     icon: Icon(
                       _consoleVisible
                           ? Icons.keyboard_arrow_down
@@ -187,26 +258,36 @@ class _RunPanelState extends ConsumerState<RunPanel> {
               ),
             ),
             if (_consoleVisible) ...[
-              const Divider(height: 1),
+              Divider(height: 1, color: scheme.outlineVariant),
               Expanded(
                 child: output.isEmpty
                     ? Padding(
-                        padding: const EdgeInsets.all(10),
+                        padding: const EdgeInsets.all(8),
                         child: Text(
                           pid != null
-                              ? "Starting process\u2026"
-                              : "Press \u25b6 Run to execute the selected task. Output appears here.",
-                          style: Theme.of(context).textTheme.bodySmall,
+                              ? AppLocalizations.of(context).runStartingProcess
+                              : AppLocalizations.of(context).runEmptyHint,
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(color: scheme.onSurfaceVariant),
                         ),
                       )
-                    : SingleChildScrollView(
-                        controller: _scrollController,
-                        padding: const EdgeInsets.all(8),
-                        child: SelectableText(
-                          output,
-                          style: const TextStyle(
-                            fontFamily: "monospace",
-                            fontSize: 11,
+                    : Container(
+                        margin: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: scheme.surfaceContainerHighest,
+                          border: Border.all(color: scheme.outlineVariant),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: SingleChildScrollView(
+                          controller: _scrollController,
+                          padding: const EdgeInsets.all(8),
+                          child: SelectableText(
+                            output,
+                            style: TextStyle(
+                              fontFamily: "monospace",
+                              fontSize: 11,
+                              color: scheme.onSurface,
+                            ),
                           ),
                         ),
                       ),

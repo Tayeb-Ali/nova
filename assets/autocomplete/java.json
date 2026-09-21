@@ -1,0 +1,20 @@
+{
+  "receivers": {
+    "System": {
+      "methods": {},
+      "fields": {
+        "out": "PrintStream",
+        "err": "PrintStream",
+        "in": "InputStream"
+      }
+    },
+    "SystemOut": {
+      "methods": {
+        "println": "void",
+        "print": "void",
+        "printf": "void"
+      },
+      "fields": {}
+    }
+  }
+}

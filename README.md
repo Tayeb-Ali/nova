@@ -87,7 +87,7 @@
 
 ### 3. قناة الأحداث (Event Channel)
 
-الدوال تنفع للطلب والرد ("افتح ملف"، "ابدأ عملية")، لكن **الأحداث المستمرة** (سطر جديد في الكونسول، نسبة تقدّم تثبيت) تحتاج بثًا حيًا. لهذا توجد قناة أحداث واحدة باسم `sd.adaa.nova/events`.
+الدوال تنفع للطلب والرد ("افتح ملف"، "ابدأ عملية")، لكن **الأحداث المستمرة** (سطر جديد في الكونسول، نسبة تقدّم تثبيت) تحتاج بثًا حيًا. لهذا توجد قناة أحداث واحدة باسم `sd.adaa.codeide/events`.
 
 نقطة مهمة تعلّمناها بالتجربة: القناة تتحمّل **مستمعًا واحدًا فعليًا**. لذلك كل الاشتراكات تمر عبر **`IdeEventBus`** — مفترق واحد يستقبل البث ويوزّعه على (التيرمينال، العمليات، المعاينة، شاشة الرن-تايم). بدونه كانت الأحداث تضيع وتظهر أعراض مثل "التثبيت يبدأ ثم يتجمد".
 
@@ -128,7 +128,7 @@ nova/
 │       └── features/             # الشاشات: workspace، editor، terminal،
 │                                 # process، git، runtime، webpreview، lsp، ai
 ├── android/app/src/main/kotlin/   # المحرك (Kotlin)
-│   └── sd/adaa/nova/
+│   └── sd/adaa/codeide/
 │       ├── filesystem/ project/ process/ terminal/
 │       ├── git/ runtime/ webpreview/
 │       └── MainActivity · IdeCore · IdeService · IdeEvents · AllApis
@@ -145,6 +145,7 @@ nova/
 |---|---|
 | Workspace | المستكشف الجانبي (قابل للطي) + المحرر + زر التشغيل |
 | Editor | تبويبات ملفات، تلوين لغات، حفظ، مؤشر التعديلات |
+| Markdown | محرر نصوص غنية لملفات `.md` (تحرير + معاينة) عبر Fleather |
 | Run Console | اختيار مهمة، تشغيل/إيقاف، ناتج حي (قابل للطي ويعود تلقائيًا عند الضغط على Run) |
 | Terminal | تيرمينال تفاعلي كامل بلوحة مفاتيح مخصصة |
 | Process | قائمة العمليات الجارية وإدارتها |
@@ -163,6 +164,8 @@ nova/
 |---|---|
 | `flutter_riverpod` + `riverpod` | إدارة الحالة في كل التطبيق |
 | `re_editor` + `re_highlight` | المحرر وتلوين اللغات (خلف تجريد يسمح بتبديله لاحقًا) |
+| `fleather` + `parchment` | محرر Markdown الغني (تحرير + فتح/حفظ `.md`) |
+| `flutter_markdown` | معاينة Markdown للقراءة فقط |
 | `xterm` | التيرمينال التفاعلي |
 | `flutter_inappwebview` | معاينة الويب داخل التطبيق |
 | `dio` | عميل HTTP لخدمة الذكاء الاصطناعي |
@@ -173,7 +176,7 @@ nova/
 
 ### طرف أندرويد
 
-- **Kotlin** + Android SDK، `applicationId = sd.adaa.nova`.
+- **Kotlin** + Android SDK، `applicationId = sd.adaa.codeide`.
 - `targetSdk = 28` — **مقصود وليس إهمالًا**: من 29 فصاعدًا يمنع النظام (SELinux) تنفيذ الملفات داخل مجلد بيانات التطبيق، وهو ما يقتل بيئة التشغيل المضمّنة.
 - `useLegacyPackaging = true` لنفس السبب.
 
@@ -241,13 +244,13 @@ flutter test      # يجب: كل الاختبارات ناجحة (22 اختبا�
 
 ```bash
 # تثبيت git عبر مسار التثبيت الحقيقي داخل التطبيق
-adb shell am broadcast -a sd.adaa.nova.DEBUG_INSTALL_RUNTIME --es id git
+adb shell am broadcast -a sd.adaa.codeide.DEBUG_INSTALL_RUNTIME --es id git
 
 # مراقبة الأحداث
 adb logcat -s flutter:I | grep IDE-EVENT
 
 # فحص البيئة يدويًا
-adb shell "run-as sd.adaa.nova sh -c 'ls files/usr/bin | head'"
+adb shell "run-as sd.adaa.codeide sh -c 'ls files/usr/bin | head'"
 ```
 
 ---
@@ -272,6 +275,17 @@ adb shell "run-as sd.adaa.nova sh -c 'ls files/usr/bin | head'"
 **التالي المقترح:** إكمال Git (فروع/دمج)، تحسين المحرر (إكمال تلقائي أفضل)، دعم حزم أكثر في الرن-تايم، وتقليل حجم APK.
 
 ---
+## المحرر الاحترافي: إكمال وثيمات وخطوط
+
+- **إكمال تلقائي** بأسلوب VSCode: كلمات كل لغة + snippets جاهزة (python/js/php/dart/json) + كلمات ملتقطة من الملف المفتوح، مع نافذة اقتراحات بأيقونة لكل نوع. يُفعّل ويُعطّل من الإعدادات.
+- **ثيمات بصيغة VSCode**: 10 ثيمات مدمجة (VSCode فاتح/داكن، Monokai، Nord، Tokyo Night...) + استيراد أي ملف JSON بصيغة `tokenColors`.
+- **التطبيق كاملًا يتبع المحرر**: عند اختيار ثيم داكن مثل VSCode Dark تتلون كل الشاشات بألوانه (اختياري من الإعدادات).
+- **ألوان دلالية**: تمييز الدالة عن المتغير عن الصنف (`semanticTokenColors`: function/variable/class...) بألوان VSCode الحقيقية.
+- **خطوط برمجية**: JetBrains Mono وFira Code وSource Code Pro وIBM Plex Mono — تُنزّل عند أول استخدام وتُحفظ للعمل دون إنترنت — مع ضبط الحجم.
+- **معاينة حية** في الإعدادات تُظهر شكل المحرر بالخط والحجم والثيم قبل التطبيق.
+
+---
+
 
 ## المساهمة
 

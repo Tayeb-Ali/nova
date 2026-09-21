@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace = "sd.adaa.nova"
+    namespace = "sd.adaa.codeide"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -16,7 +16,7 @@ android {
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "sd.adaa.nova"
+        applicationId = "sd.adaa.codeide"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion
@@ -39,6 +39,36 @@ android {
             cmake {
                 cFlags += "-std=c99"
             }
+        }
+    }
+
+    buildFeatures {
+        buildConfig = true
+    }
+
+    // Store flavors (Phase 1 production integration):
+    // - github: targetSdk 28 + direct exec (current shipping behavior).
+    // - play: targetSdk 36 + linker exec via libnova-exec (the tested gate).
+    // DEFAULT_EXEC_MODE is read by EnvironmentManager.buildEnvironment so every
+    // spawn path follows the flavor without call-site changes.
+    // NOVA_REPO_URL: when non-empty the installer points apt at the Nova
+    // binary repository instead of the legacy Termux mirror (Phase 2). Empty
+    // keeps today's behavior -> bundled Termux bootstrap + packages-cf mirror.
+    flavorDimensions += "store"
+    productFlavors {
+        create("github") {
+            dimension = "store"
+            // Inherits defaultConfig targetSdk = 28.
+            buildConfigField("String", "DEFAULT_EXEC_MODE", "\"direct\"")
+            buildConfigField("String", "NOVA_REPO_URL", "\"\"")
+            buildConfigField("String", "NOVA_REPO_SUITE", "\"nova\"")
+        }
+        create("play") {
+            dimension = "store"
+            targetSdk = 36
+            buildConfigField("String", "DEFAULT_EXEC_MODE", "\"linker\"")
+            buildConfigField("String", "NOVA_REPO_URL", "\"\"")
+            buildConfigField("String", "NOVA_REPO_SUITE", "\"nova\"")
         }
     }
 

@@ -1,0 +1,120 @@
+{
+  "receivers": {
+    "DateTime": {
+      "methods": {
+        "now": "DateTime",
+        "utc": "DateTime",
+        "parse": "DateTime",
+        "tryParse": "DateTime?",
+        "fromMillisecondsSinceEpoch": "DateTime",
+        "fromMicrosecondsSinceEpoch": "DateTime"
+      },
+      "fields": {}
+    },
+    "int": {
+      "methods": { "parse": "int", "tryParse": "int?" },
+      "fields": {}
+    },
+    "double": {
+      "methods": { "parse": "double", "tryParse": "double?" },
+      "fields": {}
+    },
+    "num": {
+      "methods": { "parse": "num", "tryParse": "num?" },
+      "fields": {}
+    },
+    "bool": {
+      "methods": { "parse": "bool", "tryParse": "bool?" },
+      "fields": {}
+    },
+    "String": {
+      "methods": {
+        "fromCharCodes": "String",
+        "fromCharCode": "String",
+        "fromEnvironment": "String"
+      },
+      "fields": {}
+    },
+    "List": {
+      "methods": {
+        "filled": "List",
+        "generate": "List",
+        "empty": "List",
+        "from": "List",
+        "of": "List",
+        "unmodifiable": "List"
+      },
+      "fields": {}
+    },
+    "Map": {
+      "methods": {
+        "from": "Map",
+        "of": "Map",
+        "unmodifiable": "Map",
+        "fromEntries": "Map",
+        "fromIterable": "Map",
+        "identity": "Map"
+      },
+      "fields": {}
+    },
+    "Set": {
+      "methods": { "from": "Set", "of": "Set", "identity": "Set" },
+      "fields": {}
+    },
+    "Iterable": {
+      "methods": { "generate": "Iterable", "empty": "Iterable" },
+      "fields": {}
+    },
+    "Future": {
+      "methods": {
+        "delayed": "Future",
+        "value": "Future",
+        "error": "Future",
+        "wait": "Future",
+        "any": "Future",
+        "microtask": "Future",
+        "sync": "Future"
+      },
+      "fields": {}
+    },
+    "Stream": {
+      "methods": {
+        "empty": "Stream",
+        "error": "Stream",
+        "fromFuture": "Stream",
+        "fromFutures": "Stream",
+        "fromIterable": "Stream",
+        "multi": "Stream",
+        "periodic": "Stream",
+        "value": "Stream"
+      },
+      "fields": {}
+    },
+    "RegExp": {
+      "methods": { "escape": "String" },
+      "fields": {}
+    },
+    "Uri": {
+      "methods": {
+        "parse": "Uri",
+        "tryParse": "Uri?",
+        "file": "Uri",
+        "http": "Uri",
+        "https": "Uri"
+      },
+      "fields": {}
+    },
+    "Duration": {
+      "methods": {},
+      "fields": { "zero": "Duration" }
+    },
+    "Object": {
+      "methods": { "hashAll": "int", "hashAllUnordered": "int" },
+      "fields": {}
+    },
+    "WidgetsFlutterBinding": {
+      "methods": { "ensureInitialized": "binding" },
+      "fields": {}
+    }
+  }
+}

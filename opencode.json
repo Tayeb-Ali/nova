@@ -1,0 +1,27 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "skills": {
+    "paths": [".agents/skills"]
+  },
+  "mcp": {
+    "dart": {
+      "type": "local",
+      "command": ["dart", "mcp-server"],
+      "enabled": true
+    },
+    "scrcpy": {
+      "type": "local",
+      "command": ["npx", "-y", "scrcpy-mcp"],
+      "enabled": true,
+      "environment": {
+        "ADB_PATH": "C:\\SDK\\scrcpy-win64-v4.1\\adb.exe",
+        "SCRCPY_SERVER_PATH": "C:\\SDK\\scrcpy-win64-v4.1\\scrcpy-server"
+      }
+    },
+    "context7": {
+      "type": "local",
+      "command": ["npx", "-y", "@upstash/context7-mcp"],
+      "enabled": true
+    }
+  }
+}

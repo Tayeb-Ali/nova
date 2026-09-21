@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:nova/l10n/generated/app_localizations.dart';
 
 import '../../core/bridge/generated/ide_api.g.dart' as bridge;
 import '../../core/models/project.dart';
@@ -57,6 +58,7 @@ class _GitScreenState extends State<GitScreen> {
   String get _path => _pathController.text.trim();
 
   Future<void> _loadStatus() async {
+    final l10n = AppLocalizations.of(context);
     final String path = _path;
     if (path.isEmpty) return;
     setState(() {
@@ -77,42 +79,42 @@ class _GitScreenState extends State<GitScreen> {
       if (!mounted) return;
       setState(() {
         _loading = false;
-        _error = 'Failed to load git status: $e';
+        _error = l10n.commonError('$e');
       });
     }
   }
 
   Future<void> _stageAll() async {
+    final l10n = AppLocalizations.of(context);
     final String path = _path;
     if (path.isEmpty) return;
     try {
       await _git.add(path, const ['.']);
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Staged all changes')),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(l10n.gitStagedAll)));
       await _loadStatus();
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Stage failed: $e')));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(l10n.gitStageFailed('$e'))));
     }
   }
 
   Future<void> _commit() async {
+    final l10n = AppLocalizations.of(context);
     final String path = _path;
     if (path.isEmpty) return;
     final controller = TextEditingController();
     final String? message = await showDialog<String>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Commit'),
+        title: Text(AppLocalizations.of(ctx).gitCommit),
         content: TextField(
           controller: controller,
           autofocus: true,
-          decoration: const InputDecoration(
-            labelText: 'Commit message',
+          decoration: InputDecoration(
+            labelText: AppLocalizations.of(ctx).gitCommitMessage,
             border: OutlineInputBorder(),
           ),
           onSubmitted: (v) => Navigator.pop(ctx, v),
@@ -120,11 +122,11 @@ class _GitScreenState extends State<GitScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel'),
+            child: Text(AppLocalizations.of(ctx).actionCancel),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(ctx, controller.text.trim()),
-            child: const Text('Commit'),
+            child: Text(AppLocalizations.of(ctx).gitCommit),
           ),
         ],
       ),
@@ -135,19 +137,18 @@ class _GitScreenState extends State<GitScreen> {
     try {
       await _git.commit(path, msg);
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Committed')),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(l10n.gitCommitted)));
       await _loadStatus();
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Commit failed: $e')));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(l10n.gitCommitFailed('$e'))));
     }
   }
 
   Future<void> _showDiff() async {
+    final l10n = AppLocalizations.of(context);
     final String path = _path;
     if (path.isEmpty) return;
     setState(() => _diff = null);
@@ -157,7 +158,7 @@ class _GitScreenState extends State<GitScreen> {
       setState(() => _diff = diff);
     } catch (e) {
       if (!mounted) return;
-      setState(() => _diff = 'Failed to load diff:\n$e');
+      setState(() => _diff = l10n.commonError('$e'));
     }
     if (!mounted) return;
     await showDialog<void>(
@@ -169,7 +170,7 @@ class _GitScreenState extends State<GitScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Git')),
+      appBar: AppBar(title: Text(AppLocalizations.of(context).gitTitle)),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -184,6 +185,7 @@ class _GitScreenState extends State<GitScreen> {
   }
 
   Widget _buildProjectSelector() {
+    final l10n = AppLocalizations.of(context);
     final String path = _path;
     final bool hasProject = _projects.any((p) => p.path == path);
     return Card(
@@ -192,15 +194,15 @@ class _GitScreenState extends State<GitScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Project',
+            Text(
+              l10n.gitProject,
               style: TextStyle(fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 12),
             if (_projects.isNotEmpty) ...[
               InputDecorator(
-                decoration: const InputDecoration(
-                  labelText: 'Open project',
+                decoration: InputDecoration(
+                  labelText: l10n.gitOpenProject,
                   border: OutlineInputBorder(),
                   isDense: true,
                 ),
@@ -208,15 +210,12 @@ class _GitScreenState extends State<GitScreen> {
                   child: DropdownButton<String>(
                     value: hasProject ? path : null,
                     isExpanded: true,
-                    hint: const Text('Select project'),
+                    hint: Text(l10n.gitSelectProject),
                     items: [
                       for (final ProjectInfo p in _projects)
                         DropdownMenuItem(
                           value: p.path,
-                          child: Text(
-                            p.name,
-                            overflow: TextOverflow.ellipsis,
-                          ),
+                          child: Text(p.name, overflow: TextOverflow.ellipsis),
                         ),
                     ],
                     onChanged: (v) {
@@ -231,9 +230,9 @@ class _GitScreenState extends State<GitScreen> {
             ],
             TextField(
               controller: _pathController,
-              decoration: const InputDecoration(
-                labelText: 'Project path',
-                hintText: '/data/user/0/sd.adaa.nova/files/projects/my-app',
+              decoration: InputDecoration(
+                labelText: l10n.gitProjectPath,
+                hintText: '/data/user/0/sd.adaa.codeide/files/projects/my-app',
                 border: OutlineInputBorder(),
                 isDense: true,
                 prefixIcon: Icon(Icons.folder),
@@ -247,6 +246,7 @@ class _GitScreenState extends State<GitScreen> {
   }
 
   Widget _buildActions() {
+    final l10n = AppLocalizations.of(context);
     final bool hasPath = _path.isNotEmpty;
     final bool usable = hasPath && _error == null;
     return Wrap(
@@ -256,28 +256,29 @@ class _GitScreenState extends State<GitScreen> {
         FilledButton.icon(
           onPressed: hasPath ? _loadStatus : null,
           icon: const Icon(Icons.refresh),
-          label: const Text('Status'),
+          label: Text(l10n.gitStatus),
         ),
         OutlinedButton.icon(
           onPressed: usable ? _stageAll : null,
           icon: const Icon(Icons.add_circle_outline),
-          label: const Text('Stage all'),
+          label: Text(l10n.gitStageAll),
         ),
         OutlinedButton.icon(
           onPressed: usable ? _commit : null,
           icon: const Icon(Icons.commit),
-          label: const Text('Commit'),
+          label: Text(l10n.gitCommit),
         ),
         OutlinedButton.icon(
           onPressed: usable ? _showDiff : null,
           icon: const Icon(Icons.difference),
-          label: const Text('Diff'),
+          label: Text(l10n.gitDiff),
         ),
       ],
     );
   }
 
   Widget _buildStatus() {
+    final l10n = AppLocalizations.of(context);
     if (_loading) {
       return const Padding(
         padding: EdgeInsets.all(24),
@@ -291,7 +292,7 @@ class _GitScreenState extends State<GitScreen> {
             Icons.error_outline,
             color: Theme.of(context).colorScheme.error,
           ),
-          title: const Text('Git unavailable'),
+          title: Text(l10n.gitUnavailable),
           subtitle: Text(_error!),
         ),
       );
@@ -302,15 +303,30 @@ class _GitScreenState extends State<GitScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Branch: ${status.branch}',
+          l10n.gitBranch(status.branch),
           style: Theme.of(context).textTheme.titleMedium,
         ),
         const SizedBox(height: 8),
-        _buildSection('Modified', status.modified, Icons.edit, Colors.orange),
-        _buildSection('Added', status.added, Icons.add_circle, Colors.green),
-        _buildSection('Deleted', status.deleted, Icons.delete, Colors.red),
         _buildSection(
-          'Untracked',
+          l10n.gitModified,
+          status.modified,
+          Icons.edit,
+          Colors.orange,
+        ),
+        _buildSection(
+          l10n.gitAdded,
+          status.added,
+          Icons.add_circle,
+          Colors.green,
+        ),
+        _buildSection(
+          l10n.gitDeleted,
+          status.deleted,
+          Icons.delete,
+          Colors.red,
+        ),
+        _buildSection(
+          l10n.gitUntracked,
           status.untracked,
           Icons.help_outline,
           Colors.blueGrey,
@@ -319,7 +335,12 @@ class _GitScreenState extends State<GitScreen> {
     );
   }
 
-  Widget _buildSection(String title, List<String> files, IconData icon, Color color) {
+  Widget _buildSection(
+    String title,
+    List<String> files,
+    IconData icon,
+    Color color,
+  ) {
     if (files.isEmpty) return const SizedBox.shrink();
     return Padding(
       padding: const EdgeInsets.only(top: 12),
@@ -343,9 +364,8 @@ class _GitScreenState extends State<GitScreen> {
               child: Text(
                 '• $f',
                 overflow: TextOverflow.ellipsis,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  fontFamily: 'monospace',
-                ),
+                style: Theme.of(context).textTheme.bodySmall
+                    ?.copyWith(fontFamily: 'monospace'),
               ),
             ),
         ],
@@ -372,7 +392,10 @@ class _DiffDialog extends StatelessWidget {
             Row(
               children: [
                 Expanded(
-                  child: Text('Diff', style: Theme.of(context).textTheme.titleMedium),
+                  child: Text(
+                    AppLocalizations.of(context).gitDiff,
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
                 ),
                 IconButton(
                   icon: const Icon(Icons.close),
@@ -396,8 +419,13 @@ class _DiffDialog extends StatelessWidget {
                 ),
                 child: SingleChildScrollView(
                   child: SelectableText(
-                    content.isEmpty ? '(empty diff)' : content,
-                    style: const TextStyle(fontFamily: 'monospace', fontSize: 12),
+                    content.isEmpty
+                        ? AppLocalizations.of(context).gitEmptyDiff
+                        : content,
+                    style: const TextStyle(
+                      fontFamily: 'monospace',
+                      fontSize: 12,
+                    ),
                   ),
                 ),
               ),
@@ -407,7 +435,7 @@ class _DiffDialog extends StatelessWidget {
               alignment: Alignment.centerRight,
               child: TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: const Text('Close'),
+                child: Text(AppLocalizations.of(context).actionClose),
               ),
             ),
           ],
