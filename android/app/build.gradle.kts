@@ -54,21 +54,37 @@ android {
     // NOVA_REPO_URL: when non-empty the installer points apt at the Nova
     // binary repository instead of the legacy Termux mirror (Phase 2). Empty
     // keeps today's behavior -> bundled Termux bootstrap + packages-cf mirror.
+    // Phase 2 download model: bootstraps are NOT bundled in the APK. The setup
+    // screen offers slim/full variants hosted remotely; SHAs pin each artifact.
+    //   slim -> GitHub Pages (fast, ~67MB each)
+    //   full -> GitHub Release assets (offline-everything, ~283MB each)
     flavorDimensions += "store"
     productFlavors {
         create("github") {
             dimension = "store"
             // Inherits defaultConfig targetSdk = 28.
             buildConfigField("String", "DEFAULT_EXEC_MODE", "\"direct\"")
-            buildConfigField("String", "NOVA_REPO_URL", "\"\"")
-            buildConfigField("String", "NOVA_REPO_SUITE", "\"nova\"")
+            buildConfigField("String", "NOVA_REPO_URL", "\"https://tayeb-ali.github.io/nova/apt\"")
+            buildConfigField("String", "NOVA_REPO_SUITE", "\"stable\"")
+            buildConfigField("String", "NOVA_BOOTSTRAP_SLIM_BASE_URL", "\"https://tayeb-ali.github.io/nova/bootstrap\"")
+            buildConfigField("String", "NOVA_BOOTSTRAP_FULL_BASE_URL", "\"https://github.com/Tayeb-Ali/nova/releases/download/bootstrap-v1\"")
+            buildConfigField("String", "NOVA_BOOTSTRAP_SLIM_SHA_AARCH64", "\"16348cf5a9f15c0f53ba4450649d2b78bcf5e397347cadbf8d395304e662e0e4\"")
+            buildConfigField("String", "NOVA_BOOTSTRAP_SLIM_SHA_X86_64", "\"b6f9c02d7ca2b33c3c98db6dfcc198d89842870d050f4d4a6b0f559147c2b329\"")
+            buildConfigField("String", "NOVA_BOOTSTRAP_FULL_SHA_AARCH64", "\"632e0a5b44132cfac22d40baef9a0ebe63c1a2e646e9a8d89c7307695546c5f5\"")
+            buildConfigField("String", "NOVA_BOOTSTRAP_FULL_SHA_X86_64", "\"2200e3ba57285e9e9e70d5eaa69b9709fbe77468dc79ef9bd1d98340559adecd\"")
         }
         create("play") {
             dimension = "store"
             targetSdk = 36
             buildConfigField("String", "DEFAULT_EXEC_MODE", "\"linker\"")
-            buildConfigField("String", "NOVA_REPO_URL", "\"\"")
-            buildConfigField("String", "NOVA_REPO_SUITE", "\"nova\"")
+            buildConfigField("String", "NOVA_REPO_URL", "\"https://tayeb-ali.github.io/nova/apt\"")
+            buildConfigField("String", "NOVA_REPO_SUITE", "\"stable\"")
+            buildConfigField("String", "NOVA_BOOTSTRAP_SLIM_BASE_URL", "\"https://tayeb-ali.github.io/nova/bootstrap\"")
+            buildConfigField("String", "NOVA_BOOTSTRAP_FULL_BASE_URL", "\"https://github.com/Tayeb-Ali/nova/releases/download/bootstrap-v1\"")
+            buildConfigField("String", "NOVA_BOOTSTRAP_SLIM_SHA_AARCH64", "\"16348cf5a9f15c0f53ba4450649d2b78bcf5e397347cadbf8d395304e662e0e4\"")
+            buildConfigField("String", "NOVA_BOOTSTRAP_SLIM_SHA_X86_64", "\"b6f9c02d7ca2b33c3c98db6dfcc198d89842870d050f4d4a6b0f559147c2b329\"")
+            buildConfigField("String", "NOVA_BOOTSTRAP_FULL_SHA_AARCH64", "\"632e0a5b44132cfac22d40baef9a0ebe63c1a2e646e9a8d89c7307695546c5f5\"")
+            buildConfigField("String", "NOVA_BOOTSTRAP_FULL_SHA_X86_64", "\"2200e3ba57285e9e9e70d5eaa69b9709fbe77468dc79ef9bd1d98340559adecd\"")
         }
     }
 

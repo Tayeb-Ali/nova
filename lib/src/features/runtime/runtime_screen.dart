@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:nova/l10n/generated/app_localizations.dart';
 
+import '../../core/app_config.dart';
 import '../../core/bridge/events_bus.dart';
 import '../../core/bridge/generated/ide_api.g.dart' as bridge;
 import '../../core/models/runtime.dart';
@@ -30,6 +31,7 @@ class _RuntimeScreenState extends State<RuntimeScreen> {
   String? _setupPhase;
   double _setupFraction = 0;
   String? _setupError;
+  String _variant = AppConfig.bootstrapVariantSlim;
 
   List<RuntimeInfo> _runtimes = const [];
   bool _loadingRuntimes = true;
@@ -48,6 +50,7 @@ class _RuntimeScreenState extends State<RuntimeScreen> {
     super.initState();
     _listenEvents();
     _loadSetupStatus();
+    _loadVariant();
     _refreshRuntimes();
   }
 
@@ -244,6 +247,26 @@ class _RuntimeScreenState extends State<RuntimeScreen> {
       if (r.id == id) return r.displayName;
     }
     return id;
+  }
+
+  Future<void> _loadVariant() async {
+    try {
+      final stored = await _setupService.getBootstrapVariant();
+      if (!mounted) return;
+      setState(() => _variant = stored);
+    } catch (_) {
+      // Keep default (slim).
+    }
+  }
+
+  Future<void> _selectVariant(String? value) async {
+    if (value == null || _setupRunning) return;
+    setState(() => _variant = value);
+    try {
+      await _setupService.setBootstrapVariant(value);
+    } catch (_) {
+      // Persist failure is non-fatal; Kotlin defaults to slim.
+    }
   }
 
   Future<void> _loadSetupStatus() async {
@@ -553,6 +576,33 @@ class _RuntimeScreenState extends State<RuntimeScreen> {
               ),
             ],
             if (!ready && !_setupRunning) ...[
+              const SizedBox(height: 8),
+              Text(
+                'اختر نسخة نظام لينكس (تُحمَّل من الإنترنت لمرة واحدة):',
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+              RadioGroup<String>(
+                groupValue: _variant,
+                onChanged: _selectVariant,
+                child: Column(
+                  children: [
+                    RadioListTile<String>(
+                      value: AppConfig.bootstrapVariantSlim,
+                      dense: true,
+                      contentPadding: EdgeInsets.zero,
+                      title: const Text('خفيفة ~67MB (موصى بها)'),
+                      subtitle: const Text('الأساسيات + apt — واللغات تُثبَّت عند الحاجة'),
+                    ),
+                    RadioListTile<String>(
+                      value: AppConfig.bootstrapVariantFull,
+                      dense: true,
+                      contentPadding: EdgeInsets.zero,
+                      title: const Text('كاملة ~283MB'),
+                      subtitle: const Text('node وpython وphp وgit مثبتة مسبقًا — تعمل دون إنترنت'),
+                    ),
+                  ],
+                ),
+              ),
               const SizedBox(height: 8),
               FilledButton.icon(
                 onPressed: _startSetup,

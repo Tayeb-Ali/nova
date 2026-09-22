@@ -61,14 +61,25 @@ class BootstrapInstaller(private val context: Context) {
     }
 
     private fun install(onProgress: (String, Float) -> Unit) {
+        val variant = readVariant()
+        val arch = EnvironmentManager.arch()
         val zipFile = EnvironmentManager.bootstrapZip(context)
         val prefix = EnvironmentManager.prefix(context)
-        val expectedSha = EnvironmentManager.bootstrapSha256()
-            ?: error("No bundled bootstrap for ABI ${EnvironmentManager.arch()} (only aarch64/x86_64)")
+        val expectedSha = EnvironmentManager.bootstrapVariantSha256(variant)
+            ?: error("No bootstrap for variant $variant on ABI $arch (only aarch64/x86_64)")
+        val baseUrl = when (variant) {
+            EnvironmentManager.BOOTSTRAP_VARIANT_FULL ->
+                BuildConfig.NOVA_BOOTSTRAP_FULL_BASE_URL
+            else -> BuildConfig.NOVA_BOOTSTRAP_SLIM_BASE_URL
+        }.trim().trimEnd('/')
+        require(baseUrl.isNotEmpty()) {
+            "Bootstrap base URL is empty: bootstraps are downloaded, not bundled"
+        }
+        val url = "$baseUrl/$variant-$arch.zip"
 
-        onProgress("copying", 0.15f)
-        if (!zipFile.exists()) {
-            copyAsset(EnvironmentManager.bootstrapAssetName(), zipFile)
+        if (!(zipFile.exists() && sha256(zipFile).equals(expectedSha, ignoreCase = true))) {
+            onProgress("downloading", 0.05f)
+            downloadBootstrap(url, zipFile, onProgress)
         }
 
         onProgress("verifying", 0.35f)
@@ -122,10 +133,81 @@ class BootstrapInstaller(private val context: Context) {
         }
     }
 
-    private fun copyAsset(asset: String, dest: File) {
+    /**
+     * Variant picked on the setup screen ("slim" or "full"). Dart persists it
+     * via shared_preferences, which lands in the FlutterSharedPreferences
+     * file that both sides can read — no bridge change needed. Unknown or
+     * missing values fall back to slim.
+     */
+    private fun readVariant(): String {
+        val stored = try {
+            context.getSharedPreferences(
+                EnvironmentManager.BOOTSTRAP_PREFS_FILE,
+                Context.MODE_PRIVATE,
+            ).getString(EnvironmentManager.BOOTSTRAP_VARIANT_PREF, null)
+        } catch (_: Exception) {
+            null
+        }
+        return if (stored == EnvironmentManager.BOOTSTRAP_VARIANT_FULL) {
+            EnvironmentManager.BOOTSTRAP_VARIANT_FULL
+        } else {
+            EnvironmentManager.BOOTSTRAP_VARIANT_SLIM
+        }
+    }
+
+    /**
+     * Downloads the bootstrap zip with progress (fraction mapped to
+     * 0.05→0.30 so later phases keep their weights). Writes to a .part file
+     * and renames atomically; partial files are deleted on failure.
+     */
+    private fun downloadBootstrap(
+        url: String,
+        dest: File,
+        onProgress: (String, Float) -> Unit,
+    ) {
         dest.parentFile?.mkdirs()
-        context.assets.open(asset).use { input ->
-            FileOutputStream(dest).use { output -> input.copyTo(output) }
+        val part = File(dest.parentFile, "${dest.name}.part")
+        if (part.exists()) part.delete()
+        var connection: java.net.HttpURLConnection? = null
+        try {
+            connection = java.net.URL(url).openConnection()
+                as java.net.HttpURLConnection
+            connection.instanceFollowRedirects = true
+            connection.connectTimeout = 15000
+            connection.readTimeout = 30000
+            connection.connect()
+            val code = connection.responseCode
+            require(code == java.net.HttpURLConnection.HTTP_OK) {
+                "Bootstrap download failed: HTTP $code for $url"
+            }
+            val total = connection.contentLengthLong
+            var received = 0L
+            connection.inputStream.use { input ->
+                FileOutputStream(part).use { output ->
+                    val buf = ByteArray(256 * 1024)
+                    while (true) {
+                        val n = input.read(buf)
+                        if (n < 0) break
+                        output.write(buf, 0, n)
+                        received += n
+                        if (total > 0) {
+                            val frac = 0.05f + 0.25f * (received.toFloat() / total)
+                            onProgress("downloading", frac.coerceIn(0.05f, 0.30f))
+                        }
+                    }
+                }
+            }
+            require(part.length() > 0) { "Bootstrap download is empty: $url" }
+            if (dest.exists()) dest.delete()
+            require(part.renameTo(dest)) { "Cannot move downloaded bootstrap into place" }
+        } catch (e: Exception) {
+            try {
+                if (part.exists()) part.delete()
+            } catch (_: Exception) {
+            }
+            throw e
+        } finally {
+            connection?.disconnect()
         }
     }
 

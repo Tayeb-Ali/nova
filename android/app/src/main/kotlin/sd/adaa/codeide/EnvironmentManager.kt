@@ -18,12 +18,21 @@ object EnvironmentManager {
     /** aarch64 bootstrap pinned in-repo (default for arm64 phones). */
     const val ARCH_AARCH64 = "aarch64"
     const val BOOTSTRAP_ASSET_AARCH64 = "bootstrap-aarch64.zip"
-    const val BOOTSTRAP_SHA256_AARCH64 = "4fa66c681eefb16b71d2fa5118609f5bb5ce449fc815edee2762e22b1a9b7a26"
 
     /** x86_64 bootstrap pinned in-repo (for x86_64 emulators / Android-x86 devices). */
     const val ARCH_X86_64 = "x86_64"
     const val BOOTSTRAP_ASSET_X86_64 = "bootstrap-x86_64.zip"
-    const val BOOTSTRAP_SHA256_X86_64 = "f73fd8ea465b5065d94e5af27bce893f3968d3ec901f02f42ef3b71e4a231e2c"
+
+    /**
+     * Downloadable bootstrap variants (Phase 2, not bundled in the APK).
+     * The setup screen lets the user pick one; the choice is stored in the
+     * shared FlutterSharedPreferences file (key [BOOTSTRAP_VARIANT_PREF])
+     * so Dart and Kotlin agree without a bridge change.
+     */
+    const val BOOTSTRAP_VARIANT_SLIM = "slim"
+    const val BOOTSTRAP_VARIANT_FULL = "full"
+    const val BOOTSTRAP_VARIANT_PREF = "nova_bootstrap_variant"
+    const val BOOTSTRAP_PREFS_FILE = "FlutterSharedPreferences"
 
     const val EVENTS_CHANNEL = "sd.adaa.codeide/events"
 
@@ -66,12 +75,25 @@ object EnvironmentManager {
 
     fun bootstrapAssetName(): String = "bootstrap-${arch()}.zip"
 
-    /** Returns null when no bootstrap asset is bundled for this ABI. */
-    fun bootstrapSha256(): String? = when (arch()) {
-        ARCH_AARCH64 -> BOOTSTRAP_SHA256_AARCH64
-        ARCH_X86_64 -> BOOTSTRAP_SHA256_X86_64
+    /**
+     * Expected SHA-256 for the downloadable [variant] on this ABI, or null
+     * when the variant/ABI combination is unknown. Values come from
+     * BuildConfig so each release pins its own artifacts.
+     */
+    fun bootstrapVariantSha256(variant: String): String? = when (arch()) {
+        ARCH_AARCH64 -> when (variant) {
+            BOOTSTRAP_VARIANT_FULL -> BuildConfig.NOVA_BOOTSTRAP_FULL_SHA_AARCH64
+            else -> BuildConfig.NOVA_BOOTSTRAP_SLIM_SHA_AARCH64
+        }
+        ARCH_X86_64 -> when (variant) {
+            BOOTSTRAP_VARIANT_FULL -> BuildConfig.NOVA_BOOTSTRAP_FULL_SHA_X86_64
+            else -> BuildConfig.NOVA_BOOTSTRAP_SLIM_SHA_X86_64
+        }
         else -> null
     }
+
+    /** Returns null when no bootstrap asset is bundled for this ABI. */
+    fun bootstrapSha256(): String? = bootstrapVariantSha256(BOOTSTRAP_VARIANT_SLIM)
 
     fun bootstrapZip(context: Context): File = File(filesDir(context), "bootstrap-${arch()}.zip")
 

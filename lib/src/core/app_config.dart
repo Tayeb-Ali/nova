@@ -30,4 +30,21 @@ abstract final class AppConfig {
   /// Resolve interpreter for a file extension, or null if unsupported.
   static String? commandForExtension(String ext) =>
       languageCommands[ext.toLowerCase().trim()];
+
+  // -- Downloadable bootstrap variants (Phase 2, not bundled in the APK). --
+  // The setup screen offers slim (~67MB: shell + core + apt) and full
+  // (~283MB: + node/python/php/git preinstalled). The choice is persisted
+  // under [bootstrapVariantKey], which the Kotlin installer reads from the
+  // same FlutterSharedPreferences file (see EnvironmentManager).
+  static const String bootstrapVariantKey = 'nova_bootstrap_variant';
+  static const String bootstrapVariantSlim = 'slim';
+  static const String bootstrapVariantFull = 'full';
+
+  /// Approximate download size in bytes, per variant and ABI folder name.
+  static const Map<String, int> bootstrapVariantBytes = {
+    'slim-aarch64': 70724606,
+    'slim-x86_64': 70577631,
+    'full-aarch64': 297616258,
+    'full-x86_64': 296451792,
+  };
 }
