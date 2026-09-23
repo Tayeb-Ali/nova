@@ -590,7 +590,7 @@ class _RuntimeScreenState extends State<RuntimeScreen> {
                       value: AppConfig.bootstrapVariantSlim,
                       dense: true,
                       contentPadding: EdgeInsets.zero,
-                      title: const Text('خفيفة ~67MB (موصى بها)'),
+                      title: const Text('خفيفة ~70MB (موصى بها)'),
                       subtitle: const Text('الأساسيات + apt — واللغات تُثبَّت عند الحاجة'),
                     ),
                     RadioListTile<String>(

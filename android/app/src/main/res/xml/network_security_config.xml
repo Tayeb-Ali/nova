@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Phase 2: allow cleartext HTTP ONLY for the Nova download host.
+     github.io 301-redirects to this custom domain over plain HTTP, and every
+     artifact is SHA-256 pinned before use, so integrity does not rely on TLS.
+     All other traffic stays HTTPS-only. -->
+<network-security-config>
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="true">elteyab.sd</domain>
+        <domain includeSubdomains="true">tayeb-ali.github.io</domain>
+        <domain includeSubdomains="true">nova.elteyab.sd</domain>
+
+    </domain-config>
+    <base-config cleartextTrafficPermitted="false" />
+</network-security-config>

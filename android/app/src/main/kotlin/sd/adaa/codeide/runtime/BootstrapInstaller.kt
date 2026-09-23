@@ -168,17 +168,34 @@ class BootstrapInstaller(private val context: Context) {
         dest.parentFile?.mkdirs()
         val part = File(dest.parentFile, "${dest.name}.part")
         if (part.exists()) part.delete()
+        // NOTE: HttpURLConnection refuses to auto-follow HTTPS->HTTP
+        // downgrades, and our host 301-redirects github.io to a custom
+        // domain. Follow redirects manually (max 5 hops).
+        var currentUrl = url
         var connection: java.net.HttpURLConnection? = null
         try {
-            connection = java.net.URL(url).openConnection()
-                as java.net.HttpURLConnection
-            connection.instanceFollowRedirects = true
-            connection.connectTimeout = 15000
-            connection.readTimeout = 30000
-            connection.connect()
-            val code = connection.responseCode
-            require(code == java.net.HttpURLConnection.HTTP_OK) {
-                "Bootstrap download failed: HTTP $code for $url"
+            var hops = 0
+            while (true) {
+                connection?.disconnect()
+                connection = java.net.URL(currentUrl).openConnection()
+                    as java.net.HttpURLConnection
+                connection.instanceFollowRedirects = false
+                connection.connectTimeout = 15000
+                connection.readTimeout = 30000
+                connection.connect()
+                val code = connection.responseCode
+                if (code in 300..399) {
+                    require(hops < 5) { "Too many redirects downloading bootstrap" }
+                    val location = connection.getHeaderField("Location")
+                        ?: error("Redirect without Location for $currentUrl")
+                    currentUrl = java.net.URL(java.net.URL(currentUrl), location).toString()
+                    hops++
+                    continue
+                }
+                require(code == java.net.HttpURLConnection.HTTP_OK) {
+                    "Bootstrap download failed: HTTP $code for $currentUrl"
+                }
+                break
             }
             val total = connection.contentLengthLong
             var received = 0L
