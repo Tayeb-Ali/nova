@@ -42,8 +42,8 @@ abstract final class AppConfig {
 
   /// Approximate download size in bytes, per variant and ABI folder name.
   static const Map<String, int> bootstrapVariantBytes = {
-    'slim-aarch64': 73756233,
-    'slim-x86_64': 73666554,
+    'slim-aarch64': 73753122,
+    'slim-x86_64': 73663496,
     'full-aarch64': 297616258,
     'full-x86_64': 296451792,
   };
