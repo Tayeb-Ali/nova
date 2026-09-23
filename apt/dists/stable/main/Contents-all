@@ -3738,8 +3738,6 @@ data/data/sd.adaa.codeide/files/usr/share/xml/docbook/xsl-stylesheets-1.79.2-non
 data/data/sd.adaa.codeide/files/usr/share/xml/docbook/xsl-stylesheets-1.79.2-nons/xhtml5/xhtml-docbook.xsl docbook-xsl
 data/data/sd.adaa.codeide/files/usr/share/xml/docbook/xsl-stylesheets-1.79.2-nons/xhtml5/xhtml-profile-docbook.xsl docbook-xsl
 data/data/sd.adaa.codeide/files/usr/share/xml/docbook/xsl-stylesheets-1.79.2-nons/xhtml5/xhtml2xhtml5.xsl docbook-xsl
-data/data/sd.adaa.codeide/files/usr/bin/dpkg-scanpackages                        dpkg-scanpackages
-data/data/sd.adaa.codeide/files/usr/share/man/man1/dpkg-scanpackages.1.gz        dpkg-scanpackages
 data/data/sd.adaa.codeide/files/usr/opt/glib/cross/bin/gapplication              glib-cross
 data/data/sd.adaa.codeide/files/usr/opt/glib/cross/bin/gdbus                     glib-cross
 data/data/sd.adaa.codeide/files/usr/opt/glib/cross/bin/gdbus-codegen             glib-cross

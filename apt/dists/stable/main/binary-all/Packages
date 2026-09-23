@@ -88,21 +88,6 @@ SHA1: cfdfcbb6a60c71fecc38f93ebaf1493f75f45013
 SHA256: e3647396150c5827f498c45d5bd5a44f952fb7c42e40d0b6bc51097cdb59bd66
 SHA512: 43caf7d54ee02e06966bb9fa6baaca031bafcc0917f170c4426f6a799da53fa28d6fff3eec0ab0f04b1ee8119f7bc7789e879c15abe970e390ba26e2c5d56af0
 
-Package: dpkg-scanpackages
-Architecture: all
-Installed-Size: 56
-Maintainer: @termux
-Version: 1.22.6-5
-Homepage: https://packages.debian.org/dpkg
-Depends: dpkg-perl, dpkg (= 1.22.6-5)
-Description: Creates Packages index files
-Filename: dists/stable/main/binary-all/dpkg-scanpackages_1.22.6-5_all.deb
-Size: 6524
-MD5Sum: 475bb1132550032d69669556bbdf0860
-SHA1: d4278e8b4862b9efd429aa32c204599dc4716158
-SHA256: d625c342ad3d906eb2280772a036de6320a914859b32a71db8d26bfebfd327cb
-SHA512: 1d50b2c247db985349ecd272101bf5bdd069399fa48342d44d202920116c006a0a94e8eb432325a829f30a987527168d00bbc37319a34ea20788ef9faed443a4
-
 Package: glib-cross
 Architecture: all
 Installed-Size: 83708
