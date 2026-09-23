@@ -88,21 +88,6 @@ SHA1: cfdfcbb6a60c71fecc38f93ebaf1493f75f45013
 SHA256: e3647396150c5827f498c45d5bd5a44f952fb7c42e40d0b6bc51097cdb59bd66
 SHA512: 43caf7d54ee02e06966bb9fa6baaca031bafcc0917f170c4426f6a799da53fa28d6fff3eec0ab0f04b1ee8119f7bc7789e879c15abe970e390ba26e2c5d56af0
 
-Package: dpkg-perl
-Architecture: all
-Installed-Size: 940
-Maintainer: @termux
-Version: 1.22.6-5
-Homepage: https://packages.debian.org/dpkg
-Depends: perl, clang, make, dpkg (= 1.22.6-5)
-Description: Perl modules for dpkg
-Filename: dists/stable/main/binary-all/dpkg-perl_1.22.6-5_all.deb
-Size: 126308
-MD5Sum: 31ef690f13676fa5ac2bb7f0b4a17136
-SHA1: dced9f4abdf9c694d9212d80954c8ecabfabe30e
-SHA256: c631b08a8cb12dc5d3d29b8b5acc1e993924e8362dbd1616ecb4146d95e0afe0
-SHA512: ed4d1725458a179648b0d0968c38ed033c9a6871fbdf2547ecc2f5d11008e2b05454ef15eb9e74555d10d9d6f9e702dc5310e55792ab63da33d1ffdbb19a5284
-
 Package: dpkg-scanpackages
 Architecture: all
 Installed-Size: 56
