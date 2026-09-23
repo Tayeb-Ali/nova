@@ -64,9 +64,9 @@ android {
             dimension = "store"
             // Inherits defaultConfig targetSdk = 28.
             buildConfigField("String", "DEFAULT_EXEC_MODE", "\"direct\"")
-            buildConfigField("String", "NOVA_REPO_URL", "\"https://tayeb-ali.github.io/nova/apt\"")
+            buildConfigField("String", "NOVA_REPO_URL", "\"http://elteyab.sd/nova/apt\"")
             buildConfigField("String", "NOVA_REPO_SUITE", "\"stable\"")
-            buildConfigField("String", "NOVA_BOOTSTRAP_SLIM_BASE_URL", "\"https://tayeb-ali.github.io/nova/bootstrap\"")
+            buildConfigField("String", "NOVA_BOOTSTRAP_SLIM_BASE_URL", "\"http://elteyab.sd/nova/bootstrap\"")
             buildConfigField("String", "NOVA_BOOTSTRAP_FULL_BASE_URL", "\"https://github.com/Tayeb-Ali/nova/releases/download/bootstrap-v1\"")
             buildConfigField("String", "NOVA_BOOTSTRAP_SLIM_SHA_AARCH64", "\"ef2961fdb57333a5f04f62c795cf59ecc90d39a45491b392668375831a9c4309\"")
             buildConfigField("String", "NOVA_BOOTSTRAP_SLIM_SHA_X86_64", "\"d5f9a65709feaaf15c66e56e1d2d992b8ce38171b589718accd3dbd4d25c6e83\"")
@@ -77,9 +77,9 @@ android {
             dimension = "store"
             targetSdk = 36
             buildConfigField("String", "DEFAULT_EXEC_MODE", "\"linker\"")
-            buildConfigField("String", "NOVA_REPO_URL", "\"https://tayeb-ali.github.io/nova/apt\"")
+            buildConfigField("String", "NOVA_REPO_URL", "\"http://elteyab.sd/nova/apt\"")
             buildConfigField("String", "NOVA_REPO_SUITE", "\"stable\"")
-            buildConfigField("String", "NOVA_BOOTSTRAP_SLIM_BASE_URL", "\"https://tayeb-ali.github.io/nova/bootstrap\"")
+            buildConfigField("String", "NOVA_BOOTSTRAP_SLIM_BASE_URL", "\"http://elteyab.sd/nova/bootstrap\"")
             buildConfigField("String", "NOVA_BOOTSTRAP_FULL_BASE_URL", "\"https://github.com/Tayeb-Ali/nova/releases/download/bootstrap-v1\"")
             buildConfigField("String", "NOVA_BOOTSTRAP_SLIM_SHA_AARCH64", "\"ef2961fdb57333a5f04f62c795cf59ecc90d39a45491b392668375831a9c4309\"")
             buildConfigField("String", "NOVA_BOOTSTRAP_SLIM_SHA_X86_64", "\"d5f9a65709feaaf15c66e56e1d2d992b8ce38171b589718accd3dbd4d25c6e83\"")
