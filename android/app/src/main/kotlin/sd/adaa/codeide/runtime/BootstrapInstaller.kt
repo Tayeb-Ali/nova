@@ -338,10 +338,13 @@ class BootstrapInstaller(private val context: Context) {
      * re-extraction):
      *  - while the Phase-2 Nova repository is configured (NOVA_REPO_URL), list
      *    it FIRST via sources.list.d/nova.list, signed by the bundled keyring
-     *    when present (best-effort [trusted=yes] until the key ships);
-     *  - keep the Cloudflare termux-main mirror as fallback with [trusted=yes]
-     *    (the termux-keyring/gpgv snapshot in the bootstrap cannot verify
-     *    NO_PUBKEY);
+     *    when present (best-effort [trusted=yes] until the key ships). The
+     *    legacy Termux mirror is then NOT listed at all: apt would otherwise
+     *    prefer it on version ties and its com.termux-built debs would
+     *    corrupt our prefix;
+     *  - without NOVA_REPO_URL, keep the Cloudflare termux-main mirror with
+     *    [trusted=yes] (the termux-keyring/gpgv snapshot in the bootstrap
+     *    cannot verify NO_PUBKEY);
      *  - allow unauthenticated/insecure repositories in 99-nova.conf;
      *  - rebind apt's cache/archive directories to paths under our data dir so
      *    dpkg can write them.
@@ -370,12 +373,25 @@ class BootstrapInstaller(private val context: Context) {
                 )
             }
 
-            // 1. Legacy Termux fallback while the Nova repo is not live.
+            // 1. Legacy Termux mirror. Written ONLY when no Nova repository is
+            // configured. When the Nova repo is active the legacy mirror must
+            // NOT be listed: apt prefers it on version ties (it is read
+            // first), and its debs are built for the com.termux prefix, so
+            // installing them would corrupt our prefix with wrong baked
+            // paths. A clean "package not found" beats silent corruption.
             val sources = File(etc, "sources.list")
-            sources.writeText(
-                "# The main termux repository, with cloudflare cache (trusted for embedded keyless bootstrap)\n" +
-                    "deb [trusted=yes] https://packages-cf.termux.dev/apt/termux-main/ stable main\n"
-            )
+            if (novaUrl.isBlank()) {
+                sources.writeText(
+                    "# The main termux repository, with cloudflare cache (trusted for embedded keyless bootstrap)\n" +
+                        "deb [trusted=yes] https://packages-cf.termux.dev/apt/termux-main/ stable main\n"
+                )
+            } else {
+                sources.writeText(
+                    "# Nova repository is authoritative (see sources.list.d/nova.list).\n" +
+                        "# The legacy Termux mirror is intentionally NOT listed: its\n" +
+                        "# packages target the com.termux prefix and would corrupt this install.\n"
+                )
+            }
 
             // 2. Allow unauthenticated + rebind caches under our data dir.
             val novaConf = File(confDir, "99-nova.conf")
