@@ -1,9 +1,10 @@
-﻿import "dart:io";
+import "dart:io";
 
 import "package:flutter/material.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:path/path.dart" as p;
 
+import "../../core/ui/text_prompt_dialog.dart";
 import "files_providers.dart";
 
 /// Drawer with workspace root picker, file list, and new/delete actions.
@@ -40,9 +41,8 @@ class _FileExplorerState extends ConsumerState<FileExplorer> {
 
   void _showFsError(Object e) {
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text("Storage not writable here: $e")),
-    );
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text("Storage not writable here: $e")));
   }
 
   @override
@@ -101,36 +101,21 @@ class _FileExplorerState extends ConsumerState<FileExplorer> {
   }
 
   Future<void> _promptNewFile() async {
-    final nameController = TextEditingController();
-    final name = await showDialog<String>(
+    final name = await showTextPromptDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text("New file"),
-        content: TextField(
-          controller: nameController,
-          autofocus: true,
-          decoration: const InputDecoration(hintText: "e.g. main.py"),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text("Cancel"),
-          ),
-          FilledButton(
-            onPressed: () =>
-                Navigator.of(context).pop(nameController.text.trim()),
-            child: const Text("Create"),
-          ),
-        ],
-      ),
+      title: "New file",
+      hintText: "e.g. main.py",
+      confirmLabel: "Create",
+      cancelLabel: "Cancel",
     );
-    nameController.dispose();
     if (name == null || name.isEmpty) return;
     final dir = _currentDir;
     if (dir == null) return;
     late final File file;
     try {
-      file = await ref.read(fileServiceProvider).createFile(p.join(dir.path, name));
+      file = await ref
+          .read(fileServiceProvider)
+          .createFile(p.join(dir.path, name));
     } catch (e) {
       _showFsError(e);
       return;
@@ -209,15 +194,12 @@ class _FileExplorerState extends ConsumerState<FileExplorer> {
                       builder: (context, ref, _) {
                         final files = ref.watch(fileListProvider(dir));
                         return files.when(
-                          loading: () => const Center(
-                            child: CircularProgressIndicator(),
-                          ),
+                          loading: () =>
+                              const Center(child: CircularProgressIndicator()),
                           error: (e, _) => Center(child: Text("Error: $e")),
                           data: (entries) {
                             if (entries.isEmpty) {
-                              return const Center(
-                                child: Text("Empty folder"),
-                              );
+                              return const Center(child: Text("Empty folder"));
                             }
                             return ListView.builder(
                               itemCount: entries.length,
@@ -237,14 +219,16 @@ class _FileExplorerState extends ConsumerState<FileExplorer> {
                                   ),
                                   onTap: () {
                                     if (isDir) {
-                                      setState(() => _currentDir =
-                                          Directory(entity.path));
+                                      setState(
+                                        () => _currentDir = Directory(
+                                          entity.path,
+                                        ),
+                                      );
                                     } else {
                                       _openFile(entity.path);
                                     }
                                   },
-                                  onLongPress: () =>
-                                      _confirmDelete(entity),
+                                  onLongPress: () => _confirmDelete(entity),
                                 );
                               },
                             );

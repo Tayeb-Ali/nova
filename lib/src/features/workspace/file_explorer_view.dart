@@ -4,6 +4,7 @@ import "package:nova/l10n/generated/app_localizations.dart";
 import "package:path/path.dart" as p;
 
 import "../../core/models/project.dart";
+import "../../core/ui/text_prompt_dialog.dart";
 import "workspace_providers.dart";
 
 /// File explorer for the active project, walking ProjectService.listFiles
@@ -36,44 +37,14 @@ class _FileExplorerViewState extends ConsumerState<FileExplorerView> {
     final dir = ref.read(currentDirProvider);
     final project = ref.read(activeProjectProvider);
     if (dir == null || project == null) return;
-    final nameController = TextEditingController();
-    final name = await showDialog<String>(
+    final name = await showTextPromptDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        title: Text(l10n.explorerNewFile),
-        content: TextField(
-          controller: nameController,
-          autofocus: true,
-          decoration: InputDecoration(
-            hintText: "e.g. main.py",
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(4)),
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            style: TextButton.styleFrom(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(4),
-              ),
-            ),
-            child: Text(l10n.actionCancel),
-          ),
-          FilledButton(
-            onPressed: () =>
-                Navigator.of(context).pop(nameController.text.trim()),
-            style: FilledButton.styleFrom(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(4),
-              ),
-            ),
-            child: Text(l10n.actionCreate),
-          ),
-        ],
-      ),
+      title: l10n.explorerNewFile,
+      hintText: "e.g. main.py",
+      confirmLabel: l10n.actionCreate,
+      cancelLabel: l10n.actionCancel,
+      borderRadius: const BorderRadius.all(Radius.circular(12)),
     );
-    nameController.dispose();
     if (name == null || name.isEmpty) return;
     final path = p.join(dir, name);
     try {
@@ -90,44 +61,15 @@ class _FileExplorerViewState extends ConsumerState<FileExplorerView> {
     final l10n = AppLocalizations.of(context);
     final dir = ref.read(currentDirProvider);
     if (dir == null) return;
-    final nameController = TextEditingController(text: entry.name);
-    final newName = await showDialog<String>(
+    final newName = await showTextPromptDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        title: Text(l10n.actionRename),
-        content: TextField(
-          controller: nameController,
-          autofocus: true,
-          decoration: InputDecoration(
-            hintText: l10n.explorerNewNameHint,
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(4)),
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            style: TextButton.styleFrom(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(4),
-              ),
-            ),
-            child: Text(l10n.actionCancel),
-          ),
-          FilledButton(
-            onPressed: () =>
-                Navigator.of(context).pop(nameController.text.trim()),
-            style: FilledButton.styleFrom(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(4),
-              ),
-            ),
-            child: Text(l10n.actionRename),
-          ),
-        ],
-      ),
+      title: l10n.actionRename,
+      hintText: l10n.explorerNewNameHint,
+      initialValue: entry.name,
+      confirmLabel: l10n.actionRename,
+      cancelLabel: l10n.actionCancel,
+      borderRadius: const BorderRadius.all(Radius.circular(12)),
     );
-    nameController.dispose();
     if (newName == null || newName.isEmpty || newName == entry.name) return;
     final newPath = p.join(dir, newName);
     bool ok;
