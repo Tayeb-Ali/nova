@@ -1,6 +1,12 @@
 import '../bridge/generated/ide_api.g.dart' as bridge;
 
 /// An opened project in the IDE workspace (task.md §19 §23).
+///
+/// Identity is the [path], not the instance. `listProjects()` mints a fresh
+/// object on every call, so `activeProjectProvider` routinely holds an instance
+/// that is equal-but-not-identical to the one in the current `projects` list.
+/// Without value equality a `DropdownButton` keyed on this object finds zero
+/// matching items for the active project and throws.
 class ProjectInfo {
   final String name;
   final String path;
@@ -11,6 +17,16 @@ class ProjectInfo {
     required this.path,
     this.language,
   });
+
+  @override
+  bool operator ==(Object other) =>
+      other is ProjectInfo && other.path == path;
+
+  @override
+  int get hashCode => path.hashCode;
+
+  @override
+  String toString() => 'ProjectInfo($name, $path)';
 
   factory ProjectInfo.fromBridge(bridge.ProjectInfo p) => ProjectInfo(
         name: p.name,

@@ -17,6 +17,7 @@ Future<String?> showTextPromptDialog({
   required String confirmLabel,
   required String cancelLabel,
   String? hintText,
+  String? labelText,
   String initialValue = "",
   BorderRadius borderRadius = const BorderRadius.all(Radius.circular(4)),
 }) {
@@ -27,6 +28,7 @@ Future<String?> showTextPromptDialog({
       confirmLabel: confirmLabel,
       cancelLabel: cancelLabel,
       hintText: hintText,
+      labelText: labelText,
       initialValue: initialValue,
       borderRadius: borderRadius,
     ),
@@ -39,6 +41,7 @@ class _TextPromptDialog extends StatefulWidget {
     required this.confirmLabel,
     required this.cancelLabel,
     this.hintText,
+    this.labelText,
     this.initialValue = "",
     this.borderRadius = const BorderRadius.all(Radius.circular(4)),
   });
@@ -47,6 +50,10 @@ class _TextPromptDialog extends StatefulWidget {
   final String confirmLabel;
   final String cancelLabel;
   final String? hintText;
+
+  /// Floating label; mutually exclusive with [hintText] in practice, but
+  /// `InputDecoration` renders both, so callers pick one.
+  final String? labelText;
   final String initialValue;
   final BorderRadius borderRadius;
 
@@ -85,6 +92,7 @@ class _TextPromptDialogState extends State<_TextPromptDialog> {
         autofocus: true,
         decoration: InputDecoration(
           hintText: widget.hintText,
+          labelText: widget.labelText,
           border: OutlineInputBorder(borderRadius: widget.borderRadius),
         ),
         onSubmitted: (_) => _submit(),

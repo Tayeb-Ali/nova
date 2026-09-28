@@ -15,12 +15,23 @@ class _FakeProjectService extends ProjectService {
     language: "php",
   );
 
-  @override
-  Future<List<ProjectInfo>> listProjects() async => [demo];
+  /// Mirrors the real ProjectManager: a created project persists and shows up
+  /// in the next listProjects() call.
+  final List<ProjectInfo> _projects = [demo];
 
   @override
-  Future<ProjectInfo> createProject(String name, String language) async =>
-      ProjectInfo(name: name, path: "/data/$name", language: language);
+  Future<List<ProjectInfo>> listProjects() async => List.of(_projects);
+
+  @override
+  Future<ProjectInfo> createProject(String name, String language) async {
+    final created = ProjectInfo(
+      name: name,
+      path: "/data/$name",
+      language: language,
+    );
+    _projects.add(created);
+    return created;
+  }
 
   @override
   Future<void> openProject(String path) async {}
@@ -61,15 +72,36 @@ void main() {
     await tester.tap(find.byIcon(Icons.create_new_folder));
     await tester.pump(const Duration(milliseconds: 500));
 
-    // Type a name and create.
-    await tester.enterText(find.byType(TextField).first, "repro");
+    // Type a name and create. Scope the field to the dialog: the hub behind it
+    // has its own search TextField, and it comes first in the widget tree.
+    final dialog = find.byType(AlertDialog);
+    await tester.enterText(
+      find.descendant(of: dialog, matching: find.byType(TextField)),
+      "repro",
+    );
     await tester.pump(const Duration(milliseconds: 300));
-    final createButton = find.widgetWithText(FilledButton, "Create");
+    final createButton = find.descendant(
+      of: dialog,
+      matching: find.widgetWithText(FilledButton, "Create"),
+    );
     expect(createButton, findsOneWidget);
     await tester.tap(createButton);
     await tester.pump(const Duration(seconds: 1));
     await tester.pump(const Duration(seconds: 1));
 
     expect(tester.takeException(), isNull);
+
+    // Creating a project must land the user in the editor with that project
+    // active, not leave them on the projects hub.
+    final navBar = tester.widget<NavigationBar>(find.byType(NavigationBar));
+    expect(navBar.selectedIndex, 1, reason: 'editor tab should be selected');
+    final container = ProviderScope.containerOf(
+      tester.element(find.byType(NavigationBar)),
+    );
+    expect(
+      container.read(activeProjectProvider)?.name,
+      'repro',
+      reason: 'the new project should be the active one',
+    );
   });
 }

@@ -5,6 +5,7 @@ import '../../core/bridge/generated/ide_api.g.dart' as bridge;
 import '../../core/models/project.dart';
 import '../../core/services/git_service.dart';
 import '../../core/services/project_service.dart';
+import '../../core/ui/text_prompt_dialog.dart';
 
 /// Git panel: status/diff/commit (task.md §24).
 class GitScreen extends StatefulWidget {
@@ -105,33 +106,13 @@ class _GitScreenState extends State<GitScreen> {
     final l10n = AppLocalizations.of(context);
     final String path = _path;
     if (path.isEmpty) return;
-    final controller = TextEditingController();
-    final String? message = await showDialog<String>(
+    final String? message = await showTextPromptDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(AppLocalizations.of(ctx).gitCommit),
-        content: TextField(
-          controller: controller,
-          autofocus: true,
-          decoration: InputDecoration(
-            labelText: AppLocalizations.of(ctx).gitCommitMessage,
-            border: OutlineInputBorder(),
-          ),
-          onSubmitted: (v) => Navigator.pop(ctx, v),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: Text(AppLocalizations.of(ctx).actionCancel),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(ctx, controller.text.trim()),
-            child: Text(AppLocalizations.of(ctx).gitCommit),
-          ),
-        ],
-      ),
+      title: l10n.gitCommit,
+      labelText: l10n.gitCommitMessage,
+      confirmLabel: l10n.gitCommit,
+      cancelLabel: l10n.actionCancel,
     );
-    controller.dispose();
     final String msg = message?.trim() ?? '';
     if (msg.isEmpty) return;
     try {

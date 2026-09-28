@@ -304,22 +304,36 @@ class _WorkspaceScreenState extends ConsumerState<WorkspaceScreen> {
     if (projects == null || projects.isEmpty) {
       return Text(AppLocalizations.of(context).workspaceTitle);
     }
+    // A DropdownButton asserts that EXACTLY ONE item equals its value. Key the
+    // items by path and dedupe, then resolve the active path against that same
+    // list, so neither a stale activeProject instance nor a duplicate row can
+    // produce 0 or 2 matches.
+    final seen = <String>{};
+    final items = <DropdownMenuItem<String>>[
+      for (final project in projects)
+        if (seen.add(project.path))
+          DropdownMenuItem(
+            value: project.path,
+            child: Text(project.name, overflow: TextOverflow.ellipsis),
+          ),
+    ];
+    final value = (active != null && seen.contains(active.path))
+        ? active.path
+        : null;
     return DropdownButtonHideUnderline(
-      child: DropdownButton<ProjectInfo>(
-        value: active == null || !projects.any((p) => p.path == active.path)
-            ? null
-            : active,
+      child: DropdownButton<String>(
+        value: value,
         isExpanded: true,
         hint: Text(AppLocalizations.of(context).projectSelect),
-        items: [
-          for (final project in projects)
-            DropdownMenuItem(
-              value: project,
-              child: Text(project.name, overflow: TextOverflow.ellipsis),
-            ),
-        ],
-        onChanged: (project) {
-          if (project != null) _selectProject(project);
+        items: items,
+        onChanged: (path) {
+          if (path == null) return;
+          for (final project in projects) {
+            if (project.path == path) {
+              _selectProject(project);
+              return;
+            }
+          }
         },
       ),
     );

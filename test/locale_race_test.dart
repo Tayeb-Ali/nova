@@ -73,10 +73,16 @@ void main() {
     await container.read(settingsStoreProvider.notifier).setAppLocale("ar");
     await tester.pump(const Duration(milliseconds: 200));
 
-    await tester.enterText(find.byType(TextField).first, "repro");
+    // Scope the field to the dialog: the hub behind it has its own search
+    // TextField and comes first in the widget tree.
+    final dialog = find.byType(AlertDialog);
+    await tester.enterText(
+      find.descendant(of: dialog, matching: find.byType(TextField)),
+      "repro",
+    );
     await tester.pump(const Duration(milliseconds: 300));
     final createButton = find.descendant(
-      of: find.byType(AlertDialog),
+      of: dialog,
       matching: find.byType(FilledButton),
     );
     expect(createButton, findsOneWidget);

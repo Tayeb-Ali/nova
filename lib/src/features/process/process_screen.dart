@@ -56,8 +56,11 @@ class _ProcessScreenState extends State<ProcessScreen> {
     });
   }
 
+  /// Never read `AppLocalizations.of(context)` before the first `await` here:
+  /// this runs from `initState`, and depending on an inherited widget during
+  /// initState throws. The error message is only needed on the failure path,
+  /// which is already past the await.
   Future<void> _refresh() async {
-    final l10n = AppLocalizations.of(context);
     setState(() {
       _loading = true;
       _error = null;
@@ -71,6 +74,7 @@ class _ProcessScreenState extends State<ProcessScreen> {
       });
     } on Exception catch (e) {
       if (!mounted) return;
+      final l10n = AppLocalizations.of(context);
       setState(() {
         _loading = false;
         _error = l10n.commonError('$e');

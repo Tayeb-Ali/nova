@@ -58,7 +58,10 @@ class _ProjectsHubScreenState extends ConsumerState<ProjectsHubScreen> {
     setState(() => _loading = false);
   }
 
-  Future<void> _loadProjects({ProjectInfo? select}) async {
+  Future<void> _loadProjects({
+    ProjectInfo? select,
+    bool openEditor = false,
+  }) async {
     List<ProjectInfo> projects;
     try {
       projects = await ref.read(projectServiceProvider).listProjects();
@@ -80,7 +83,7 @@ class _ProjectsHubScreenState extends ConsumerState<ProjectsHubScreen> {
       ref.read(activeProjectProvider.notifier).state = null;
       ref.read(currentDirProvider.notifier).state = null;
     } else {
-      _selectProject(target);
+      _selectProject(target, openEditor: openEditor);
     }
   }
 
@@ -141,7 +144,10 @@ class _ProjectsHubScreenState extends ConsumerState<ProjectsHubScreen> {
       final created = await ref
           .read(projectServiceProvider)
           .createProject(result.$1, result.$2);
-      await _loadProjects(select: created);
+      // A freshly created project has no tabs, so staying on the hub would
+      // show a bare list. Land the user in the editor with the new project
+      // already active.
+      await _loadProjects(select: created, openEditor: true);
     } catch (e) {
       _toast(l10n.commonCreateFailed("$e"));
     } finally {
