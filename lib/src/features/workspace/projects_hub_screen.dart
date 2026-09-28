@@ -4,15 +4,16 @@ import "package:nova/l10n/generated/app_localizations.dart";
 
 import "../../core/models/project.dart";
 import "new_project_dialog.dart";
+import "task_detector.dart";
 import "workspace_providers.dart";
 
 /// Projects hub: stats ribbon + quick actions + searchable project list.
 ///
 /// Reuses the same providers and service calls as [WorkspaceScreen]
 /// ([projectServiceProvider], [projectsProvider], [activeProjectProvider]).
-/// Task detection is intentionally left to the editor tab: selecting a
-/// project here clears the run-task state so the editor never shows
-/// another project's tasks.
+/// Selecting a project re-detects its run tasks here: the editor tab skips
+/// detection when the project is unchanged, so without this the run panel
+/// would keep showing an empty task list and a disabled run button.
 class ProjectsHubScreen extends ConsumerStatefulWidget {
   const ProjectsHubScreen({super.key, required this.onOpenEditor});
 
@@ -107,8 +108,23 @@ class _ProjectsHubScreenState extends ConsumerState<ProjectsHubScreen> {
       // run panel never shows another project's tasks.
       ref.read(runTasksProvider.notifier).state = const [];
       ref.read(runTaskProvider.notifier).state = null;
+      _refreshTasks(project);
     }
     if (openEditor) widget.onOpenEditor();
+  }
+
+  /// Detect runnable tasks for the newly selected project. Mirrors
+  /// WorkspaceScreen: it skips detection when the project is unchanged, so
+  /// the hub must populate tasks on select, otherwise the run button stays
+  /// disabled with "No tasks detected".
+  Future<void> _refreshTasks(ProjectInfo project) async {
+    final detector = TaskDetector(ref.read(projectServiceProvider));
+    final tasks = await detector.detect(project);
+    if (!mounted) return;
+    if (ref.read(activeProjectProvider)?.path != project.path) return;
+    ref.read(runTasksProvider.notifier).state = tasks;
+    ref.read(runTaskProvider.notifier).state =
+        tasks.isNotEmpty ? tasks.first : null;
   }
 
   void _openRecentFile(String path) {

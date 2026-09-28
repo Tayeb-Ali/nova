@@ -12,15 +12,10 @@ class ProjectInfo {
   final String path;
   final String? language;
 
-  const ProjectInfo({
-    required this.name,
-    required this.path,
-    this.language,
-  });
+  const ProjectInfo({required this.name, required this.path, this.language});
 
   @override
-  bool operator ==(Object other) =>
-      other is ProjectInfo && other.path == path;
+  bool operator ==(Object other) => other is ProjectInfo && other.path == path;
 
   @override
   int get hashCode => path.hashCode;
@@ -28,11 +23,8 @@ class ProjectInfo {
   @override
   String toString() => 'ProjectInfo($name, $path)';
 
-  factory ProjectInfo.fromBridge(bridge.ProjectInfo p) => ProjectInfo(
-        name: p.name,
-        path: p.path,
-        language: p.language,
-      );
+  factory ProjectInfo.fromBridge(bridge.ProjectInfo p) =>
+      ProjectInfo(name: p.name, path: p.path, language: p.language);
 
   ProjectInfo copyWith({String? name, String? path, String? language}) {
     return ProjectInfo(
@@ -58,9 +50,9 @@ class FileEntry {
   });
 
   factory FileEntry.fromBridge(bridge.FileEntry f) => FileEntry(
-        name: f.name,
-        path: f.path,
-        isDirectory: f.isDirectory,
-        size: f.size,
-      );
+    name: f.name,
+    path: f.path,
+    isDirectory: f.isDirectory,
+    size: f.size,
+  );
 }

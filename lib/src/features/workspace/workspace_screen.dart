@@ -40,11 +40,11 @@ class _WorkspaceScreenState extends ConsumerState<WorkspaceScreen> {
 
   // Tab labels follow the app locale (rebuilt via NovaApp on locale change).
   List<String> _toolLabels(AppLocalizations l10n) => [
-        l10n.actionRun,
-        l10n.toolTerminal,
-        l10n.toolGit,
-        l10n.toolProcesses,
-      ];
+    l10n.actionRun,
+    l10n.toolTerminal,
+    l10n.toolGit,
+    l10n.toolProcesses,
+  ];
 
   Widget _toolDrawer(
     BuildContext context,
@@ -165,9 +165,8 @@ class _WorkspaceScreenState extends ConsumerState<WorkspaceScreen> {
 
   void _toast(String message) {
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
-    );
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(message)));
   }
 
   Future<void> _init() async {
@@ -226,19 +225,19 @@ class _WorkspaceScreenState extends ConsumerState<WorkspaceScreen> {
     // Auto-detected project type overrides an unset/generic template
     // choice so badges and tasks follow the actual files on disk.
     final stored = project.language;
-    final detected = (stored == null ||
-            stored.isEmpty ||
-            stored == "general")
+    final detected = (stored == null || stored.isEmpty || stored == "general")
         ? await detector.detectLanguage(project)
         : null;
     if (!mounted) return;
     if (ref.read(activeProjectProvider)?.path != project.path) return;
     ref.read(runTasksProvider.notifier).state = tasks;
-    ref.read(runTaskProvider.notifier).state =
-        tasks.isNotEmpty ? tasks.first : null;
+    ref.read(runTaskProvider.notifier).state = tasks.isNotEmpty
+        ? tasks.first
+        : null;
     if (detected != null && detected != stored) {
-      ref.read(activeProjectProvider.notifier).state =
-          project.copyWith(language: detected);
+      ref.read(activeProjectProvider.notifier).state = project.copyWith(
+        language: detected,
+      );
     }
   }
 
@@ -248,10 +247,9 @@ class _WorkspaceScreenState extends ConsumerState<WorkspaceScreen> {
     if (result == null) return;
     ProjectInfo created;
     try {
-      created = await ref.read(projectServiceProvider).createProject(
-            result.$1,
-            result.$2,
-          );
+      created = await ref
+          .read(projectServiceProvider)
+          .createProject(result.$1, result.$2);
     } catch (e) {
       if (!mounted) return;
       _toast(l10n.commonCreateFailed(e.toString()));
@@ -300,7 +298,10 @@ class _WorkspaceScreenState extends ConsumerState<WorkspaceScreen> {
   }
 
   Widget _projectSelector(
-      BuildContext context, List<ProjectInfo>? projects, ProjectInfo? active) {
+    BuildContext context,
+    List<ProjectInfo>? projects,
+    ProjectInfo? active,
+  ) {
     if (projects == null || projects.isEmpty) {
       return Text(AppLocalizations.of(context).workspaceTitle);
     }
@@ -346,8 +347,10 @@ class _WorkspaceScreenState extends ConsumerState<WorkspaceScreen> {
         children: [
           const Icon(Icons.folder_open, size: 64),
           const SizedBox(height: 12),
-          Text(AppLocalizations.of(context).workspaceEmpty,
-              style: Theme.of(context).textTheme.titleMedium),
+          Text(
+            AppLocalizations.of(context).workspaceEmpty,
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
           const SizedBox(height: 12),
           FilledButton.icon(
             onPressed: _newProject,
@@ -383,8 +386,7 @@ class _WorkspaceScreenState extends ConsumerState<WorkspaceScreen> {
                     ),
                     const Spacer(),
                     IconButton(
-                      onPressed: () =>
-                          setState(() => _appBarCollapsed = false),
+                      onPressed: () => setState(() => _appBarCollapsed = false),
                       tooltip: AppLocalizations.of(context).toolbarShow,
                       iconSize: 18,
                       padding: EdgeInsets.zero,
@@ -402,8 +404,7 @@ class _WorkspaceScreenState extends ConsumerState<WorkspaceScreen> {
               title: _projectSelector(context, projects, activeProject),
               actions: [
                 IconButton(
-                  onPressed: () =>
-                      setState(() => _appBarCollapsed = true),
+                  onPressed: () => setState(() => _appBarCollapsed = true),
                   tooltip: AppLocalizations.of(context).toolbarHide,
                   icon: const Icon(Icons.expand_less),
                 ),
@@ -411,23 +412,19 @@ class _WorkspaceScreenState extends ConsumerState<WorkspaceScreen> {
                   onPressed: () => showCommandPalette(
                     context,
                     ref,
-                    onOpenTool: (i) => setState(
-                      () => _toolIndex = _toolIndex == i ? -1 : i,
-                    ),
+                    onOpenTool: (i) =>
+                        setState(() => _toolIndex = _toolIndex == i ? -1 : i),
                   ),
                   tooltip: "Command palette",
                   icon: const Icon(Icons.search),
                 ),
                 IconButton(
-                  onPressed: () => setState(
-                    () => _explorerVisible = !_explorerVisible,
-                  ),
+                  onPressed: () =>
+                      setState(() => _explorerVisible = !_explorerVisible),
                   tooltip: _explorerVisible
                       ? AppLocalizations.of(context).explorerHide
                       : AppLocalizations.of(context).explorerShow,
-                  icon: Icon(
-                    _explorerVisible ? Icons.menu_open : Icons.menu,
-                  ),
+                  icon: Icon(_explorerVisible ? Icons.menu_open : Icons.menu),
                 ),
                 IconButton(
                   onPressed: _newProject,
@@ -446,27 +443,27 @@ class _WorkspaceScreenState extends ConsumerState<WorkspaceScreen> {
       body: _initialLoading
           ? const Center(child: CircularProgressIndicator())
           : projects == null || projects.isEmpty || activeProject == null
-              ? _emptyState()
-              : Column(
-                  children: [
-                    Expanded(
-                      child: Row(
-                        children: [
-                          if (_explorerVisible) ...[
-                            const SizedBox(width: 264, child: FileExplorerView()),
-                            const VerticalDivider(width: 1),
-                          ],
-                          const Expanded(child: EditorAreaView()),
-                        ],
-                      ),
-                    ),
-                    _toolDrawer(
-                      context,
-                      Theme.of(context).colorScheme,
-                      activeProject.path,
-                    ),
-                  ],
+          ? _emptyState()
+          : Column(
+              children: [
+                Expanded(
+                  child: Row(
+                    children: [
+                      if (_explorerVisible) ...[
+                        const SizedBox(width: 264, child: FileExplorerView()),
+                        const VerticalDivider(width: 1),
+                      ],
+                      const Expanded(child: EditorAreaView()),
+                    ],
+                  ),
                 ),
+                _toolDrawer(
+                  context,
+                  Theme.of(context).colorScheme,
+                  activeProject.path,
+                ),
+              ],
+            ),
     );
   }
 }
