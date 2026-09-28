@@ -7,7 +7,7 @@
             "type": "dart",
             "args": [
                 "--flavor",
-                "target36spike"
+                "github"
             ]
         },
         {
@@ -17,7 +17,7 @@
             "flutterMode": "profile",
             "args": [
                 "--flavor",
-                "target36spike"
+                "github"
             ]
         },
         {
@@ -27,7 +27,7 @@
             "flutterMode": "release",
             "args": [
                 "--flavor",
-                "target36spike"
+                "github"
             ]
         }
     ]

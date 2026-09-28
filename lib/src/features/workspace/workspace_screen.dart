@@ -46,7 +46,11 @@ class _WorkspaceScreenState extends ConsumerState<WorkspaceScreen> {
         l10n.toolProcesses,
       ];
 
-  Widget _toolDrawer(BuildContext context, ColorScheme scheme) {
+  Widget _toolDrawer(
+    BuildContext context,
+    ColorScheme scheme,
+    String? projectPath,
+  ) {
     final l10n = AppLocalizations.of(context);
     final labels = _toolLabels(l10n);
     final decoration = BoxDecoration(
@@ -139,7 +143,10 @@ class _WorkspaceScreenState extends ConsumerState<WorkspaceScreen> {
             ),
             if (_toolIndex == 0) const RunPanel(),
             if (_toolIndex == 1)
-              const SizedBox(height: 320, child: TerminalScreen()),
+              SizedBox(
+                height: 320,
+                child: TerminalScreen(initialCwd: projectPath),
+              ),
             if (_toolIndex == 2)
               const SizedBox(height: 320, child: GitScreen()),
             if (_toolIndex == 3)
@@ -440,7 +447,10 @@ class _WorkspaceScreenState extends ConsumerState<WorkspaceScreen> {
                       ),
                     ),
                     _toolDrawer(
-                        context, Theme.of(context).colorScheme),
+                      context,
+                      Theme.of(context).colorScheme,
+                      activeProject.path,
+                    ),
                   ],
                 ),
     );

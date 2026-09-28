@@ -8,7 +8,21 @@ Nova: a Flutter/Android IDE app that runs code in an embedded Termux Linux runti
 - `dart run pigeon --input pigeons/ide_api.dart` — regenerate the bridge after editing the Pigeon contract (never hand-write bridge code).
 - `flutter analyze` — must end in `No issues found`.
 - `flutter test` — 36 unit/widget tests, all native APIs mocked (`TestDefaultBinaryMessenger`); no device needed.
-- `flutter build apk --debug` — the only trustworthy APK path. Run via Gradle directly can produce stale APKs missing recent Dart changes.
+- `flutter build apk --debug --flavor github` — the only trustworthy APK path. Running Gradle directly can produce stale APKs missing recent Dart changes.
+
+## Product flavors (hard rule: ALWAYS pass `--flavor`)
+
+`android/app/build.gradle.kts` declares `flavorDimensions += "store"` with flavors `github` and `play`.
+
+**A flavor-less `flutter run` / `flutter build apk` FAILS** with
+`Gradle build failed to produce an .apk file` — not a Gradle error. `assembleDebug`
+succeeds and emits `app-github-debug.apk` + `app-play-debug.apk`, but the Flutter tool
+looks for the non-existent `app-debug.apk`. Always pass `--flavor`:
+
+- `flutter run --flavor github` — dev default. targetSdk 28 + `DEFAULT_EXEC_MODE=direct` (the shipping path).
+- `flutter run --flavor play` — targetSdk 36 + `DEFAULT_EXEC_MODE=linker` (the tested Play gate).
+
+`.vscode/launch.json` uses `--flavor github`. There is no `target36spike` flavor; references to it are stale.
 
 ## Package naming (hard rule, user-ordered, never violate)
 

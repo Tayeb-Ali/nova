@@ -10,7 +10,12 @@ import '../../core/services/terminal_service.dart';
 
 /// Terminal: interactive PTY shell via xterm (task.md §8–§12).
 class TerminalScreen extends StatefulWidget {
-  const TerminalScreen({super.key});
+  const TerminalScreen({super.key, this.initialCwd});
+
+  /// Working directory snapshot for newly created tabs (project path at
+  /// creation time). Null/empty falls back to the runtime home on the
+  /// native side. Existing tabs keep their sessions when this changes.
+  final String? initialCwd;
 
   @override
   State<TerminalScreen> createState() => _TerminalScreenState();
@@ -61,6 +66,10 @@ class _TerminalTab {
   bool creating = true;
   String? error;
   String? exited;
+  // Watchdog state: a session that yields zero bytes shortly after creation
+  // is treated as a silent hang and re-created once automatically.
+  bool receivedOutput = false;
+  bool autoRetried = false;
 }
 
 class _TerminalScreenState extends State<TerminalScreen> {
@@ -85,7 +94,11 @@ class _TerminalScreenState extends State<TerminalScreen> {
     super.initState();
     _outputSub = _terminalService.outputStream.listen(_onOutputData);
     _exitSub = _terminalService.exitStream.listen(_onExit);
-    _addTab();
+    // Defer the first session past the first frame so the view is laid out
+    // (real dimensions) and the engine is settled before native PTY open.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && _tabs.isEmpty) _addTab();
+    });
   }
 
   @override
@@ -140,7 +153,7 @@ class _TerminalScreenState extends State<TerminalScreen> {
     tab.controller.clearSelection();
     try {
       final sessionId = await _terminalService.createSession(
-        cwd: '',
+        cwd: widget.initialCwd ?? '',
         cols: _cols,
         rows: _rows,
       );
@@ -153,8 +166,10 @@ class _TerminalScreenState extends State<TerminalScreen> {
       setState(() {
         tab.sessionId = sessionId;
         tab.creating = false;
+        tab.receivedOutput = false;
       });
       unawaited(_terminalService.resize(sessionId, _cols, _rows));
+      _armSilentHangWatchdog(tab, sessionId);
     } on Exception {
       if (!mounted) return;
       if (!_tabs.contains(tab)) return;
@@ -163,6 +178,34 @@ class _TerminalScreenState extends State<TerminalScreen> {
         tab.error = l10n.terminalStartFailed;
       });
     }
+  }
+
+  /// Silent-hang watchdog: some cold starts yield a session id but zero
+  /// bytes (no prompt, no error, no exit). If nothing arrives within a few
+  /// seconds, re-create once automatically; a second silence surfaces the
+  /// normal error banner with Retry instead of hanging forever.
+  static const _silentHangGrace = Duration(seconds: 8);
+
+  void _armSilentHangWatchdog(_TerminalTab tab, String sessionId) {
+    Future.delayed(_silentHangGrace, () {
+      if (!mounted) return;
+      if (!_tabs.contains(tab)) return;
+      if (tab.sessionId != sessionId) return;
+      if (tab.receivedOutput || tab.error != null || tab.exited != null) {
+        return;
+      }
+      if (tab.autoRetried) {
+        setState(() {
+          tab.creating = false;
+          tab.error = AppLocalizations.of(context).terminalStartFailed;
+        });
+        return;
+      }
+      tab.autoRetried = true;
+      tab.sessionId = null;
+      unawaited(_terminalService.close(sessionId));
+      unawaited(_createSessionFor(tab));
+    });
   }
 
   void _switchTo(int index) {
@@ -230,6 +273,7 @@ class _TerminalScreenState extends State<TerminalScreen> {
     if (!mounted) return;
     for (final tab in _tabs) {
       if (tab.sessionId != null && output.sessionId == tab.sessionId) {
+        tab.receivedOutput = true;
         tab.terminal.write(output.data);
         return;
       }
