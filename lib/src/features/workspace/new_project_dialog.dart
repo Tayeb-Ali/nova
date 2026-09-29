@@ -1,86 +1,106 @@
 import "package:flutter/material.dart";
 
 import "../../../l10n/generated/app_localizations.dart";
+import "../../core/models/runtime.dart";
+import "../../core/services/runtime_service.dart";
 
 /// Shared new-project dialog: name field + runtime picker.
 ///
-/// Returns `(name, language)` with language one of
-/// `"php"`, `"node"`, `"python"`, `"general"`, or null on cancel.
+/// The runtime list is built from **installed** runtimes (plus General):
+/// installing a language in the SDK tab makes it appear here. Returns
+/// `(name, languageId)` with languageId being a runtime id ("php", "go",
+/// …) or `"general"`, or null on cancel.
 /// Stored values are never remapped here; use [displayLanguage] at
 /// render sites for user-facing labels.
 Future<(String, String)?> showNewProjectDialog(BuildContext context) {
   final l10n = AppLocalizations.of(context);
+  final nameController = TextEditingController();
+  var selectedLanguage = "general";
   return showDialog<(String, String)>(
     context: context,
-    builder: (context) => _NewProjectDialog(
-      title: l10n.projectNew,
-      nameHint: l10n.projectNameHint,
-      cancelLabel: l10n.actionCancel,
-      createLabel: l10n.actionCreate,
+    builder: (context) => _NewProjectDialogBody(
+      l10n: l10n,
+      nameController: nameController,
+      initialLanguage: selectedLanguage,
+      onPicked: (v) => selectedLanguage = v,
     ),
-  );
+  ).then((result) {
+    nameController.dispose();
+    return result == null ? null : (result.$1, selectedLanguage);
+  });
 }
 
-/// Dialog body owning the name controller and the selected runtime.
-///
-/// The controller MUST live in this State, not in the caller: `showDialog`'s
-/// future completes on `pop()`, while the route keeps rebuilding through its
-/// exit transition. A caller-owned controller disposed at that point makes the
-/// still-animating [TextField] re-attach a listener to a disposed controller.
-class _NewProjectDialog extends StatefulWidget {
-  const _NewProjectDialog({
-    required this.title,
-    required this.nameHint,
-    required this.cancelLabel,
-    required this.createLabel,
+class _NewProjectDialogBody extends StatefulWidget {
+  const _NewProjectDialogBody({
+    required this.l10n,
+    required this.nameController,
+    required this.initialLanguage,
+    required this.onPicked,
   });
 
-  final String title;
-  final String nameHint;
-  final String cancelLabel;
-  final String createLabel;
+  final AppLocalizations l10n;
+  final TextEditingController nameController;
+  final String initialLanguage;
+  final ValueChanged<String> onPicked;
 
   @override
-  State<_NewProjectDialog> createState() => _NewProjectDialogState();
+  State<_NewProjectDialogBody> createState() => _NewProjectDialogBodyState();
 }
 
-class _NewProjectDialogState extends State<_NewProjectDialog> {
-  late final TextEditingController _nameController;
-  var _selectedLanguage = "general";
+class _NewProjectDialogBodyState extends State<_NewProjectDialogBody> {
+  late String _selected = widget.initialLanguage;
+  List<RuntimeInfo> _installed = const [];
+  bool _loading = true;
 
   @override
   void initState() {
     super.initState();
-    _nameController = TextEditingController();
+    _loadInstalled();
   }
 
-  @override
-  void dispose() {
-    _nameController.dispose();
-    super.dispose();
+  Future<void> _loadInstalled() async {
+    try {
+      final all = await RuntimeService().getRuntimes();
+      if (!mounted) return;
+      setState(() {
+        _installed =
+            all.where((r) => r.installed && r.type.isLanguage).toList();
+        _loading = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _loading = false);
+    }
+  }
+
+  void _pick(String value) {
+    setState(() => _selected = value);
+    widget.onPicked(value);
   }
 
   void _submit() {
-    final name = _nameController.text.trim();
+    final name = widget.nameController.text.trim();
     if (name.isEmpty) return;
-    Navigator.of(context).pop((name, _selectedLanguage));
+    Navigator.of(context).pop((name, _selected));
   }
 
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
-      title: Text(widget.title),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(4),
+      ),
+      title: Text(widget.l10n.projectNew),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             TextField(
-              controller: _nameController,
+              controller: widget.nameController,
               autofocus: true,
               decoration: InputDecoration(
-                hintText: widget.nameHint,
+                hintText: widget.l10n.projectNameHint,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(4),
                 ),
@@ -88,55 +108,63 @@ class _NewProjectDialogState extends State<_NewProjectDialog> {
               onSubmitted: (_) => _submit(),
             ),
             const SizedBox(height: 8),
-            RadioGroup<String>(
-              groupValue: _selectedLanguage,
-              onChanged: (v) =>
-                  setState(() => _selectedLanguage = v ?? "general"),
-              child: const Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  RadioListTile<String>(
-                    value: "php",
-                    secondary: Icon(Icons.language),
-                    title: Text("PHP"),
-                    subtitle: Text("Laravel, WordPress…"),
-                    dense: true,
+            if (_loading)
+              const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(12),
+                  child: SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
                   ),
-                  RadioListTile<String>(
-                    value: "node",
-                    secondary: Icon(Icons.integration_instructions),
-                    title: Text("Node.js"),
-                    subtitle: Text("JavaScript & TypeScript"),
-                    dense: true,
-                  ),
-                  RadioListTile<String>(
-                    value: "python",
-                    secondary: Icon(Icons.terminal),
-                    title: Text("Python"),
-                    subtitle: Text("Scripts & data"),
-                    dense: true,
-                  ),
-                  RadioListTile<String>(
-                    value: "general",
-                    secondary: Icon(Icons.folder_open),
-                    title: Text("General"),
-                    subtitle: Text(
-                      "No runtime assumed — language auto-detected",
+                ),
+              )
+            else
+              RadioGroup<String>(
+                groupValue: _selected,
+                onChanged: (v) {
+                  if (v != null) _pick(v);
+                },
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    for (final r in _installed)
+                      RadioListTile<String>(
+                        value: r.id,
+                        secondary: Icon(r.type.icon),
+                        title: Text(r.displayName),
+                        subtitle:
+                            r.version != null && r.version!.isNotEmpty
+                                ? Text(
+                                    r.version!,
+                                    overflow: TextOverflow.ellipsis,
+                                  )
+                                : null,
+                        dense: true,
+                      ),
+                    const RadioListTile<String>(
+                      value: "general",
+                      secondary: Icon(Icons.folder_open),
+                      title: Text("General"),
+                      subtitle: Text(
+                          "No runtime assumed — language auto-detected"),
+                      dense: true,
                     ),
-                    dense: true,
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
           ],
         ),
       ),
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: Text(widget.cancelLabel),
+          child: Text(widget.l10n.actionCancel),
         ),
-        FilledButton(onPressed: _submit, child: Text(widget.createLabel)),
+        FilledButton(
+          onPressed: _submit,
+          child: Text(widget.l10n.actionCreate),
+        ),
       ],
     );
   }
@@ -154,6 +182,18 @@ String displayLanguage(String? language) {
       return "PHP";
     case "python":
       return "Python";
+    case "go":
+      return "Go";
+    case "rust":
+      return "Rust";
+    case "ruby":
+      return "Ruby";
+    case "java":
+      return "Java";
+    case "kotlin":
+      return "Kotlin";
+    case "dart":
+      return "Dart";
     case "general":
       return "General";
     default:

@@ -223,7 +223,7 @@ class RuntimeManager(
         val executable = File(prefix, "bin/${def.executable}")
         if (!executable.exists()) return null
         val output = runCatching {
-            shell.execute(executable.absolutePath, listOf("--version"), cwd.absolutePath, env, 60_000)
+            shell.execute(executable.absolutePath, def.versionArgs, cwd.absolutePath, env, 60_000)
                 .getOrNull()
         }.getOrNull() ?: return null
         return output.lineSequence().firstOrNull { it.isNotBlank() }?.trim()

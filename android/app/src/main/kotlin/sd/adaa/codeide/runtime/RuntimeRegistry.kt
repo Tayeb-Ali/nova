@@ -10,6 +10,9 @@ data class RuntimeDefinition(
     val executable: String,
     val packageName: String,
     val aliases: List<String>,
+    /** Args that print the version (first non-blank line). Most tools take
+     *  --version, but e.g. `go` needs `go version` and `tcc` needs `-v`. */
+    val versionArgs: List<String> = listOf("--version"),
 )
 
 object RuntimeRegistry {
@@ -20,6 +23,15 @@ object RuntimeRegistry {
         RuntimeDefinition("git", "Git", "git", "git", listOf("git")),
         RuntimeDefinition("composer", "Composer", "composer", "composer", listOf("composer")),
         RuntimeDefinition("openssh", "OpenSSH", "ssh", "openssh", listOf("ssh", "scp", "sftp")),
+        // ---- Phase 3 language pack (built from source for our prefix) ----
+        // Package names verified against the Nova apt repo after the build;
+        // install/update/remove flow is unchanged (apt by packageName).
+        RuntimeDefinition("go", "Go", "go", "golang", listOf("go", "gofmt"), listOf("version")),
+        RuntimeDefinition("rust", "Rust", "rustc", "rust", listOf("rustc", "cargo", "rustdoc")),
+        RuntimeDefinition("ruby", "Ruby", "ruby", "ruby", listOf("ruby", "gem", "irb")),
+        RuntimeDefinition("java", "Java", "java", "openjdk-25", listOf("java", "javac", "jar")),
+        RuntimeDefinition("kotlin", "Kotlin", "kotlinc", "kotlin", listOf("kotlinc", "kotlin")),
+        RuntimeDefinition("dart", "Dart", "dart", "dart", listOf("dart")),
     )
 
     fun get(id: String): RuntimeDefinition? = all.firstOrNull { it.id == id }

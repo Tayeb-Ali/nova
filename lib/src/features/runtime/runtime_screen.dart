@@ -36,6 +36,8 @@ class _RuntimeScreenState extends State<RuntimeScreen> {
   List<RuntimeInfo> _runtimes = const [];
   bool _loadingRuntimes = true;
   String? _runtimesError;
+  String _runtimeQuery = '';
+  final TextEditingController _searchController = TextEditingController();
 
   String? _activeId;
   final List<String> _progressLog = <String>[];
@@ -58,6 +60,7 @@ class _RuntimeScreenState extends State<RuntimeScreen> {
   void dispose() {
     _events?.cancel();
     _logScrollController.dispose();
+    _searchController.dispose();
     super.dispose();
   }
 
@@ -642,8 +645,85 @@ class _RuntimeScreenState extends State<RuntimeScreen> {
     if (_runtimes.isEmpty) {
       return Text(AppLocalizations.of(context).runtimeEmpty);
     }
+    final query = _runtimeQuery.trim().toLowerCase();
+    List<RuntimeInfo> filtered = _runtimes;
+    if (query.isNotEmpty) {
+      filtered = _runtimes.where((r) {
+        return r.displayName.toLowerCase().contains(query) ||
+            r.id.toLowerCase().contains(query);
+      }).toList();
+    }
+    if (filtered.isEmpty) {
+      return const Text('لا نتائج مطابقة للبحث');
+    }
+    final installed = filtered.where((r) => r.installed).toList();
+    final availableLanguages =
+        filtered.where((r) => !r.installed && r.type.isLanguage).toList();
+    final availableTools =
+        filtered.where((r) => !r.installed && !r.type.isLanguage).toList();
     return Column(
-      children: [for (final RuntimeInfo r in _runtimes) _buildRuntimeTile(r)],
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        TextField(
+          controller: _searchController,
+          onChanged: (v) => setState(() => _runtimeQuery = v),
+          decoration: InputDecoration(
+            hintText: 'بحث عن لغة أو أداة...',
+            prefixIcon: const Icon(Icons.search),
+            suffixIcon: _runtimeQuery.isEmpty
+                ? null
+                : IconButton(
+                    tooltip: 'مسح',
+                    icon: const Icon(Icons.clear),
+                    onPressed: () {
+                      _searchController.clear();
+                      setState(() => _runtimeQuery = '');
+                    },
+                  ),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          ),
+        ),
+        const SizedBox(height: 8),
+        if (installed.isNotEmpty) ...[
+          _buildSectionHeader(
+              'المثبتة (${installed.length})', Icons.check_circle_outline),
+          for (final r in installed) _buildRuntimeTile(r),
+        ],
+        if (availableLanguages.isNotEmpty) ...[
+          _buildSectionHeader(
+              'لغات البرمجة (${availableLanguages.length})', Icons.code),
+          for (final r in availableLanguages) _buildRuntimeTile(r),
+        ],
+        if (availableTools.isNotEmpty) ...[
+          _buildSectionHeader(
+              'الأدوات (${availableTools.length})', Icons.build_outlined),
+          for (final r in availableTools) _buildRuntimeTile(r),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildSectionHeader(String title, IconData icon) {
+    final scheme = Theme.of(context).colorScheme;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(4, 8, 4, 4),
+      child: Row(
+        children: [
+          Icon(icon, size: 16, color: scheme.primary),
+          const SizedBox(width: 6),
+          Text(
+            title,
+            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: scheme.primary,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -665,11 +745,37 @@ class _RuntimeScreenState extends State<RuntimeScreen> {
           children: [
             Row(
               children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: scheme.primaryContainer,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(
+                    runtime.type.icon,
+                    size: 20,
+                    color: scheme.onPrimaryContainer,
+                  ),
+                ),
+                const SizedBox(width: 10),
                 Expanded(
-                  child: Text(
-                    runtime.displayName,
-                    style: Theme.of(context).textTheme.titleSmall
-                        ?.copyWith(fontWeight: FontWeight.bold),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        runtime.displayName,
+                        style: Theme.of(context).textTheme.titleSmall
+                            ?.copyWith(fontWeight: FontWeight.bold),
+                      ),
+                      if (runtime.type.description.isNotEmpty)
+                        Text(
+                          runtime.type.description,
+                          style:
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: scheme.onSurfaceVariant,
+                          ),
+                        ),
+                    ],
                   ),
                 ),
                 if (runtime.installed)

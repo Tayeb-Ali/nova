@@ -5,8 +5,10 @@ import "../../core/models/task.dart";
 import "../../core/services/project_service.dart";
 
 /// Detects runnable tasks for a project (task.md §20):
-/// package.json `scripts`, composer.json `scripts`, artisan,
-/// main.py / index.js / index.php entry points.
+/// package.json `scripts`, composer.json `scripts`, artisan, Cargo.toml,
+/// go.mod, Makefile/CMakeLists, Gemfile, pubspec.yaml and well-known
+/// single-file entry points (main.py, index.js, index.php, main.go,
+/// main.rs, Main.java, Main.kt, main.rb, main.dart, main.c).
 class TaskDetector {
   final ProjectService service;
 
@@ -26,9 +28,14 @@ class TaskDetector {
         await _collectJsonScripts("${project.path}/composer.json", tasks,
             prefix: "composer", runCommand: "composer run");
       }
+      if (names.contains("Cargo.toml") || names.contains("main.rs")) {
+        tasks.add(const IdeTask(name: "cargo run", command: "cargo", args: "run"));
+      }
+      if (names.contains("go.mod") || names.contains("main.go")) {
+        tasks.add(const IdeTask(name: "go run", command: "go", args: "run ."));
+      }
       if (names.contains("artisan")) {
-        tasks.add(const IdeTask(
-            name: "artisan serve", command: "php", args: "artisan serve"));
+        tasks.add(const IdeTask(name: "artisan serve", command: "php", args: "artisan serve"));
       }
       if (names.contains("main.py")) {
         tasks.add(const IdeTask(name: "main.py", command: "python", args: "main.py"));
@@ -39,11 +46,37 @@ class TaskDetector {
       if (names.contains("index.php")) {
         tasks.add(const IdeTask(name: "index.php", command: "php", args: "index.php"));
       }
+      if (names.contains("main.rb")) {
+        tasks.add(const IdeTask(name: "main.rb", command: "ruby", args: "main.rb"));
+      }
+      if (names.contains("main.dart")) {
+        tasks.add(const IdeTask(name: "main.dart", command: "dart", args: "main.dart"));
+      }
+      if (names.contains("Main.java") &&
+          !names.contains("pom.xml") &&
+          !_hasGradle(names)) {
+        tasks.add(const IdeTask(
+          name: "Main.java",
+          command: "sh",
+          args: '-c "javac Main.java && java Main"',
+        ));
+      }
+      if (names.contains("Main.kt") && !_hasGradle(names)) {
+        tasks.add(const IdeTask(
+          name: "Main.kt",
+          command: "sh",
+          args: '-c "kotlinc Main.kt -include-runtime -d app.jar && java -jar app.jar"',
+        ));
+      }
     } catch (_) {
       // Project root unreadable or not ready; no tasks.
     }
     return tasks;
   }
+
+  static bool _hasGradle(Set<String> names) =>
+      names.any((n) => n.toLowerCase().startsWith("build.gradle"));
+
 
   Future<String?> detectLanguage(ProjectInfo project) async {
     try {
@@ -85,6 +118,9 @@ class TaskDetector {
     }
     if (names.contains('package.swift')) return 'swift';
     if (names.contains('cmakelists.txt')) return 'cpp';
+    if (names.any((n) => n == 'main.kt' || n.startsWith('build.gradle.kts'))) {
+      return 'kotlin';
+    }
     return null;
   }
 

@@ -63,13 +63,16 @@ class ProjectManager(private val context: Context) {
         name.replace(Regex("[^A-Za-z0-9_\\- ]"), "_").trim()
 
     private fun writeTemplates(dir: File, name: String, language: String) {
+        // Slug safe for module/crate names (lowercase, no spaces).
+        val slug = name.lowercase().replace(Regex("[^a-z0-9]+"), "-").trim('-')
+            .ifBlank { "app" }
         when (language.lowercase()) {
             "php" -> File(dir, "index.php").let { if (!it.exists()) it.writeText("<?php echo \"Hello from Nova\";") }
             "node" -> {
                 File(dir, "package.json").let { f ->
                     if (!f.exists()) {
                         val pkg = JSONObject().apply {
-                            put("name", name)
+                            put("name", slug)
                             put("version", "1.0.0")
                             put("scripts", JSONObject().put("start", "node index.js"))
                         }
@@ -79,6 +82,30 @@ class ProjectManager(private val context: Context) {
                 File(dir, "index.js").let { if (!it.exists()) it.writeText("console.log(\"Hello from Nova\");") }
             }
             "python" -> File(dir, "main.py").let { if (!it.exists()) it.writeText("print(\"Hello from Nova\")") }
+            "go" -> {
+                File(dir, "go.mod").let { if (!it.exists()) it.writeText("module $slug\n\ngo 1.21\n") }
+                File(dir, "main.go").let {
+                    if (!it.exists()) it.writeText("package main\n\nimport \"fmt\"\n\nfunc main() {\n\tfmt.Println(\"Hello from Nova\")\n}\n")
+                }
+            }
+            "rust" -> {
+                File(dir, "Cargo.toml").let {
+                    if (!it.exists()) it.writeText("[package]\nname = \"$slug\"\nversion = \"0.1.0\"\nedition = \"2021\"\n")
+                }
+                File(dir, "src").mkdirs()
+                File(dir, "src/main.rs").let { if (!it.exists()) it.writeText("fn main() {\n    println!(\"Hello from Nova\");\n}\n") }
+            }
+            "java" -> File(dir, "Main.java").let {
+                if (!it.exists()) it.writeText("public class Main {\n    public static void main(String[] args) {\n        System.out.println(\"Hello from Nova\");\n    }\n}\n")
+            }
+            "kotlin" -> File(dir, "Main.kt").let { if (!it.exists()) it.writeText("fun main() {\n    println(\"Hello from Nova\")\n}\n") }
+            "ruby" -> File(dir, "main.rb").let { if (!it.exists()) it.writeText("puts \"Hello from Nova\"\n") }
+            "dart" -> {
+                File(dir, "pubspec.yaml").let {
+                    if (!it.exists()) it.writeText("name: $slug\nversion: 1.0.0\n\nenvironment:\n  sdk: ^3.0.0\n")
+                }
+                File(dir, "main.dart").let { if (!it.exists()) it.writeText("void main() {\n  print('Hello from Nova');\n}\n") }
+            }
         }
     }
 

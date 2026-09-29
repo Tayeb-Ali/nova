@@ -1,3 +1,5 @@
+import 'package:nova/src/core/models/project.dart';
+import 'package:nova/src/core/services/project_service.dart';
 import 'package:nova/src/features/editor/editor_engine.dart';
 import 'package:nova/src/features/workspace/task_detector.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -81,6 +83,14 @@ void main() {
         TaskDetector.detectProjectLanguage(['CMakeLists.txt']),
         'cpp',
       );
+      expect(
+        TaskDetector.detectProjectLanguage(['Main.kt']),
+        'kotlin',
+      );
+      expect(
+        TaskDetector.detectProjectLanguage(['main.rb']),
+        isNull,
+      );
     });
 
     test('returns null when ambiguous or unknown', () {
@@ -89,4 +99,59 @@ void main() {
       expect(TaskDetector.detectProjectLanguage([]), isNull);
     });
   });
+
+  group('detect entry points', () {
+    Future<List<String>> commandsFor(List<String> files) async {
+      final detector = TaskDetector(_FilesService(files));
+      const project = ProjectInfo(
+        name: "t",
+        path: "/data/t",
+        language: "general",
+      );
+      final tasks = await detector.detect(project);
+      return [for (final t in tasks) "${t.command} ${t.args ?? ""}".trim()];
+    }
+
+    test('go/rust/ruby/dart entry points', () async {
+      expect(await commandsFor(["go.mod", "main.go"]), ["go run ."]);
+      expect(await commandsFor(["Cargo.toml"]), ["cargo run"]);
+      expect(await commandsFor(["main.rb"]), ["ruby main.rb"]);
+      expect(await commandsFor(["pubspec.yaml", "main.dart"]), ["dart main.dart"]);
+    });
+
+    test('java/kotlin single files use shell wrappers', () async {
+      expect(
+        await commandsFor(["Main.java"]),
+        ['sh -c "javac Main.java && java Main"'],
+      );
+      expect(
+        await commandsFor(["Main.kt"]),
+        ['sh -c "kotlinc Main.kt -include-runtime -d app.jar && java -jar app.jar"'],
+      );
+    });
+  });
+}
+
+class _FilesService extends ProjectService {
+  _FilesService(this.files);
+
+  final List<String> files;
+
+  @override
+  Future<List<ProjectInfo>> listProjects() async => const [];
+
+  @override
+  Future<void> openProject(String path) async {}
+
+  @override
+  Future<List<FileEntry>> listFiles(String path) async => [
+        for (final f in files)
+          FileEntry(name: f, path: "/data/t/$f", isDirectory: false),
+      ];
+
+  @override
+  Future<String> readFile(String path) async => "";
+
+  @override
+  Future<void> writeFile(String path, String content) async {}
 }
