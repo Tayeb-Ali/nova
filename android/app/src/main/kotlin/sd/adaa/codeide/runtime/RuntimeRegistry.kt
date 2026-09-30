@@ -13,6 +13,14 @@ data class RuntimeDefinition(
     /** Args that print the version (first non-blank line). Most tools take
      *  --version, but e.g. `go` needs `go version` and `tcc` needs `-v`. */
     val versionArgs: List<String> = listOf("--version"),
+    /**
+     * True for install packs (metapackages): [executable] is unused and
+     * installation state derives from [memberBins] instead. Removing a pack
+     * only removes the metapackage itself (apt behavior), never binaries.
+     */
+    val isPack: Boolean = false,
+    /** bin/ names that must all exist for a pack to count as installed. */
+    val memberBins: List<String> = emptyList(),
 )
 
 object RuntimeRegistry {
@@ -32,6 +40,17 @@ object RuntimeRegistry {
         RuntimeDefinition("java", "Java", "java", "openjdk-25", listOf("java", "javac", "jar")),
         RuntimeDefinition("kotlin", "Kotlin", "kotlinc", "kotlin", listOf("kotlinc", "kotlin")),
         RuntimeDefinition("dart", "Dart", "dart", "dart", listOf("dart")),
+        // ---- Install packs (metapackages, one-tap groups) ----
+        RuntimeDefinition("nova-web", "Web Pack", "", "nova-web", emptyList(), isPack = true,
+            memberBins = listOf("php", "composer", "ruby", "node", "npm")),
+        RuntimeDefinition("nova-systems", "Systems Pack", "", "nova-systems", emptyList(), isPack = true,
+            memberBins = listOf("rustc", "go", "make", "cmake")),
+        RuntimeDefinition("nova-jvm", "JVM Pack", "", "nova-jvm", emptyList(), isPack = true,
+            memberBins = listOf("java", "kotlinc")),
+        RuntimeDefinition("nova-python", "Python Pack", "", "nova-python", emptyList(), isPack = true,
+            memberBins = listOf("python3", "pip")),
+        RuntimeDefinition("nova-dart", "Dart Pack", "", "nova-dart", emptyList(), isPack = true,
+            memberBins = listOf("dart")),
     )
 
     fun get(id: String): RuntimeDefinition? = all.firstOrNull { it.id == id }

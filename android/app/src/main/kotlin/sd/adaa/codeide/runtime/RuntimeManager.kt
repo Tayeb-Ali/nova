@@ -197,6 +197,9 @@ class RuntimeManager(
     }
 
     private fun removeById(def: RuntimeDefinition) {
+        // Packs own no binaries: apt remove drops just the metapackage,
+        // members stay (standard metapackage semantics).
+        if (def.isPack) return
         for (name in (listOf(def.executable) + def.aliases).distinct()) {
             val bin = File(prefix, "bin/$name")
             if (bin.exists()) bin.delete()
@@ -215,11 +218,18 @@ class RuntimeManager(
     )
 
     private fun isInstalled(def: RuntimeDefinition): Boolean {
+        // A pack counts as installed only when every member binary exists.
+        if (def.isPack) {
+            if (def.memberBins.isEmpty()) return false
+            return def.memberBins.all { File(prefix, "bin/$it").exists() }
+        }
         val binary = File(prefix, "bin/${def.executable}")
         return binary.exists()
     }
 
     private fun queryVersion(def: RuntimeDefinition): String? {
+        // Packs have no single version; the tile shows member state instead.
+        if (def.isPack) return null
         val executable = File(prefix, "bin/${def.executable}")
         if (!executable.exists()) return null
         val output = runCatching {

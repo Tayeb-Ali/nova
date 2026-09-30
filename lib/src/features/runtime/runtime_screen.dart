@@ -657,10 +657,16 @@ class _RuntimeScreenState extends State<RuntimeScreen> {
       return const Text('لا نتائج مطابقة للبحث');
     }
     final installed = filtered.where((r) => r.installed).toList();
-    final availableLanguages =
-        filtered.where((r) => !r.installed && r.type.isLanguage).toList();
-    final availableTools =
-        filtered.where((r) => !r.installed && !r.type.isLanguage).toList();
+    final packs = filtered.where((r) => r.isPack).toList();
+    final availableLanguages = filtered
+        .where((r) => !r.installed && !r.isPack && r.type.isLanguage)
+        .toList();
+    final availableTools = filtered
+        .where((r) => !r.installed && !r.isPack && !r.type.isLanguage)
+        .toList();
+    // Installed packs merge into the installed section; available packs
+    // get their own top section (one-tap groups).
+    final installedNonPacks = installed.where((r) => !r.isPack).toList();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -688,10 +694,15 @@ class _RuntimeScreenState extends State<RuntimeScreen> {
           ),
         ),
         const SizedBox(height: 8),
-        if (installed.isNotEmpty) ...[
+        if (installedNonPacks.isNotEmpty) ...[
           _buildSectionHeader(
-              'المثبتة (${installed.length})', Icons.check_circle_outline),
-          for (final r in installed) _buildRuntimeTile(r),
+              'المثبتة (${installedNonPacks.length})', Icons.check_circle_outline),
+          for (final r in installedNonPacks) _buildRuntimeTile(r),
+        ],
+        if (packs.isNotEmpty) ...[
+          _buildSectionHeader(
+              'الحزم الجاهزة (${packs.length})', Icons.widgets_outlined),
+          for (final r in packs) _buildRuntimeTile(r),
         ],
         if (availableLanguages.isNotEmpty) ...[
           _buildSectionHeader(
@@ -752,7 +763,7 @@ class _RuntimeScreenState extends State<RuntimeScreen> {
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Icon(
-                    runtime.type.icon,
+                    runtime.displayIcon,
                     size: 20,
                     color: scheme.onPrimaryContainer,
                   ),
@@ -767,9 +778,9 @@ class _RuntimeScreenState extends State<RuntimeScreen> {
                         style: Theme.of(context).textTheme.titleSmall
                             ?.copyWith(fontWeight: FontWeight.bold),
                       ),
-                      if (runtime.type.description.isNotEmpty)
+                      if (runtime.displayDescription.isNotEmpty)
                         Text(
-                          runtime.type.description,
+                          runtime.displayDescription,
                           style:
                               Theme.of(context).textTheme.bodySmall?.copyWith(
                             color: scheme.onSurfaceVariant,

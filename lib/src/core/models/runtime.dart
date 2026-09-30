@@ -145,6 +145,49 @@ class RuntimeInfo {
 
   RuntimeType get type => RuntimeType.fromId(id);
 
+  /// True for install packs (metapackages, ids `nova-*`): one-tap groups,
+  /// installed when all member binaries exist. Derived client-side so the
+  /// bridge contract stays untouched.
+  bool get isPack => id.startsWith('nova-');
+
+  /// Tile icon: pack-specific for packs, per-language otherwise.
+  IconData get displayIcon {
+    if (!isPack) return type.icon;
+    switch (id) {
+      case 'nova-web':
+        return Icons.web_asset_outlined;
+      case 'nova-systems':
+        return Icons.handyman_outlined;
+      case 'nova-jvm':
+        return Icons.coffee_outlined;
+      case 'nova-python':
+        return Icons.science_outlined;
+      case 'nova-dart':
+        return Icons.flutter_dash;
+      default:
+        return Icons.widgets_outlined;
+    }
+  }
+
+  /// Tile subtitle: pack members for packs, per-language otherwise.
+  String get displayDescription {
+    if (!isPack) return type.description;
+    switch (id) {
+      case 'nova-web':
+        return 'PHP + Composer + Ruby + Node.js — تطوير الويب';
+      case 'nova-systems':
+        return 'Rust + Go + make + cmake — لغات الأنظمة';
+      case 'nova-jvm':
+        return 'Java 25 + Kotlin — منصة JVM';
+      case 'nova-python':
+        return 'Python + pip — سكربتات وبيانات';
+      case 'nova-dart':
+        return 'Dart — أدوات سطر الأوامر';
+      default:
+        return '';
+    }
+  }
+
   factory RuntimeInfo.fromBridge(bridge.RuntimeInfo b) => RuntimeInfo(
         id: b.id,
         displayName: b.displayName,
