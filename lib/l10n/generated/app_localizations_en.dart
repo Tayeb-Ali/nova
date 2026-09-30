@@ -274,6 +274,65 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get gitStage => 'Stage';
+
+  @override
+  String gitStagedFile(String file) {
+    return 'Staged $file';
+  }
+
+  @override
+  String get gitBranches => 'Branches';
+
+  @override
+  String get gitCheckout => 'Checkout';
+
+  @override
+  String get gitCreateBranch => 'New branch';
+
+  @override
+  String get gitBranchNameHint => 'Branch name';
+
+  @override
+  String gitDeleteBranchConfirm(String name) {
+    return 'Delete branch \'$name\'?';
+  }
+
+  @override
+  String gitBranchActionFailed(String error) {
+    return 'Branch action failed: $error';
+  }
+
+  @override
+  String get gitNoBranches => '(no branches)';
+
+  @override
+  String get gitStash => 'Stash';
+
+  @override
+  String get gitStashSave => 'Stash changes';
+
+  @override
+  String get gitStashMessage => 'Stash message';
+
+  @override
+  String get gitStashed => 'Stashed changes';
+
+  @override
+  String gitStashActionFailed(String error) {
+    return 'Stash action failed: $error';
+  }
+
+  @override
+  String get gitStashEmpty => '(no stashed changes)';
+
+  @override
+  String get gitStashPop => 'Pop';
+
+  @override
+  String get gitStashDrop => 'Drop';
+
+  @override
   String get terminalTitle => 'Terminal';
 
   @override

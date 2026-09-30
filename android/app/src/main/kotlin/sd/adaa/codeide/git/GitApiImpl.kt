@@ -17,4 +17,37 @@ object GitApiImpl : GitApi {
     }
 
     override fun diff(projectPath: String): String = IdeCore.git.diff(projectPath)
+
+    override fun listBranches(projectPath: String): List<String> =
+        IdeCore.git.listBranches(projectPath)
+
+    override fun currentBranch(projectPath: String): String =
+        IdeCore.git.currentBranch(projectPath)
+
+    override fun checkout(projectPath: String, branch: String) {
+        IdeCore.git.checkout(projectPath, branch)
+    }
+
+    override fun createBranch(projectPath: String, branch: String) {
+        IdeCore.git.createBranch(projectPath, branch)
+    }
+
+    override fun deleteBranch(projectPath: String, branch: String) {
+        IdeCore.git.deleteBranch(projectPath, branch)
+    }
+
+    override fun stashList(projectPath: String): List<String> =
+        IdeCore.git.stashList(projectPath)
+
+    override fun stashSave(projectPath: String, message: String) {
+        IdeCore.git.stashSave(projectPath, message)
+    }
+
+    override fun stashPop(projectPath: String, index: Long) {
+        IdeCore.git.stashPop(projectPath, index)
+    }
+
+    override fun stashDrop(projectPath: String, index: Long) {
+        IdeCore.git.stashDrop(projectPath, index)
+    }
 }

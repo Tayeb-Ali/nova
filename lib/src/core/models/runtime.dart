@@ -15,6 +15,7 @@ enum RuntimeType {
   java,
   kotlin,
   dart,
+  c,
   other;
 
   static RuntimeType fromId(String id) {
@@ -41,6 +42,8 @@ enum RuntimeType {
         return RuntimeType.kotlin;
       case 'dart':
         return RuntimeType.dart;
+      case 'c':
+        return RuntimeType.c;
       default:
         return RuntimeType.other;
     }
@@ -59,6 +62,7 @@ enum RuntimeType {
       case RuntimeType.java:
       case RuntimeType.kotlin:
       case RuntimeType.dart:
+      case RuntimeType.c:
         return true;
       case RuntimeType.git:
       case RuntimeType.composer:
@@ -88,6 +92,8 @@ enum RuntimeType {
         return Icons.bolt_outlined;
       case RuntimeType.dart:
         return Icons.flutter_dash;
+      case RuntimeType.c:
+        return Icons.memory_outlined;
       case RuntimeType.git:
         return Icons.account_tree;
       case RuntimeType.composer:
@@ -118,6 +124,8 @@ enum RuntimeType {
         return 'Kotlin — تعمل على JVM (تحتاج Java)';
       case RuntimeType.dart:
         return 'Dart — تطبيقات وأدوات سطر أوامر';
+      case RuntimeType.c:
+        return 'لغة C وC++ — مترجم Clang السريع';
       case RuntimeType.git:
         return 'إدارة الإصدارات والمستودعات';
       case RuntimeType.composer:

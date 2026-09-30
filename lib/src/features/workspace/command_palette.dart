@@ -3,6 +3,7 @@ import "package:flutter_riverpod/flutter_riverpod.dart";
 
 import "../../core/models/project.dart";
 import "../editor/theme/theme_pack_store.dart";
+import "../search/search_screen.dart";
 import "workspace_providers.dart";
 
 /// Command palette: fuzzy-ish file + command search for the workspace.
@@ -178,6 +179,14 @@ class _CommandPaletteDialogState
         commandId: "cycle-theme",
       ),
     );
+    entries.add(
+      const _PaletteEntry(
+        kind: _EntryKind.command,
+        title: "Search in project",
+        icon: Icons.find_in_page,
+        commandId: "search-in-project",
+      ),
+    );
     final onGoToTab = widget.onGoToTab;
     if (onGoToTab != null) {
       entries.add(
@@ -250,6 +259,14 @@ class _CommandPaletteDialogState
         } else if (entry.commandId == "cycle-theme") {
           if (mounted) Navigator.of(context).pop();
           await _cycleTheme();
+        } else if (entry.commandId == "search-in-project") {
+          // Grab the navigator before popping: the dialog context is
+          // unmounted by pop and must not be reused afterwards.
+          final navigator = Navigator.of(context);
+          navigator.pop();
+          await navigator.push(
+            MaterialPageRoute(builder: (_) => const SearchScreen()),
+          );
         } else if (entry.commandId == "open-settings") {
           if (mounted) Navigator.of(context).pop();
           widget.onGoToTab?.call("settings");

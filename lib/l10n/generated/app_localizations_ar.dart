@@ -274,6 +274,65 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
+  String get gitStage => 'تجهيز';
+
+  @override
+  String gitStagedFile(String file) {
+    return 'تم تجهيز $file';
+  }
+
+  @override
+  String get gitBranches => 'الفروع';
+
+  @override
+  String get gitCheckout => 'تبديل';
+
+  @override
+  String get gitCreateBranch => 'فرع جديد';
+
+  @override
+  String get gitBranchNameHint => 'اسم الفرع';
+
+  @override
+  String gitDeleteBranchConfirm(String name) {
+    return 'حذف الفرع «$name»؟';
+  }
+
+  @override
+  String gitBranchActionFailed(String error) {
+    return 'فشل إجراء الفرع: $error';
+  }
+
+  @override
+  String get gitNoBranches => '(لا توجد فروع)';
+
+  @override
+  String get gitStash => 'التخزين المؤقت';
+
+  @override
+  String get gitStashSave => 'تخزين التغييرات';
+
+  @override
+  String get gitStashMessage => 'رسالة التخزين';
+
+  @override
+  String get gitStashed => 'تم تخزين التغييرات';
+
+  @override
+  String gitStashActionFailed(String error) {
+    return 'فشل إجراء التخزين: $error';
+  }
+
+  @override
+  String get gitStashEmpty => '(لا توجد تغييرات مخزنة)';
+
+  @override
+  String get gitStashPop => 'استعادة';
+
+  @override
+  String get gitStashDrop => 'إسقاط';
+
+  @override
   String get terminalTitle => 'الطرفية';
 
   @override

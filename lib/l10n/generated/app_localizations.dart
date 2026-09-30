@@ -572,6 +572,108 @@ abstract class AppLocalizations {
   /// **'Stage failed: {error}'**
   String gitStageFailed(String error);
 
+  /// Git: per-file stage action
+  ///
+  /// In en, this message translates to:
+  /// **'Stage'**
+  String get gitStage;
+
+  /// Git: per-file staged confirmation
+  ///
+  /// In en, this message translates to:
+  /// **'Staged {file}'**
+  String gitStagedFile(String file);
+
+  /// Git: branches dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Branches'**
+  String get gitBranches;
+
+  /// Git: checkout branch action
+  ///
+  /// In en, this message translates to:
+  /// **'Checkout'**
+  String get gitCheckout;
+
+  /// Git: create branch action
+  ///
+  /// In en, this message translates to:
+  /// **'New branch'**
+  String get gitCreateBranch;
+
+  /// Git: new branch name hint
+  ///
+  /// In en, this message translates to:
+  /// **'Branch name'**
+  String get gitBranchNameHint;
+
+  /// Git: delete branch confirmation
+  ///
+  /// In en, this message translates to:
+  /// **'Delete branch \'{name}\'?'**
+  String gitDeleteBranchConfirm(String name);
+
+  /// Git: branch action failure
+  ///
+  /// In en, this message translates to:
+  /// **'Branch action failed: {error}'**
+  String gitBranchActionFailed(String error);
+
+  /// Git: empty branches placeholder
+  ///
+  /// In en, this message translates to:
+  /// **'(no branches)'**
+  String get gitNoBranches;
+
+  /// Git: stash section header
+  ///
+  /// In en, this message translates to:
+  /// **'Stash'**
+  String get gitStash;
+
+  /// Git: stash save action
+  ///
+  /// In en, this message translates to:
+  /// **'Stash changes'**
+  String get gitStashSave;
+
+  /// Git: stash message label
+  ///
+  /// In en, this message translates to:
+  /// **'Stash message'**
+  String get gitStashMessage;
+
+  /// Git: stashed confirmation
+  ///
+  /// In en, this message translates to:
+  /// **'Stashed changes'**
+  String get gitStashed;
+
+  /// Git: stash action failure
+  ///
+  /// In en, this message translates to:
+  /// **'Stash action failed: {error}'**
+  String gitStashActionFailed(String error);
+
+  /// Git: empty stash placeholder
+  ///
+  /// In en, this message translates to:
+  /// **'(no stashed changes)'**
+  String get gitStashEmpty;
+
+  /// Git: stash pop action
+  ///
+  /// In en, this message translates to:
+  /// **'Pop'**
+  String get gitStashPop;
+
+  /// Git: stash drop action
+  ///
+  /// In en, this message translates to:
+  /// **'Drop'**
+  String get gitStashDrop;
+
   /// Terminal screen title
   ///
   /// In en, this message translates to:

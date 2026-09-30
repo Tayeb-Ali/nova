@@ -127,7 +127,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         OutlineInputBorder(borderRadius: BorderRadius.circular(4));
 
     return Scaffold(
-      appBar: AppBar(title: const Text("Settings")),
+      appBar: AppBar(title: Text(AppLocalizations.of(context).navSettings)),
       body: ListView(
         padding: const EdgeInsets.all(8),
         children: [
@@ -172,7 +172,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  sectionTitle("Run"),
+                  sectionTitle(AppLocalizations.of(context).actionRun),
                   const SizedBox(height: 8),
                   Text("Run timeout: ${settings.timeoutMs} ms"),
                   Slider(
@@ -212,7 +212,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  sectionTitle("Editor"),
+                  sectionTitle(AppLocalizations.of(context).settingsEditor),
                   const SizedBox(height: 8),
                   SwitchListTile(
                     contentPadding: EdgeInsets.zero,
@@ -376,7 +376,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  sectionTitle("AI"),
+                  sectionTitle(AppLocalizations.of(context).settingsAi),
                   const SizedBox(height: 8),
                   DropdownButtonFormField<String>(
                     initialValue: aiPresetById(settings.aiProvider) == null
@@ -528,7 +528,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 ).showSnackBar(const SnackBar(content: Text("Settings saved")));
               }
             },
-            child: const Text("Save"),
+            child: Text(AppLocalizations.of(context).actionSave),
           ),
         ],
       ),

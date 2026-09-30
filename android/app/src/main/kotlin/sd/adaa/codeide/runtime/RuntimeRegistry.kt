@@ -40,6 +40,9 @@ object RuntimeRegistry {
         RuntimeDefinition("java", "Java", "java", "openjdk-25", listOf("java", "javac", "jar")),
         RuntimeDefinition("kotlin", "Kotlin", "kotlinc", "kotlin", listOf("kotlinc", "kotlin")),
         RuntimeDefinition("dart", "Dart", "dart", "dart", listOf("dart")),
+        // Clang 21 (apt package `clang`): C/C++ frontend; version probing is
+        // the default `cc --version` (first line: "clang version 21…").
+        RuntimeDefinition("c", "C", "cc", "clang", listOf("cc", "clang", "clang++")),
         // ---- Install packs (metapackages, one-tap groups) ----
         RuntimeDefinition("nova-web", "Web Pack", "", "nova-web", emptyList(), isPack = true,
             memberBins = listOf("php", "composer", "ruby", "node", "npm")),

@@ -132,7 +132,8 @@ class _TerminalScreenState extends State<TerminalScreen> {
       onBell: () => HapticFeedback.selectionClick(),
     );
     tab = _TerminalTab(
-      title: 'Terminal ${_nextNumber++}',
+      title:
+          '${AppLocalizations.of(context).terminalTitle} ${_nextNumber++}',
       terminal: terminal,
       controller: TerminalController(),
     );
@@ -348,7 +349,7 @@ class _TerminalScreenState extends State<TerminalScreen> {
             Padding(
               padding: const EdgeInsets.only(top: 8, bottom: 4),
               child: IconButton(
-                tooltip: 'Add terminal',
+                tooltip: AppLocalizations.of(context).terminalNewSession,
                 visualDensity: VisualDensity.compact,
                 onPressed: _tabs.length >= _maxTabs ? null : _addTab,
                 icon: const Icon(Icons.add, size: 18),

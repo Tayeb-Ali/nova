@@ -5,6 +5,7 @@ import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:path/path.dart" as p;
 
 import "../../core/ui/text_prompt_dialog.dart";
+import "../../../l10n/generated/app_localizations.dart";
 import "files_providers.dart";
 
 /// Drawer with workspace root picker, file list, and new/delete actions.
@@ -72,16 +73,18 @@ class _FileExplorerState extends ConsumerState<FileExplorer> {
     final ok = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text("Delete?"),
-        content: Text("Delete $name?"),
+        title: Text(AppLocalizations.of(context).explorerDeleteTitle),
+        content: Text(
+          AppLocalizations.of(context).explorerDeleteMessage(name),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text("Cancel"),
+            child: Text(AppLocalizations.of(context).actionCancel),
           ),
           FilledButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text("Delete"),
+            child: Text(AppLocalizations.of(context).actionDelete),
           ),
         ],
       ),
@@ -101,12 +104,13 @@ class _FileExplorerState extends ConsumerState<FileExplorer> {
   }
 
   Future<void> _promptNewFile() async {
+    final l10n = AppLocalizations.of(context);
     final name = await showTextPromptDialog(
       context: context,
-      title: "New file",
+      title: l10n.explorerNewFile,
       hintText: "e.g. main.py",
-      confirmLabel: "Create",
-      cancelLabel: "Cancel",
+      confirmLabel: l10n.actionCreate,
+      cancelLabel: l10n.actionCancel,
     );
     if (name == null || name.isEmpty) return;
     final dir = _currentDir;
@@ -139,7 +143,7 @@ class _FileExplorerState extends ConsumerState<FileExplorer> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    "Workspace",
+                    AppLocalizations.of(context).workspaceTitle,
                     style: Theme.of(context).textTheme.titleSmall,
                   ),
                   const SizedBox(height: 8),
@@ -159,7 +163,9 @@ class _FileExplorerState extends ConsumerState<FileExplorer> {
                       IconButton(
                         onPressed: _applyRoot,
                         icon: const Icon(Icons.folder_open),
-                        tooltip: "Open folder",
+                        tooltip: AppLocalizations.of(
+                          context,
+                        ).projectsOpenFolder,
                       ),
                     ],
                   ),
@@ -196,10 +202,20 @@ class _FileExplorerState extends ConsumerState<FileExplorer> {
                         return files.when(
                           loading: () =>
                               const Center(child: CircularProgressIndicator()),
-                          error: (e, _) => Center(child: Text("Error: $e")),
+                          error: (e, _) => Center(
+                            child: Text(
+                              AppLocalizations.of(context).commonError("$e"),
+                            ),
+                          ),
                           data: (entries) {
                             if (entries.isEmpty) {
-                              return const Center(child: Text("Empty folder"));
+                              return Center(
+                                child: Text(
+                                  AppLocalizations.of(
+                                    context,
+                                  ).explorerEmptyFolder,
+                                ),
+                              );
                             }
                             return ListView.builder(
                               itemCount: entries.length,
@@ -242,7 +258,7 @@ class _FileExplorerState extends ConsumerState<FileExplorer> {
               child: FilledButton.icon(
                 onPressed: _promptNewFile,
                 icon: const Icon(Icons.add),
-                label: const Text("New file"),
+                label: Text(AppLocalizations.of(context).explorerNewFile),
               ),
             ),
           ],

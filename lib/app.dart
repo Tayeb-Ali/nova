@@ -3,6 +3,7 @@ import "package:flutter_riverpod/flutter_riverpod.dart";
 
 import "l10n/generated/app_localizations.dart";
 import "src/core/services/setup_service.dart";
+import "src/features/setup/setup_wizard_dialog.dart";
 import "src/core/settings_store.dart";
 import "src/features/editor/autocomplete/language_members.dart";
 import "src/features/editor/theme/app_theme.dart";
@@ -76,32 +77,11 @@ class _IdeShellState extends State<IdeShell> {
       return;
     }
     if (!missing || !mounted) return;
-    final l10n = AppLocalizations.of(context);
-    final download = await showDialog<bool>(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        title: Text(l10n.bootstrapRequired),
-        content: Text(l10n.bootstrapRequiredBody),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: Text(l10n.actionLater),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: Text(l10n.actionDownload),
-          ),
-        ],
-      ),
-    );
-    if (download != true || !mounted) return;
-    _selectNav(2);
-    try {
-      await SetupService().startSetup();
-    } catch (_) {
-      //nothing to do.
-    }
+    // Setup wizard (NEXT_PLAN 3.2): slim/full choice + progress + retry.
+    // It drives SetupService itself; a completed wizard lands on Runtimes.
+    final done = await showSetupWizard(context);
+    if (!mounted) return;
+    if (done == true) _selectNav(2);
   }
 
   @override

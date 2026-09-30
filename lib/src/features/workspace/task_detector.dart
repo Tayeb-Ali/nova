@@ -8,7 +8,7 @@ import "../../core/services/project_service.dart";
 /// package.json `scripts`, composer.json `scripts`, artisan, Cargo.toml,
 /// go.mod, Makefile/CMakeLists, Gemfile, pubspec.yaml and well-known
 /// single-file entry points (main.py, index.js, index.php, main.go,
-/// main.rs, Main.java, Main.kt, main.rb, main.dart, main.c).
+/// main.rs, Main.java, Main.kt, main.rb, main.dart, main.c, main.cpp).
 class TaskDetector {
   final ProjectService service;
 
@@ -67,6 +67,23 @@ class TaskDetector {
           command: "sh",
           args: '-c "kotlinc Main.kt -include-runtime -d app.jar && java -jar app.jar"',
         ));
+      }
+      if (names.contains("main.c")) {
+        tasks.add(const IdeTask(
+          name: "main.c",
+          command: "sh",
+          args: '-c "cc main.c -o app && ./app"',
+        ));
+      }
+      if (names.contains("main.cpp")) {
+        tasks.add(const IdeTask(
+          name: "main.cpp",
+          command: "sh",
+          args: '-c "clang++ main.cpp -o app && ./app"',
+        ));
+      }
+      if (names.contains("Makefile")) {
+        tasks.add(const IdeTask(name: "make", command: "make"));
       }
     } catch (_) {
       // Project root unreadable or not ready; no tasks.

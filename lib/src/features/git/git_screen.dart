@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:nova/l10n/generated/app_localizations.dart';
 
@@ -6,6 +8,8 @@ import '../../core/models/project.dart';
 import '../../core/services/git_service.dart';
 import '../../core/services/project_service.dart';
 import '../../core/ui/text_prompt_dialog.dart';
+import 'branch_picker.dart';
+import 'diff_view.dart';
 
 /// Git panel: status/diff/commit (task.md §24).
 class GitScreen extends StatefulWidget {
@@ -22,6 +26,7 @@ class _GitScreenState extends State<GitScreen> {
 
   List<ProjectInfo> _projects = const [];
   bridge.GitStatus? _status;
+  List<String> _stashes = const [];
   bool _loading = false;
   String? _error;
   String? _diff;
@@ -76,12 +81,27 @@ class _GitScreenState extends State<GitScreen> {
             ? status.error
             : null;
       });
+      // Best-effort and unawaited: stash must never gate (or hang) status.
+      // An unmocked/missing stash channel leaves its future pending, so
+      // awaiting it here would pin the spinner and hang pumpAndSettle.
+      unawaited(_loadStash(path));
     } catch (e) {
       if (!mounted) return;
       setState(() {
         _loading = false;
         _error = l10n.commonError('$e');
       });
+    }
+  }
+
+  /// Best-effort stash refresh; never throws and never blocks status.
+  Future<void> _loadStash(String path) async {
+    try {
+      final List<String> stashes = await _git.stashList(path);
+      if (!mounted) return;
+      setState(() => _stashes = stashes);
+    } catch (_) {
+      // Stash unavailable (e.g. unmocked in tests): keep the old list.
     }
   }
 
@@ -99,6 +119,90 @@ class _GitScreenState extends State<GitScreen> {
       if (!mounted) return;
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text(l10n.gitStageFailed('$e'))));
+    }
+  }
+
+  Future<void> _stageFile(String file) async {
+    final l10n = AppLocalizations.of(context);
+    final String path = _path;
+    if (path.isEmpty) return;
+    try {
+      await _git.add(path, [file]);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(l10n.gitStagedFile(file))));
+      await _loadStatus();
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(l10n.gitStageFailed('$e'))));
+    }
+  }
+
+  Future<void> _openBranches() async {
+    final String path = _path;
+    if (path.isEmpty) return;
+    await showBranchPicker(context, projectPath: path);
+    if (!mounted) return;
+    await _loadStatus();
+  }
+
+  Future<void> _stashSave() async {
+    final l10n = AppLocalizations.of(context);
+    final String path = _path;
+    if (path.isEmpty) return;
+    final String? message = await showTextPromptDialog(
+      context: context,
+      title: l10n.gitStashSave,
+      labelText: l10n.gitStashMessage,
+      confirmLabel: l10n.gitStashSave,
+      cancelLabel: l10n.actionCancel,
+    );
+    final String msg = message?.trim() ?? '';
+    if (msg.isEmpty) return;
+    try {
+      await _git.stashSave(path, msg);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(l10n.gitStashed)));
+      await _loadStatus();
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.gitStashActionFailed('$e'))),
+      );
+    }
+  }
+
+  Future<void> _stashPop(int index) async {
+    final l10n = AppLocalizations.of(context);
+    final String path = _path;
+    if (path.isEmpty) return;
+    try {
+      await _git.stashPop(path, index);
+      if (!mounted) return;
+      await _loadStatus();
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.gitStashActionFailed('$e'))),
+      );
+    }
+  }
+
+  Future<void> _stashDrop(int index) async {
+    final l10n = AppLocalizations.of(context);
+    final String path = _path;
+    if (path.isEmpty) return;
+    try {
+      await _git.stashDrop(path, index);
+      if (!mounted) return;
+      await _loadStatus();
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.gitStashActionFailed('$e'))),
+      );
     }
   }
 
@@ -254,6 +358,11 @@ class _GitScreenState extends State<GitScreen> {
           icon: const Icon(Icons.difference),
           label: Text(l10n.gitDiff),
         ),
+        OutlinedButton.icon(
+          onPressed: usable ? _openBranches : null,
+          icon: const Icon(Icons.account_tree),
+          label: Text(l10n.gitBranches),
+        ),
       ],
     );
   }
@@ -312,7 +421,73 @@ class _GitScreenState extends State<GitScreen> {
           Icons.help_outline,
           Colors.blueGrey,
         ),
+        _buildStash(),
       ],
+    );
+  }
+
+  Widget _buildStash() {
+    final l10n = AppLocalizations.of(context);
+    return Padding(
+      padding: const EdgeInsets.only(top: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.inventory_2_outlined, size: 18),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Text(
+                  '${l10n.gitStash} (${_stashes.length})',
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.titleSmall,
+                ),
+              ),
+              TextButton.icon(
+                onPressed:
+                    _path.isNotEmpty && _error == null ? _stashSave : null,
+                icon: const Icon(Icons.add, size: 18),
+                label: Text(l10n.gitStashSave),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          if (_stashes.isEmpty)
+            Text(
+              l10n.gitStashEmpty,
+              style: Theme.of(context).textTheme.bodySmall,
+            )
+          else
+            for (int i = 0; i < _stashes.length; i++)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 2),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        '• ${_stashes[i]}',
+                        overflow: TextOverflow.ellipsis,
+                        style: Theme.of(context).textTheme.bodySmall
+                            ?.copyWith(fontFamily: 'monospace'),
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: () => _stashPop(i),
+                      child: Text(l10n.gitStashPop),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.delete_outline),
+                      tooltip: l10n.gitStashDrop,
+                      iconSize: 18,
+                      visualDensity: VisualDensity.compact,
+                      onPressed: () => _stashDrop(i),
+                    ),
+                  ],
+                ),
+              ),
+        ],
+      ),
     );
   }
 
@@ -323,6 +498,7 @@ class _GitScreenState extends State<GitScreen> {
     Color color,
   ) {
     if (files.isEmpty) return const SizedBox.shrink();
+    final l10n = AppLocalizations.of(context);
     return Padding(
       padding: const EdgeInsets.only(top: 12),
       child: Column(
@@ -342,11 +518,24 @@ class _GitScreenState extends State<GitScreen> {
           for (final String f in files)
             Padding(
               padding: const EdgeInsets.only(bottom: 2),
-              child: Text(
-                '• $f',
-                overflow: TextOverflow.ellipsis,
-                style: Theme.of(context).textTheme.bodySmall
-                    ?.copyWith(fontFamily: 'monospace'),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      '• $f',
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.bodySmall
+                          ?.copyWith(fontFamily: 'monospace'),
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.add),
+                    tooltip: l10n.gitStage,
+                    iconSize: 18,
+                    visualDensity: VisualDensity.compact,
+                    onPressed: () => _stageFile(f),
+                  ),
+                ],
               ),
             ),
         ],
@@ -355,7 +544,7 @@ class _GitScreenState extends State<GitScreen> {
   }
 }
 
-/// Scrollable monospace diff viewer.
+/// Scrollable per-file diff viewer.
 class _DiffDialog extends StatelessWidget {
   final String content;
 
@@ -398,16 +587,9 @@ class _DiffDialog extends StatelessWidget {
                   color: Theme.of(context).colorScheme.surfaceContainerHighest,
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: SingleChildScrollView(
-                  child: SelectableText(
-                    content.isEmpty
-                        ? AppLocalizations.of(context).gitEmptyDiff
-                        : content,
-                    style: const TextStyle(
-                      fontFamily: 'monospace',
-                      fontSize: 12,
-                    ),
-                  ),
+                child: DiffView(
+                  content: content,
+                  emptyLabel: AppLocalizations.of(context).gitEmptyDiff,
                 ),
               ),
             ),

@@ -1203,6 +1203,15 @@ interface GitApi {
   fun add(projectPath: String, paths: List<String>)
   fun commit(projectPath: String, message: String)
   fun diff(projectPath: String): String
+  fun listBranches(projectPath: String): List<String>
+  fun currentBranch(projectPath: String): String
+  fun checkout(projectPath: String, branch: String)
+  fun createBranch(projectPath: String, branch: String)
+  fun deleteBranch(projectPath: String, branch: String)
+  fun stashList(projectPath: String): List<String>
+  fun stashSave(projectPath: String, message: String)
+  fun stashPop(projectPath: String, index: Long)
+  fun stashDrop(projectPath: String, index: Long)
 
   companion object {
     /** The codec used by GitApi. */
@@ -1276,6 +1285,171 @@ interface GitApi {
             val projectPathArg = args[0] as String
             val wrapped: List<Any?> = try {
               listOf(api.diff(projectPathArg))
+            } catch (exception: Throwable) {
+              IdeApiPigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.codeide.GitApi.listBranches$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val projectPathArg = args[0] as String
+            val wrapped: List<Any?> = try {
+              listOf(api.listBranches(projectPathArg))
+            } catch (exception: Throwable) {
+              IdeApiPigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.codeide.GitApi.currentBranch$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val projectPathArg = args[0] as String
+            val wrapped: List<Any?> = try {
+              listOf(api.currentBranch(projectPathArg))
+            } catch (exception: Throwable) {
+              IdeApiPigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.codeide.GitApi.checkout$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val projectPathArg = args[0] as String
+            val branchArg = args[1] as String
+            val wrapped: List<Any?> = try {
+              api.checkout(projectPathArg, branchArg)
+              listOf(null)
+            } catch (exception: Throwable) {
+              IdeApiPigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.codeide.GitApi.createBranch$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val projectPathArg = args[0] as String
+            val branchArg = args[1] as String
+            val wrapped: List<Any?> = try {
+              api.createBranch(projectPathArg, branchArg)
+              listOf(null)
+            } catch (exception: Throwable) {
+              IdeApiPigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.codeide.GitApi.deleteBranch$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val projectPathArg = args[0] as String
+            val branchArg = args[1] as String
+            val wrapped: List<Any?> = try {
+              api.deleteBranch(projectPathArg, branchArg)
+              listOf(null)
+            } catch (exception: Throwable) {
+              IdeApiPigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.codeide.GitApi.stashList$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val projectPathArg = args[0] as String
+            val wrapped: List<Any?> = try {
+              listOf(api.stashList(projectPathArg))
+            } catch (exception: Throwable) {
+              IdeApiPigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.codeide.GitApi.stashSave$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val projectPathArg = args[0] as String
+            val messageArg = args[1] as String
+            val wrapped: List<Any?> = try {
+              api.stashSave(projectPathArg, messageArg)
+              listOf(null)
+            } catch (exception: Throwable) {
+              IdeApiPigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.codeide.GitApi.stashPop$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val projectPathArg = args[0] as String
+            val indexArg = args[1] as Long
+            val wrapped: List<Any?> = try {
+              api.stashPop(projectPathArg, indexArg)
+              listOf(null)
+            } catch (exception: Throwable) {
+              IdeApiPigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.codeide.GitApi.stashDrop$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val projectPathArg = args[0] as String
+            val indexArg = args[1] as Long
+            val wrapped: List<Any?> = try {
+              api.stashDrop(projectPathArg, indexArg)
+              listOf(null)
             } catch (exception: Throwable) {
               IdeApiPigeonUtils.wrapError(exception)
             }

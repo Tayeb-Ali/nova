@@ -49,11 +49,25 @@ class ReEditorAdapter extends ConsumerStatefulWidget {
   final String language;
   final ValueChanged<String> onChanged;
 
+  /// 0-based line to jump to on mount (e.g. from project search results).
+  /// Null means keep the cursor at the start.
+  final int? initialLine;
+
+  /// Receives the in-file find controller bound to the editor's
+  /// [CodeLineEditingController] (re_editor ^0.10.0 `CodeFindController`).
+  /// The parent renders its own find bar with it: type into
+  /// `findInputController`, read match state from the `ValueNotifier`,
+  /// and call `nextMatch()` / `previousMatch()` / `close()`.
+  /// Call `findMode()` once before typing so the search state initializes.
+  final void Function(CodeFindController controller)? onFindControllerReady;
+
   const ReEditorAdapter({
     super.key,
     required this.initialText,
     required this.language,
     required this.onChanged,
+    this.initialLine,
+    this.onFindControllerReady,
   });
 
   @override
@@ -63,18 +77,24 @@ class ReEditorAdapter extends ConsumerStatefulWidget {
 class _ReEditorAdapterState extends ConsumerState<ReEditorAdapter> {
   late final CodeLineEditingController _controller;
   late final CodeScrollController _scrollController;
+  late final CodeFindController _findController;
   late NovaPromptsBuilder _promptsBuilder;
+  bool _didInitialJump = false;
 
   @override
   void initState() {
     super.initState();
-    
+
     EditorFontLoader.ensureLoaded(
       ref.read(settingsStoreProvider).editorFont,
     ).then((_) {
       if (mounted) setState(() {});
     });
     _controller = CodeLineEditingController.fromText(widget.initialText);
+    // Verified against re_editor 0.10.0: CodeFindController(controller)
+    // drives highlight + next/previous match; CodeEditor picks it up via
+    // its `findController` param even with `findBuilder` left null.
+    _findController = CodeFindController(_controller);
     _scrollController = CodeScrollController(
       verticalScroller: ScrollController(),
       horizontalScroller: ScrollController(),
@@ -82,6 +102,23 @@ class _ReEditorAdapterState extends ConsumerState<ReEditorAdapter> {
     _promptsBuilder = NovaPromptsBuilder(
       language: _modeFor(widget.language),
       languageId: widget.language,
+    );
+    widget.onFindControllerReady?.call(_findController);
+    if (widget.initialLine != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _jumpToInitialLine());
+    }
+  }
+
+  /// Move the cursor to [ReEditorAdapter.initialLine] and scroll it into view.
+  void _jumpToInitialLine() {
+    if (!mounted || _didInitialJump) return;
+    _didInitialJump = true;
+    final target = widget.initialLine;
+    if (target == null || _controller.lineCount <= 0) return;
+    final line = target.clamp(0, _controller.lineCount - 1);
+    _controller.selection = CodeLineSelection.collapsed(index: line, offset: 0);
+    _controller.makePositionCenterIfInvisible(
+      CodeLinePosition(index: line, offset: 0),
     );
   }
 
@@ -98,6 +135,7 @@ class _ReEditorAdapterState extends ConsumerState<ReEditorAdapter> {
 
   @override
   void dispose() {
+    _findController.dispose();
     _controller.dispose();
     _scrollController.verticalScroller.dispose();
     _scrollController.horizontalScroller.dispose();
@@ -205,6 +243,7 @@ class _ReEditorAdapterState extends ConsumerState<ReEditorAdapter> {
 
     final editor = CodeEditor(
       controller: _controller,
+      findController: _findController,
       scrollController: _scrollController,
       style: _styleFor(
         widget.language,

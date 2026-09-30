@@ -12,50 +12,46 @@ import "../../core/services/runtime_service.dart";
 /// …) or `"general"`, or null on cancel.
 /// Stored values are never remapped here; use [displayLanguage] at
 /// render sites for user-facing labels.
+///
+/// The [TextEditingController] is owned by [_NewProjectDialogBodyState] so it
+/// is disposed with the dialog subtree — after the route's exit transition.
+/// Never create the controller in the caller and dispose it when the
+/// `showDialog` future completes: `pop()` completes the future *before* the
+/// dialog stops rebuilding, so the still-animating [TextField] re-attaches to
+/// a disposed controller and throws
+/// `A TextEditingController was used after being disposed.`, which then
+/// cascades into `_dependents.isEmpty` (red screen, see `nova_last_crash`).
 Future<(String, String)?> showNewProjectDialog(BuildContext context) {
-  final l10n = AppLocalizations.of(context);
-  final nameController = TextEditingController();
-  var selectedLanguage = "general";
   return showDialog<(String, String)>(
     context: context,
-    builder: (context) => _NewProjectDialogBody(
-      l10n: l10n,
-      nameController: nameController,
-      initialLanguage: selectedLanguage,
-      onPicked: (v) => selectedLanguage = v,
-    ),
-  ).then((result) {
-    nameController.dispose();
-    return result == null ? null : (result.$1, selectedLanguage);
-  });
+    builder: (context) => const _NewProjectDialogBody(),
+  );
 }
 
 class _NewProjectDialogBody extends StatefulWidget {
-  const _NewProjectDialogBody({
-    required this.l10n,
-    required this.nameController,
-    required this.initialLanguage,
-    required this.onPicked,
-  });
-
-  final AppLocalizations l10n;
-  final TextEditingController nameController;
-  final String initialLanguage;
-  final ValueChanged<String> onPicked;
+  const _NewProjectDialogBody();
 
   @override
   State<_NewProjectDialogBody> createState() => _NewProjectDialogBodyState();
 }
 
 class _NewProjectDialogBodyState extends State<_NewProjectDialogBody> {
-  late String _selected = widget.initialLanguage;
+  late final TextEditingController _nameController;
+  String _selected = "general";
   List<RuntimeInfo> _installed = const [];
   bool _loading = true;
 
   @override
   void initState() {
     super.initState();
+    _nameController = TextEditingController();
     _loadInstalled();
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadInstalled() async {
@@ -75,32 +71,32 @@ class _NewProjectDialogBodyState extends State<_NewProjectDialogBody> {
 
   void _pick(String value) {
     setState(() => _selected = value);
-    widget.onPicked(value);
   }
 
   void _submit() {
-    final name = widget.nameController.text.trim();
+    final name = _nameController.text.trim();
     if (name.isEmpty) return;
     Navigator.of(context).pop((name, _selected));
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return AlertDialog(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(4),
       ),
-      title: Text(widget.l10n.projectNew),
+      title: Text(l10n.projectNew),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             TextField(
-              controller: widget.nameController,
+              controller: _nameController,
               autofocus: true,
               decoration: InputDecoration(
-                hintText: widget.l10n.projectNameHint,
+                hintText: l10n.projectNameHint,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(4),
                 ),
@@ -159,11 +155,11 @@ class _NewProjectDialogBodyState extends State<_NewProjectDialogBody> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: Text(widget.l10n.actionCancel),
+          child: Text(l10n.actionCancel),
         ),
         FilledButton(
           onPressed: _submit,
-          child: Text(widget.l10n.actionCreate),
+          child: Text(l10n.actionCreate),
         ),
       ],
     );
@@ -194,6 +190,8 @@ String displayLanguage(String? language) {
       return "Kotlin";
     case "dart":
       return "Dart";
+    case "c":
+      return "C";
     case "general":
       return "General";
     default:

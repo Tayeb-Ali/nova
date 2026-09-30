@@ -6,7 +6,7 @@
 ![Version](https://img.shields.io/badge/Version-0.1.0-blue)
 ![Bridge](https://img.shields.io/badge/Bridge-Pigeon_29-7B61FF)
 ![State](https://img.shields.io/badge/State-Riverpod-FF6B6B)
-![Tests](https://img.shields.io/badge/Tests-22_passing-success)
+![Tests](https://img.shields.io/badge/Tests-79_passing-success)
 [![License: Waqf-1.0](https://img.shields.io/badge/License-Waqf--1.0-green)](LICENSE)
 [![Google Play](https://img.shields.io/badge/Google_Play-Download-414D0B?logo=google-play&logoColor=white)](https://play.google.com/store/apps/details?id=sd.adaa.codeide)
 
@@ -14,7 +14,7 @@
   <img alt="احصل عليه على Google Play" src="https://play.google.com/intl/en_us/badges/static/images/badges/ar_badge_web_generic.png" height="70"/>
 </a>
 
-> **نوفا** محرر كود يشتغل على موبايلك الأندرويد، ويشغّل الكود **فعليًا** على الجهاز نفسه — بايثون، جافاسكربت، PHP — مع تيرمينال حقيقي، Git، ومعاينة ويب. لا سيرفر خارجي، لا محاكاة: تكتب، تضغط تشغيل، وتشوف النتيجة.
+> **نوفا** محرر كود يشتغل على موبايلك الأندرويد، ويشغّل الكود **فعليًا** على الجهاز نفسه — بايثون، جافاسكربت، PHP، ‏Go، ‏Rust، ‏Ruby، ‏Java، ‏Kotlin، ‏Dart، ‏C/C++ — مع تيرمينال حقيقي، Git، ومعاينة ويب. لا سيرفر خارجي، لا محاكاة: تكتب، تضغط تشغيل، وتشوف النتيجة.
 
 ---
 
@@ -39,7 +39,7 @@
 
 معظم "محررات الكود" على الموبايل إما أنها مجرد ملوّن نصوص، أو ترسل كودك لسيرفر بعيد يشغّله ويرجع النتيجة. نوفا اختار الطريق الأصعب والأصدق:
 
-1. **تفتح مشروع** (أو تنشئ واحد جديد: PHP / Node / Python).
+1. **تفتح مشروع** (أو تنشئ واحد جديد: PHP / Node / Python / Go / Rust / Ruby / Java / Kotlin / Dart / C).
 2. **تتصفح ملفاتك وتعدّلها** في محرر فيه تلوين لغات وتبويبات.
 3. **تضغط Run** فيشتغل الكود داخل بيئة لينكس حقيقية **مضمّنة داخل التطبيق نفسه** (مبنية على حزم Termux).
 4. **تشوف الناتج** لحظة بلحظة في لوحة الكونسول، أو تفتح تيرمينال كامل، أو تعاين صفحة ويب شغّلها مشروعك.
@@ -109,6 +109,17 @@
 ### 5. بيئة التشغيل (Linux داخل التطبيق)
 
 عند أول تشغيل، يفكّ التطبيق حزمة `bootstrap` تحت مجلد بياناته (`files/usr/...`) — بايثون وNode وأدوات أساسية جاهزة. المسارات المكتوبة داخل الحزمة (`/data/data/com.termux/files/usr`) تُرقَّع آليًا إلى مسار التطبيق الفعلي.
+
+اللغات المدعومة اليوم: PHP وNode.js وبايثون، إضافة إلى Go (حزمة `golang`) وRust (حزمة `rust`) وRuby (حزمة `ruby`) وJava (حزمة `openjdk-25`) وKotlin (حزمة `kotlin`) وDart (حزمة `dart`) وC/C++ (حزمة `clang` — ‏Clang 21) — كلها تُثبَّت من مستودع نوفا الخاص عبر `apt` داخل التطبيق.
+
+المستودع: `http://elteyab.sd/nova/apt` (الفرع `stable` والمكوّن `main`)، موقَّع بمفتاح نوفا المضمّن في حزمة التمهيد.
+
+نوعا حزمة التمهيد في شاشة الإعداد (`slim` هو الافتراضي):
+
+| النوع | المحتوى | الحجم التقريبي | المصدر |
+|---|---|---|---|
+| `slim` | الأساس + `apt` فقط، وبقية اللغات تُثبَّت عند الحاجة | نحو 67–70MB | `http://elteyab.sd/nova/bootstrap` |
+| `full` | كل اللغات مثبّتة مسبقًا — للعمل دون إنترنت | نحو 283MB | ملحقات GitHub Releases |
 
 تثبيت حزمة جديدة (مثل `git`) يتم بوصفة مجرّبة: `apt download` للحزمة وتوابعها، ثم فكّ كل `.deb` مباشرة داخل البيئة، ثم إصلاح روابط البداية (`shebang`). هكذا نتجاوز قيدًا في `dpkg` يمنعه من إنشاء مجلدات خارج مساره الأصلي.
 
@@ -221,7 +232,7 @@ flutter build apk --debug
 
 1. ثبّت الـ APK وافتح التطبيق.
 2. انتظر فكّ حزمة البيئة (مرة واحدة فقط).
-3. أنشئ مشروعًا (PHP / Node / Python) وافتح ملفًا واضغط **Run**.
+3. أنشئ مشروعًا (PHP / Node / Python / Go / Rust / Ruby / Java / Kotlin / Dart / C) وافتح ملفًا واضغط **Run**.
 
 ---
 
@@ -229,7 +240,7 @@ flutter build apk --debug
 
 ```bash
 flutter analyze   # يجب: No issues found
-flutter test      # يجب: كل الاختبارات ناجحة (22 اختبارًا حاليًا)
+flutter test      # يجب: كل الاختبارات ناجحة (79 اختبارًا حاليًا)
 ```
 
 - `test/comprehensive_inapp_test.dart` — اختبار شامل يغطي (Node / Python / Terminal) داخل التطبيق.

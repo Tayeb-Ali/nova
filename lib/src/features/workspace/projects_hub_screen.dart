@@ -36,6 +36,7 @@ class _ProjectsHubScreenState extends ConsumerState<ProjectsHubScreen> {
   void initState() {
     super.initState();
     _searchController.addListener(() {
+      if (!mounted) return;
       setState(() => _query = _searchController.text.trim().toLowerCase());
     });
     _init();
@@ -69,6 +70,11 @@ class _ProjectsHubScreenState extends ConsumerState<ProjectsHubScreen> {
     } catch (_) {
       projects = const [];
     }
+    // listProjects() can outlive this State (locale flip rebuilds
+    // MaterialApp, or the hub is disposed mid-flight). Never touch ref or
+    // context-derived objects after an await without a guard: a stale
+    // inherited dependency is what surfaced as `_dependents.isEmpty`.
+    if (!mounted) return;
     ref.read(projectsProvider.notifier).state = projects;
     ProjectInfo? target;
     if (select != null) {
@@ -152,45 +158,58 @@ class _ProjectsHubScreenState extends ConsumerState<ProjectsHubScreen> {
   }
 
   Future<void> _newProject() async {
-    final l10n = AppLocalizations.of(context);
     final result = await showNewProjectDialog(context);
     if (result == null) return;
+    // The dialog + createProject await can outlive this State (locale flip
+    // rebuilds MaterialApp, or the hub is disposed mid-flight). Never touch
+    // State, context-derived objects, or setState after that without a guard:
+    // a stale inherited dependency is what surfaced as `_dependents.isEmpty`.
+    if (!mounted) return;
     setState(() => _actionBusy = true);
     try {
       final created = await ref
           .read(projectServiceProvider)
           .createProject(result.$1, result.$2);
+      // createProject can outlive this State (locale flip mid-flight).
+      if (!mounted) return;
       // A freshly created project has no tabs, so staying on the hub would
       // show a bare list. Land the user in the editor with the new project
       // already active.
       await _loadProjects(select: created, openEditor: true);
     } catch (e) {
-      _toast(l10n.commonCreateFailed("$e"));
+      if (!mounted) return;
+      _toast(AppLocalizations.of(context).commonCreateFailed("$e"));
     } finally {
       if (mounted) setState(() => _actionBusy = false);
     }
   }
 
   Future<void> _deleteProject(ProjectInfo project) async {
-    final l10n = AppLocalizations.of(context);
     final ok = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(l10n.projectsDeleteTitle),
-        content: Text(l10n.projectsDeleteMessage(project.name)),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: Text(l10n.actionCancel),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: Text(l10n.actionDelete),
-          ),
-        ],
-      ),
+      builder: (context) {
+        // Fresh lookup on the dialog's own context: never capture the hub's
+        // l10n across the await (locale flip would leave a stale inherited
+        // dependency, the `_dependents.isEmpty` crash).
+        final dL10n = AppLocalizations.of(context);
+        return AlertDialog(
+          title: Text(dL10n.projectsDeleteTitle),
+          content: Text(dL10n.projectsDeleteMessage(project.name)),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: Text(dL10n.actionCancel),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: Text(dL10n.actionDelete),
+            ),
+          ],
+        );
+      },
     );
     if (ok != true) return;
+    if (!mounted) return;
     final pid = ref.read(runningPidProvider);
     if (pid != null) {
       try {
@@ -198,17 +217,21 @@ class _ProjectsHubScreenState extends ConsumerState<ProjectsHubScreen> {
       } catch (_) {
         // Ignore: process may already be gone.
       }
+      if (!mounted) return;
       ref.read(runningPidProvider.notifier).state = null;
     }
+    if (!mounted) return;
     setState(() => _actionBusy = true);
     try {
       await ref.read(projectServiceProvider).deleteProject(project.path);
     } catch (e) {
-      _toast(l10n.commonDeleteFailed("$e"));
+      if (!mounted) return;
+      _toast(AppLocalizations.of(context).commonDeleteFailed("$e"));
       return;
     } finally {
       if (mounted) setState(() => _actionBusy = false);
     }
+    if (!mounted) return;
     await _loadProjects();
   }
 
@@ -364,7 +387,6 @@ class _HubActions extends StatelessWidget {
   final VoidCallback onRefresh;
   final VoidCallback? onDelete;
 
-  @override
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);

@@ -193,6 +193,24 @@ abstract class GitApi {
   void commit(String projectPath, String message);
 
   String diff(String projectPath);
+
+  List<String> listBranches(String projectPath);
+
+  String currentBranch(String projectPath);
+
+  void checkout(String projectPath, String branch);
+
+  void createBranch(String projectPath, String branch);
+
+  void deleteBranch(String projectPath, String branch);
+
+  List<String> stashList(String projectPath);
+
+  void stashSave(String projectPath, String message);
+
+  void stashPop(String projectPath, int index);
+
+  void stashDrop(String projectPath, int index);
 }
 
 @HostApi()

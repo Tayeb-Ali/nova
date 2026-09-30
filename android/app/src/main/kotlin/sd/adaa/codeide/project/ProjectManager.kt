@@ -106,6 +106,7 @@ class ProjectManager(private val context: Context) {
                 }
                 File(dir, "main.dart").let { if (!it.exists()) it.writeText("void main() {\n  print('Hello from Nova');\n}\n") }
             }
+            "c" -> File(dir, TemplateC.fileName).let { if (!it.exists()) it.writeText(TemplateC.content) }
         }
     }
 

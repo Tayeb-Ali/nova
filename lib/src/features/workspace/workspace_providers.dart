@@ -28,6 +28,14 @@ final fileEntriesProvider =
   return ref.watch(projectServiceProvider).listFiles(path);
 });
 
+/// Pending initial-line jumps keyed by tab id (the full file path), set by
+/// [WorkspaceTabsNotifier.open] when [initialLine] is given (e.g. from
+/// project search results). The editor consumes the entry on mount via
+/// [WorkspaceTabsNotifier.takeInitialLine] and passes it to the code editor
+/// as its 0-based `initialLine` so the cursor lands on the match.
+final pendingInitialLineProvider =
+    StateProvider<Map<String, int>>((ref) => const {});
+
 /// Open editor tabs; the tab id is the full file path (task.md §35).
 class WorkspaceTabsNotifier extends StateNotifier<List<EditorTabModel>> {
   WorkspaceTabsNotifier(this._ref) : super(const <EditorTabModel>[]);
@@ -35,8 +43,19 @@ class WorkspaceTabsNotifier extends StateNotifier<List<EditorTabModel>> {
   final Ref _ref;
 
   /// Open [filePath] in a tab (re-uses an existing one) and return its id.
-  String open(String filePath) {
+  ///
+  /// [initialLine] is a 0-based line the editor should jump to on mount;
+  /// it is stored in [pendingInitialLineProvider] for the editor to consume.
+  String open(String filePath, {int? initialLine}) {
     final tab = EditorTabModel.fromPath(filePath);
+    if (initialLine != null) {
+      final pending = Map<String, int>.from(
+        _ref.read(pendingInitialLineProvider),
+      );
+      pending[tab.id] = initialLine;
+      _ref.read(pendingInitialLineProvider.notifier).state =
+          Map.unmodifiable(pending);
+    }
     final index = state.indexWhere((t) => t.id == tab.id);
     if (index >= 0) {
       _recordRecent(filePath);
@@ -45,6 +64,17 @@ class WorkspaceTabsNotifier extends StateNotifier<List<EditorTabModel>> {
     state = [...state, tab];
     _recordRecent(filePath);
     return tab.id;
+  }
+
+  /// Take (and clear) the pending initial line for tab [id], or null when
+  /// no line jump was requested. Called by the editor on mount.
+  int? takeInitialLine(String id) {
+    final pending = _ref.read(pendingInitialLineProvider);
+    if (!pending.containsKey(id)) return null;
+    final next = Map<String, int>.from(pending)..remove(id);
+    _ref.read(pendingInitialLineProvider.notifier).state =
+        Map.unmodifiable(next);
+    return pending[id];
   }
 
   void close(String id) {

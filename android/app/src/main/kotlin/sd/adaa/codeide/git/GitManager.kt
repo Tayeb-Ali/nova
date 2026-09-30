@@ -75,6 +75,54 @@ class GitManager(private val context: Context) {
             .joinToString("\n")
     }
 
+    fun listBranches(projectPath: String): List<String> =
+        runGit(projectPath, listOf("branch", "--format=%(refname:short)"))
+            .getOrThrow()
+            .lines()
+            .map { it.trim() }
+            .filter { it.isNotEmpty() }
+
+    fun currentBranch(projectPath: String): String =
+        runGit(projectPath, listOf("rev-parse", "--abbrev-ref", "HEAD"))
+            .getOrThrow()
+            .trim()
+
+    fun checkout(projectPath: String, branch: String) {
+        runGit(projectPath, listOf("checkout", branch)).getOrThrow()
+    }
+
+    fun createBranch(projectPath: String, branch: String) {
+        runGit(projectPath, listOf("checkout", "-b", branch)).getOrThrow()
+    }
+
+    fun deleteBranch(projectPath: String, branch: String) {
+        runGit(projectPath, listOf("branch", "-d", branch)).getOrThrow()
+    }
+
+    fun stashList(projectPath: String): List<String> =
+        runGit(projectPath, listOf("stash", "list"))
+            .getOrThrow()
+            .lines()
+            .map { it.trim() }
+            .filter { it.isNotEmpty() }
+
+    fun stashSave(projectPath: String, message: String) {
+        val args = if (message.isBlank()) {
+            listOf("stash", "push")
+        } else {
+            listOf("stash", "push", "-m", message)
+        }
+        runGit(projectPath, args).getOrThrow()
+    }
+
+    fun stashPop(projectPath: String, index: Long) {
+        runGit(projectPath, listOf("stash", "pop", "stash@{$index}")).getOrThrow()
+    }
+
+    fun stashDrop(projectPath: String, index: Long) {
+        runGit(projectPath, listOf("stash", "drop", "stash@{$index}")).getOrThrow()
+    }
+
     private fun runGit(projectPath: String, args: List<String>): Result<String> =
         shell.execute(
             command = "git",
