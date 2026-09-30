@@ -1,0 +1,131 @@
+# Nova APK release (NEXT_PLAN §4.2).
+#
+# Builds `flutter build apk --debug --flavor github` and uploads the APK to
+# GitHub Releases with an auto-generated changelog.
+#
+# Triggers:
+#   - push of a version tag `v*` (e.g. `v0.2.0`) -> creates that Release.
+#   - manual run (Actions -> release-apk -> Run workflow) -> creates a
+#     timestamped `dev-*` prerelease, or the tag given in `tag_name`.
+#
+# Conventions follow .github/workflows/nova-build.yml:
+#   - ubuntu-latest runner, bash with `set -euo pipefail`.
+#   - `permissions: contents: write` so the Release can be created.
+#   - artifacts via actions/upload-artifact@v4.
+#   - auth via github.token (never a personal token).
+#
+# NOTE: always build via `flutter build apk`, never Gradle directly —
+# a direct Gradle build can ship a stale APK missing recent Dart changes.
+# Always pass `--flavor github` (a flavor-less build fails to produce
+# `app-debug.apk` because the store flavors emit `app-github-debug.apk`).
+
+name: release-apk
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        description: 'Release tag (default: dev-<date>-<sha>)'
+        required: false
+        default: ''
+      prerelease:
+        description: 'Mark the Release as a pre-release'
+        required: false
+        default: true
+        type: boolean
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+
+      - name: Fetch dependencies
+        run: |
+          set -euo pipefail
+          flutter pub get
+
+      - name: Re-apply inappwebview proguard patch
+        run: |
+          set -euo pipefail
+          # After every `flutter pub get` the `-optimize` line shipped in
+          # flutter_inappwebview_android's proguard rules breaks the build,
+          # so it must be removed again (see README "ملاحظتان توفّران عليك ساعات").
+          mapfile -t rules < <(find "${HOME}/.pub-cache/hosted/pub.dev" \
+            -path '*flutter_inappwebview_android*/proguard-rules.pro' 2>/dev/null || true)
+          if [ "${#rules[@]}" -eq 0 ]; then
+            echo "No inappwebview proguard-rules.pro found; skipping patch."
+            exit 0
+          fi
+          for f in "${rules[@]}"; do
+            echo "Patching: $f"
+            sed -i '/^-optimize/d' "$f"
+          done
+
+      - name: Build APK (github flavor, debug)
+        run: |
+          set -euo pipefail
+          flutter build apk --debug --flavor github
+          ls -la build/app/outputs/flutter-apk/
+
+      - name: Resolve release tag
+        id: tag
+        run: |
+          set -euo pipefail
+          if [ -n "${{ github.event.inputs.tag_name }}" ]; then
+            echo "name=${{ github.event.inputs.tag_name }}" >> "${GITHUB_OUTPUT}"
+          elif [ "${{ github.ref_type }}" = "tag" ]; then
+            echo "name=${{ github.ref_name }}" >> "${GITHUB_OUTPUT}"
+          else
+            echo "name=dev-$(date -u +%F)-$(git rev-parse --short HEAD)" >> "${GITHUB_OUTPUT}"
+          fi
+          cat "${GITHUB_OUTPUT}"
+
+      - name: Stage APK for release
+        run: |
+          set -euo pipefail
+          src="build/app/outputs/flutter-apk/app-github-debug.apk"
+          test -f "$src"
+          dest="nova-${{ steps.tag.outputs.name }}-github-debug.apk"
+          cp "$src" "$dest"
+          sha256sum "$dest" > "$dest.sha256"
+          ls -la "$dest" "$dest.sha256"
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: nova-apk-${{ steps.tag.outputs.name }}
+          path: |
+            nova-${{ steps.tag.outputs.name }}-github-debug.apk
+            nova-${{ steps.tag.outputs.name }}-github-debug.apk.sha256
+          if-no-files-found: error
+
+      - name: Create GitHub Release with auto changelog
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.tag.outputs.name }}
+          prerelease: ${{ github.event.inputs.prerelease == 'false' && false || true }}
+          generate_release_notes: true
+          files: |
+            nova-${{ steps.tag.outputs.name }}-github-debug.apk
+            nova-${{ steps.tag.outputs.name }}-github-debug.apk.sha256
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
