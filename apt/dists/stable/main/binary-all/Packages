@@ -88,20 +88,95 @@ SHA1: cfdfcbb6a60c71fecc38f93ebaf1493f75f45013
 SHA256: e3647396150c5827f498c45d5bd5a44f952fb7c42e40d0b6bc51097cdb59bd66
 SHA512: 43caf7d54ee02e06966bb9fa6baaca031bafcc0917f170c4426f6a799da53fa28d6fff3eec0ab0f04b1ee8119f7bc7789e879c15abe970e390ba26e2c5d56af0
 
-Package: glib-cross
+Package: kotlin
 Architecture: all
-Installed-Size: 83708
+Installed-Size: 95428
 Maintainer: @termux
-Version: 2.90.0
-Homepage: https://developer.gnome.org/glib/
-Depends: glib (= 2.90.0)
-Description: glib for host (NOT for Termux)
-Filename: dists/stable/main/binary-all/glib-cross_2.90.0_all.deb
-Size: 13299656
-MD5Sum: 633a0f25d1d5e7cb4f3b98b610743367
-SHA1: 89d4be43f225131f453c61bd76e327d32054dcaa
-SHA256: f0246ebdb20857061dd1671df296850fa45f578736924d6eeaa53183d165dc56
-SHA512: b6b1c8675edee36c893748e2ff5f4cdc6f63499054767781933823c4e1758fc6e81c59408acc23732e0664d8c2be9b4cce4599683671467c80256ea697f540ab
+Version: 2.4.20
+Homepage: https://kotlinlang.org/
+Depends: openjdk-25
+Description: The Kotlin Programming Language
+Filename: dists/stable/main/binary-all/kotlin_2.4.20_all.deb
+Size: 87728112
+MD5Sum: efcbd2e4cb30b3fe613f4a8b488491dc
+SHA1: 160fffa8ca258a3388341b87dc31889b383e46af
+SHA256: c9a9bce5789671f5a0dada0f2bbbd415adc372b16f4d70f8878a50b187a2194b
+SHA512: 624ea76ccb9eed03db50eab27294eef687e086a2157b9395142ee4cf601ff971f68bf4900e2495f8b1f7fee44ae3ad80a0101c1a3eb76d106f4d9e68ed6a02b3
+
+Package: nova-dart
+Architecture: all
+Installed-Size: 4
+Maintainer: @termux
+Version: 1.0
+Homepage: https://github.com/termux/termux-packages
+Depends: dart
+Description: Nova Dart bundle (dart)
+Filename: dists/stable/main/binary-all/nova-dart_1.0_all.deb
+Size: 696
+MD5Sum: 64d779030a3dea8b911bf6c4cbe591aa
+SHA1: 617fc8066535d9004a7dff234aca2d70f04ebec7
+SHA256: 3fbac9d486ea1cc6064e18b567fb6a79f22a52b71d9518d051623fe77c817990
+SHA512: 1e59eac8a4487a029342ff11ba1f99d40619983ea36b6d33a3d4eb585387652ca891e3e4f3f94d4e599e0adfe8998c9422ad84a07efbfc8f3ae794f89c1edaa0
+
+Package: nova-jvm
+Architecture: all
+Installed-Size: 4
+Maintainer: @termux
+Version: 1.0
+Homepage: https://github.com/termux/termux-packages
+Depends: openjdk-25, kotlin
+Description: Nova JVM bundle (openjdk-25, kotlin)
+Filename: dists/stable/main/binary-all/nova-jvm_1.0_all.deb
+Size: 704
+MD5Sum: da3fd3bd1c6211f68949ecf8b002b7ae
+SHA1: 5f2fcd32036e39b47b59b4b6cd6d5fe5db496282
+SHA256: 3792da4b1ba12ff5f6c406a13748ed1e56d9e0ae24fae7f729a4c3fc5966d696
+SHA512: ca236e68235e851760173b492f5b258e1a1b70c50ba4b35da73a5a61b0b2a2721ce8ec48fc296ea7d7e4048025fe0fe5797be13aa612aeda6e15b747b28690c8
+
+Package: nova-python
+Architecture: all
+Installed-Size: 4
+Maintainer: @termux
+Version: 1.0
+Homepage: https://github.com/termux/termux-packages
+Depends: python, python-pip
+Description: Nova Python bundle (python, python-pip)
+Filename: dists/stable/main/binary-all/nova-python_1.0_all.deb
+Size: 704
+MD5Sum: 3ebf6ed1354d3e9a1ff25a4112b8d8d8
+SHA1: 9317364b09888ea2cb9c67ad277c9495b3c282bd
+SHA256: 2d25fdb3396f37cc317720ad5f74a8655506c1ce1f47ce4c7a2051b516de4d23
+SHA512: 3a4d9cdbe03a3184de12aab91f46b4134beb04680765f23677656a5dfdcc041da83e361c893babca23083aac04f7cd2759d1ffc71d3f3996cfa4841c083de375
+
+Package: nova-systems
+Architecture: all
+Installed-Size: 4
+Maintainer: @termux
+Version: 1.0
+Homepage: https://github.com/termux/termux-packages
+Depends: rust, golang, make, cmake, binutils
+Description: Nova systems development bundle (rust, golang, make, cmake, binutils)
+Filename: dists/stable/main/binary-all/nova-systems_1.0_all.deb
+Size: 728
+MD5Sum: 9bfb18f351bfa09ae696b16db92e2f87
+SHA1: 5e1406c8ac28b58ce693abc8277f1758fa0f4cc5
+SHA256: 4300df2fef8d292282901f41020180043fe5b49d555753384ccaaf6a34d5ba42
+SHA512: 3c0b4992e9574c8e8592e448733ec1b401df833dfec8dc7192be2fc649eb2fda148bcee2add7ba5966153da1a5985d358fba2106d4040d378e8985dc9c755171
+
+Package: nova-web
+Architecture: all
+Installed-Size: 4
+Maintainer: @termux
+Version: 1.0
+Homepage: https://github.com/termux/termux-packages
+Depends: php, composer, ruby, nodejs, npm
+Description: Nova web development bundle (php, composer, ruby, nodejs, npm)
+Filename: dists/stable/main/binary-all/nova-web_1.0_all.deb
+Size: 724
+MD5Sum: abe5d3297b50f4f23e4f04d6fe62166d
+SHA1: bd7a95bb83f6965488655ad9a9b6741efcd15c5b
+SHA256: c4f846fab85478cdf8243dd334c6612ba16083decf32bb7e86e0bb2c79b67f46
+SHA512: 371acb4caff197a7ef06d7ff2582a9788c75fdb2885c0023c0b2513ad1a89f16557426c14651ef52de377f3bf388064ee76730cfab7fa4f7382e94b4dc94cb2f
 
 Package: npm
 Architecture: all
@@ -118,6 +193,20 @@ MD5Sum: 63f17c79533ab82a9b8786104a6002f0
 SHA1: a86799421874d446e6c13b041ae5ec5865904b7c
 SHA256: 334e5e5276833440661957bf5b93c3e6dd5f590b0a6bd26ca92ccde71cb78986
 SHA512: 57725034f800282b9c19275906a45b4ea48307c1c72e66d71a5a7223d9eef6216648a2b7025e6650aa9d3bd8c17ffcb0c0d5628b92505bf16e3ef31a6ed828e0
+
+Package: openjdk-25-source
+Architecture: all
+Installed-Size: 51828
+Maintainer: @termux
+Version: 25.0.4
+Homepage: https://openjdk.java.net
+Description: Source files for openjdk-25
+Filename: dists/stable/main/binary-all/openjdk-25-source_25.0.4_all.deb
+Size: 48643576
+MD5Sum: 16c3cc04cbc9fc2e8c4820d6f8ca7fc8
+SHA1: 8a2ea43baca0383ca6a0d4341b6c9f3905d692d9
+SHA256: 6268822b4e1514d99890d2b25ef2fbd752d897d8c001c6925aec9c92ea35501e
+SHA512: 5bb1cb2cc782e10b551b593924dafb593716281b70c7e6530e139c510188176a7814628c1fa312845e1d972367b78cff75b4db397e9b50830886565679bcc90f
 
 Package: python-ensurepip-wheels
 Architecture: all
@@ -170,6 +259,139 @@ MD5Sum: d1948a7de5fa3950e9e27c5b961de2b5
 SHA1: eae21f4220b8d6c22358dd5d69563cf1305610f3
 SHA256: c1b97e3631160e29cbca8e39f70cde5fcdf6e13208f9b5bdac4649f3d85e541b
 SHA512: 0fee8b9c6460bb223447b2aaf5dc4d36323f927839fbbb9dad1a039e68b5356d506c1aa25a98d47119157fa235030dc86210d0ab50e6d22cae40392b9e24341e
+
+Package: ruby-ri
+Architecture: all
+Installed-Size: 64024
+Maintainer: @termux
+Version: 4.0.6
+Homepage: https://www.ruby-lang.org/
+Depends: ruby (= 4.0.6)
+Description: Ruby documentation index
+Filename: dists/stable/main/binary-all/ruby-ri_4.0.6_all.deb
+Size: 1708276
+MD5Sum: aa81a7ea5dd1db99f048ee386a892a46
+SHA1: 1cbc5d3327aa81e93f1e3529a60c4377d72ba89f
+SHA256: 3da293444f9b5290f5dc7c3b82b0ea6fcf3a915334391fba97eb75f6f8f83f19
+SHA512: 4dbfe1a30e4b0f9c7067996e423e6ad03c112f374a6edec03ed32f8a7512d332a106b140e774e83341f59fd1696e23b3108cc9858ab69fe4383cf7fc85d560aa
+
+Package: rust-docs
+Architecture: all
+Installed-Size: 896488
+Maintainer: @termux
+Version: 1.98.1
+Homepage: https://www.rust-lang.org/
+Description: Rust documentation
+Filename: dists/stable/main/binary-all/rust-docs_1.98.1_all.deb
+Size: 33657168
+MD5Sum: 84bbfd9cce3c39258699fae46819a811
+SHA1: c7fec23078b127a77f4e3310ba702254f4058de4
+SHA256: 6fd52bc77b53e2a4b1706daa6d6430c6291f5e66c51faacfe54c16fa6645b7f2
+SHA512: 2dcb647cbbbe44f7eadb3225c3ad61883e6d2ebad285bc89f9c715a7288b58cf93d5b58a8a64527c5e7a2950d2bfcb2e083ba01b9b469cef48972fbe46b5915c
+
+Package: rust-src
+Architecture: all
+Installed-Size: 82860
+Maintainer: @termux
+Version: 1.98.1
+Homepage: https://www.rust-lang.org/
+Breaks: rust (<< 1.74.1-1)
+Replaces: rust (<< 1.74.1-1)
+Description: Rust source code files
+Filename: dists/stable/main/binary-all/rust-src_1.98.1_all.deb
+Size: 6097804
+MD5Sum: 73d2e387050ca2db223808146150af69
+SHA1: 4307d52900c0d1ab89fbbc792d57d2793e2da243
+SHA256: 0dfc60c215bb939ddca83d6af1b20d38210c51230353043dc648abef05e2269b
+SHA512: 07b2dfdda8d231fe040d503115861ca21276d0a81c70864713de684a13587a80bd2c5d11f47ab7b2fe0e14199e8181eb1f20bcf2ef0cf0d4d05b865cd629ab80
+
+Package: rust-std-wasm32-unknown-unknown
+Architecture: all
+Installed-Size: 87156
+Maintainer: @termux
+Version: 1.98.1
+Homepage: https://www.rust-lang.org/
+Breaks: rust-std-wasm32 (<< 1.74.1-1)
+Replaces: rust-std-wasm32 (<< 1.74.1-1)
+Description: Component files for target wasm32-unknown-unknown
+Filename: dists/stable/main/binary-all/rust-std-wasm32-unknown-unknown_1.98.1_all.deb
+Size: 20554992
+MD5Sum: b90cdd3806ec0a08f0d6238268225c8f
+SHA1: 884f4b7d28746e2c488b13899cf1ffab2235d351
+SHA256: b979e0327dc08c13a2d3ca4d422fbc3e11caea70028903d2e18ca298c835e659
+SHA512: 04d849675b057fa175d91470eb4ba3f21cdd93fccb7b4e364d38b6b4b9c2a70ee99b89898398f1e41ed7296dc2272569041e123e59ff81ad2c719d4068fdb29f
+
+Package: rust-std-wasm32-wasip1
+Architecture: all
+Installed-Size: 91448
+Maintainer: @termux
+Version: 1.98.1
+Homepage: https://www.rust-lang.org/
+Description: Component files for target wasm32-wasip1
+Filename: dists/stable/main/binary-all/rust-std-wasm32-wasip1_1.98.1_all.deb
+Size: 21606304
+MD5Sum: 63dc8c180e1b26859948981b5ffeb42a
+SHA1: 5b6287303f4dd86a8b7bbad590881a16d2ad366c
+SHA256: 07fc33787b46a8880dbda70f09caaad983c68c25d57f4e3b1b00907ed3c9a8d5
+SHA512: 30215a6d231f2609224f61012bd3123ebab1f98f8a613476f6b200829443a0a61a17a8ab78205a93681859b75bab23c71657d981df6a7c320f8f988145ad085b
+
+Package: rust-std-wasm32-wasip2
+Architecture: all
+Installed-Size: 94160
+Maintainer: @termux
+Version: 1.98.1
+Homepage: https://www.rust-lang.org/
+Description: Component files for target wasm32-wasip2
+Filename: dists/stable/main/binary-all/rust-std-wasm32-wasip2_1.98.1_all.deb
+Size: 22253036
+MD5Sum: cd1638374a131e01578e39a6e5515594
+SHA1: 74ee23203d2e8d9c01036d8300eb374bb68172d4
+SHA256: aaa30bdf0a8617b560c896e4baab8b168e9174295f63d5097eb18df928dfdaaf
+SHA512: 7935b97edb1c14c75f47d0b0fd2dbd73ead693a6e7e1e877b3a003a5aa7b16a1c69f5c3a065e4b7400eb56326cb34abaca1442a1cf6893b11eebd8d2306bcdc4
+
+Package: rust-std-wasm32-wasip3
+Architecture: all
+Installed-Size: 94552
+Maintainer: @termux
+Version: 1.98.1
+Homepage: https://www.rust-lang.org/
+Description: Component files for target wasm32-wasip3
+Filename: dists/stable/main/binary-all/rust-std-wasm32-wasip3_1.98.1_all.deb
+Size: 22329484
+MD5Sum: 14787c5cfd9718ae28d6457c15e0601f
+SHA1: f911c7a211d61c0e5ea99b18d6585f0b99efeedc
+SHA256: 272e1c237c1a59057eef0b275dff6d7a19f4fe70ac912139d811b4dc75131227
+SHA512: 013a2d993f71f8f10084082a7444c234a0c12c238410d612da4d86f0da493d7e6b5302c9cae0ff0a1a9328dab860dd5d88caf04f99cd986aea4ec2a9a0d6db58
+
+Package: rust-std-wasm32v1-none
+Architecture: all
+Installed-Size: 54328
+Maintainer: @termux
+Version: 1.98.1
+Homepage: https://www.rust-lang.org/
+Description: Component files for target wasm32v1-none
+Filename: dists/stable/main/binary-all/rust-std-wasm32v1-none_1.98.1_all.deb
+Size: 11822740
+MD5Sum: 643e17b96123bf5d991188210f4e7a31
+SHA1: 83d19edf35db068bd6851d8c2ea811d05a745ba8
+SHA256: 72d9280eadfba5ee35d7cde3f40c4d03991fc82c0493b0f446af1de919bf7fb7
+SHA512: 14a02643c05b1f29f133759a2562de25530098f17aa045144eb8c64fd30c8fdd2fc2bf71634fb122afb211eac65690c3f2ade4fc2beee16e214e1488db54c9f9
+
+Package: rustc-src
+Architecture: all
+Installed-Size: 42812
+Maintainer: @termux
+Version: 1.98.1
+Homepage: https://www.rust-lang.org/
+Breaks: rust (<< 1.74.1-1)
+Replaces: rust (<< 1.74.1-1)
+Description: Rust compiler source code files
+Filename: dists/stable/main/binary-all/rustc-src_1.98.1_all.deb
+Size: 5530864
+MD5Sum: e528288049bcce264dd539cb59d69a34
+SHA1: 78352eafec5f4aac3e97227f2278ab4ad1525747
+SHA256: cf751a6c07f589920871d8a60875f7249b55fcd5aa1325e810f9f93c5c344fc7
+SHA512: 7c6d5996f47d8ac66077a0bbfb23d9905419c459a1d66cefa9d372b4086a9f197844f7fa8359295c6fa924597deeb552ab53a02e17d625b4ece15b8af9880323
 
 Package: termux-am
 Architecture: all
@@ -229,6 +451,36 @@ MD5Sum: ae1da83853b464d8504c2eed615196df
 SHA1: 9812086046807ca37e040da4ce0d3ea3101caa90
 SHA256: 3327dd8db4cb654dac87820227a4c200f4e7cd1c606fab2cd62dc1eae7c055cc
 SHA512: 53d6799e7d71355d922017835228b2b24cf801310dc28d69a3bedec1c5e2a30604876f16e73f44ca1aa0d2b37abceeb03f3c1a34ecd7ac2320b3dd5863e721aa
+
+Package: update-info-dir
+Architecture: all
+Installed-Size: 48
+Maintainer: @termux
+Version: 7.3
+Homepage: https://www.gnu.org/software/texinfo/
+Depends: texinfo (= 7.3)
+Description: Update or create index file from all installed info files in directory
+Filename: dists/stable/main/binary-all/update-info-dir_7.3_all.deb
+Size: 2484
+MD5Sum: ebab8493c60a04bfc24483a322d3265c
+SHA1: e0dae2f9355d8223dc2199c2c166179cc904630c
+SHA256: ce20e41ac16843242ca609098f454d1eb6b20f307ebfeafdab1afdb149a734d0
+SHA512: 0caabbc1b1ceb8b247f56dfc8e898b4153726841299dc93c820b8385b852483cc23de678e191e0c61653b8127a2c2955b4cadad54d04f7ff78116cc7d74c9d44
+
+Package: wasi-libc
+Architecture: all
+Installed-Size: 264132
+Maintainer: @termux
+Version: 34+really33
+Homepage: https://wasi.dev/
+Recommends: wasm-component-ld
+Description: Libc for WebAssembly programs built on top of WASI system calls
+Filename: dists/stable/main/binary-all/wasi-libc_34+really33_all.deb
+Size: 48320228
+MD5Sum: 012a8614b317c4e73bc979ebb228ef5b
+SHA1: 0e6fdfa1aa599b8f8a24ecc2ecb5ee5408aecef0
+SHA256: 693a1e37b86219914d7e9575fe876539758970dcd78a90509540e27bc9440285
+SHA512: a4d63d07013e1d0fb27005e3613a6866a7a3c52b47da198a77416df1f72cc73200175b9f49be61e6aae897ecd91c2386ebf3065f76561d969b6caa280c35b2ff
 
 Package: xcb-proto
 Architecture: all
