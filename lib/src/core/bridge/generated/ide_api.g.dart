@@ -161,6 +161,7 @@ class RuntimeInfo {
     this.version,
     required this.installed,
     this.executable,
+    this.supported,
   });
 
   String id;
@@ -173,6 +174,10 @@ class RuntimeInfo {
 
   String? executable;
 
+  /// False when the runtime has no packages for this device ABI
+  /// (e.g. x86_64). Null from old hosts means supported.
+  bool? supported;
+
   List<Object?> _toList() {
     return <Object?>[
       id,
@@ -180,6 +185,7 @@ class RuntimeInfo {
       version,
       installed,
       executable,
+      supported,
     ];
   }
 
@@ -194,6 +200,7 @@ class RuntimeInfo {
       version: result[2] as String?,
       installed: result[3]! as bool,
       executable: result[4] as String?,
+      supported: result[5] as bool?,
     );
   }
 
@@ -206,7 +213,7 @@ class RuntimeInfo {
     if (identical(this, other)) {
       return true;
     }
-    return _deepEquals(id, other.id) && _deepEquals(displayName, other.displayName) && _deepEquals(version, other.version) && _deepEquals(installed, other.installed) && _deepEquals(executable, other.executable);
+    return _deepEquals(id, other.id) && _deepEquals(displayName, other.displayName) && _deepEquals(version, other.version) && _deepEquals(installed, other.installed) && _deepEquals(executable, other.executable) && _deepEquals(supported, other.supported);
   }
 
   @override
@@ -215,7 +222,7 @@ class RuntimeInfo {
 
   @override
   String toString() {
-    return 'RuntimeInfo(id: $id, displayName: $displayName, version: $version, installed: $installed, executable: $executable)';
+    return 'RuntimeInfo(id: $id, displayName: $displayName, version: $version, installed: $installed, executable: $executable, supported: $supported)';
   }
 }
 

@@ -251,7 +251,12 @@ data class RuntimeInfo (
   val displayName: String,
   val version: String? = null,
   val installed: Boolean,
-  val executable: String? = null
+  val executable: String? = null,
+  /**
+   * False when the runtime has no packages for this device ABI
+   * (e.g. x86_64). Null from old hosts means supported.
+   */
+  val supported: Boolean? = null
 )
  {
   companion object {
@@ -261,7 +266,8 @@ data class RuntimeInfo (
       val version = pigeonVar_list[2] as String?
       val installed = pigeonVar_list[3] as Boolean
       val executable = pigeonVar_list[4] as String?
-      return RuntimeInfo(id, displayName, version, installed, executable)
+      val supported = pigeonVar_list[5] as Boolean?
+      return RuntimeInfo(id, displayName, version, installed, executable, supported)
     }
   }
   fun toList(): List<Any?> {
@@ -271,6 +277,7 @@ data class RuntimeInfo (
       version,
       installed,
       executable,
+      supported,
     )
   }
   override fun equals(other: Any?): Boolean {
@@ -281,7 +288,7 @@ data class RuntimeInfo (
       return true
     }
     val other = other as RuntimeInfo
-    return IdeApiPigeonUtils.deepEquals(this.id, other.id) && IdeApiPigeonUtils.deepEquals(this.displayName, other.displayName) && IdeApiPigeonUtils.deepEquals(this.version, other.version) && IdeApiPigeonUtils.deepEquals(this.installed, other.installed) && IdeApiPigeonUtils.deepEquals(this.executable, other.executable)
+    return IdeApiPigeonUtils.deepEquals(this.id, other.id) && IdeApiPigeonUtils.deepEquals(this.displayName, other.displayName) && IdeApiPigeonUtils.deepEquals(this.version, other.version) && IdeApiPigeonUtils.deepEquals(this.installed, other.installed) && IdeApiPigeonUtils.deepEquals(this.executable, other.executable) && IdeApiPigeonUtils.deepEquals(this.supported, other.supported)
   }
 
   override fun hashCode(): Int {
@@ -291,10 +298,11 @@ data class RuntimeInfo (
     result = 31 * result + IdeApiPigeonUtils.deepHash(this.version)
     result = 31 * result + IdeApiPigeonUtils.deepHash(this.installed)
     result = 31 * result + IdeApiPigeonUtils.deepHash(this.executable)
+    result = 31 * result + IdeApiPigeonUtils.deepHash(this.supported)
     return result
   }
   override fun toString(): String {
-    return "RuntimeInfo(id=$id, displayName=$displayName, version=$version, installed=$installed, executable=$executable)"
+    return "RuntimeInfo(id=$id, displayName=$displayName, version=$version, installed=$installed, executable=$executable, supported=$supported)"
   }
 }
 

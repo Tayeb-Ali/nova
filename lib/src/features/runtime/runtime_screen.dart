@@ -801,6 +801,17 @@ class _RuntimeScreenState extends State<RuntimeScreen> {
                     visualDensity: VisualDensity.compact,
                     padding: const EdgeInsets.all(4),
                   )
+                else if (!runtime.isSupported)
+                  Chip(
+                    avatar: const Icon(Icons.smartphone_outlined, size: 16),
+                    label: const Text('غير مدعوم على هذا الجهاز'),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    backgroundColor: scheme.surfaceContainerHigh,
+                    visualDensity: VisualDensity.compact,
+                    padding: const EdgeInsets.all(4),
+                  )
                 else
                   Chip(
                     label: Text(AppLocalizations.of(context).runtimeAvailable),
@@ -902,7 +913,9 @@ class _RuntimeScreenState extends State<RuntimeScreen> {
                     ),
                   ] else
                     FilledButton.icon(
-                      onPressed: _busy ? null : () => _install(runtime.id),
+                      onPressed: (_busy || !runtime.isSupported)
+                          ? null
+                          : () => _install(runtime.id),
                       style: FilledButton.styleFrom(
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(4),

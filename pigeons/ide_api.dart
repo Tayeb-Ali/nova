@@ -28,6 +28,7 @@ class RuntimeInfo {
     this.version,
     required this.installed,
     this.executable,
+    this.supported,
   });
 
   String id;
@@ -35,6 +36,9 @@ class RuntimeInfo {
   String? version;
   bool installed;
   String? executable;
+  /// False when the runtime has no packages for this device ABI
+  /// (e.g. x86_64). Null from old hosts means supported.
+  bool? supported;
 }
 
 /// A managed background process.

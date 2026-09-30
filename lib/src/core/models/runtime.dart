@@ -142,6 +142,9 @@ class RuntimeInfo {
   final String? version;
   final bool installed;
   final String? executable;
+  /// False when the runtime has no packages for this device ABI.
+  /// Null (old hosts / tests) means supported.
+  final bool? supported;
 
   RuntimeInfo({
     required this.id,
@@ -149,7 +152,11 @@ class RuntimeInfo {
     this.version,
     this.installed = false,
     this.executable,
+    this.supported,
   });
+
+  /// Whether this runtime can be installed on this device.
+  bool get isSupported => supported ?? true;
 
   RuntimeType get type => RuntimeType.fromId(id);
 
@@ -202,5 +209,6 @@ class RuntimeInfo {
         version: b.version,
         installed: b.installed,
         executable: b.executable,
+        supported: b.supported,
       );
 }

@@ -215,6 +215,8 @@ class RuntimeManager(
         version = queryVersion(def),
         installed = isInstalled(def),
         executable = def.executable,
+        supported = def.supportedAbis.isEmpty() ||
+            def.supportedAbis.contains(android.os.Build.SUPPORTED_ABIS.firstOrNull()),
     )
 
     private fun isInstalled(def: RuntimeDefinition): Boolean {
