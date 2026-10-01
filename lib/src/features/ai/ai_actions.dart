@@ -2,6 +2,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
+import '../../../l10n/generated/app_localizations.dart';
 import '../../core/settings_store.dart';
 import 'ai_client.dart';
 import 'ai_providers.dart';
@@ -82,35 +83,38 @@ class _AiActionsSheetState extends ConsumerState<AiActionsSheet> {
   Future<void> _saveKey() async {
     final key = _keyController.text.trim();
     if (key.isEmpty) return;
+    final l10n = AppLocalizations.of(context);
     await _storage.write(key: kNovaAiKeyStorageKey, value: key);
     ref.invalidate(aiKeyProvider);
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('تم حفظ المفتاح')),
+        SnackBar(content: Text(l10n.aiKeySaved)),
       );
     }
   }
 
-  String _promptFor(String kind) {
+  String _promptFor(BuildContext context, String kind) {
+    final l10n = AppLocalizations.of(context);
     final code = widget.selectedCode;
     switch (kind) {
       case 'explain':
-        return 'اشرح الكود التالي:\n$code';
+        return l10n.aiPromptExplain(code);
       case 'fix':
-        return 'أصلح الخطأ في الكود التالي:\n$code';
+        return l10n.aiPromptFix(code);
       case 'complete':
-        return 'أكمل الكود التالي:\n$code';
+        return l10n.aiPromptComplete(code);
       default:
         return code;
     }
   }
 
   Future<void> _runAction(String kind) async {
+    final l10n = AppLocalizations.of(context);
     final apiKey = _keyController.text.trim();
     if (apiKey.isEmpty) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('أدخل مفتاح API أولا')),
+          SnackBar(content: Text(l10n.aiEnterKeyFirst)),
         );
       }
       return;
@@ -118,14 +122,14 @@ class _AiActionsSheetState extends ConsumerState<AiActionsSheet> {
     if (widget.selectedCode.trim().isEmpty) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('لا يوجد كود محدد')),
+          SnackBar(content: Text(l10n.aiNoCode)),
         );
       }
       return;
     }
 
     final notifier = ref.read(aiStateProvider.notifier);
-    final prompt = _promptFor(kind);
+    final prompt = _promptFor(context, kind);
 
     if (widget.clientOverride != null) {
       // Standalone path (useful in tests / previews): bypass provider.
@@ -160,6 +164,7 @@ try {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final aiState = ref.watch(aiStateProvider);
     final bottom = MediaQuery.of(context).viewInsets.bottom;
 
@@ -172,7 +177,7 @@ try {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
-              'إجراءات الذكاء الاصطناعي',
+              l10n.aiTitle,
               style: Theme.of(context).textTheme.titleMedium,
               textAlign: TextAlign.center,
             ),
@@ -187,7 +192,7 @@ try {
               child: SingleChildScrollView(
                 child: Text(
                   widget.selectedCode.isEmpty
-                      ? 'لا يوجد كود محدد'
+                      ? l10n.aiNoCode
                       : widget.selectedCode,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         fontFamily: 'monospace',
@@ -212,7 +217,7 @@ try {
                 const SizedBox(width: 8),
                 ElevatedButton(
                   onPressed: _saveKey,
-                  child: const Text('حفظ'),
+                  child: Text(l10n.actionSave),
                 ),
               ],
             ),
@@ -226,16 +231,16 @@ try {
                 ElevatedButton(
                   onPressed:
                       aiState.loading ? null : () => _runAction('explain'),
-                  child: const Text('اشرح الكود'),
+                  child: Text(l10n.aiExplainCode),
                 ),
                 ElevatedButton(
                   onPressed: aiState.loading ? null : () => _runAction('fix'),
-                  child: const Text('أصلح الخطأ'),
+                  child: Text(l10n.aiFixError),
                 ),
                 ElevatedButton(
                   onPressed:
                       aiState.loading ? null : () => _runAction('complete'),
-                  child: const Text('أكمل الكود'),
+                  child: Text(l10n.aiCompleteCode),
                 ),
               ],
             ),

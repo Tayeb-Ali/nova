@@ -5,6 +5,7 @@ import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:path/path.dart" as p;
 
 import "../../core/ui/text_prompt_dialog.dart";
+import "../../core/ui/empty_state.dart";
 import "../../../l10n/generated/app_localizations.dart";
 import "files_providers.dart";
 
@@ -42,8 +43,13 @@ class _FileExplorerState extends ConsumerState<FileExplorer> {
 
   void _showFsError(Object e) {
     if (!mounted) return;
-    ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text("Storage not writable here: $e")));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          AppLocalizations.of(context).explorerStorageError('$e'),
+        ),
+      ),
+    );
   }
 
   @override
@@ -108,7 +114,7 @@ class _FileExplorerState extends ConsumerState<FileExplorer> {
     final name = await showTextPromptDialog(
       context: context,
       title: l10n.explorerNewFile,
-      hintText: "e.g. main.py",
+      hintText: l10n.explorerNewFileHint,
       confirmLabel: l10n.actionCreate,
       cancelLabel: l10n.actionCancel,
     );
@@ -195,7 +201,11 @@ class _FileExplorerState extends ConsumerState<FileExplorer> {
               ),
             Expanded(
               child: dir == null
-                  ? const Center(child: Text("No folder selected"))
+                  ? Center(
+                      child: Text(
+                        AppLocalizations.of(context).explorerNoFolder,
+                      ),
+                    )
                   : Consumer(
                       builder: (context, ref, _) {
                         final files = ref.watch(fileListProvider(dir));
@@ -209,12 +219,11 @@ class _FileExplorerState extends ConsumerState<FileExplorer> {
                           ),
                           data: (entries) {
                             if (entries.isEmpty) {
-                              return Center(
-                                child: Text(
-                                  AppLocalizations.of(
-                                    context,
-                                  ).explorerEmptyFolder,
-                                ),
+                              return EmptyState(
+                                icon: Icons.folder_open_outlined,
+                                title: AppLocalizations.of(
+                                  context,
+                                ).explorerEmptyFolder,
                               );
                             }
                             return ListView.builder(

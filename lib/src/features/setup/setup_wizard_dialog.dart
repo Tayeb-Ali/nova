@@ -188,6 +188,7 @@ class _SetupWizardDialogState extends State<SetupWizardDialog> {
   }
 
   Widget _buildChooseStep() {
+    final l10n = AppLocalizations.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -202,18 +203,18 @@ class _SetupWizardDialogState extends State<SetupWizardDialog> {
                 value: AppConfig.bootstrapVariantSlim,
                 dense: true,
                 contentPadding: EdgeInsets.zero,
-                title: const Text('Slim ~80MB (default)'),
-                subtitle: const Text(
-                  'Core + apt — languages install on demand',
+                title: Text(l10n.setupSlimTitle),
+                subtitle: Text(
+                  l10n.setupSlimSub,
                 ),
               ),
               RadioListTile<String>(
                 value: AppConfig.bootstrapVariantFull,
                 dense: true,
                 contentPadding: EdgeInsets.zero,
-                title: const Text('Full ~283MB (offline)'),
-                subtitle: const Text(
-                  'Node, Python, PHP and Git preinstalled',
+                title: Text(l10n.setupFullTitle),
+                subtitle: Text(
+                  l10n.setupFullSub,
                 ),
               ),
             ],
@@ -247,8 +248,8 @@ class _SetupWizardDialogState extends State<SetupWizardDialog> {
               style: TextStyle(color: Theme.of(context).colorScheme.error),
             ),
             const SizedBox(height: 4),
-            const Text(
-              'Retry reuses the verified download (resume).',
+            Text(
+              l10n.setupResumeNote,
               style: TextStyle(fontSize: 12),
             ),
           ],

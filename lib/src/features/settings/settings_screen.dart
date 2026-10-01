@@ -57,6 +57,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   // Sends a minimal chat request to verify the provider connects.
   // Reads the key from the field, falling back to the stored key.
   Future<void> _testAiConnection(BuildContext context, WidgetRef ref) async {
+    final l10n = AppLocalizations.of(context);
     final messenger = ScaffoldMessenger.of(context);
     var key = _apiKeyCtrl.text.trim();
     if (key.isEmpty) {
@@ -70,7 +71,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     }
     if (key.isEmpty) {
       messenger.showSnackBar(
-        const SnackBar(content: Text("Enter an API key first")),
+        SnackBar(content: Text(l10n.aiEnterKeyFirst)),
       );
       return;
     }
@@ -90,13 +91,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       messenger.showSnackBar(
         SnackBar(
           content: Text(
-            "Connected: ${shown.length > 120 ? "${shown.substring(0, 120)}…" : shown}",
+            l10n.settingsConnected(shown.length > 120 ? "${shown.substring(0, 120)}…" : shown),
           ),
         ),
       );
     } catch (e) {
       if (!mounted) return;
-      messenger.showSnackBar(SnackBar(content: Text("Connection failed: $e")));
+      messenger.showSnackBar(SnackBar(content: Text(l10n.settingsConnectionFailed("$e"))));
     } finally {
       if (mounted) setState(() => _aiTesting = false);
     }
@@ -151,10 +152,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         borderRadius: BorderRadius.circular(4),
                       ),
                     ),
-                    items: const [
-                      DropdownMenuItem(value: null, child: Text("System")),
-                      DropdownMenuItem(value: "en", child: Text("English")),
-                      DropdownMenuItem(value: "ar", child: Text("العربية")),
+                    items: [
+                      DropdownMenuItem(value: null, child: Text(AppLocalizations.of(context).settingsSystem)),
+                      const DropdownMenuItem(value: "en", child: Text("English")),
+                      const DropdownMenuItem(value: "ar", child: Text("العربية")),
                     ],
                     onChanged: (v) => store.setAppLocale(v),
                   ),
@@ -174,7 +175,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 children: [
                   sectionTitle(AppLocalizations.of(context).actionRun),
                   const SizedBox(height: 8),
-                  Text("Run timeout: ${settings.timeoutMs} ms"),
+                  Text(AppLocalizations.of(context).settingsRunTimeout(settings.timeoutMs)),
                   Slider(
                     min: 1000,
                     max: 120000,
@@ -187,7 +188,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     controller: _timeoutCtrl,
                     keyboardType: TextInputType.number,
                     decoration: InputDecoration(
-                      labelText: "Timeout (ms, 1000-120000)",
+                      labelText: AppLocalizations.of(context).settingsTimeoutLabel,
                       border: fieldBorder(),
                     ),
                     onSubmitted: (v) {
@@ -216,18 +217,18 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   const SizedBox(height: 8),
                   SwitchListTile(
                     contentPadding: EdgeInsets.zero,
-                    title: const Text("Autocomplete"),
-                    subtitle: const Text(
-                      "Keyword, snippet and word suggestions while typing",
+                    title: Text(AppLocalizations.of(context).settingsAutocomplete),
+                    subtitle: Text(
+                      AppLocalizations.of(context).settingsAutocompleteSub,
                     ),
                     value: settings.autocompleteEnabled,
                     onChanged: (v) => store.setAutocompleteEnabled(v),
                   ),
                   SwitchListTile(
                     contentPadding: EdgeInsets.zero,
-                    title: const Text("Match app to editor theme"),
-                    subtitle: const Text(
-                      "Whole app follows the editor theme colors",
+                    title: Text(AppLocalizations.of(context).settingsMatchTheme),
+                    subtitle: Text(
+                      AppLocalizations.of(context).settingsMatchThemeSub,
                     ),
                     value: settings.followEditorTheme,
                     onChanged: (v) => store.setFollowEditorTheme(v),
@@ -236,9 +237,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     contentPadding: EdgeInsets.zero,
                     dense: true,
                     visualDensity: VisualDensity.compact,
-                    title: const Text("Word wrap"),
-                    subtitle: const Text(
-                      "Wrap long lines instead of scrolling sideways",
+                    title: Text(AppLocalizations.of(context).settingsWordWrap),
+                    subtitle: Text(
+                      AppLocalizations.of(context).settingsWordWrapSub,
                     ),
                     value: settings.wordWrap,
                     onChanged: (v) => store.setWordWrap(v),
@@ -247,8 +248,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     contentPadding: EdgeInsets.zero,
                     dense: true,
                     visualDensity: VisualDensity.compact,
-                    title: const Text("Auto save"),
-                    subtitle: const Text("Save 1.5s after you stop typing"),
+                    title: Text(AppLocalizations.of(context).settingsAutoSave),
+                    subtitle: Text(AppLocalizations.of(context).settingsAutoSaveSub),
                     value: settings.autoSave,
                     onChanged: (v) => store.setAutoSave(v),
                   ),
@@ -268,7 +269,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   DropdownButtonFormField<String>(
                     initialValue: settings.editorFont,
                     decoration: InputDecoration(
-                      labelText: "Editor font",
+                      labelText: AppLocalizations.of(context).settingsEditorFont,
                       border: fieldBorder(),
                     ),
                     items: [
@@ -313,6 +314,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         : (id) async {
                             if (id == null || id == settings.editorFont) return;
                             final needsInstall = !EditorFontLoader.isLoaded(id);
+                            final l10n = AppLocalizations.of(context);
                             final messenger = ScaffoldMessenger.of(context);
                             setState(() => _fontLoading = true);
                             final ok = await EditorFontLoader.ensureLoaded(id);
@@ -324,16 +326,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                 SnackBar(
                                   content: Text(
                                     needsInstall
-                                        ? "Font installed"
-                                        : "Editor font updated",
+                                        ? l10n.settingsFontInstalled
+                                        : l10n.settingsFontUpdated,
                                   ),
                                 ),
                               );
                             } else {
                               messenger.showSnackBar(
-                                const SnackBar(
+                                SnackBar(
                                   content: Text(
-                                    "Download failed: check connection",
+                                    l10n.settingsDownloadFailed,
                                   ),
                                 ),
                               );
@@ -347,7 +349,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     ),
                   const SizedBox(height: 8),
                   Text(
-                    "Font size: ${settings.editorFontSize.toStringAsFixed(0)}",
+                    AppLocalizations.of(context).settingsFontSize(settings.editorFontSize.toStringAsFixed(0)),
                   ),
                   Slider(
                     min: 10,
@@ -358,7 +360,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     onChanged: (v) => store.setEditorFontSize(v),
                   ),
                   const SizedBox(height: 4),
-                  const Text("Live preview"),
+                  Text(AppLocalizations.of(context).settingsLivePreview),
                   const SizedBox(height: 8),
                   const _EditorPreview(),
                   const _EditorThemePicker(),
@@ -383,7 +385,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         ? "custom"
                         : settings.aiProvider,
                     decoration: InputDecoration(
-                      labelText: "Provider",
+                      labelText: AppLocalizations.of(context).settingsProvider,
                       border: fieldBorder(),
                     ),
                     items: [
@@ -395,10 +397,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
-                      const DropdownMenuItem(
+                      DropdownMenuItem(
                         value: "custom",
                         child: Text(
-                          "Custom (OpenAI compatible)",
+                          AppLocalizations.of(context).settingsCustomProvider,
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
@@ -420,7 +422,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     controller: _baseUrlCtrl,
                     keyboardType: TextInputType.url,
                     decoration: InputDecoration(
-                      labelText: "Base URL (OpenAI compatible)",
+                      labelText: AppLocalizations.of(context).settingsBaseUrl,
                       hintText: "https://api.openai.com/v1",
                       border: fieldBorder(),
                     ),
@@ -433,7 +435,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   TextField(
                     controller: _modelCtrl,
                     decoration: InputDecoration(
-                      labelText: "Model",
+                      labelText: AppLocalizations.of(context).settingsModel,
                       hintText: "gpt-4o-mini",
                       border: fieldBorder(),
                     ),
@@ -449,20 +451,20 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     enableSuggestions: false,
                     autocorrect: false,
                     decoration: InputDecoration(
-                      labelText: "API key",
+                      labelText: AppLocalizations.of(context).settingsApiKey,
                       hintText: ref.watch(aiKeyProvider).maybeWhen(
                             data: (v) => v,
                             orElse: () => null,
                           ) !=
                           null
-                          ? "Saved in secure storage"
-                          : "Paste your key",
+                          ? AppLocalizations.of(context).settingsApiKeySaved
+                          : AppLocalizations.of(context).settingsApiKeyHint,
                       border: fieldBorder(),
                     ),
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    "The key is stored in encrypted secure storage, never in plain settings.",
+                    AppLocalizations.of(context).settingsKeySecureNote,
                     style: Theme.of(context).textTheme.bodySmall
                         ?.copyWith(color: scheme.onSurfaceVariant),
                   ),
@@ -489,7 +491,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           )
                         : const Icon(Icons.wifi_tethering_outlined, size: 18),
                     label: Text(
-                      _aiTesting ? "Testing…" : "Test connection",
+                      _aiTesting ? AppLocalizations.of(context).settingsTesting : AppLocalizations.of(context).settingsTestConnection,
                     ),
                   ),
                 ],
@@ -505,6 +507,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
             ),
             onPressed: () async {
+              final l10n = AppLocalizations.of(context);
               await store.setAiBaseUrl(_baseUrlCtrl.text);
               await store.setAiModel(_modelCtrl.text);
               final ms = int.tryParse(_timeoutCtrl.text.trim());
@@ -525,7 +528,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               if (context.mounted) {
                 ScaffoldMessenger.of(
                   context,
-                ).showSnackBar(const SnackBar(content: Text("Settings saved")));
+                ).showSnackBar(SnackBar(content: Text(l10n.settingsSaved)));
               }
             },
             child: Text(AppLocalizations.of(context).actionSave),
@@ -624,6 +627,7 @@ class _EditorThemePicker extends ConsumerWidget {
   const _EditorThemePicker();
 
   Future<void> _import(BuildContext context, WidgetRef ref) async {
+    final l10n = AppLocalizations.of(context);
     final files = await FilePicker.pickFiles(
       type: FileType.custom,
       allowedExtensions: ["json"],
@@ -644,33 +648,35 @@ class _EditorThemePicker extends ConsumerWidget {
       await store.setPackFor(pack.brightness, pack.id);
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Theme "${pack.name}" imported')),
+          SnackBar(content: Text(l10n.settingsThemeImported(pack.name))),
         );
       }
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text("Import failed: $e")));
+            .showSnackBar(SnackBar(content: Text(l10n.settingsImportFailed("$e"))));
       }
     }
   }
 
   Future<void> _copyPack(BuildContext context, EditorThemePack pack) async {
+    final l10n = AppLocalizations.of(context);
     final json = jsonEncode(pack.toJson());
     await Clipboard.setData(ClipboardData(text: json));
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Theme "${pack.name}" JSON copied')),
+        SnackBar(content: Text(l10n.settingsThemeCopied(pack.name))),
       );
     }
   }
 
   Future<void> _exportPack(BuildContext context, EditorThemePack pack) async {
+    final l10n = AppLocalizations.of(context);
     final json = jsonEncode(pack.toJson());
     await Clipboard.setData(ClipboardData(text: json));
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Theme "${pack.name}" exported to clipboard')),
+        SnackBar(content: Text(l10n.settingsThemeExported(pack.name))),
       );
     }
   }
@@ -747,7 +753,7 @@ class _EditorThemePicker extends ConsumerWidget {
             visualDensity: VisualDensity.compact,
           ),
           icon: const Icon(Icons.file_upload_outlined, size: 18),
-          label: const Text("Import theme JSON"),
+          label: Text(l10n.settingsImportTheme),
         ),
         for (final pack in themeState.customPacks)
           Container(
@@ -771,7 +777,7 @@ class _EditorThemePicker extends ConsumerWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   IconButton(
-                    tooltip: "Copy theme JSON",
+                    tooltip: l10n.settingsCopyTheme,
                     visualDensity: VisualDensity.compact,
                     style: IconButton.styleFrom(
                       backgroundColor: scheme.surfaceContainerHigh,
@@ -785,7 +791,7 @@ class _EditorThemePicker extends ConsumerWidget {
                   ),
                   const SizedBox(width: 4),
                   IconButton(
-                    tooltip: "Export theme",
+                    tooltip: l10n.settingsExportTheme,
                     visualDensity: VisualDensity.compact,
                     style: IconButton.styleFrom(
                       backgroundColor: scheme.surfaceContainerHigh,
@@ -799,7 +805,7 @@ class _EditorThemePicker extends ConsumerWidget {
                   ),
                   const SizedBox(width: 4),
                   IconButton(
-                    tooltip: "Delete theme",
+                    tooltip: l10n.settingsDeleteTheme,
                     visualDensity: VisualDensity.compact,
                     style: IconButton.styleFrom(
                       backgroundColor: scheme.surfaceContainerHigh,

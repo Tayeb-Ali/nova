@@ -10,6 +10,15 @@ class AppLocalizationsAr extends AppLocalizations {
   AppLocalizationsAr([String locale = 'ar']) : super(locale);
 
   @override
+  String get searchEmpty => 'لا نتائج';
+
+  @override
+  String get searchPrompt => 'ابحث في المشروع النشط أعلاه';
+
+  @override
+  String get commandPaletteEmpty => 'لا نتائج';
+
+  @override
   String get navProjects => 'المشاريع';
 
   @override
@@ -98,7 +107,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get settingsEditor => 'المحرر';
 
   @override
-  String get settingsFontSize => 'حجم الخط';
+  String settingsFontSize(String size) {
+    return 'حجم الخط: $size';
+  }
 
   @override
   String get settingsAi => 'الذكاء الاصطناعي';
@@ -587,4 +598,574 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get runtimeSetupFailed => 'فشل الإعداد';
+
+  @override
+  String get aiTitle => 'إجراءات الذكاء الاصطناعي';
+
+  @override
+  String get aiKeySaved => 'تم حفظ المفتاح';
+
+  @override
+  String get aiEnterKeyFirst => 'أدخل مفتاح API أولا';
+
+  @override
+  String get aiNoCode => 'لا يوجد كود محدد';
+
+  @override
+  String get aiExplainCode => 'اشرح الكود';
+
+  @override
+  String get aiFixError => 'أصلح الخطأ';
+
+  @override
+  String get aiCompleteCode => 'أكمل الكود';
+
+  @override
+  String aiPromptExplain(String code) {
+    return 'اشرح الكود التالي:\n$code';
+  }
+
+  @override
+  String aiPromptFix(String code) {
+    return 'أصلح الخطأ في الكود التالي:\n$code';
+  }
+
+  @override
+  String aiPromptComplete(String code) {
+    return 'أكمل الكود التالي:\n$code';
+  }
+
+  @override
+  String get settingsSystem => 'النظام';
+
+  @override
+  String settingsRunTimeout(int ms) {
+    return 'مهلة التشغيل: $ms مللي ثانية';
+  }
+
+  @override
+  String get settingsTimeoutLabel => 'المهلة (مللي ثانية، 1000-120000)';
+
+  @override
+  String get settingsAutocomplete => 'الإكمال التلقائي';
+
+  @override
+  String get settingsAutocompleteSub =>
+      'اقتراحات الكلمات والمقاطع أثناء الكتابة';
+
+  @override
+  String get settingsMatchTheme => 'مطابقة التطبيق مع سمة المحرر';
+
+  @override
+  String get settingsMatchThemeSub => 'التطبيق كله يتبع ألوان سمة المحرر';
+
+  @override
+  String get settingsWordWrap => 'التفاف الأسطر';
+
+  @override
+  String get settingsWordWrapSub => 'التفاف الأسطر الطويلة بدل التمرير الجانبي';
+
+  @override
+  String get settingsAutoSave => 'الحفظ التلقائي';
+
+  @override
+  String get settingsAutoSaveSub => 'الحفظ بعد 1.5 ثانية من توقف الكتابة';
+
+  @override
+  String get settingsEditorFont => 'خط المحرر';
+
+  @override
+  String get settingsFontInstalled => 'تم تثبيت الخط';
+
+  @override
+  String get settingsFontUpdated => 'تم تحديث خط المحرر';
+
+  @override
+  String get settingsDownloadFailed => 'فشل التنزيل: تحقق من الاتصال';
+
+  @override
+  String get settingsLivePreview => 'معاينة حية';
+
+  @override
+  String get settingsProvider => 'المزود';
+
+  @override
+  String get settingsCustomProvider => 'مخصص (متوافق مع OpenAI)';
+
+  @override
+  String get settingsBaseUrl => 'الرابط الأساسي (متوافق مع OpenAI)';
+
+  @override
+  String get settingsModel => 'النموذج';
+
+  @override
+  String get settingsApiKey => 'مفتاح API';
+
+  @override
+  String get settingsApiKeySaved => 'محفوظ في التخزين الآمن';
+
+  @override
+  String get settingsApiKeyHint => 'الصق مفتاحك';
+
+  @override
+  String get settingsKeySecureNote =>
+      'المفتاح يُحفظ في تخزين آمن مشفر، وليس في الإعدادات العادية.';
+
+  @override
+  String get settingsTestConnection => 'اختبار الاتصال';
+
+  @override
+  String get settingsTesting => 'جارٍ الاختبار…';
+
+  @override
+  String get settingsSaved => 'تم حفظ الإعدادات';
+
+  @override
+  String settingsConnected(String reply) {
+    return 'متصل: $reply';
+  }
+
+  @override
+  String settingsConnectionFailed(String error) {
+    return 'فشل الاتصال: $error';
+  }
+
+  @override
+  String settingsThemeImported(String name) {
+    return 'تم استيراد السمة «$name»';
+  }
+
+  @override
+  String settingsImportFailed(String error) {
+    return 'فشل الاستيراد: $error';
+  }
+
+  @override
+  String settingsThemeCopied(String name) {
+    return 'تم نسخ JSON للسمة «$name»';
+  }
+
+  @override
+  String settingsThemeExported(String name) {
+    return 'تم تصدير السمة «$name» إلى الحافظة';
+  }
+
+  @override
+  String get settingsImportTheme => 'استيراد JSON لسمة';
+
+  @override
+  String get settingsCopyTheme => 'نسخ JSON للسمة';
+
+  @override
+  String get settingsExportTheme => 'تصدير السمة';
+
+  @override
+  String get settingsDeleteTheme => 'حذف السمة';
+
+  @override
+  String get searchTitle => 'البحث في المشروع';
+
+  @override
+  String get searchHint => 'ابحث عن نص أو نمط…';
+
+  @override
+  String get searchReplaceHint => 'استبدل بـ…';
+
+  @override
+  String get searchMatchCase => 'مطابقة حالة الأحرف';
+
+  @override
+  String get searchUseRegex => 'استخدام التعبيرات النمطية';
+
+  @override
+  String get searchButton => 'بحث';
+
+  @override
+  String searchButtonCount(int hits) {
+    return 'بحث ($hits)';
+  }
+
+  @override
+  String get searchReplaceAll => 'استبدال الكل';
+
+  @override
+  String get searchNoProject => 'لا يوجد مشروع مفتوح';
+
+  @override
+  String get searchTypeSomething => 'اكتب شيئًا للبحث عنه';
+
+  @override
+  String get searchInvalidRegex => 'تعبير نمطي غير صالح';
+
+  @override
+  String searchFailed(String error) {
+    return 'فشل البحث: $error';
+  }
+
+  @override
+  String get searchEmptyHint => 'ابحث في المشروع النشط أعلاه';
+
+  @override
+  String get searchNoMatches => 'لا توجد نتائج';
+
+  @override
+  String get searchTruncated => 'تُعرض أول النتائج فقط (تم بلوغ الحد)';
+
+  @override
+  String searchReplaceCount(int count) {
+    return 'استبدال ($count)';
+  }
+
+  @override
+  String get searchUnsavedTitle => 'تغييرات غير محفوظة';
+
+  @override
+  String searchUnsavedBody(String names) {
+    return 'هذه التبويبات المفتوحة بها تعديلات غير محفوظة سيتجاوزها الاستبدال: $names. استبدال على أي حال؟';
+  }
+
+  @override
+  String get searchReplaceAnyway => 'استبدال على أي حال';
+
+  @override
+  String get searchNoMatchesReplace => 'لا توجد نتائج للاستبدال';
+
+  @override
+  String searchReplaced(int total, int files) {
+    return 'تم استبدال $total في $files ملفات. أعد فتح التبويبات المتأثرة للتحميل.';
+  }
+
+  @override
+  String searchReplaceFailed(String error) {
+    return 'فشل الاستبدال: $error';
+  }
+
+  @override
+  String searchNoMatchesIn(String name) {
+    return 'لا توجد نتائج في $name';
+  }
+
+  @override
+  String searchReplacedIn(int count, String name) {
+    return 'تم استبدال $count في $name. أعد فتح التبويب للتحميل.';
+  }
+
+  @override
+  String get editorFindInFile => 'بحث في الملف';
+
+  @override
+  String get editorFindHint => 'بحث';
+
+  @override
+  String get editorPrevMatch => 'النتيجة السابقة';
+
+  @override
+  String get editorNextMatch => 'النتيجة التالية';
+
+  @override
+  String get editorMatchCase => 'مطابقة حالة الأحرف';
+
+  @override
+  String get editorUseRegex => 'استخدام التعبيرات النمطية';
+
+  @override
+  String get editorCloseFind => 'إغلاق شريط البحث';
+
+  @override
+  String explorerStorageError(String error) {
+    return 'التخزين غير قابل للكتابة هنا: $error';
+  }
+
+  @override
+  String get explorerNewFileHint => 'مثال: main.py';
+
+  @override
+  String get explorerNoFolder => 'لم يتم اختيار مجلد';
+
+  @override
+  String get mdUndo => 'تراجع';
+
+  @override
+  String get mdRedo => 'إعادة';
+
+  @override
+  String get mdBold => 'عريض';
+
+  @override
+  String get mdItalic => 'مائل';
+
+  @override
+  String get mdUnderline => 'تحته خط';
+
+  @override
+  String get mdStrike => 'يتوسطه خط';
+
+  @override
+  String get mdInlineCode => 'كود مضمن';
+
+  @override
+  String get mdH1 => 'عنوان 1';
+
+  @override
+  String get mdH2 => 'عنوان 2';
+
+  @override
+  String get mdH3 => 'عنوان 3';
+
+  @override
+  String get mdBulleted => 'قائمة نقطية';
+
+  @override
+  String get mdNumbered => 'قائمة مرقمة';
+
+  @override
+  String get mdQuote => 'اقتباس';
+
+  @override
+  String get mdCodeBlock => 'كتلة كود';
+
+  @override
+  String get terminalMaxTabs => 'تم بلوغ الحد الأقصى (5 تبويبات طرفية)';
+
+  @override
+  String get paletteHint => 'اكتب أمرًا أو اسم ملف…';
+
+  @override
+  String get paletteNoMatches => 'لا توجد نتائج';
+
+  @override
+  String get paletteToggleRun => 'تبديل لوحة التشغيل';
+
+  @override
+  String get paletteToggleTerminal => 'تبديل الطرفية';
+
+  @override
+  String get paletteToggleGit => 'تبديل لوحة Git';
+
+  @override
+  String get paletteToggleProcesses => 'تبديل لوحة العمليات';
+
+  @override
+  String get paletteSwitchTheme => 'تبديل سمة المحرر';
+
+  @override
+  String get paletteSearchInProject => 'البحث في المشروع';
+
+  @override
+  String get paletteOpenSettings => 'فتح الإعدادات';
+
+  @override
+  String get paletteTitle => 'لوحة الأوامر';
+
+  @override
+  String get projectGeneral => 'عام';
+
+  @override
+  String get projectGeneralSub => 'بدون بيئة مفترضة — يُكتشف اللغة تلقائيًا';
+
+  @override
+  String runtimeInstalledOk(String name) {
+    return 'تم تثبيت $name بنجاح ✅';
+  }
+
+  @override
+  String runtimeInstallFailed(String name, String error) {
+    return 'فشل تثبيت $name: $error';
+  }
+
+  @override
+  String runtimeStartInstall(String name) {
+    return 'بدء تثبيت $name…';
+  }
+
+  @override
+  String runtimeStartInstallFailed(String error) {
+    return 'فشل بدء التثبيت: $error';
+  }
+
+  @override
+  String runtimeStartUpdate(String name) {
+    return 'بدء تحديث $name…';
+  }
+
+  @override
+  String runtimeStartUpdateFailed(String error) {
+    return 'فشل بدء التحديث: $error';
+  }
+
+  @override
+  String runtimeRemoving(String name) {
+    return 'إزالة $name…';
+  }
+
+  @override
+  String runtimeRemoveFailed(String error) {
+    return 'فشل الإزالة: $error';
+  }
+
+  @override
+  String get runtimeChooseVariant =>
+      'اختر نسخة نظام لينكس (تُحمَّل من الإنترنت لمرة واحدة):';
+
+  @override
+  String get runtimeVariantSlim => 'خفيفة ~70MB (موصى بها)';
+
+  @override
+  String get runtimeVariantSlimSub =>
+      'الأساسيات + apt — واللغات تُثبَّت عند الحاجة';
+
+  @override
+  String get runtimeVariantFull => 'كاملة ~283MB';
+
+  @override
+  String get runtimeVariantFullSub =>
+      'node وpython وphp وgit مثبتة مسبقًا — تعمل دون إنترنت';
+
+  @override
+  String get runtimeNoResults => 'لا نتائج مطابقة للبحث';
+
+  @override
+  String get runtimeSearchHint => 'بحث عن لغة أو أداة...';
+
+  @override
+  String get runtimeClear => 'مسح';
+
+  @override
+  String get runtimeUnsupported => 'غير مدعوم على هذا الجهاز';
+
+  @override
+  String runtimeInstalledSection(int count) {
+    return 'المثبتة ($count)';
+  }
+
+  @override
+  String runtimePacksSection(int count) {
+    return 'الحزم الجاهزة ($count)';
+  }
+
+  @override
+  String runtimeLanguagesSection(int count) {
+    return 'لغات البرمجة ($count)';
+  }
+
+  @override
+  String runtimeToolsSection(int count) {
+    return 'الأدوات ($count)';
+  }
+
+  @override
+  String runtimeWorking(String name) {
+    return 'جاري تنفيذ: $name';
+  }
+
+  @override
+  String runtimeLastOp(String name) {
+    return 'آخر عملية: $name';
+  }
+
+  @override
+  String get runtimeLogTitle => 'سجل العمليات';
+
+  @override
+  String runtimeLines(int count) {
+    return '$count سطر';
+  }
+
+  @override
+  String get runtimeDone => 'اكتمل';
+
+  @override
+  String get runtimeStatusUpdating => 'تحديث قوائم الحزم...';
+
+  @override
+  String get runtimeStatusInstalling => 'بدء التثبيت...';
+
+  @override
+  String get runtimeStatusReading => 'قراءة قوائم الحزم...';
+
+  @override
+  String get runtimeStatusDeps => 'بناء شجرة الاعتماديات...';
+
+  @override
+  String get runtimeStatusUnpacking => 'فك الحزم...';
+
+  @override
+  String get runtimeStatusSettingUp => 'إعداد الحزم...';
+
+  @override
+  String runtimeWorkingOn(String name) {
+    return 'جاري العمل على $name...';
+  }
+
+  @override
+  String get setupSlimTitle => 'خفيفة ~80MB (افتراضي)';
+
+  @override
+  String get setupSlimSub => 'الأساسيات + apt — واللغات تُثبَّت عند الحاجة';
+
+  @override
+  String get setupFullTitle => 'كاملة ~283MB (دون إنترنت)';
+
+  @override
+  String get setupFullSub => 'node وpython وphp وgit مثبتة مسبقًا';
+
+  @override
+  String get setupResumeNote =>
+      'إعادة المحاولة تعيد استخدام التنزيل المتحقق منه (استئناف).';
+
+  @override
+  String get webPreviewTitle => 'معاينة الويب';
+
+  @override
+  String get runtimeDescPhp => 'لغة الويب — Laravel وWordPress';
+
+  @override
+  String get runtimeDescNode => 'JavaScript وTypeScript — npm مدمجة';
+
+  @override
+  String get runtimeDescPython => 'سكربتات وبيانات — pip مدمجة';
+
+  @override
+  String get runtimeDescGo => 'لغة Go المترجمة — سريعة وخفيفة';
+
+  @override
+  String get runtimeDescRust => 'لغة Rust — أمان الذاكرة والأداء';
+
+  @override
+  String get runtimeDescRuby => 'لغة Ruby للسكربتات والويب';
+
+  @override
+  String get runtimeDescJava => 'Java 25 — منصة JVM كاملة';
+
+  @override
+  String get runtimeDescKotlin => 'Kotlin — تعمل على JVM (تحتاج Java)';
+
+  @override
+  String get runtimeDescDart => 'Dart — تطبيقات وأدوات سطر أوامر';
+
+  @override
+  String get runtimeDescC => 'لغة C وC++ — مترجم Clang السريع';
+
+  @override
+  String get runtimeDescGit => 'إدارة الإصدارات والمستودعات';
+
+  @override
+  String get runtimeDescComposer => 'مدير حزم PHP';
+
+  @override
+  String get runtimeDescNovaWeb =>
+      'PHP + Composer + Ruby + Node.js — تطوير الويب';
+
+  @override
+  String get runtimeDescNovaSystems =>
+      'Rust + Go + make + cmake — لغات الأنظمة';
+
+  @override
+  String get runtimeDescNovaJvm => 'Java 25 + Kotlin — منصة JVM';
+
+  @override
+  String get runtimeDescNovaPython => 'Python + pip — سكربتات وبيانات';
+
+  @override
+  String get runtimeDescNovaDart => 'Dart — أدوات سطر الأوامر';
 }

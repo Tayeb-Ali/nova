@@ -1,7 +1,8 @@
 import "package:flutter/material.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
-
+import "../../../l10n/generated/app_localizations.dart";
 import "../../core/services/search_service.dart";
+import "../../core/ui/empty_state.dart";
 import "../workspace/workspace_providers.dart";
 
 /// Preview of [hit.lineText] with the matched range swapped for
@@ -59,10 +60,11 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       SearchService(ref.read(projectServiceProvider));
 
   Future<void> _search() async {
+    final l10n = AppLocalizations.of(context);
     final project = ref.read(activeProjectProvider);
     if (project == null) {
       setState(() {
-        _error = "No project open";
+        _error = l10n.searchNoProject;
         _result = null;
       });
       return;
@@ -70,7 +72,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     final query = _queryController.text;
     if (query.isEmpty) {
       setState(() {
-        _error = "Type something to search for";
+        _error = l10n.searchTypeSomething;
         _result = null;
       });
       return;
@@ -90,14 +92,14 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     } on FormatException {
       if (!mounted) return;
       setState(() {
-        _error = "Invalid regular expression";
+        _error = l10n.searchInvalidRegex;
         _result = null;
         _searching = false;
       });
     } catch (e) {
       if (!mounted) return;
       setState(() {
-        _error = "Search failed: $e";
+        _error = l10n.searchFailed("$e");
         _result = null;
         _searching = false;
       });
@@ -129,23 +131,23 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   Future<bool> _confirmDirtyOverwrite(List<String> dirtyPaths) async {
     if (dirtyPaths.isEmpty) return true;
     if (!mounted) return false;
+    final l10n = AppLocalizations.of(context);
     final names = dirtyPaths.map(_baseName).join(", ");
     return await showDialog<bool>(
           context: context,
           builder: (context) => AlertDialog(
-            title: const Text("Unsaved changes"),
+            title: Text(l10n.searchUnsavedTitle),
             content: Text(
-              "These open tabs have unsaved edits that replace would "
-              "overwrite: $names. Replace anyway?",
+              l10n.searchUnsavedBody(names),
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(false),
-                child: const Text("Cancel"),
+                child: Text(l10n.actionCancel),
               ),
               FilledButton(
                 onPressed: () => Navigator.of(context).pop(true),
-                child: const Text("Replace anyway"),
+                child: Text(l10n.searchReplaceAnyway),
               ),
             ],
           ),
@@ -170,6 +172,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   }
 
   Future<void> _replaceAll() async {
+    final l10n = AppLocalizations.of(context);
     final project = ref.read(activeProjectProvider);
     final hits = _result?.hits;
     if (project == null || hits == null || hits.isEmpty) return;
@@ -193,22 +196,21 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       setState(() {
         _searching = false;
         _notice = outcome.totalReplacements == 0
-            ? "No matches to replace"
-            : "Replaced ${outcome.totalReplacements} in "
-                "${outcome.perFile.length} files. "
-                "Reopen affected tabs to reload.";
+            ? l10n.searchNoMatchesReplace
+            : l10n.searchReplaced(outcome.totalReplacements, outcome.perFile.length);
       });
       await _search();
     } catch (e) {
       if (!mounted) return;
       setState(() {
         _searching = false;
-        _error = "Replace failed: $e";
+        _error = l10n.searchReplaceFailed("$e");
       });
     }
   }
 
   Future<void> _replaceInFile(String path) async {
+    final l10n = AppLocalizations.of(context);
     final query = _queryController.text;
     if (query.isEmpty) return;
     if (!await _confirmDirtyOverwrite(_dirtyTabsIn({path}))) return;
@@ -223,14 +225,13 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       _invalidateParents([path]);
       setState(() {
         _notice = count == 0
-            ? "No matches in ${_baseName(path)}"
-            : "Replaced $count in ${_baseName(path)}. "
-                "Reopen the tab to reload.";
+            ? l10n.searchNoMatchesIn(_baseName(path))
+            : l10n.searchReplacedIn(count, _baseName(path));
       });
       await _search();
     } catch (e) {
       if (!mounted) return;
-      setState(() => _error = "Replace failed: $e");
+      setState(() => _error = l10n.searchReplaceFailed("$e"));
     }
   }
 
@@ -257,12 +258,19 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   }
 
   Widget _results() {
+    final l10n = AppLocalizations.of(context);
     final result = _result;
     if (result == null) {
-      return const Center(child: Text("Search the active project above"));
+      return EmptyState(
+        icon: Icons.search,
+        title: l10n.searchEmptyHint,
+      );
     }
     if (result.hits.isEmpty) {
-      return const Center(child: Text("No matches"));
+      return EmptyState(
+        icon: Icons.search_off_outlined,
+        title: l10n.searchNoMatches,
+      );
     }
     final replacement = _replaceController.text;
     final groups = <String, List<SearchHit>>{};
@@ -272,10 +280,10 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     return ListView(
       children: [
         if (result.truncated)
-          const ListTile(
+          ListTile(
             dense: true,
-            leading: Icon(Icons.warning_amber_outlined, size: 18),
-            title: Text("Showing the first matches only (limits reached)"),
+            leading: const Icon(Icons.warning_amber_outlined, size: 18),
+            title: Text(l10n.searchTruncated),
           ),
         for (final entry in groups.entries) ...[
           ListTile(
@@ -291,7 +299,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             ),
             trailing: TextButton(
               onPressed: () => _replaceInFile(entry.key),
-              child: Text("Replace (${entry.value.length})"),
+              child: Text(l10n.searchReplaceCount(entry.value.length)),
             ),
           ),
           for (final hit in entry.value)
@@ -319,11 +327,12 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final project = ref.watch(activeProjectProvider);
     final hits = _result?.hits.length ?? 0;
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Search in project"),
+        title: Text(l10n.searchTitle),
         bottom: project == null
             ? null
             : PreferredSize(
@@ -337,7 +346,12 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                 ),
               ),
       ),
-      body: Column(
+      body: Align(
+        // Tablet: keep the form readable on wide screens.
+        alignment: Alignment.topCenter,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 760),
+          child: Column(
         children: [
           Padding(
             padding: const EdgeInsets.all(12),
@@ -346,20 +360,20 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                 TextField(
                   controller: _queryController,
                   autofocus: true,
-                  decoration: const InputDecoration(
-                    hintText: "Search text or pattern…",
-                    border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.search),
+                  decoration: InputDecoration(
+                    hintText: l10n.searchHint,
+                    border: const OutlineInputBorder(),
+                    prefixIcon: const Icon(Icons.search),
                   ),
                   onSubmitted: (_) => _search(),
                 ),
                 const SizedBox(height: 8),
                 TextField(
                   controller: _replaceController,
-                  decoration: const InputDecoration(
-                    hintText: "Replace with…",
-                    border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.find_replace),
+                  decoration: InputDecoration(
+                    hintText: l10n.searchReplaceHint,
+                    border: const OutlineInputBorder(),
+                    prefixIcon: const Icon(Icons.find_replace),
                   ),
                   onChanged: (_) => setState(() {}),
                 ),
@@ -368,7 +382,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                   children: [
                     FilterChip(
                       label: const Text("Aa"),
-                      tooltip: "Match case",
+                      tooltip: l10n.searchMatchCase,
                       selected: _caseSensitive,
                       onSelected: (v) =>
                           setState(() => _caseSensitive = v),
@@ -376,7 +390,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                     const SizedBox(width: 8),
                     FilterChip(
                       label: const Text(".*"),
-                      tooltip: "Use regular expression",
+                      tooltip: l10n.searchUseRegex,
                       selected: _regex,
                       onSelected: (v) => setState(() => _regex = v),
                     ),
@@ -384,7 +398,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                     FilledButton.icon(
                       onPressed: _searching ? null : _search,
                       icon: const Icon(Icons.search, size: 18),
-                      label: Text(hits == 0 ? "Search" : "Search ($hits)"),
+                      label: Text(hits == 0 ? l10n.searchButton : l10n.searchButtonCount(hits)),
                     ),
                   ],
                 ),
@@ -395,7 +409,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                       onPressed:
                           (_searching || hits == 0) ? null : _replaceAll,
                       icon: const Icon(Icons.find_replace, size: 18),
-                      label: const Text("Replace all"),
+                      label: Text(l10n.searchReplaceAll),
                     ),
                   ),
                 if (_error != null)
@@ -418,6 +432,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           if (_searching) const LinearProgressIndicator(minHeight: 2),
           Expanded(child: _results()),
         ],
+      ),
+        ),
       ),
     );
   }

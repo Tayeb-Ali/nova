@@ -1,6 +1,8 @@
 import "package:fleather/fleather.dart";
 import "package:flutter/material.dart";
 
+import "../../../l10n/generated/app_localizations.dart";
+
 /// Compact mobile-first Markdown toolbar with fully explicit colors.
 ///
 /// Fleather's bundled toolbar resolves its button fills through inherited
@@ -43,7 +45,7 @@ class MarkdownToolbar extends StatelessWidget {
             return Row(
               children: [
                 _ToolButton(
-                  tooltip: "Undo",
+                  tooltip: AppLocalizations.of(context).mdUndo,
                   icon: Icons.undo,
                   onPressed: () {
                     controller.undo();
@@ -51,7 +53,7 @@ class MarkdownToolbar extends StatelessWidget {
                   },
                 ),
                 _ToolButton(
-                  tooltip: "Redo",
+                  tooltip: AppLocalizations.of(context).mdRedo,
                   icon: Icons.redo,
                   onPressed: () {
                     controller.redo();
@@ -60,58 +62,58 @@ class MarkdownToolbar extends StatelessWidget {
                 ),
                 const _ToolDivider(),
                 _ToolButton(
-                  tooltip: "Bold",
+                  tooltip: AppLocalizations.of(context).mdBold,
                   icon: Icons.format_bold,
                   toggled: on(ParchmentAttribute.bold),
                   onPressed: () => _apply(ParchmentAttribute.bold),
                 ),
                 _ToolButton(
-                  tooltip: "Italic",
+                  tooltip: AppLocalizations.of(context).mdItalic,
                   icon: Icons.format_italic,
                   toggled: on(ParchmentAttribute.italic),
                   onPressed: () => _apply(ParchmentAttribute.italic),
                 ),
                 _ToolButton(
-                  tooltip: "Underline",
+                  tooltip: AppLocalizations.of(context).mdUnderline,
                   icon: Icons.format_underline,
                   toggled: on(ParchmentAttribute.underline),
                   onPressed: () => _apply(ParchmentAttribute.underline),
                 ),
                 _ToolButton(
-                  tooltip: "Strikethrough",
+                  tooltip: AppLocalizations.of(context).mdStrike,
                   icon: Icons.format_strikethrough,
                   toggled: on(ParchmentAttribute.strikethrough),
                   onPressed: () =>
                       _apply(ParchmentAttribute.strikethrough),
                 ),
                 _ToolButton(
-                  tooltip: "Inline code",
+                  tooltip: AppLocalizations.of(context).mdInlineCode,
                   icon: Icons.code,
                   toggled: on(ParchmentAttribute.inlineCode),
                   onPressed: () => _apply(ParchmentAttribute.inlineCode),
                 ),
                 const _ToolDivider(),
                 _ToolButton(
-                  tooltip: "Heading 1",
+                  tooltip: AppLocalizations.of(context).mdH1,
                   label: "H1",
                   toggled: on(ParchmentAttribute.h1),
                   onPressed: () => _apply(ParchmentAttribute.h1),
                 ),
                 _ToolButton(
-                  tooltip: "Heading 2",
+                  tooltip: AppLocalizations.of(context).mdH2,
                   label: "H2",
                   toggled: on(ParchmentAttribute.h2),
                   onPressed: () => _apply(ParchmentAttribute.h2),
                 ),
                 _ToolButton(
-                  tooltip: "Heading 3",
+                  tooltip: AppLocalizations.of(context).mdH3,
                   label: "H3",
                   toggled: on(ParchmentAttribute.h3),
                   onPressed: () => _apply(ParchmentAttribute.h3),
                 ),
                 const _ToolDivider(),
                 _ToolButton(
-                  tooltip: "Bulleted list",
+                  tooltip: AppLocalizations.of(context).mdBulleted,
                   icon: Icons.format_list_bulleted,
                   toggled:
                       on(ParchmentAttribute.block.bulletList),
@@ -119,7 +121,7 @@ class MarkdownToolbar extends StatelessWidget {
                       _apply(ParchmentAttribute.block.bulletList),
                 ),
                 _ToolButton(
-                  tooltip: "Numbered list",
+                  tooltip: AppLocalizations.of(context).mdNumbered,
                   icon: Icons.format_list_numbered,
                   toggled:
                       on(ParchmentAttribute.block.numberList),
@@ -127,14 +129,14 @@ class MarkdownToolbar extends StatelessWidget {
                       _apply(ParchmentAttribute.block.numberList),
                 ),
                 _ToolButton(
-                  tooltip: "Quote",
+                  tooltip: AppLocalizations.of(context).mdQuote,
                   icon: Icons.format_quote,
                   toggled: on(ParchmentAttribute.block.quote),
                   onPressed: () =>
                       _apply(ParchmentAttribute.block.quote),
                 ),
                 _ToolButton(
-                  tooltip: "Code block",
+                  tooltip: AppLocalizations.of(context).mdCodeBlock,
                   icon: Icons.code_off,
                   toggled: on(ParchmentAttribute.block.code),
                   onPressed: () =>

@@ -9,6 +9,7 @@ import '../../core/bridge/generated/ide_api.g.dart' as bridge;
 import '../../core/models/runtime.dart';
 import '../../core/services/runtime_service.dart';
 import '../../core/services/setup_service.dart';
+import '../../core/ui/empty_state.dart';
 
 /// Runtime manager: bootstrap status + install/update/remove runtimes
 /// (task.md §29).
@@ -142,6 +143,7 @@ class _RuntimeScreenState extends State<RuntimeScreen> {
   }
 
   void _parseProgress(String line) {
+    final l10n = AppLocalizations.of(context);
     // Parse apt output for percentage like "12%" or "[12%]" and download rate like "1.2 MB/s"
     final RegExp percentReg = RegExp(r'(\d{1,3})\s*%');
     final RegExp rateReg = RegExp(
@@ -175,20 +177,20 @@ class _RuntimeScreenState extends State<RuntimeScreen> {
     // Heuristic: lines containing "apt update" or "apt install" set status
     final String lower = line.toLowerCase();
     if (lower.contains('apt update')) {
-      _runtimeStatus = 'تحديث قوائم الحزم...';
+      _runtimeStatus = l10n.runtimeStatusUpdating;
       _runtimeFraction = 0.1;
     } else if (lower.contains('apt install')) {
-      _runtimeStatus = 'بدء التثبيت...';
+      _runtimeStatus = l10n.runtimeStatusInstalling;
       _runtimeFraction ??= 0.2;
     } else if (lower.contains('reading package lists')) {
-      _runtimeStatus = 'قراءة قوائم الحزم...';
+      _runtimeStatus = l10n.runtimeStatusReading;
     } else if (lower.contains('building dependency tree')) {
-      _runtimeStatus = 'بناء شجرة الاعتماديات...';
+      _runtimeStatus = l10n.runtimeStatusDeps;
     } else if (lower.contains('unpacking')) {
-      _runtimeStatus = 'فك الحزم...';
+      _runtimeStatus = l10n.runtimeStatusUnpacking;
       _runtimeFraction = 0.7;
     } else if (lower.contains('setting up')) {
-      _runtimeStatus = 'إعداد الحزم...';
+      _runtimeStatus = l10n.runtimeStatusSettingUp;
       _runtimeFraction = 0.9;
     } else if (lower.contains('fetched') || lower.contains('get:')) {
       _runtimeStatus = line.length > 60 ? line.substring(0, 60) : line;
@@ -197,13 +199,14 @@ class _RuntimeScreenState extends State<RuntimeScreen> {
 
   void _finishRuntime(String? id, String? error) {
     if (!mounted) return;
+    final l10n = AppLocalizations.of(context);
     final String displayName = id != null ? _nameForId(id) : _activeName;
     setState(() {
       _activeId = null;
       _runtimeError = error;
       if (error == null) {
         _runtimeFraction = 1.0;
-        _runtimeStatus = 'اكتمل';
+        _runtimeStatus = l10n.runtimeDone;
       }
     });
     _refreshRuntimes();
@@ -212,7 +215,7 @@ class _RuntimeScreenState extends State<RuntimeScreen> {
     if (error == null) {
       messenger.showSnackBar(
         SnackBar(
-          content: Text('تم تثبيت $displayName بنجاح ✅'),
+          content: Text(l10n.runtimeInstalledOk(displayName)),
           backgroundColor: Theme.of(context).colorScheme.inverseSurface,
           behavior: SnackBarBehavior.floating,
           duration: const Duration(seconds: 3),
@@ -221,12 +224,12 @@ class _RuntimeScreenState extends State<RuntimeScreen> {
     } else {
       messenger.showSnackBar(
         SnackBar(
-          content: Text('فشل تثبيت $displayName: $error'),
+          content: Text(l10n.runtimeInstallFailed(displayName, error)),
           backgroundColor: Theme.of(context).colorScheme.error,
           behavior: SnackBarBehavior.floating,
           duration: const Duration(seconds: 4),
           action: SnackBarAction(
-            label: AppLocalizations.of(context).actionRetry,
+            label: l10n.actionRetry,
             onPressed: () => _install(id ?? ''),
           ),
         ),
@@ -334,18 +337,19 @@ class _RuntimeScreenState extends State<RuntimeScreen> {
   }
 
   Future<void> _install(String id) async {
+    final l10n = AppLocalizations.of(context);
     setState(() {
       _activeId = id;
       _progressLog.clear();
       _runtimeError = null;
       _runtimeFraction = 0.05;
-      _runtimeStatus = 'بدء تثبيت ${_nameForId(id)}...';
+      _runtimeStatus = l10n.runtimeStartInstall(_nameForId(id));
       _downloadRate = null;
     });
     // Immediate feedback: SnackBar that work started
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('بدء تثبيت ${_nameForId(id)}...'),
+        content: Text(l10n.runtimeStartInstall(_nameForId(id))),
         duration: const Duration(seconds: 2),
         behavior: SnackBarBehavior.floating,
       ),
@@ -361,7 +365,7 @@ class _RuntimeScreenState extends State<RuntimeScreen> {
       });
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('فشل بدء التثبيت: $e'),
+          content: Text(l10n.runtimeStartInstallFailed('$e')),
           backgroundColor: Theme.of(context).colorScheme.error,
           behavior: SnackBarBehavior.floating,
         ),
@@ -370,17 +374,18 @@ class _RuntimeScreenState extends State<RuntimeScreen> {
   }
 
   Future<void> _update(String id) async {
+    final l10n = AppLocalizations.of(context);
     setState(() {
       _activeId = id;
       _progressLog.clear();
       _runtimeError = null;
       _runtimeFraction = 0.05;
-      _runtimeStatus = 'بدء تحديث ${_nameForId(id)}...';
+      _runtimeStatus = l10n.runtimeStartUpdate(_nameForId(id));
       _downloadRate = null;
     });
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('بدء تحديث ${_nameForId(id)}...'),
+        content: Text(l10n.runtimeStartUpdate(_nameForId(id))),
         behavior: SnackBarBehavior.floating,
       ),
     );
@@ -395,7 +400,7 @@ class _RuntimeScreenState extends State<RuntimeScreen> {
       });
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('فشل بدء التحديث: $e'),
+          content: Text(l10n.runtimeStartUpdateFailed('$e')),
           backgroundColor: Theme.of(context).colorScheme.error,
           behavior: SnackBarBehavior.floating,
         ),
@@ -436,18 +441,19 @@ class _RuntimeScreenState extends State<RuntimeScreen> {
     );
     if (ok != true) return;
     if (!mounted) return;
+    final l10n = AppLocalizations.of(context);
     setState(() {
       _activeId = runtime.id;
       _progressLog.clear();
       _runtimeError = null;
       _runtimeFraction = 0.1;
-      _runtimeStatus = 'إزالة ${runtime.displayName}...';
+      _runtimeStatus = l10n.runtimeRemoving(runtime.displayName);
       _downloadRate = null;
     });
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('إزالة ${runtime.displayName}...'),
+        content: Text(l10n.runtimeRemoving(runtime.displayName)),
         behavior: SnackBarBehavior.floating,
       ),
     );
@@ -462,7 +468,7 @@ class _RuntimeScreenState extends State<RuntimeScreen> {
       });
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('فشل الإزالة: $e'),
+          content: Text(l10n.runtimeRemoveFailed('$e')),
           backgroundColor: Theme.of(context).colorScheme.error,
           behavior: SnackBarBehavior.floating,
         ),
@@ -483,26 +489,33 @@ class _RuntimeScreenState extends State<RuntimeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text(AppLocalizations.of(context).runtimeTitle)),
-      body: RefreshIndicator(
-        onRefresh: _refreshAll,
-        child: ListView(
-          padding: const EdgeInsets.all(8),
-          children: [
-            _buildSetupCard(),
-            const SizedBox(height: 8),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 4),
-              child: Text(
-                AppLocalizations.of(context).runtimeTitle,
-                style: Theme.of(context).textTheme.titleSmall
-                    ?.copyWith(fontWeight: FontWeight.bold),
-              ),
+      // Tablet (rail ≥700px): keep the column readable on wide screens.
+      body: Align(
+        alignment: Alignment.topCenter,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 760),
+          child: RefreshIndicator(
+            onRefresh: _refreshAll,
+            child: ListView(
+              padding: const EdgeInsets.all(8),
+              children: [
+                _buildSetupCard(),
+                const SizedBox(height: 8),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  child: Text(
+                    AppLocalizations.of(context).runtimeTitle,
+                    style: Theme.of(context).textTheme.titleSmall
+                        ?.copyWith(fontWeight: FontWeight.bold),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                _buildRuntimes(),
+                const SizedBox(height: 8),
+                _buildProgressSection(),
+              ],
             ),
-            const SizedBox(height: 8),
-            _buildRuntimes(),
-            const SizedBox(height: 8),
-            _buildProgressSection(),
-          ],
+          ),
         ),
       ),
     );
@@ -581,7 +594,7 @@ class _RuntimeScreenState extends State<RuntimeScreen> {
             if (!ready && !_setupRunning) ...[
               const SizedBox(height: 8),
               Text(
-                'اختر نسخة نظام لينكس (تُحمَّل من الإنترنت لمرة واحدة):',
+                AppLocalizations.of(context).runtimeChooseVariant,
                 style: Theme.of(context).textTheme.bodySmall,
               ),
               RadioGroup<String>(
@@ -593,15 +606,15 @@ class _RuntimeScreenState extends State<RuntimeScreen> {
                       value: AppConfig.bootstrapVariantSlim,
                       dense: true,
                       contentPadding: EdgeInsets.zero,
-                      title: const Text('خفيفة ~70MB (موصى بها)'),
-                      subtitle: const Text('الأساسيات + apt — واللغات تُثبَّت عند الحاجة'),
+                      title: Text(AppLocalizations.of(context).runtimeVariantSlim),
+                      subtitle: Text(AppLocalizations.of(context).runtimeVariantSlimSub),
                     ),
                     RadioListTile<String>(
                       value: AppConfig.bootstrapVariantFull,
                       dense: true,
                       contentPadding: EdgeInsets.zero,
-                      title: const Text('كاملة ~283MB'),
-                      subtitle: const Text('node وpython وphp وgit مثبتة مسبقًا — تعمل دون إنترنت'),
+                      title: Text(AppLocalizations.of(context).runtimeVariantFull),
+                      subtitle: Text(AppLocalizations.of(context).runtimeVariantFullSub),
                     ),
                   ],
                 ),
@@ -643,7 +656,10 @@ class _RuntimeScreenState extends State<RuntimeScreen> {
       );
     }
     if (_runtimes.isEmpty) {
-      return Text(AppLocalizations.of(context).runtimeEmpty);
+      return EmptyState(
+        icon: Icons.widgets_outlined,
+        title: AppLocalizations.of(context).runtimeEmpty,
+      );
     }
     final query = _runtimeQuery.trim().toLowerCase();
     List<RuntimeInfo> filtered = _runtimes;
@@ -654,7 +670,10 @@ class _RuntimeScreenState extends State<RuntimeScreen> {
       }).toList();
     }
     if (filtered.isEmpty) {
-      return const Text('لا نتائج مطابقة للبحث');
+      return EmptyState(
+        icon: Icons.search_off_outlined,
+        title: AppLocalizations.of(context).searchEmpty,
+      );
     }
     final installed = filtered.where((r) => r.installed).toList();
     final packs = filtered.where((r) => r.isPack).toList();
@@ -674,12 +693,12 @@ class _RuntimeScreenState extends State<RuntimeScreen> {
           controller: _searchController,
           onChanged: (v) => setState(() => _runtimeQuery = v),
           decoration: InputDecoration(
-            hintText: 'بحث عن لغة أو أداة...',
+            hintText: AppLocalizations.of(context).runtimeSearchHint,
             prefixIcon: const Icon(Icons.search),
             suffixIcon: _runtimeQuery.isEmpty
                 ? null
                 : IconButton(
-                    tooltip: 'مسح',
+                    tooltip: AppLocalizations.of(context).runtimeClear,
                     icon: const Icon(Icons.clear),
                     onPressed: () {
                       _searchController.clear();
@@ -696,22 +715,22 @@ class _RuntimeScreenState extends State<RuntimeScreen> {
         const SizedBox(height: 8),
         if (installedNonPacks.isNotEmpty) ...[
           _buildSectionHeader(
-              'المثبتة (${installedNonPacks.length})', Icons.check_circle_outline),
+              AppLocalizations.of(context).runtimeInstalledSection(installedNonPacks.length), Icons.check_circle_outline),
           for (final r in installedNonPacks) _buildRuntimeTile(r),
         ],
         if (packs.isNotEmpty) ...[
           _buildSectionHeader(
-              'الحزم الجاهزة (${packs.length})', Icons.widgets_outlined),
+              AppLocalizations.of(context).runtimePacksSection(packs.length), Icons.widgets_outlined),
           for (final r in packs) _buildRuntimeTile(r),
         ],
         if (availableLanguages.isNotEmpty) ...[
           _buildSectionHeader(
-              'لغات البرمجة (${availableLanguages.length})', Icons.code),
+              AppLocalizations.of(context).runtimeLanguagesSection(availableLanguages.length), Icons.code),
           for (final r in availableLanguages) _buildRuntimeTile(r),
         ],
         if (availableTools.isNotEmpty) ...[
           _buildSectionHeader(
-              'الأدوات (${availableTools.length})', Icons.build_outlined),
+              AppLocalizations.of(context).runtimeToolsSection(availableTools.length), Icons.build_outlined),
           for (final r in availableTools) _buildRuntimeTile(r),
         ],
       ],
@@ -778,9 +797,9 @@ class _RuntimeScreenState extends State<RuntimeScreen> {
                         style: Theme.of(context).textTheme.titleSmall
                             ?.copyWith(fontWeight: FontWeight.bold),
                       ),
-                      if (runtime.displayDescription.isNotEmpty)
+                      if (runtime.localizedDescription(AppLocalizations.of(context)).isNotEmpty)
                         Text(
-                          runtime.displayDescription,
+                          runtime.localizedDescription(AppLocalizations.of(context)),
                           style:
                               Theme.of(context).textTheme.bodySmall?.copyWith(
                             color: scheme.onSurfaceVariant,
@@ -804,7 +823,7 @@ class _RuntimeScreenState extends State<RuntimeScreen> {
                 else if (!runtime.isSupported)
                   Chip(
                     avatar: const Icon(Icons.smartphone_outlined, size: 16),
-                    label: const Text('غير مدعوم على هذا الجهاز'),
+                    label: Text(AppLocalizations.of(context).runtimeUnsupported),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(4),
                     ),
@@ -848,7 +867,7 @@ class _RuntimeScreenState extends State<RuntimeScreen> {
                   Expanded(
                     child: Text(
                       _runtimeStatus ??
-                          'جاري العمل على ${runtime.displayName}...',
+                          AppLocalizations.of(context).runtimeWorkingOn(runtime.displayName),
                       style: Theme.of(context).textTheme.bodySmall,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -974,10 +993,10 @@ class _RuntimeScreenState extends State<RuntimeScreen> {
                 Expanded(
                   child: Text(
                     hasActive
-                        ? 'جاري تنفيذ: $_activeName'
+                        ? AppLocalizations.of(context).runtimeWorking(_activeName)
                         : hasError
-                        ? 'آخر عملية: $_activeName'
-                        : 'سجل العمليات',
+                        ? AppLocalizations.of(context).runtimeLastOp(_activeName)
+                        : AppLocalizations.of(context).runtimeLogTitle,
                     style: Theme.of(context).textTheme.titleSmall
                         ?.copyWith(fontWeight: FontWeight.bold),
                   ),
@@ -1074,7 +1093,7 @@ class _RuntimeScreenState extends State<RuntimeScreen> {
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        'خطأ: $_runtimeError',
+                        AppLocalizations.of(context).commonError('$_runtimeError'),
                         style: TextStyle(
                           color: Theme.of(context).colorScheme.onErrorContainer,
                           fontSize: 13,
@@ -1153,7 +1172,7 @@ class _RuntimeScreenState extends State<RuntimeScreen> {
               Row(
                 children: [
                   Text(
-                    '${_progressLog.length} سطر',
+                    AppLocalizations.of(context).runtimeLines(_progressLog.length),
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       color: Theme.of(context).colorScheme.outline,
                     ),
@@ -1162,7 +1181,7 @@ class _RuntimeScreenState extends State<RuntimeScreen> {
                   TextButton.icon(
                     onPressed: () => setState(() => _progressLog.clear()),
                     icon: const Icon(Icons.clear_all, size: 14),
-                    label: const Text('مسح', style: TextStyle(fontSize: 12)),
+                    label: Text(AppLocalizations.of(context).runtimeClear, style: TextStyle(fontSize: 12)),
                     style: TextButton.styleFrom(
                       padding: const EdgeInsets.symmetric(horizontal: 8),
                     ),

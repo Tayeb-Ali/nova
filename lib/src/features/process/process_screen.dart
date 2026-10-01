@@ -5,6 +5,7 @@ import 'package:nova/l10n/generated/app_localizations.dart';
 
 import '../../core/models/process_info.dart';
 import '../../core/services/process_service.dart';
+import '../../core/ui/empty_state.dart';
 
 /// Process manager: running tasks list + kill + ad-hoc run (task.md §21).
 class ProcessScreen extends StatefulWidget {
@@ -197,11 +198,9 @@ class _ProcessScreenState extends State<ProcessScreen> {
       return const Center(child: CircularProgressIndicator());
     }
     if (_processes.isEmpty) {
-      return Center(
-        child: Text(
-          AppLocalizations.of(context).processEmpty,
-          textAlign: TextAlign.center,
-        ),
+      return EmptyState(
+        icon: Icons.play_circle_outline,
+        title: AppLocalizations.of(context).processEmpty,
       );
     }
     return ListView.builder(

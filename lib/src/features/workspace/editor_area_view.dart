@@ -6,6 +6,7 @@ import "package:nova/l10n/generated/app_localizations.dart";
 import "package:path/path.dart" as p;
 
 import "../../core/settings_store.dart";
+import "../../core/ui/empty_state.dart";
 import "../editor/editor_engine.dart";
 import "../editor/re_editor_adapter.dart";
 import "../markdown/markdown_editor_view.dart";
@@ -21,19 +22,9 @@ class EditorAreaView extends ConsumerWidget {
     final active = ref.watch(activeEditorTabModelProvider);
     final scheme = Theme.of(context).colorScheme;
     if (tabs.isEmpty || active == null) {
-      return Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.description_outlined, size: 28, color: scheme.outline),
-            const SizedBox(height: 8),
-            Text(
-              AppLocalizations.of(context).editorEmptyHint,
-              style: Theme.of(context).textTheme.bodyMedium
-                  ?.copyWith(color: scheme.onSurfaceVariant),
-            ),
-          ],
-        ),
+      return EmptyState(
+        icon: Icons.description_outlined,
+        title: AppLocalizations.of(context).editorEmptyHint,
       );
     }
     return Column(

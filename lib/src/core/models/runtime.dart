@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../l10n/generated/app_localizations.dart';
 import '../bridge/generated/ide_api.g.dart' as bridge;
 
 /// Runtime kinds supported by the embedded environment (task.md §4).
@@ -134,6 +135,37 @@ enum RuntimeType {
         return '';
     }
   }
+
+  String localizedDescription(AppLocalizations l10n) {
+    switch (this) {
+      case RuntimeType.php:
+        return l10n.runtimeDescPhp;
+      case RuntimeType.node:
+        return l10n.runtimeDescNode;
+      case RuntimeType.python:
+        return l10n.runtimeDescPython;
+      case RuntimeType.go:
+        return l10n.runtimeDescGo;
+      case RuntimeType.rust:
+        return l10n.runtimeDescRust;
+      case RuntimeType.ruby:
+        return l10n.runtimeDescRuby;
+      case RuntimeType.java:
+        return l10n.runtimeDescJava;
+      case RuntimeType.kotlin:
+        return l10n.runtimeDescKotlin;
+      case RuntimeType.dart:
+        return l10n.runtimeDescDart;
+      case RuntimeType.c:
+        return l10n.runtimeDescC;
+      case RuntimeType.git:
+        return l10n.runtimeDescGit;
+      case RuntimeType.composer:
+        return l10n.runtimeDescComposer;
+      case RuntimeType.other:
+        return '';
+    }
+  }
 }
 
 class RuntimeInfo {
@@ -198,6 +230,24 @@ class RuntimeInfo {
         return 'Python + pip — سكربتات وبيانات';
       case 'nova-dart':
         return 'Dart — أدوات سطر الأوامر';
+      default:
+        return '';
+    }
+  }
+
+  String localizedDescription(AppLocalizations l10n) {
+    if (!isPack) return type.localizedDescription(l10n);
+    switch (id) {
+      case 'nova-web':
+        return l10n.runtimeDescNovaWeb;
+      case 'nova-systems':
+        return l10n.runtimeDescNovaSystems;
+      case 'nova-jvm':
+        return l10n.runtimeDescNovaJvm;
+      case 'nova-python':
+        return l10n.runtimeDescNovaPython;
+      case 'nova-dart':
+        return l10n.runtimeDescNovaDart;
       default:
         return '';
     }

@@ -415,7 +415,7 @@ class _WorkspaceScreenState extends ConsumerState<WorkspaceScreen> {
                     onOpenTool: (i) =>
                         setState(() => _toolIndex = _toolIndex == i ? -1 : i),
                   ),
-                  tooltip: "Command palette",
+                  tooltip: AppLocalizations.of(context).paletteTitle,
                   icon: const Icon(Icons.search),
                 ),
                 IconButton(

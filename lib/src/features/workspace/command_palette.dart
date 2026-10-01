@@ -1,7 +1,9 @@
 import "package:flutter/material.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 
+import "../../../l10n/generated/app_localizations.dart";
 import "../../core/models/project.dart";
+import "../../core/ui/empty_state.dart";
 import "../editor/theme/theme_pack_store.dart";
 import "../search/search_screen.dart";
 import "workspace_providers.dart";
@@ -141,48 +143,49 @@ class _CommandPaletteDialogState
   }
 
   List<_PaletteEntry> _commands() {
+    final l10n = AppLocalizations.of(context);
     final entries = <_PaletteEntry>[];
     final onOpenTool = widget.onOpenTool;
     if (onOpenTool != null) {
-      entries.addAll(const [
+      entries.addAll([
         _PaletteEntry(
           kind: _EntryKind.command,
-          title: "Toggle Run panel",
+          title: l10n.paletteToggleRun,
           icon: Icons.play_arrow,
           toolIndex: 0,
         ),
         _PaletteEntry(
           kind: _EntryKind.command,
-          title: "Toggle Terminal",
+          title: l10n.paletteToggleTerminal,
           icon: Icons.terminal,
           toolIndex: 1,
         ),
         _PaletteEntry(
           kind: _EntryKind.command,
-          title: "Toggle Git panel",
+          title: l10n.paletteToggleGit,
           icon: Icons.account_tree,
           toolIndex: 2,
         ),
         _PaletteEntry(
           kind: _EntryKind.command,
-          title: "Toggle Processes panel",
+          title: l10n.paletteToggleProcesses,
           icon: Icons.settings_input_component_outlined,
           toolIndex: 3,
         ),
       ]);
     }
     entries.add(
-      const _PaletteEntry(
+      _PaletteEntry(
         kind: _EntryKind.command,
-        title: "Switch editor theme",
+        title: l10n.paletteSwitchTheme,
         icon: Icons.palette_outlined,
         commandId: "cycle-theme",
       ),
     );
     entries.add(
-      const _PaletteEntry(
+      _PaletteEntry(
         kind: _EntryKind.command,
-        title: "Search in project",
+        title: l10n.paletteSearchInProject,
         icon: Icons.find_in_page,
         commandId: "search-in-project",
       ),
@@ -190,9 +193,9 @@ class _CommandPaletteDialogState
     final onGoToTab = widget.onGoToTab;
     if (onGoToTab != null) {
       entries.add(
-        const _PaletteEntry(
+        _PaletteEntry(
           kind: _EntryKind.command,
-          title: "Open settings",
+          title: l10n.paletteOpenSettings,
           icon: Icons.settings_outlined,
           commandId: "open-settings",
         ),
@@ -290,7 +293,7 @@ class _CommandPaletteDialogState
                 controller: _controller,
                 autofocus: true,
                 decoration: InputDecoration(
-                  hintText: "Type a command or file name…",
+                  hintText: AppLocalizations.of(context).paletteHint,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(4),
                   ),
@@ -304,7 +307,12 @@ class _CommandPaletteDialogState
               if (_loadingFiles) const LinearProgressIndicator(minHeight: 2),
               Flexible(
                 child: results.isEmpty && !_loadingFiles
-                    ? const Center(child: Text("No matches"))
+                    ? EmptyState(
+                        icon: Icons.search_off_outlined,
+                        title: AppLocalizations.of(
+                          context,
+                        ).paletteNoMatches,
+                      )
                     : ListView.builder(
                         shrinkWrap: true,
                         itemCount: results.length,

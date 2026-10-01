@@ -5,6 +5,7 @@ import "package:path/path.dart" as p;
 
 import "../../core/models/project.dart";
 import "../../core/ui/text_prompt_dialog.dart";
+import "../../core/ui/empty_state.dart";
 import "workspace_providers.dart";
 
 /// File explorer for the active project, walking ProjectService.listFiles
@@ -40,7 +41,7 @@ class _FileExplorerViewState extends ConsumerState<FileExplorerView> {
     final name = await showTextPromptDialog(
       context: context,
       title: l10n.explorerNewFile,
-      hintText: "e.g. main.py",
+      hintText: l10n.explorerNewFileHint,
       confirmLabel: l10n.actionCreate,
       cancelLabel: l10n.actionCancel,
       borderRadius: const BorderRadius.all(Radius.circular(12)),
@@ -261,13 +262,9 @@ class _FileExplorerViewState extends ConsumerState<FileExplorerView> {
       ),
       data: (entries) {
         if (entries.isEmpty) {
-          return Center(
-            child: Text(
-              AppLocalizations.of(context).explorerEmptyFolder,
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
-            ),
+          return EmptyState(
+            icon: Icons.folder_open_outlined,
+            title: AppLocalizations.of(context).explorerEmptyFolder,
           );
         }
         return ListView.builder(

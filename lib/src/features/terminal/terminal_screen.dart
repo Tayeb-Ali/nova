@@ -119,7 +119,9 @@ class _TerminalScreenState extends State<TerminalScreen> {
   void _addTab() {
     if (_tabs.length >= _maxTabs) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Maximum of 5 terminal tabs reached')),
+        SnackBar(
+          content: Text(AppLocalizations.of(context).terminalMaxTabs),
+        ),
       );
       return;
     }

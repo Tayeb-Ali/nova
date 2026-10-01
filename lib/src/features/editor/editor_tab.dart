@@ -7,6 +7,7 @@ import "package:re_editor/re_editor.dart";
 
 import "../editor/editor_engine.dart";
 import "../files/files_providers.dart";
+import "../../../l10n/generated/app_localizations.dart";
 import "re_editor_adapter.dart";
 
 /// Shows one open file: loads it, edits it, saves it.
@@ -92,13 +93,14 @@ class _EditorTabState extends ConsumerState<EditorTab> {
   }
 
   Future<void> _save() async {
+    final l10n = AppLocalizations.of(context);
     final service = ref.read(fileServiceProvider);
     try {
       await service.writeFile(File(widget.tab.path), _currentText);
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Save failed: $e")),
+          SnackBar(content: Text(l10n.editorSaveFailed('$e'))),
         );
       }
       return;
@@ -107,7 +109,7 @@ class _EditorTabState extends ConsumerState<EditorTab> {
     ref.read(openTabsProvider.notifier).markDirty(widget.tab.id, false);
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Saved ${p.basename(widget.tab.path)}")),
+        SnackBar(content: Text(l10n.editorSaved(p.basename(widget.tab.path)))),
       );
     }
   }
@@ -122,7 +124,9 @@ class _EditorTabState extends ConsumerState<EditorTab> {
         }
         if (snapshot.hasError) {
           return Center(
-            child: Text("Could not open file: ${snapshot.error}"),
+            child: Text(
+              AppLocalizations.of(context).editorOpenFailed('${snapshot.error}'),
+            ),
           );
         }
         final initialText = snapshot.data ?? "";
@@ -147,13 +151,15 @@ class _EditorTabState extends ConsumerState<EditorTab> {
                     ),
                   IconButton(
                     onPressed: _loaded ? _toggleFind : null,
-                    tooltip: "Find in file",
+                    tooltip: AppLocalizations.of(
+                      context,
+                    ).editorFindInFile,
                     icon: const Icon(Icons.search, size: 18),
                   ),
                   TextButton.icon(
                     onPressed: _loaded ? _save : null,
                     icon: const Icon(Icons.save, size: 18),
-                    label: const Text("Save"),
+                    label: Text(AppLocalizations.of(context).actionSave),
                   ),
                 ],
               ),
@@ -217,11 +223,13 @@ class _InFileFindBar extends StatelessWidget {
                 child: TextField(
                   controller: controller.findInputController,
                   autofocus: true,
-                  decoration: const InputDecoration(
-                    hintText: "Find",
+                  decoration: InputDecoration(
+                    hintText: AppLocalizations.of(
+                      context,
+                    ).editorFindHint,
                     isDense: true,
-                    border: OutlineInputBorder(),
-                    contentPadding: EdgeInsets.symmetric(
+                    border: const OutlineInputBorder(),
+                    contentPadding: const EdgeInsets.symmetric(
                       horizontal: 8,
                       vertical: 6,
                     ),
@@ -233,19 +241,19 @@ class _InFileFindBar extends StatelessWidget {
               Text(countLabel, style: Theme.of(context).textTheme.bodySmall),
               IconButton(
                 visualDensity: VisualDensity.compact,
-                tooltip: "Previous match",
+                tooltip: AppLocalizations.of(context).editorPrevMatch,
                 icon: const Icon(Icons.keyboard_arrow_up, size: 18),
                 onPressed: result == null ? null : controller.previousMatch,
               ),
               IconButton(
                 visualDensity: VisualDensity.compact,
-                tooltip: "Next match",
+                tooltip: AppLocalizations.of(context).editorNextMatch,
                 icon: const Icon(Icons.keyboard_arrow_down, size: 18),
                 onPressed: result == null ? null : controller.nextMatch,
               ),
               IconButton(
                 visualDensity: VisualDensity.compact,
-                tooltip: "Match case",
+                tooltip: AppLocalizations.of(context).editorMatchCase,
                 isSelected: option?.caseSensitive ?? false,
                 selectedIcon: Icon(
                   Icons.abc,
@@ -257,7 +265,7 @@ class _InFileFindBar extends StatelessWidget {
               ),
               IconButton(
                 visualDensity: VisualDensity.compact,
-                tooltip: "Use regular expression",
+                tooltip: AppLocalizations.of(context).editorUseRegex,
                 isSelected: option?.regex ?? false,
                 selectedIcon: Icon(
                   Icons.star,
@@ -272,7 +280,7 @@ class _InFileFindBar extends StatelessWidget {
               ),
               IconButton(
                 visualDensity: VisualDensity.compact,
-                tooltip: "Close find bar",
+                tooltip: AppLocalizations.of(context).editorCloseFind,
                 icon: const Icon(Icons.close, size: 18),
                 onPressed: onClose,
               ),

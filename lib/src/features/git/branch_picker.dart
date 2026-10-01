@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:nova/l10n/generated/app_localizations.dart';
 
 import '../../core/services/git_service.dart';
+import '../../core/ui/empty_state.dart';
 import '../../core/ui/text_prompt_dialog.dart';
 
 /// Branch list dialog: checkout / create / delete via [GitService].
@@ -197,7 +198,10 @@ class _BranchPickerDialogState extends State<_BranchPickerDialog> {
       );
     }
     if (_branches.isEmpty) {
-      return Center(child: Text(l10n.gitNoBranches));
+      return EmptyState(
+        icon: Icons.account_tree_outlined,
+        title: l10n.gitNoBranches,
+      );
     }
     return ListView.builder(
       shrinkWrap: true,

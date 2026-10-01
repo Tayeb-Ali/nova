@@ -138,12 +138,11 @@ class _NewProjectDialogBodyState extends State<_NewProjectDialogBody> {
                                 : null,
                         dense: true,
                       ),
-                    const RadioListTile<String>(
+                    RadioListTile<String>(
                       value: "general",
-                      secondary: Icon(Icons.folder_open),
-                      title: Text("General"),
-                      subtitle: Text(
-                          "No runtime assumed — language auto-detected"),
+                      secondary: const Icon(Icons.folder_open),
+                      title: Text(l10n.projectGeneral),
+                      subtitle: Text(l10n.projectGeneralSub),
                       dense: true,
                     ),
                   ],

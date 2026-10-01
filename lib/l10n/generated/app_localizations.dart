@@ -98,6 +98,24 @@ abstract class AppLocalizations {
     Locale('en'),
   ];
 
+  /// Search: no results placeholder
+  ///
+  /// In en, this message translates to:
+  /// **'No matches'**
+  String get searchEmpty;
+
+  /// Search: initial hint
+  ///
+  /// In en, this message translates to:
+  /// **'Search the active project above'**
+  String get searchPrompt;
+
+  /// Command palette: no results
+  ///
+  /// In en, this message translates to:
+  /// **'No matches'**
+  String get commandPaletteEmpty;
+
   /// Bottom nav: projects tab
   ///
   /// In en, this message translates to:
@@ -272,11 +290,11 @@ abstract class AppLocalizations {
   /// **'Editor'**
   String get settingsEditor;
 
-  /// Settings group: font size
+  /// Settings: font size label
   ///
   /// In en, this message translates to:
-  /// **'Font size'**
-  String get settingsFontSize;
+  /// **'Font size: {size}'**
+  String settingsFontSize(String size);
 
   /// Settings group: AI
   ///
@@ -1147,6 +1165,990 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Setup failed'**
   String get runtimeSetupFailed;
+
+  /// AI sheet title
+  ///
+  /// In en, this message translates to:
+  /// **'AI actions'**
+  String get aiTitle;
+
+  /// AI: key saved confirmation
+  ///
+  /// In en, this message translates to:
+  /// **'Key saved'**
+  String get aiKeySaved;
+
+  /// AI: missing key warning
+  ///
+  /// In en, this message translates to:
+  /// **'Enter an API key first'**
+  String get aiEnterKeyFirst;
+
+  /// AI: empty selection placeholder
+  ///
+  /// In en, this message translates to:
+  /// **'No code selected'**
+  String get aiNoCode;
+
+  /// AI: explain action
+  ///
+  /// In en, this message translates to:
+  /// **'Explain code'**
+  String get aiExplainCode;
+
+  /// AI: fix action
+  ///
+  /// In en, this message translates to:
+  /// **'Fix error'**
+  String get aiFixError;
+
+  /// AI: complete action
+  ///
+  /// In en, this message translates to:
+  /// **'Complete code'**
+  String get aiCompleteCode;
+
+  /// AI prompt: explain
+  ///
+  /// In en, this message translates to:
+  /// **'Explain the following code:\n{code}'**
+  String aiPromptExplain(String code);
+
+  /// AI prompt: fix
+  ///
+  /// In en, this message translates to:
+  /// **'Fix the error in the following code:\n{code}'**
+  String aiPromptFix(String code);
+
+  /// AI prompt: complete
+  ///
+  /// In en, this message translates to:
+  /// **'Complete the following code:\n{code}'**
+  String aiPromptComplete(String code);
+
+  /// Settings: system language option
+  ///
+  /// In en, this message translates to:
+  /// **'System'**
+  String get settingsSystem;
+
+  /// Settings: run timeout label
+  ///
+  /// In en, this message translates to:
+  /// **'Run timeout: {ms} ms'**
+  String settingsRunTimeout(int ms);
+
+  /// Settings: timeout field label
+  ///
+  /// In en, this message translates to:
+  /// **'Timeout (ms, 1000-120000)'**
+  String get settingsTimeoutLabel;
+
+  /// Settings: autocomplete title
+  ///
+  /// In en, this message translates to:
+  /// **'Autocomplete'**
+  String get settingsAutocomplete;
+
+  /// Settings: autocomplete subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Keyword, snippet and word suggestions while typing'**
+  String get settingsAutocompleteSub;
+
+  /// Settings: follow editor theme
+  ///
+  /// In en, this message translates to:
+  /// **'Match app to editor theme'**
+  String get settingsMatchTheme;
+
+  /// Settings: follow editor theme subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Whole app follows the editor theme colors'**
+  String get settingsMatchThemeSub;
+
+  /// Settings: word wrap
+  ///
+  /// In en, this message translates to:
+  /// **'Word wrap'**
+  String get settingsWordWrap;
+
+  /// Settings: word wrap subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Wrap long lines instead of scrolling sideways'**
+  String get settingsWordWrapSub;
+
+  /// Settings: auto save
+  ///
+  /// In en, this message translates to:
+  /// **'Auto save'**
+  String get settingsAutoSave;
+
+  /// Settings: auto save subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Save 1.5s after you stop typing'**
+  String get settingsAutoSaveSub;
+
+  /// Settings: editor font label
+  ///
+  /// In en, this message translates to:
+  /// **'Editor font'**
+  String get settingsEditorFont;
+
+  /// Settings: font installed
+  ///
+  /// In en, this message translates to:
+  /// **'Font installed'**
+  String get settingsFontInstalled;
+
+  /// Settings: font updated
+  ///
+  /// In en, this message translates to:
+  /// **'Editor font updated'**
+  String get settingsFontUpdated;
+
+  /// Settings: font download failure
+  ///
+  /// In en, this message translates to:
+  /// **'Download failed: check connection'**
+  String get settingsDownloadFailed;
+
+  /// Settings: live preview header
+  ///
+  /// In en, this message translates to:
+  /// **'Live preview'**
+  String get settingsLivePreview;
+
+  /// Settings: AI provider label
+  ///
+  /// In en, this message translates to:
+  /// **'Provider'**
+  String get settingsProvider;
+
+  /// Settings: custom provider option
+  ///
+  /// In en, this message translates to:
+  /// **'Custom (OpenAI compatible)'**
+  String get settingsCustomProvider;
+
+  /// Settings: base URL label
+  ///
+  /// In en, this message translates to:
+  /// **'Base URL (OpenAI compatible)'**
+  String get settingsBaseUrl;
+
+  /// Settings: model label
+  ///
+  /// In en, this message translates to:
+  /// **'Model'**
+  String get settingsModel;
+
+  /// Settings: API key label
+  ///
+  /// In en, this message translates to:
+  /// **'API key'**
+  String get settingsApiKey;
+
+  /// Settings: key saved hint
+  ///
+  /// In en, this message translates to:
+  /// **'Saved in secure storage'**
+  String get settingsApiKeySaved;
+
+  /// Settings: key hint
+  ///
+  /// In en, this message translates to:
+  /// **'Paste your key'**
+  String get settingsApiKeyHint;
+
+  /// Settings: secure storage note
+  ///
+  /// In en, this message translates to:
+  /// **'The key is stored in encrypted secure storage, never in plain settings.'**
+  String get settingsKeySecureNote;
+
+  /// Settings: test connection
+  ///
+  /// In en, this message translates to:
+  /// **'Test connection'**
+  String get settingsTestConnection;
+
+  /// Settings: testing state
+  ///
+  /// In en, this message translates to:
+  /// **'Testing…'**
+  String get settingsTesting;
+
+  /// Settings: saved confirmation
+  ///
+  /// In en, this message translates to:
+  /// **'Settings saved'**
+  String get settingsSaved;
+
+  /// Settings: connection ok
+  ///
+  /// In en, this message translates to:
+  /// **'Connected: {reply}'**
+  String settingsConnected(String reply);
+
+  /// Settings: connection failure
+  ///
+  /// In en, this message translates to:
+  /// **'Connection failed: {error}'**
+  String settingsConnectionFailed(String error);
+
+  /// Settings: theme imported
+  ///
+  /// In en, this message translates to:
+  /// **'Theme \"{name}\" imported'**
+  String settingsThemeImported(String name);
+
+  /// Settings: import failure
+  ///
+  /// In en, this message translates to:
+  /// **'Import failed: {error}'**
+  String settingsImportFailed(String error);
+
+  /// Settings: theme copied
+  ///
+  /// In en, this message translates to:
+  /// **'Theme \"{name}\" JSON copied'**
+  String settingsThemeCopied(String name);
+
+  /// Settings: theme exported
+  ///
+  /// In en, this message translates to:
+  /// **'Theme \"{name}\" exported to clipboard'**
+  String settingsThemeExported(String name);
+
+  /// Settings: import theme action
+  ///
+  /// In en, this message translates to:
+  /// **'Import theme JSON'**
+  String get settingsImportTheme;
+
+  /// Settings: copy theme tooltip
+  ///
+  /// In en, this message translates to:
+  /// **'Copy theme JSON'**
+  String get settingsCopyTheme;
+
+  /// Settings: export theme tooltip
+  ///
+  /// In en, this message translates to:
+  /// **'Export theme'**
+  String get settingsExportTheme;
+
+  /// Settings: delete theme tooltip
+  ///
+  /// In en, this message translates to:
+  /// **'Delete theme'**
+  String get settingsDeleteTheme;
+
+  /// Search: screen title
+  ///
+  /// In en, this message translates to:
+  /// **'Search in project'**
+  String get searchTitle;
+
+  /// Search: query hint
+  ///
+  /// In en, this message translates to:
+  /// **'Search text or pattern…'**
+  String get searchHint;
+
+  /// Search: replace hint
+  ///
+  /// In en, this message translates to:
+  /// **'Replace with…'**
+  String get searchReplaceHint;
+
+  /// Search: match case
+  ///
+  /// In en, this message translates to:
+  /// **'Match case'**
+  String get searchMatchCase;
+
+  /// Search: regex tooltip
+  ///
+  /// In en, this message translates to:
+  /// **'Use regular expression'**
+  String get searchUseRegex;
+
+  /// Search: action
+  ///
+  /// In en, this message translates to:
+  /// **'Search'**
+  String get searchButton;
+
+  /// Search: action with count
+  ///
+  /// In en, this message translates to:
+  /// **'Search ({hits})'**
+  String searchButtonCount(int hits);
+
+  /// Search: replace all
+  ///
+  /// In en, this message translates to:
+  /// **'Replace all'**
+  String get searchReplaceAll;
+
+  /// Search: no project error
+  ///
+  /// In en, this message translates to:
+  /// **'No project open'**
+  String get searchNoProject;
+
+  /// Search: empty query error
+  ///
+  /// In en, this message translates to:
+  /// **'Type something to search for'**
+  String get searchTypeSomething;
+
+  /// Search: bad regex
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid regular expression'**
+  String get searchInvalidRegex;
+
+  /// Search: failure
+  ///
+  /// In en, this message translates to:
+  /// **'Search failed: {error}'**
+  String searchFailed(String error);
+
+  /// Search: empty state
+  ///
+  /// In en, this message translates to:
+  /// **'Search the active project above'**
+  String get searchEmptyHint;
+
+  /// Search: no matches
+  ///
+  /// In en, this message translates to:
+  /// **'No matches'**
+  String get searchNoMatches;
+
+  /// Search: truncated notice
+  ///
+  /// In en, this message translates to:
+  /// **'Showing the first matches only (limits reached)'**
+  String get searchTruncated;
+
+  /// Search: per-file replace
+  ///
+  /// In en, this message translates to:
+  /// **'Replace ({count})'**
+  String searchReplaceCount(int count);
+
+  /// Search: dirty confirm title
+  ///
+  /// In en, this message translates to:
+  /// **'Unsaved changes'**
+  String get searchUnsavedTitle;
+
+  /// Search: dirty confirm body
+  ///
+  /// In en, this message translates to:
+  /// **'These open tabs have unsaved edits that replace would overwrite: {names}. Replace anyway?'**
+  String searchUnsavedBody(String names);
+
+  /// Search: confirm replace
+  ///
+  /// In en, this message translates to:
+  /// **'Replace anyway'**
+  String get searchReplaceAnyway;
+
+  /// Search: nothing to replace
+  ///
+  /// In en, this message translates to:
+  /// **'No matches to replace'**
+  String get searchNoMatchesReplace;
+
+  /// Search: replace-all notice
+  ///
+  /// In en, this message translates to:
+  /// **'Replaced {total} in {files} files. Reopen affected tabs to reload.'**
+  String searchReplaced(int total, int files);
+
+  /// Search: replace failure
+  ///
+  /// In en, this message translates to:
+  /// **'Replace failed: {error}'**
+  String searchReplaceFailed(String error);
+
+  /// Search: no matches in file
+  ///
+  /// In en, this message translates to:
+  /// **'No matches in {name}'**
+  String searchNoMatchesIn(String name);
+
+  /// Search: replaced in file
+  ///
+  /// In en, this message translates to:
+  /// **'Replaced {count} in {name}. Reopen the tab to reload.'**
+  String searchReplacedIn(int count, String name);
+
+  /// Editor: find tooltip
+  ///
+  /// In en, this message translates to:
+  /// **'Find in file'**
+  String get editorFindInFile;
+
+  /// Editor: find hint
+  ///
+  /// In en, this message translates to:
+  /// **'Find'**
+  String get editorFindHint;
+
+  /// Editor: previous match
+  ///
+  /// In en, this message translates to:
+  /// **'Previous match'**
+  String get editorPrevMatch;
+
+  /// Editor: next match
+  ///
+  /// In en, this message translates to:
+  /// **'Next match'**
+  String get editorNextMatch;
+
+  /// Editor: match case
+  ///
+  /// In en, this message translates to:
+  /// **'Match case'**
+  String get editorMatchCase;
+
+  /// Editor: regex tooltip
+  ///
+  /// In en, this message translates to:
+  /// **'Use regular expression'**
+  String get editorUseRegex;
+
+  /// Editor: close find
+  ///
+  /// In en, this message translates to:
+  /// **'Close find bar'**
+  String get editorCloseFind;
+
+  /// Explorer: storage error
+  ///
+  /// In en, this message translates to:
+  /// **'Storage not writable here: {error}'**
+  String explorerStorageError(String error);
+
+  /// Explorer: new file hint
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. main.py'**
+  String get explorerNewFileHint;
+
+  /// Explorer: no folder
+  ///
+  /// In en, this message translates to:
+  /// **'No folder selected'**
+  String get explorerNoFolder;
+
+  /// Markdown: undo
+  ///
+  /// In en, this message translates to:
+  /// **'Undo'**
+  String get mdUndo;
+
+  /// Markdown: redo
+  ///
+  /// In en, this message translates to:
+  /// **'Redo'**
+  String get mdRedo;
+
+  /// Markdown: bold
+  ///
+  /// In en, this message translates to:
+  /// **'Bold'**
+  String get mdBold;
+
+  /// Markdown: italic
+  ///
+  /// In en, this message translates to:
+  /// **'Italic'**
+  String get mdItalic;
+
+  /// Markdown: underline
+  ///
+  /// In en, this message translates to:
+  /// **'Underline'**
+  String get mdUnderline;
+
+  /// Markdown: strikethrough
+  ///
+  /// In en, this message translates to:
+  /// **'Strikethrough'**
+  String get mdStrike;
+
+  /// Markdown: inline code
+  ///
+  /// In en, this message translates to:
+  /// **'Inline code'**
+  String get mdInlineCode;
+
+  /// Markdown: H1
+  ///
+  /// In en, this message translates to:
+  /// **'Heading 1'**
+  String get mdH1;
+
+  /// Markdown: H2
+  ///
+  /// In en, this message translates to:
+  /// **'Heading 2'**
+  String get mdH2;
+
+  /// Markdown: H3
+  ///
+  /// In en, this message translates to:
+  /// **'Heading 3'**
+  String get mdH3;
+
+  /// Markdown: bullet list
+  ///
+  /// In en, this message translates to:
+  /// **'Bulleted list'**
+  String get mdBulleted;
+
+  /// Markdown: numbered list
+  ///
+  /// In en, this message translates to:
+  /// **'Numbered list'**
+  String get mdNumbered;
+
+  /// Markdown: quote
+  ///
+  /// In en, this message translates to:
+  /// **'Quote'**
+  String get mdQuote;
+
+  /// Markdown: code block
+  ///
+  /// In en, this message translates to:
+  /// **'Code block'**
+  String get mdCodeBlock;
+
+  /// Terminal: tab limit
+  ///
+  /// In en, this message translates to:
+  /// **'Maximum of 5 terminal tabs reached'**
+  String get terminalMaxTabs;
+
+  /// Palette: input hint
+  ///
+  /// In en, this message translates to:
+  /// **'Type a command or file name…'**
+  String get paletteHint;
+
+  /// Palette: empty state
+  ///
+  /// In en, this message translates to:
+  /// **'No matches'**
+  String get paletteNoMatches;
+
+  /// Palette: toggle run
+  ///
+  /// In en, this message translates to:
+  /// **'Toggle Run panel'**
+  String get paletteToggleRun;
+
+  /// Palette: toggle terminal
+  ///
+  /// In en, this message translates to:
+  /// **'Toggle Terminal'**
+  String get paletteToggleTerminal;
+
+  /// Palette: toggle git
+  ///
+  /// In en, this message translates to:
+  /// **'Toggle Git panel'**
+  String get paletteToggleGit;
+
+  /// Palette: toggle processes
+  ///
+  /// In en, this message translates to:
+  /// **'Toggle Processes panel'**
+  String get paletteToggleProcesses;
+
+  /// Palette: switch theme
+  ///
+  /// In en, this message translates to:
+  /// **'Switch editor theme'**
+  String get paletteSwitchTheme;
+
+  /// Palette: search command
+  ///
+  /// In en, this message translates to:
+  /// **'Search in project'**
+  String get paletteSearchInProject;
+
+  /// Palette: open settings
+  ///
+  /// In en, this message translates to:
+  /// **'Open settings'**
+  String get paletteOpenSettings;
+
+  /// Workspace: command palette tooltip
+  ///
+  /// In en, this message translates to:
+  /// **'Command palette'**
+  String get paletteTitle;
+
+  /// New project: general option
+  ///
+  /// In en, this message translates to:
+  /// **'General'**
+  String get projectGeneral;
+
+  /// New project: general subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'No runtime assumed — language auto-detected'**
+  String get projectGeneralSub;
+
+  /// Runtime: install ok
+  ///
+  /// In en, this message translates to:
+  /// **'Installed {name} successfully'**
+  String runtimeInstalledOk(String name);
+
+  /// Runtime: install failure
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to install {name}: {error}'**
+  String runtimeInstallFailed(String name, String error);
+
+  /// Runtime: start install
+  ///
+  /// In en, this message translates to:
+  /// **'Starting install of {name}…'**
+  String runtimeStartInstall(String name);
+
+  /// Runtime: start failure
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to start install: {error}'**
+  String runtimeStartInstallFailed(String error);
+
+  /// Runtime: start update
+  ///
+  /// In en, this message translates to:
+  /// **'Starting update of {name}…'**
+  String runtimeStartUpdate(String name);
+
+  /// Runtime: update start failure
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to start update: {error}'**
+  String runtimeStartUpdateFailed(String error);
+
+  /// Runtime: removing
+  ///
+  /// In en, this message translates to:
+  /// **'Removing {name}…'**
+  String runtimeRemoving(String name);
+
+  /// Runtime: remove failure
+  ///
+  /// In en, this message translates to:
+  /// **'Removal failed: {error}'**
+  String runtimeRemoveFailed(String error);
+
+  /// Runtime: variant prompt
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a Linux system image (downloaded once from the internet):'**
+  String get runtimeChooseVariant;
+
+  /// Runtime: slim variant
+  ///
+  /// In en, this message translates to:
+  /// **'Slim ~70MB (recommended)'**
+  String get runtimeVariantSlim;
+
+  /// Runtime: slim subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Core + apt — languages install on demand'**
+  String get runtimeVariantSlimSub;
+
+  /// Runtime: full variant
+  ///
+  /// In en, this message translates to:
+  /// **'Full ~283MB'**
+  String get runtimeVariantFull;
+
+  /// Runtime: full subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Node, Python, PHP and Git preinstalled — works offline'**
+  String get runtimeVariantFullSub;
+
+  /// Runtime: search empty
+  ///
+  /// In en, this message translates to:
+  /// **'No matching results'**
+  String get runtimeNoResults;
+
+  /// Runtime: search hint
+  ///
+  /// In en, this message translates to:
+  /// **'Search for a language or tool…'**
+  String get runtimeSearchHint;
+
+  /// Runtime: clear action
+  ///
+  /// In en, this message translates to:
+  /// **'Clear'**
+  String get runtimeClear;
+
+  /// Runtime: unsupported chip
+  ///
+  /// In en, this message translates to:
+  /// **'Not supported on this device'**
+  String get runtimeUnsupported;
+
+  /// Runtime: installed header
+  ///
+  /// In en, this message translates to:
+  /// **'Installed ({count})'**
+  String runtimeInstalledSection(int count);
+
+  /// Runtime: packs header
+  ///
+  /// In en, this message translates to:
+  /// **'Ready packs ({count})'**
+  String runtimePacksSection(int count);
+
+  /// Runtime: languages header
+  ///
+  /// In en, this message translates to:
+  /// **'Languages ({count})'**
+  String runtimeLanguagesSection(int count);
+
+  /// Runtime: tools header
+  ///
+  /// In en, this message translates to:
+  /// **'Tools ({count})'**
+  String runtimeToolsSection(int count);
+
+  /// Runtime: active op
+  ///
+  /// In en, this message translates to:
+  /// **'Running: {name}'**
+  String runtimeWorking(String name);
+
+  /// Runtime: last op
+  ///
+  /// In en, this message translates to:
+  /// **'Last operation: {name}'**
+  String runtimeLastOp(String name);
+
+  /// Runtime: log title
+  ///
+  /// In en, this message translates to:
+  /// **'Operation log'**
+  String get runtimeLogTitle;
+
+  /// Runtime: log count
+  ///
+  /// In en, this message translates to:
+  /// **'{count} lines'**
+  String runtimeLines(int count);
+
+  /// Runtime: done status
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get runtimeDone;
+
+  /// Runtime: apt update status
+  ///
+  /// In en, this message translates to:
+  /// **'Updating package lists…'**
+  String get runtimeStatusUpdating;
+
+  /// Runtime: apt install status
+  ///
+  /// In en, this message translates to:
+  /// **'Starting install…'**
+  String get runtimeStatusInstalling;
+
+  /// Runtime: reading lists
+  ///
+  /// In en, this message translates to:
+  /// **'Reading package lists…'**
+  String get runtimeStatusReading;
+
+  /// Runtime: dep tree
+  ///
+  /// In en, this message translates to:
+  /// **'Building dependency tree…'**
+  String get runtimeStatusDeps;
+
+  /// Runtime: unpacking
+  ///
+  /// In en, this message translates to:
+  /// **'Unpacking packages…'**
+  String get runtimeStatusUnpacking;
+
+  /// Runtime: setup pkgs
+  ///
+  /// In en, this message translates to:
+  /// **'Setting up packages…'**
+  String get runtimeStatusSettingUp;
+
+  /// Runtime: working fallback
+  ///
+  /// In en, this message translates to:
+  /// **'Working on {name}…'**
+  String runtimeWorkingOn(String name);
+
+  /// Setup wizard: slim
+  ///
+  /// In en, this message translates to:
+  /// **'Slim ~80MB (default)'**
+  String get setupSlimTitle;
+
+  /// Setup wizard: slim subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Core + apt — languages install on demand'**
+  String get setupSlimSub;
+
+  /// Setup wizard: full
+  ///
+  /// In en, this message translates to:
+  /// **'Full ~283MB (offline)'**
+  String get setupFullTitle;
+
+  /// Setup wizard: full subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Node, Python, PHP and Git preinstalled'**
+  String get setupFullSub;
+
+  /// Setup wizard: resume note
+  ///
+  /// In en, this message translates to:
+  /// **'Retry reuses the verified download (resume).'**
+  String get setupResumeNote;
+
+  /// Web preview title
+  ///
+  /// In en, this message translates to:
+  /// **'Web Preview'**
+  String get webPreviewTitle;
+
+  /// Runtime desc: php
+  ///
+  /// In en, this message translates to:
+  /// **'Web language — Laravel and WordPress'**
+  String get runtimeDescPhp;
+
+  /// Runtime desc: node
+  ///
+  /// In en, this message translates to:
+  /// **'JavaScript and TypeScript — npm included'**
+  String get runtimeDescNode;
+
+  /// Runtime desc: python
+  ///
+  /// In en, this message translates to:
+  /// **'Scripts and data — pip included'**
+  String get runtimeDescPython;
+
+  /// Runtime desc: go
+  ///
+  /// In en, this message translates to:
+  /// **'Compiled Go — fast and light'**
+  String get runtimeDescGo;
+
+  /// Runtime desc: rust
+  ///
+  /// In en, this message translates to:
+  /// **'Rust — memory safety and performance'**
+  String get runtimeDescRust;
+
+  /// Runtime desc: ruby
+  ///
+  /// In en, this message translates to:
+  /// **'Ruby for scripts and web'**
+  String get runtimeDescRuby;
+
+  /// Runtime desc: java
+  ///
+  /// In en, this message translates to:
+  /// **'Java 25 — full JVM platform'**
+  String get runtimeDescJava;
+
+  /// Runtime desc: kotlin
+  ///
+  /// In en, this message translates to:
+  /// **'Kotlin — runs on JVM (needs Java)'**
+  String get runtimeDescKotlin;
+
+  /// Runtime desc: dart
+  ///
+  /// In en, this message translates to:
+  /// **'Dart — apps and CLI tools'**
+  String get runtimeDescDart;
+
+  /// Runtime desc: c
+  ///
+  /// In en, this message translates to:
+  /// **'C and C++ — fast Clang compiler'**
+  String get runtimeDescC;
+
+  /// Runtime desc: git
+  ///
+  /// In en, this message translates to:
+  /// **'Version control and repos'**
+  String get runtimeDescGit;
+
+  /// Runtime desc: composer
+  ///
+  /// In en, this message translates to:
+  /// **'PHP package manager'**
+  String get runtimeDescComposer;
+
+  /// Runtime desc: nova-web
+  ///
+  /// In en, this message translates to:
+  /// **'PHP + Composer + Ruby + Node.js — web development'**
+  String get runtimeDescNovaWeb;
+
+  /// Runtime desc: nova-systems
+  ///
+  /// In en, this message translates to:
+  /// **'Rust + Go + make + cmake — systems languages'**
+  String get runtimeDescNovaSystems;
+
+  /// Runtime desc: nova-jvm
+  ///
+  /// In en, this message translates to:
+  /// **'Java 25 + Kotlin — JVM platform'**
+  String get runtimeDescNovaJvm;
+
+  /// Runtime desc: nova-python
+  ///
+  /// In en, this message translates to:
+  /// **'Python + pip — scripts and data'**
+  String get runtimeDescNovaPython;
+
+  /// Runtime desc: nova-dart
+  ///
+  /// In en, this message translates to:
+  /// **'Dart — CLI tools'**
+  String get runtimeDescNovaDart;
 }
 
 class _AppLocalizationsDelegate
