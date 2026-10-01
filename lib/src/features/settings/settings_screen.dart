@@ -10,6 +10,7 @@ import "package:re_highlight/languages/dart.dart";
 import "package:flutter_secure_storage/flutter_secure_storage.dart";
 
 import "../../../l10n/generated/app_localizations.dart";
+import "../../core/services/app_info_service.dart";
 import "../../core/settings_store.dart";
 import "../ai/ai_client.dart";
 import "../ai/ai_presets.dart";
@@ -533,6 +534,26 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             },
             child: Text(AppLocalizations.of(context).actionSave),
           ),
+          const SizedBox(height: 8),
+          // About card with the platform version/build (see AppInfo).
+          // Hidden until loaded so a blank version never shows.
+          if (AppInfo.isLoaded)
+            Card(
+              elevation: 0,
+              color: scheme.surfaceContainer,
+              shape: sectionShape(),
+              margin: const EdgeInsets.only(bottom: 8),
+              child: ListTile(
+                leading: Icon(Icons.info_outline, color: scheme.primary),
+                title: Text(AppLocalizations.of(context).settingsAbout),
+                subtitle: Text(
+                  AppLocalizations.of(context).appVersionBuild(
+                    AppInfo.version,
+                    AppInfo.buildNumber,
+                  ),
+                ),
+              ),
+            ),
         ],
       ),
     );

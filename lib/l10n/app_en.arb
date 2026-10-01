@@ -695,5 +695,11 @@
   "splashStatusRuntime": "Checking runtime…",
   "@splashStatusRuntime": { "description": "Splash: loader status while probing the runtime" },
   "splashStatusWorkspace": "Preparing workspace…",
-  "@splashStatusWorkspace": { "description": "Splash: loader status while preparing the workspace" }
+  "@splashStatusWorkspace": { "description": "Splash: loader status while preparing the workspace" },
+  "splashVersionFooter": "Nova • v{version} (build {build})",
+  "@splashVersionFooter": { "description": "Splash: version footer", "placeholders": { "version": { "type": "String" }, "build": { "type": "String" } } },
+  "settingsAbout": "About",
+  "@settingsAbout": { "description": "Settings: about section title" },
+  "appVersionBuild": "v{version} (build {build})",
+  "@appVersionBuild": { "description": "Shared: version with build number", "placeholders": { "version": { "type": "String" }, "build": { "type": "String" } } }
 }

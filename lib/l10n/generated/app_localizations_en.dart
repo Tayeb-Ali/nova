@@ -1185,4 +1185,17 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get splashStatusWorkspace => 'Preparing workspace…';
+
+  @override
+  String splashVersionFooter(String version, String build) {
+    return 'Nova • v$version (build $build)';
+  }
+
+  @override
+  String get settingsAbout => 'About';
+
+  @override
+  String appVersionBuild(String version, String build) {
+    return 'v$version (build $build)';
+  }
 }

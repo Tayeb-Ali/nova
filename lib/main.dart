@@ -6,6 +6,7 @@ import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:shared_preferences/shared_preferences.dart";
 
 import "app.dart";
+import "src/core/services/app_info_service.dart";
 
 /// Key holding the first framework error of the current process, if any.
 /// Read on-device without racing logcat:
@@ -29,6 +30,10 @@ Future<void> _persistFirstError(FlutterErrorDetails details) async {
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // Detect version/build from the platform package before the first frame,
+  // so the splash footer and Settings > About read them synchronously.
+  // Best-effort (never throws): labels hide themselves if it fails.
+  await AppInfo.load();
   // Brand-colored system bars from the very first frame: the native launch
   // theme already paints #13151B, and this keeps the status/nav bars dark
   // while Flutter initializes (no white flash on either edge).

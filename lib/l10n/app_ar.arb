@@ -347,5 +347,8 @@
   "splashStatusEngine": "تهيئة المحرك…",
   "splashStatusSettings": "تحميل الإعدادات…",
   "splashStatusRuntime": "فحص بيئة التشغيل…",
-  "splashStatusWorkspace": "تجهيز مساحة العمل…"
+  "splashStatusWorkspace": "تجهيز مساحة العمل…",
+  "splashVersionFooter": "Nova • الإصدار {version} (بناء {build})",
+  "settingsAbout": "حول التطبيق",
+  "appVersionBuild": "الإصدار {version} (بناء {build})"
 }

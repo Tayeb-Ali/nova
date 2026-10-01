@@ -1183,4 +1183,17 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get splashStatusWorkspace => 'تجهيز مساحة العمل…';
+
+  @override
+  String splashVersionFooter(String version, String build) {
+    return 'Nova • الإصدار $version (بناء $build)';
+  }
+
+  @override
+  String get settingsAbout => 'حول التطبيق';
+
+  @override
+  String appVersionBuild(String version, String build) {
+    return 'الإصدار $version (بناء $build)';
+  }
 }

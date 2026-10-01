@@ -2179,6 +2179,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Preparing workspace…'**
   String get splashStatusWorkspace;
+
+  /// Splash: version footer
+  ///
+  /// In en, this message translates to:
+  /// **'Nova • v{version} (build {build})'**
+  String splashVersionFooter(String version, String build);
+
+  /// Settings: about section title
+  ///
+  /// In en, this message translates to:
+  /// **'About'**
+  String get settingsAbout;
+
+  /// Shared: version with build number
+  ///
+  /// In en, this message translates to:
+  /// **'v{version} (build {build})'**
+  String appVersionBuild(String version, String build);
 }
 
 class _AppLocalizationsDelegate

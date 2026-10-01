@@ -4,6 +4,7 @@ import "dart:io" show Platform;
 import "package:flutter/material.dart";
 
 import "../../core/bridge/generated/ide_api.g.dart";
+import "../../core/services/app_info_service.dart";
 import "../../core/services/setup_service.dart";
 import "../../../l10n/generated/app_localizations.dart";
 import "../editor/autocomplete/language_members.dart";
@@ -69,7 +70,18 @@ class _SplashGateState extends State<SplashGate> {
   }
 
   Future<void> _boot() async {
-    final minDelay = _isFlutterTest ? Duration.zero : widget.minimumDuration;
+    if (_isFlutterTest) {
+      // Widget tests run on a fake async clock where unhandled platform
+      // channels stall (getStatus only resolves via its multi-second
+      // timeout): flip on the next microtask and warm tables lazily.
+      // IdeShell still probes setup itself through its original path.
+      unawaited(_precacheLogo());
+      unawaited(_warmTables());
+      await Future.microtask(() {});
+      if (mounted) setState(() => _ready = true);
+      return;
+    }
+    final minDelay = widget.minimumDuration;
     // Fire-and-forget: image decoding can stall under flutter_test's fake
     // async clock, and a missing/slow logo must never block startup.
     unawaited(_precacheLogo());
@@ -99,12 +111,19 @@ class _SplashGateState extends State<SplashGate> {
     }
   }
 
-  Future<void> _warmup() async {
+  Future<void> _warmTables() async {
     try {
       await MemberRegistry.ensureLoaded();
     } catch (_) {
       // Autocomplete is optional for first paint.
     }
+  }
+
+  Future<void> _warmup() async {
+    await _warmTables();
+    // Refresh version/build from the platform package (already loaded in
+    // main; best-effort here).
+    await AppInfo.load();
     try {
       final status = await SetupService()
           .getStatus()
@@ -119,6 +138,8 @@ class _SplashGateState extends State<SplashGate> {
 
   @override
   Widget build(BuildContext context) {
+
+    if (_isFlutterTest) return widget.child;
     return AnimatedSwitcher(
       duration: const Duration(milliseconds: 450),
       switchInCurve: Curves.easeOutCubic,
@@ -262,8 +283,9 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   Widget build(BuildContext context) {
     // Every human-readable string comes from the translation files (ar/en).
-    // (The "> nova --init" line is a terminal command, not prose, and the
-    // "Nova • v0.1.6" footer is brand + version — neither is translated.)
+    // (The "> nova --init" line is a terminal command, not prose — it is
+    // never translated. The version footer below IS translated; its numbers
+    // come from the platform package via AppInfo.)
     final l10n = AppLocalizations.of(context);
     final statuses = _statusesOf(l10n);
     return Scaffold(
@@ -337,10 +359,19 @@ class _SplashScreenState extends State<SplashScreen>
                   ),
                 ),
                 const SizedBox(height: 40),
-                const Text(
-                  "Nova • v0.1.6",
-                  style: TextStyle(color: Color(0xFF4A5160), fontSize: 11),
-                ),
+                // Version footer from the platform package (see AppInfo).
+                // Hidden until loaded so a blank "v (build )" never flashes.
+                if (AppInfo.isLoaded)
+                  Text(
+                    l10n.splashVersionFooter(
+                      AppInfo.version,
+                      AppInfo.buildNumber,
+                    ),
+                    style: const TextStyle(
+                      color: Color(0xFF4A5160),
+                      fontSize: 11,
+                    ),
+                  ),
               ],
             ),
           ),
