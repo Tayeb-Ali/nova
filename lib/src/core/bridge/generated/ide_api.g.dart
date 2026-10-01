@@ -299,6 +299,7 @@ class ProcessRequest {
     required this.args,
     this.cwd,
     this.environment,
+    this.mergeStderr,
   });
 
   String command;
@@ -309,12 +310,17 @@ class ProcessRequest {
 
   Map<String, String>? environment;
 
+  /// False keeps stderr separate so stdout stays clean LSP JSON-RPC.
+  /// Null (legacy callers) means merged.
+  bool? mergeStderr;
+
   List<Object?> _toList() {
     return <Object?>[
       command,
       args,
       cwd,
       environment,
+      mergeStderr,
     ];
   }
 
@@ -328,6 +334,7 @@ class ProcessRequest {
       args: (result[1]! as List<Object?>).cast<String>(),
       cwd: result[2] as String?,
       environment: (result[3] as Map<Object?, Object?>?)?.cast<String, String>(),
+      mergeStderr: result[4] as bool?,
     );
   }
 
@@ -340,7 +347,7 @@ class ProcessRequest {
     if (identical(this, other)) {
       return true;
     }
-    return _deepEquals(command, other.command) && _deepEquals(args, other.args) && _deepEquals(cwd, other.cwd) && _deepEquals(environment, other.environment);
+    return _deepEquals(command, other.command) && _deepEquals(args, other.args) && _deepEquals(cwd, other.cwd) && _deepEquals(environment, other.environment) && _deepEquals(mergeStderr, other.mergeStderr);
   }
 
   @override
@@ -349,7 +356,7 @@ class ProcessRequest {
 
   @override
   String toString() {
-    return 'ProcessRequest(command: $command, args: $args, cwd: $cwd, environment: $environment)';
+    return 'ProcessRequest(command: $command, args: $args, cwd: $cwd, environment: $environment, mergeStderr: $mergeStderr)';
   }
 }
 
@@ -943,6 +950,25 @@ class ProcessApi {
     )
     ;
     return (pigeonVar_replyValue! as List<Object?>).cast<ProcessInfo>();
+  }
+
+  /// Write base64 bytes to a running process' stdin (LSP stdio transport).
+  Future<void> writeProcessStdin(String pid, String base64Chunk) async {
+    final pigeonVar_channelName = 'dev.flutter.pigeon.codeide.ProcessApi.writeProcessStdin$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[pid, base64Chunk]);
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    _extractReplyValueOrThrow(
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: true,
+    )
+    ;
   }
 }
 

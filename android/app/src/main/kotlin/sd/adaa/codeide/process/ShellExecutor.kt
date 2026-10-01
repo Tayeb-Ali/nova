@@ -12,7 +12,7 @@ import java.util.concurrent.TimeUnit
  */
 class ShellExecutor(private val context: Context) {
 
-    fun buildProcess(command: String, args: List<String>, cwd: String?, env: Map<String, String>): ProcessBuilder {
+    fun buildProcess(command: String, args: List<String>, cwd: String?, env: Map<String, String>, mergeStderr: Boolean = true): ProcessBuilder {
         val pb = ProcessBuilder(listOf(command) + args)
         cwd?.takeIf { File(it).isDirectory }?.let { pb.directory(File(it)) }
         pb.environment().putAll(EnvironmentManager.buildEnvironment(context))
@@ -31,10 +31,10 @@ class ShellExecutor(private val context: Context) {
             return ProcessBuilder(listOf(hop.command) + hop.args).also {
                 it.directory(pb.directory())
                 it.environment().putAll(pb.environment())
-                it.redirectErrorStream(true)
+                if (mergeStderr) it.redirectErrorStream(true)
             }
         }
-        pb.redirectErrorStream(true)
+        if (mergeStderr) pb.redirectErrorStream(true)
         return pb
     }
 
@@ -182,16 +182,18 @@ object NovaExecLauncher {
     }
 }
 
-    /** Async run streaming output lines; caller manages the returned Process. */
+    /** Async run streaming output lines; caller manages the returned Process.
+     *  [mergeStderr] keeps legacy merged output; LSP stdio needs it false. */
     fun executeAsync(
         command: String,
         args: List<String> = emptyList(),
         cwd: String? = null,
         env: Map<String, String> = emptyMap(),
+        mergeStderr: Boolean = true,
         onOutput: (String) -> Unit,
         onExit: (Int) -> Unit,
     ): Process {
-        val pb = buildProcess(command, args, cwd, env)
+        val pb = buildProcess(command, args, cwd, env, mergeStderr)
         val p = pb.start()
         Thread {
             p.inputStream.bufferedReader().useLines { lines ->

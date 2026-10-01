@@ -65,12 +65,16 @@ class ProcessRequest {
     required this.args,
     this.cwd,
     this.environment,
+    this.mergeStderr,
   });
 
   String command;
   List<String> args;
   String? cwd;
   Map<String, String>? environment;
+  /// False keeps stderr separate so stdout stays clean LSP JSON-RPC.
+  /// Null (legacy callers) means merged.
+  bool? mergeStderr;
 }
 
 /// An opened project.
@@ -160,6 +164,9 @@ abstract class ProcessApi {
   void killProcess(String pid);
 
   List<ProcessInfo> listProcesses();
+
+  /// Write base64 bytes to a running process' stdin (LSP stdio transport).
+  void writeProcessStdin(String pid, String base64Chunk);
 }
 
 @HostApi()

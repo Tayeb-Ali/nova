@@ -16,4 +16,8 @@ object ProcessApiImpl : ProcessApi {
     }
 
     override fun listProcesses(): List<ProcessInfo> = IdeCore.processes.list()
+
+    override fun writeProcessStdin(pid: String, base64Chunk: String) {
+        IdeCore.processes.writeStdin(pid, base64Chunk)
+    }
 }

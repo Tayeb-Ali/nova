@@ -7,6 +7,7 @@ import "package:path/path.dart" as p;
 
 import "../../core/settings_store.dart";
 import "../../core/ui/empty_state.dart";
+import "../lsp/lsp_providers.dart";
 import "../editor/editor_engine.dart";
 import "../editor/re_editor_adapter.dart";
 import "../markdown/markdown_editor_view.dart";
@@ -195,6 +196,7 @@ class _EditorTabBodyState extends ConsumerState<_EditorTabBody> {
       _currentText = text;
       _savedText = text;
       _loaded = true;
+      _notifyGoOpen();
       return text;
     } catch (_) {
       _currentText = "";
@@ -202,6 +204,24 @@ class _EditorTabBodyState extends ConsumerState<_EditorTabBody> {
       _loaded = true;
       return "";
     }
+  }
+
+  /// Best-effort gopls didOpen for Go files (silently skipped otherwise).
+  void _notifyGoOpen() {
+    if (!widget.tab.path.endsWith('.go')) return;
+    final project = ref.read(activeProjectProvider);
+    if (project == null) return;
+    ref.read(goLspManagerProvider).didOpenGoFile(project.path, widget.tab.path);
+  }
+
+  /// Best-effort gopls didChange after save.
+  void _notifyGoSave() {
+    if (!widget.tab.path.endsWith('.go')) return;
+    final project = ref.read(activeProjectProvider);
+    if (project == null) return;
+    ref
+        .read(goLspManagerProvider)
+        .didChangeGoFile(project.path, widget.tab.path, _currentText);
   }
 
   void _toast(String message) {
@@ -242,6 +262,7 @@ class _EditorTabBodyState extends ConsumerState<_EditorTabBody> {
     _currentText = text;
     _savedText = text;
     ref.read(workspaceTabsProvider.notifier).markDirty(widget.tab.id, false);
+    _notifyGoSave();
     if (!silent) _toast(l10n.editorSaved(p.basename(widget.tab.path)));
   }
 

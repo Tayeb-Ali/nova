@@ -16,17 +16,23 @@ class ProcessService {
     List<String> args = const [],
     String? cwd,
     Map<String, String>? environment,
+    bool? mergeStderr,
   }) async {
     final p = await NativeBridge.process.startProcess(bridge.ProcessRequest(
       command: command,
       args: args,
       cwd: cwd,
       environment: environment,
+      mergeStderr: mergeStderr,
     ));
     return ProcessInfo.fromBridge(p);
   }
 
   Future<void> kill(String pid) => NativeBridge.process.killProcess(pid);
+
+  /// Write base64 bytes to a running process' stdin (LSP stdio transport).
+  Future<void> writeStdin(String pid, String base64Chunk) =>
+      NativeBridge.process.writeProcessStdin(pid, base64Chunk);
 
   Future<List<ProcessInfo>> list() async {
     final list = await NativeBridge.process.listProcesses();

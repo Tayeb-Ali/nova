@@ -45,6 +45,7 @@ class ProcessManager(private val context: Context) {
             args = request.args,
             cwd = request.cwd,
             env = request.environment ?: emptyMap(),
+            mergeStderr = request.mergeStderr ?: true,
             onOutput = { chunk ->
                 val handle = started.get()
                 if (handle != null) {
@@ -87,6 +88,19 @@ class ProcessManager(private val context: Context) {
 
     fun kill(pid: String) {
         processes.remove(pid)?.let { it.process.destroyForcibly() }
+    }
+
+    /** Write raw bytes to a running process' stdin (LSP stdio transport). */
+    fun writeStdin(pid: String, base64Chunk: String) {
+        val handle = processes[pid] ?: return
+        try {
+            val bytes = android.util.Base64.decode(base64Chunk, android.util.Base64.DEFAULT)
+            synchronized(handle.process.outputStream) {
+                handle.process.outputStream.write(bytes)
+                handle.process.outputStream.flush()
+            }
+        } catch (ignored: Throwable) {
+        }
     }
 
     fun list(): List<ProcessInfo> = processes.values.map {

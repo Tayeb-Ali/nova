@@ -372,7 +372,12 @@ data class ProcessRequest (
   val command: String,
   val args: List<String>,
   val cwd: String? = null,
-  val environment: Map<String, String>? = null
+  val environment: Map<String, String>? = null,
+  /**
+   * False keeps stderr separate so stdout stays clean LSP JSON-RPC.
+   * Null (legacy callers) means merged.
+   */
+  val mergeStderr: Boolean? = null
 )
  {
   companion object {
@@ -381,7 +386,8 @@ data class ProcessRequest (
       val args = pigeonVar_list[1] as List<String>
       val cwd = pigeonVar_list[2] as String?
       val environment = pigeonVar_list[3] as Map<String, String>?
-      return ProcessRequest(command, args, cwd, environment)
+      val mergeStderr = pigeonVar_list[4] as Boolean?
+      return ProcessRequest(command, args, cwd, environment, mergeStderr)
     }
   }
   fun toList(): List<Any?> {
@@ -390,6 +396,7 @@ data class ProcessRequest (
       args,
       cwd,
       environment,
+      mergeStderr,
     )
   }
   override fun equals(other: Any?): Boolean {
@@ -400,7 +407,7 @@ data class ProcessRequest (
       return true
     }
     val other = other as ProcessRequest
-    return IdeApiPigeonUtils.deepEquals(this.command, other.command) && IdeApiPigeonUtils.deepEquals(this.args, other.args) && IdeApiPigeonUtils.deepEquals(this.cwd, other.cwd) && IdeApiPigeonUtils.deepEquals(this.environment, other.environment)
+    return IdeApiPigeonUtils.deepEquals(this.command, other.command) && IdeApiPigeonUtils.deepEquals(this.args, other.args) && IdeApiPigeonUtils.deepEquals(this.cwd, other.cwd) && IdeApiPigeonUtils.deepEquals(this.environment, other.environment) && IdeApiPigeonUtils.deepEquals(this.mergeStderr, other.mergeStderr)
   }
 
   override fun hashCode(): Int {
@@ -409,10 +416,11 @@ data class ProcessRequest (
     result = 31 * result + IdeApiPigeonUtils.deepHash(this.args)
     result = 31 * result + IdeApiPigeonUtils.deepHash(this.cwd)
     result = 31 * result + IdeApiPigeonUtils.deepHash(this.environment)
+    result = 31 * result + IdeApiPigeonUtils.deepHash(this.mergeStderr)
     return result
   }
   override fun toString(): String {
-    return "ProcessRequest(command=$command, args=$args, cwd=$cwd, environment=$environment)"
+    return "ProcessRequest(command=$command, args=$args, cwd=$cwd, environment=$environment, mergeStderr=$mergeStderr)"
   }
 }
 
@@ -928,6 +936,8 @@ interface ProcessApi {
   fun startProcess(request: ProcessRequest): ProcessInfo
   fun killProcess(pid: String)
   fun listProcesses(): List<ProcessInfo>
+  /** Write base64 bytes to a running process' stdin (LSP stdio transport). */
+  fun writeProcessStdin(pid: String, base64Chunk: String)
 
   companion object {
     /** The codec used by ProcessApi. */
@@ -979,6 +989,25 @@ interface ProcessApi {
           channel.setMessageHandler { _, reply ->
             val wrapped: List<Any?> = try {
               listOf(api.listProcesses())
+            } catch (exception: Throwable) {
+              IdeApiPigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.codeide.ProcessApi.writeProcessStdin$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val pidArg = args[0] as String
+            val base64ChunkArg = args[1] as String
+            val wrapped: List<Any?> = try {
+              api.writeProcessStdin(pidArg, base64ChunkArg)
+              listOf(null)
             } catch (exception: Throwable) {
               IdeApiPigeonUtils.wrapError(exception)
             }

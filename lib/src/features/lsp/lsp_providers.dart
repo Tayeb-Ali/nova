@@ -1,12 +1,20 @@
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:flutter_riverpod/legacy.dart";
 
+import "go_lsp_manager.dart";
 import "lsp_client.dart";
 
 /// The app-wide LSP client. Uses [NullTransport] until a real server
 /// transport is wired via native stdio.
 final lspClientProvider = Provider<LspClient>((ref) {
   return LspClient(NullTransport());
+});
+
+/// Shared `gopls` lifecycle (one server per project root, started on demand).
+final goLspManagerProvider = Provider<GoLspManager>((ref) {
+  final manager = GoLspManager();
+  ref.onDispose(() => manager.stopAll());
+  return manager;
 });
 
 /// Latest diagnostics snapshot per open document, kept in sync with
