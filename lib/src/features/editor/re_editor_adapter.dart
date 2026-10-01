@@ -241,24 +241,31 @@ class _ReEditorAdapterState extends ConsumerState<ReEditorAdapter> {
     final appSettings = ref.watch(settingsStoreProvider);
     final autocompleteEnabled = appSettings.autocompleteEnabled;
 
-    final editor = CodeEditor(
+    final editorStyle = _styleFor(
+      widget.language,
+      pack.toHighlightTokens(),
+      pack.chrome.foreground,
+      pack.chrome.background,
+      pack.chrome.cursor,
+      pack.chrome.selection,
+      pack.chrome.lineHighlight,
+      fontFamilyFor(appSettings.editorFont),
+      appSettings.editorFontSize,
+    );
+    // The CodeEditor element stays mounted at the SAME slot in every frame.
+    // When the pane is squeezed to zero height (open keyboard + tall tool
+    // drawer), it is laid out at 1px via OverflowBox: re_editor's
+    // line-number gutter asserts maxHeight > 0, and — critically — focus
+    // survives, so the keyboard does not flap. Unmounting here used to drop
+    // focus, hide the keyboard, regrow the pane, remount with
+    // autofocus=true, and oscillate forever.
+    Widget editorTree = CodeEditor(
       controller: _controller,
       findController: _findController,
       scrollController: _scrollController,
-      style: _styleFor(
-        widget.language,
-        pack.toHighlightTokens(),
-        pack.chrome.foreground,
-        pack.chrome.background,
-        pack.chrome.cursor,
-        pack.chrome.selection,
-        pack.chrome.lineHighlight,
-        fontFamilyFor(appSettings.editorFont),
-        appSettings.editorFontSize,
-      ),
+      style: editorStyle,
       wordWrap: appSettings.wordWrap,
-      indicatorBuilder:
-          (context, editingController, chunkController, notifier) {
+      indicatorBuilder: (context, editingController, chunkController, notifier) {
         return Row(
           children: [
             DefaultCodeLineNumber(
@@ -270,12 +277,25 @@ class _ReEditorAdapterState extends ConsumerState<ReEditorAdapter> {
       },
       onChanged: (_) => widget.onChanged(_controller.text),
     );
-    if (!autocompleteEnabled) return editor;
-    _promptsBuilder.documentText = _controller.text;
-    return CodeAutocomplete(
-      viewBuilder: buildAutocompletePopup,
-      promptsBuilder: _promptsBuilder,
-      child: editor,
+    if (autocompleteEnabled) {
+      _promptsBuilder.documentText = _controller.text;
+      editorTree = CodeAutocomplete(
+        viewBuilder: buildAutocompletePopup,
+        promptsBuilder: _promptsBuilder,
+        child: editorTree,
+      );
+    }
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final h = constraints.maxHeight;
+        final effMax = h.isFinite ? h.clamp(1.0, double.infinity).toDouble() : h;
+        return OverflowBox(
+          minHeight: 1,
+          maxHeight: effMax,
+          alignment: Alignment.topCenter,
+          child: editorTree,
+        );
+      },
     );
   }
 }

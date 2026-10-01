@@ -93,7 +93,15 @@ class _MarkdownEditorViewState extends State<MarkdownEditorView> {
     }
     return Column(
       children: [
-        MarkdownToolbar(controller: _controller, focusNode: _focusNode),
+        // Squeeze-safe toolbar: scrolls instead of overflowing when the
+        // pane shrinks (open keyboard + drawer). Elements stay mounted,
+        // so the Fleather focus node — owned by this State — survives.
+        Flexible(
+          fit: FlexFit.loose,
+          child: SingleChildScrollView(
+            child: MarkdownToolbar(controller: _controller, focusNode: _focusNode),
+          ),
+        ),
         const Divider(height: 1),
         Expanded(
           child: FleatherEditor(

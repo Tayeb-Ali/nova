@@ -30,7 +30,14 @@ class EditorAreaView extends ConsumerWidget {
     }
     return Column(
       children: [
-        _TabStrip(tabs: tabs, activeId: active.id),
+        // Squeeze-safe: with keyboard + drawer open the pane can shrink
+        // below the 48px strip — it scrolls instead of overflowing.
+        Flexible(
+          fit: FlexFit.loose,
+          child: SingleChildScrollView(
+            child: _TabStrip(tabs: tabs, activeId: active.id),
+          ),
+        ),
         Divider(height: 1, color: scheme.outlineVariant),
         Expanded(
           child: _EditorTabBody(key: ValueKey(active.id), tab: active),
@@ -279,13 +286,35 @@ class _EditorTabBodyState extends ConsumerState<_EditorTabBody> {
       future: _loadFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
+          return LayoutBuilder(
+            builder: (context, constraints) => SingleChildScrollView(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minHeight: constraints.maxHeight,
+                ),
+                child: const Center(child: CircularProgressIndicator()),
+              ),
+            ),
+          );
         }
         if (snapshot.hasError) {
-          return Center(
-            child: Text(
-              AppLocalizations.of(context)
-                  .editorOpenFailed("${snapshot.error}"),
+          return LayoutBuilder(
+            builder: (context, constraints) => SingleChildScrollView(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minHeight: constraints.maxHeight,
+                ),
+                child: Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Text(
+                      AppLocalizations.of(context)
+                          .editorOpenFailed("${snapshot.error}"),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ),
+              ),
             ),
           );
         }
@@ -293,7 +322,13 @@ class _EditorTabBodyState extends ConsumerState<_EditorTabBody> {
         final isMarkdown = widget.tab.kind == EditorKind.markdown;
         return Column(
           children: [
-            Container(
+            // Squeeze-safe file header (the Column:294 overflow): when the
+            // pane shrinks below the header, it scrolls instead of
+            // overflowing. Elements stay mounted, so editor focus survives.
+            Flexible(
+              fit: FlexFit.loose,
+              child: SingleChildScrollView(
+                child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.surfaceContainerLow,
@@ -413,6 +448,8 @@ class _EditorTabBodyState extends ConsumerState<_EditorTabBody> {
                 },
               ),
             ),
+          ),
+        ),
             Expanded(
               child: isMarkdown
                   ? MarkdownEditorView(
