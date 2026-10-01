@@ -7,7 +7,7 @@
             "type": "dart",
             "args": [
                 "--flavor",
-                "github"
+                "play"
             ]
         },
         {
@@ -17,7 +17,7 @@
             "flutterMode": "profile",
             "args": [
                 "--flavor",
-                "github"
+                "play"
             ]
         },
         {
@@ -27,7 +27,7 @@
             "flutterMode": "release",
             "args": [
                 "--flavor",
-                "github"
+                "play"
             ]
         }
     ]
