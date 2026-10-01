@@ -6,9 +6,10 @@ import "../../core/services/project_service.dart";
 
 /// Detects runnable tasks for a project (task.md §20):
 /// package.json `scripts`, composer.json `scripts`, artisan, Cargo.toml,
-/// go.mod, Makefile/CMakeLists, Gemfile, pubspec.yaml and well-known
-/// single-file entry points (main.py, index.js, index.php, main.go,
-/// main.rs, Main.java, Main.kt, main.rb, main.dart, main.c, main.cpp).
+/// go.mod, Makefile/CMakeLists, Gemfile, pubspec.yaml, Package.swift,
+/// .sln/.csproj and well-known single-file entry points (main.py,
+/// index.js, index.php, main.go, main.rs, Main.java, Main.kt, main.rb,
+/// main.dart, main.c, main.cpp).
 class TaskDetector {
   final ProjectService service;
 
@@ -85,6 +86,20 @@ class TaskDetector {
       if (names.contains("Makefile")) {
         tasks.add(const IdeTask(name: "make", command: "make"));
       }
+      final lower = {for (final n in names) n.toLowerCase()};
+      if (lower.contains("cmakelists.txt")) {
+        tasks.add(const IdeTask(
+          name: "cmake",
+          command: "sh",
+          args: '-c "cmake -S . -B build && cmake --build build"',
+        ));
+      }
+      if (lower.contains("package.swift")) {
+        tasks.add(const IdeTask(name: "swift run", command: "swift", args: "run"));
+      }
+      if (lower.any((n) => n.endsWith(".sln") || n.endsWith(".csproj"))) {
+        tasks.add(const IdeTask(name: "dotnet run", command: "dotnet", args: "run"));
+      }
     } catch (_) {
       // Project root unreadable or not ready; no tasks.
     }
@@ -107,10 +122,12 @@ class TaskDetector {
 
   /// Detects the project language from top-level file basenames.
   ///
-  /// Pure function, no IO. Matching is case-insensitive and uses
-  /// first-match priority order (see body). Returns null when no
-  /// marker matches. `Makefile` alone is intentionally ignored as
-  /// ambiguous.
+  /// Pure function, no IO. Matching is case-insensitive with manifest
+  /// markers first, then single-file entry-point fallbacks (see body),
+  /// so fresh or imported projects without a manifest still resolve
+  /// (`main.py`, `index.php`, `Main.java`, `main.c`, ...). Returns null
+  /// when no marker matches. `Makefile`, `Dockerfile` and IDE-only files
+  /// (`README.md`, `.gitignore`) are intentionally ignored as ambiguous.
   static String? detectProjectLanguage(List<String> fileNames) {
     final names = <String>{
       for (final f in fileNames) _basenameLower(f),
@@ -138,6 +155,18 @@ class TaskDetector {
     if (names.any((n) => n == 'main.kt' || n.startsWith('build.gradle.kts'))) {
       return 'kotlin';
     }
+    // Single-file fallbacks: entry points created by the native templates
+    // (or imported projects) that carry no manifest.
+    if (names.contains('main.py')) return 'python';
+    if (names.contains('index.js')) return 'node';
+    if (names.contains('index.php')) return 'php';
+    if (names.contains('main.rb')) return 'ruby';
+    if (names.contains('main.java')) return 'java';
+    if (names.contains('main.go')) return 'go';
+    if (names.contains('main.rs')) return 'rust';
+    if (names.contains('main.dart')) return 'dart';
+    if (names.contains('main.c')) return 'c';
+    if (names.contains('main.cpp')) return 'cpp';
     return null;
   }
 

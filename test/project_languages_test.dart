@@ -89,13 +89,39 @@ void main() {
       );
       expect(
         TaskDetector.detectProjectLanguage(['main.rb']),
-        isNull,
+        'ruby',
+      );
+      expect(
+        TaskDetector.detectProjectLanguage(['main.c']),
+        'c',
+      );
+    });
+
+    test('detects single-file entry points without a manifest', () {
+      expect(TaskDetector.detectProjectLanguage(['main.py']), 'python');
+      expect(TaskDetector.detectProjectLanguage(['index.js']), 'node');
+      expect(TaskDetector.detectProjectLanguage(['index.php']), 'php');
+      expect(TaskDetector.detectProjectLanguage(['Main.java']), 'java');
+      expect(TaskDetector.detectProjectLanguage(['main.go']), 'go');
+      expect(TaskDetector.detectProjectLanguage(['main.rs']), 'rust');
+      expect(TaskDetector.detectProjectLanguage(['main.dart']), 'dart');
+      expect(TaskDetector.detectProjectLanguage(['main.cpp']), 'cpp');
+    });
+
+    test('manifests win over single-file fallbacks', () {
+      expect(
+        TaskDetector.detectProjectLanguage(['main.c', 'CMakeLists.txt']),
+        'cpp',
+      );
+      expect(
+        TaskDetector.detectProjectLanguage(['main.py', 'requirements.txt']),
+        'python',
       );
     });
 
     test('returns null when ambiguous or unknown', () {
       expect(TaskDetector.detectProjectLanguage(['Makefile']), isNull);
-      expect(TaskDetector.detectProjectLanguage(['main.c']), isNull);
+      expect(TaskDetector.detectProjectLanguage(['README.md', '.gitignore']), isNull);
       expect(TaskDetector.detectProjectLanguage([]), isNull);
     });
   });
@@ -117,6 +143,19 @@ void main() {
       expect(await commandsFor(["Cargo.toml"]), ["cargo run"]);
       expect(await commandsFor(["main.rb"]), ["ruby main.rb"]);
       expect(await commandsFor(["pubspec.yaml", "main.dart"]), ["dart main.dart"]);
+    });
+
+    test('cmake/swift/dotnet markers add build tasks', () async {
+      expect(
+        await commandsFor(["CMakeLists.txt", "main.cpp"]),
+        [
+          'sh -c "clang++ main.cpp -o app && ./app"',
+          'sh -c "cmake -S . -B build && cmake --build build"',
+        ],
+      );
+      expect(await commandsFor(["Package.swift"]), ["swift run"]);
+      expect(await commandsFor(["App.sln"]), ["dotnet run"]);
+      expect(await commandsFor(["lib.csproj"]), ["dotnet run"]);
     });
 
     test('java/kotlin single files use shell wrappers', () async {
