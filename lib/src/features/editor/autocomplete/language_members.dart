@@ -13,6 +13,12 @@ class MemberRegistry {
     "dart": "assets/autocomplete/dart.json",
     "java": "assets/autocomplete/java.json",
     "go": "assets/autocomplete/go.json",
+    "kotlin": "assets/autocomplete/kotlin.json",
+    "rust": "assets/autocomplete/rust.json",
+    "php": "assets/autocomplete/php.json",
+    "c": "assets/autocomplete/c.json",
+    "cpp": "assets/autocomplete/cpp.json",
+    "swift": "assets/autocomplete/swift.json",
   };
 
   static final Map<String, Map<String, List<CodePrompt>>> _tables = {};
@@ -100,6 +106,16 @@ class MemberRegistry {
         .where((prompt) => prompt.match(partial))
         .toList(growable: false);
     return matched.isEmpty ? null : matched;
+  }
+
+  /// Full unfiltered member list for [receiver] (fuzzy matching is applied
+  /// by the caller in `completion_ranker.dart`, so prefix-only
+  /// [CodePrompt.match] is bypassed here). Returns null when the receiver
+  /// or language is unknown.
+  static List<CodePrompt>? membersFor(String? languageId, String receiver) {
+    final members = _tables[languageId]?[receiver];
+    if (members == null || members.isEmpty) return null;
+    return List<CodePrompt>.unmodifiable(members);
   }
 }
 

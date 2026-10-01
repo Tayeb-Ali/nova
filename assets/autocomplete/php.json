@@ -1,0 +1,836 @@
+{
+  "receivers": {
+    "Str": {
+      "methods": {
+        "strlen": "int",
+        "strpos": "int",
+        "substr": "string",
+        "str_replace": "string",
+        "explode": "array",
+        "implode": "string",
+        "trim": "string",
+        "strtolower": "string",
+        "strtoupper": "string",
+        "htmlspecialchars": "string",
+        "upper": "string",
+        "lower": "string",
+        "slug": "string",
+        "contains": "bool"
+      },
+      "fields": {}
+    },
+    "Arr": {
+      "methods": {
+        "count": "int",
+        "in_array": "bool",
+        "array_push": "int",
+        "array_pop": "mixed",
+        "array_merge": "array",
+        "array_map": "array",
+        "array_filter": "array",
+        "array_keys": "array",
+        "array_values": "array",
+        "sort": "bool",
+        "implode": "string",
+        "explode": "array",
+        "get": "mixed",
+        "pluck": "array"
+      },
+      "fields": {}
+    },
+    "DB": {
+      "methods": {
+        "table": "Builder",
+        "select": "mixed",
+        "insert": "bool",
+        "update": "int",
+        "delete": "int",
+        "find": "Model",
+        "transaction": "mixed",
+        "raw": "Expression",
+        "statement": "bool",
+        "beginTransaction": "void",
+        "commit": "void",
+        "rollBack": "void",
+        "scalar": "mixed",
+        "getPdo": "PDO"
+      },
+      "fields": {}
+    },
+    "Request": {
+      "methods": {
+        "input": "mixed",
+        "all": "array",
+        "has": "bool",
+        "validate": "array",
+        "file": "UploadedFile",
+        "query": "mixed",
+        "header": "mixed",
+        "user": "User",
+        "ip": "string",
+        "method": "string",
+        "only": "array",
+        "except": "array",
+        "bearerToken": "string"
+      },
+      "fields": {}
+    },
+    "Auth": {
+      "methods": {
+        "check": "bool",
+        "user": "User",
+        "id": "int",
+        "login": "void",
+        "logout": "void",
+        "attempt": "bool",
+        "guest": "bool",
+        "loginUsingId": "mixed",
+        "once": "bool",
+        "setUser": "void"
+      },
+      "fields": {}
+    },
+    "Log": {
+      "methods": {
+        "info": "void",
+        "error": "void",
+        "debug": "void",
+        "warning": "void",
+        "critical": "void",
+        "alert": "void",
+        "emergency": "void",
+        "notice": "void",
+        "channel": "Logger",
+        "stack": "Logger"
+      },
+      "fields": {}
+    },
+    "this": {
+      "methods": {
+        "validate": "array",
+        "redirect": "Response",
+        "view": "View",
+        "middleware": "void",
+        "authorize": "void",
+        "dispatch": "PendingDispatch"
+      },
+      "fields": {}
+    },
+    "Schema": {
+      "methods": {
+        "create": "void",
+        "drop": "void",
+        "dropIfExists": "void",
+        "hasTable": "bool",
+        "hasColumn": "bool",
+        "rename": "void",
+        "table": "void",
+        "getColumnListing": "array",
+        "defaultStringLength": "void"
+      },
+      "fields": {}
+    },
+    "Cache": {
+      "methods": {
+        "get": "mixed",
+        "put": "bool",
+        "remember": "mixed",
+        "forget": "bool",
+        "has": "bool",
+        "forever": "bool",
+        "flush": "bool",
+        "increment": "int",
+        "decrement": "int",
+        "tags": "TaggedCache"
+      },
+      "fields": {}
+    },
+    "Storage": {
+      "methods": {
+        "get": "string",
+        "put": "bool",
+        "exists": "bool",
+        "delete": "bool",
+        "url": "string",
+        "path": "string",
+        "files": "array",
+        "disk": "Filesystem",
+        "download": "StreamedResponse",
+        "copy": "bool"
+      },
+      "fields": {}
+    },
+    "Validator": {
+      "methods": {
+        "make": "Validator",
+        "validate": "array",
+        "extend": "void",
+        "extendImplicit": "void",
+        "extendDependent": "void",
+        "replacer": "void",
+        "resolver": "mixed",
+        "getTranslator": "Translator"
+      },
+      "fields": {}
+    },
+    "Route": {
+      "methods": {
+        "get": "void",
+        "post": "void",
+        "put": "void",
+        "delete": "void",
+        "group": "void",
+        "middleware": "Route",
+        "prefix": "Route",
+        "current": "Route",
+        "currentRouteName": "string",
+        "has": "bool",
+        "fallback": "void",
+        "resource": "void"
+      },
+      "fields": {}
+    },
+    "View": {
+      "methods": {
+        "make": "View",
+        "share": "void",
+        "composer": "void",
+        "creator": "void",
+        "exists": "bool",
+        "render": "string",
+        "addNamespace": "View",
+        "replaceNamespace": "void"
+      },
+      "fields": {}
+    },
+    "Session": {
+      "methods": {
+        "get": "mixed",
+        "put": "void",
+        "has": "bool",
+        "forget": "void",
+        "flush": "void",
+        "all": "array",
+        "flash": "void",
+        "pull": "mixed",
+        "regenerate": "bool",
+        "token": "string"
+      },
+      "fields": {}
+    },
+    "Cookie": {
+      "methods": {
+        "get": "mixed",
+        "make": "Cookie",
+        "queue": "void",
+        "forget": "Cookie",
+        "has": "bool",
+        "unqueue": "void"
+      },
+      "fields": {}
+    },
+    "Hash": {
+      "methods": {
+        "make": "string",
+        "check": "bool",
+        "needsRehash": "bool",
+        "info": "array",
+        "setRounds": "Hasher",
+        "isHashed": "bool"
+      },
+      "fields": {}
+    },
+    "Http": {
+      "methods": {
+        "get": "Response",
+        "post": "Response",
+        "put": "Response",
+        "delete": "Response",
+        "withHeaders": "PendingRequest",
+        "withToken": "PendingRequest",
+        "timeout": "PendingRequest",
+        "retry": "PendingRequest",
+        "pool": "array",
+        "fake": "Factory"
+      },
+      "fields": {}
+    },
+    "Mail": {
+      "methods": {
+        "to": "PendingMail",
+        "send": "void",
+        "queue": "void",
+        "later": "mixed",
+        "fake": "void",
+        "alwaysTo": "void"
+      },
+      "fields": {}
+    },
+    "Queue": {
+      "methods": {
+        "push": "mixed",
+        "later": "mixed",
+        "bulk": "mixed",
+        "fake": "void",
+        "size": "int",
+        "before": "void",
+        "after": "void",
+        "createPayload": "string"
+      },
+      "fields": {}
+    },
+    "Event": {
+      "methods": {
+        "dispatch": "mixed",
+        "listen": "void",
+        "subscribe": "void",
+        "fake": "void",
+        "hasListeners": "bool",
+        "forget": "void",
+        "until": "mixed"
+      },
+      "fields": {}
+    },
+    "Config": {
+      "methods": {
+        "get": "mixed",
+        "set": "void",
+        "has": "bool",
+        "all": "array",
+        "prepend": "void",
+        "push": "void"
+      },
+      "fields": {}
+    },
+    "App": {
+      "methods": {
+        "make": "mixed",
+        "singleton": "void",
+        "bind": "void",
+        "version": "string",
+        "environment": "string",
+        "isDownForMaintenance": "bool",
+        "register": "mixed",
+        "runningInConsole": "bool"
+      },
+      "fields": {}
+    },
+    "URL": {
+      "methods": {
+        "to": "string",
+        "route": "string",
+        "action": "string",
+        "signedRoute": "string",
+        "temporarySignedRoute": "string",
+        "previous": "string",
+        "current": "string",
+        "full": "string",
+        "is": "bool"
+      },
+      "fields": {}
+    },
+    "Redirect": {
+      "methods": {
+        "to": "RedirectResponse",
+        "route": "RedirectResponse",
+        "action": "RedirectResponse",
+        "back": "RedirectResponse",
+        "away": "RedirectResponse",
+        "intended": "RedirectResponse",
+        "refresh": "RedirectResponse"
+      },
+      "fields": {}
+    },
+    "Response": {
+      "methods": {
+        "make": "Response",
+        "json": "JsonResponse",
+        "view": "Response",
+        "download": "BinaryFileResponse",
+        "stream": "StreamedResponse",
+        "file": "BinaryFileResponse",
+        "noContent": "Response"
+      },
+      "fields": {}
+    },
+    "File": {
+      "methods": {
+        "get": "string",
+        "put": "int",
+        "exists": "bool",
+        "delete": "bool",
+        "copy": "bool",
+        "move": "bool",
+        "size": "int",
+        "lastModified": "int",
+        "files": "array",
+        "directories": "array",
+        "makeDirectory": "bool"
+      },
+      "fields": {}
+    },
+    "Lang": {
+      "methods": {
+        "get": "string",
+        "has": "bool",
+        "choice": "string",
+        "locale": "string",
+        "setLocale": "void",
+        "getLocale": "string"
+      },
+      "fields": {}
+    },
+    "RateLimiter": {
+      "methods": {
+        "hit": "int",
+        "attempts": "int",
+        "tooManyAttempts": "bool",
+        "clear": "void",
+        "availableIn": "int",
+        "remaining": "int",
+        "increment": "int"
+      },
+      "fields": {}
+    },
+    "Password": {
+      "methods": {
+        "sendResetLink": "string",
+        "reset": "mixed",
+        "broker": "Broker",
+        "getUser": "CanResetPassword",
+        "createToken": "string"
+      },
+      "fields": {}
+    },
+    "Number": {
+      "methods": {
+        "format": "string",
+        "percentage": "string",
+        "currency": "string",
+        "fileSize": "string",
+        "ordinal": "string",
+        "spell": "string",
+        "pairs": "array",
+        "clamp": "mixed"
+      },
+      "fields": {}
+    },
+    "Collection": {
+      "methods": {
+        "make": "Collection",
+        "range": "Collection",
+        "times": "Collection",
+        "wrap": "Collection",
+        "empty": "Collection",
+        "macro": "void"
+      },
+      "fields": {}
+    },
+    "Process": {
+      "methods": {
+        "run": "Result",
+        "command": "PendingProcess",
+        "path": "PendingProcess",
+        "timeout": "PendingProcess",
+        "forever": "PendingProcess",
+        "fake": "Factory",
+        "pool": "array"
+      },
+      "fields": {}
+    },
+    "Context": {
+      "methods": {
+        "get": "mixed",
+        "add": "void",
+        "push": "void",
+        "pull": "mixed",
+        "all": "array",
+        "has": "bool",
+        "forget": "void",
+        "dehydrate": "array"
+      },
+      "fields": {}
+    },
+    "Model": {
+      "methods": {
+        "all": "Collection",
+        "find": "Model",
+        "findOrFail": "Model",
+        "create": "Model",
+        "where": "Builder",
+        "query": "Builder",
+        "destroy": "int",
+        "count": "int",
+        "first": "Model",
+        "updateOrCreate": "Model",
+        "firstOrCreate": "Model",
+        "with": "Builder"
+      },
+      "fields": {}
+    },
+    "model": {
+      "methods": {
+        "save": "bool",
+        "delete": "bool",
+        "update": "bool",
+        "fill": "Model",
+        "fresh": "Model",
+        "refresh": "Model",
+        "replicate": "Model",
+        "push": "bool",
+        "touch": "bool",
+        "isDirty": "bool"
+      },
+      "fields": {}
+    },
+    "query": {
+      "methods": {
+        "where": "Builder",
+        "orWhere": "Builder",
+        "orderBy": "Builder",
+        "limit": "Builder",
+        "get": "Collection",
+        "first": "Model",
+        "count": "int",
+        "paginate": "Paginator",
+        "insert": "bool",
+        "update": "int",
+        "delete": "int",
+        "join": "Builder",
+        "select": "Builder",
+        "with": "Builder"
+      },
+      "fields": {}
+    },
+    "relation": {
+      "methods": {
+        "get": "Collection",
+        "first": "Model",
+        "create": "Model",
+        "save": "Model",
+        "attach": "void",
+        "detach": "int",
+        "sync": "array",
+        "pluck": "Collection"
+      },
+      "fields": {}
+    },
+    "paginator": {
+      "methods": {
+        "links": "string",
+        "items": "array",
+        "total": "int",
+        "currentPage": "int",
+        "perPage": "int",
+        "hasMorePages": "bool",
+        "hasPages": "bool",
+        "nextPageUrl": "string"
+      },
+      "fields": {}
+    },
+    "table": {
+      "methods": {
+        "increments": "void",
+        "id": "void",
+        "string": "void",
+        "integer": "void",
+        "text": "void",
+        "timestamps": "void",
+        "foreignId": "ForeignIdColumnDefinition",
+        "softDeletes": "void",
+        "index": "void",
+        "unique": "void",
+        "dropColumn": "void"
+      },
+      "fields": {}
+    },
+    "Factory": {
+      "methods": {
+        "create": "Model",
+        "make": "Model",
+        "count": "Factory",
+        "raw": "array",
+        "sequence": "Factory",
+        "createMany": "Collection"
+      },
+      "fields": {}
+    },
+    "faker": {
+      "methods": {
+        "name": "string",
+        "email": "string",
+        "text": "string",
+        "sentence": "string",
+        "paragraph": "string",
+        "numberBetween": "int",
+        "randomElement": "mixed",
+        "date": "string",
+        "uuid": "string",
+        "boolean": "bool",
+        "unique": "Faker",
+        "optional": "mixed"
+      },
+      "fields": {}
+    },
+    "file": {
+      "methods": {
+        "store": "string",
+        "storeAs": "string",
+        "getClientOriginalName": "string",
+        "getClientOriginalExtension": "string",
+        "getSize": "int",
+        "getMimeType": "string",
+        "isValid": "bool",
+        "move": "File",
+        "hashName": "string"
+      },
+      "fields": {}
+    },
+    "user": {
+      "methods": {
+        "save": "bool",
+        "delete": "bool",
+        "can": "bool",
+        "hasRole": "bool",
+        "assignRole": "User",
+        "notify": "void",
+        "tokens": "Collection",
+        "createToken": "NewAccessToken"
+      },
+      "fields": {}
+    },
+    "pdo": {
+      "methods": {
+        "query": "PDOStatement",
+        "prepare": "PDOStatement",
+        "exec": "int",
+        "lastInsertId": "string",
+        "beginTransaction": "bool",
+        "commit": "bool",
+        "rollBack": "bool",
+        "quote": "string",
+        "setAttribute": "bool",
+        "getAttribute": "mixed",
+        "errorInfo": "array"
+      },
+      "fields": {}
+    },
+    "stmt": {
+      "methods": {
+        "fetch": "mixed",
+        "fetchAll": "array",
+        "execute": "bool",
+        "bindParam": "bool",
+        "bindValue": "bool",
+        "rowCount": "int",
+        "columnCount": "int",
+        "setFetchMode": "bool",
+        "errorInfo": "array"
+      },
+      "fields": {}
+    },
+    "request": {
+      "methods": {
+        "input": "mixed",
+        "all": "array",
+        "has": "bool",
+        "validate": "array",
+        "file": "UploadedFile",
+        "query": "mixed",
+        "header": "mixed",
+        "cookie": "mixed",
+        "user": "User",
+        "ip": "string",
+        "method": "string",
+        "path": "string",
+        "is": "bool",
+        "merge": "Request",
+        "only": "array",
+        "except": "array",
+        "bearerToken": "string"
+      },
+      "fields": {}
+    },
+    "auth": {
+      "methods": {
+        "user": "User",
+        "check": "bool",
+        "id": "int",
+        "attempt": "bool",
+        "logout": "void",
+        "guest": "bool"
+      },
+      "fields": {}
+    },
+    "validator": {
+      "methods": {
+        "passes": "bool",
+        "fails": "bool",
+        "errors": "MessageBag",
+        "validated": "array",
+        "sometimes": "void",
+        "after": "void",
+        "messages": "MessageBag"
+      },
+      "fields": {}
+    },
+    "Carbon": {
+      "methods": {
+        "now": "Carbon",
+        "parse": "Carbon",
+        "today": "Carbon",
+        "create": "Carbon",
+        "setLocale": "void",
+        "yesterday": "Carbon",
+        "tomorrow": "Carbon",
+        "createFromFormat": "Carbon",
+        "setTestNow": "void",
+        "getTestNow": "Carbon"
+      },
+      "fields": {}
+    },
+    "carbon": {
+      "methods": {
+        "format": "string",
+        "addDays": "Carbon",
+        "subDays": "Carbon",
+        "diffInDays": "int",
+        "isPast": "bool",
+        "isFuture": "bool",
+        "startOfDay": "Carbon",
+        "endOfDay": "Carbon",
+        "toDateString": "string",
+        "copy": "Carbon",
+        "setTimezone": "Carbon",
+        "age": "int"
+      },
+      "fields": {}
+    },
+    "Assert": {
+      "methods": {
+        "assertEquals": "void",
+        "assertTrue": "void",
+        "assertFalse": "void",
+        "assertNull": "void",
+        "assertNotNull": "void",
+        "assertCount": "void",
+        "assertContains": "void",
+        "assertInstanceOf": "void",
+        "assertSame": "void",
+        "assertEmpty": "void",
+        "assertArrayHasKey": "void",
+        "assertStringContainsString": "void",
+        "fail": "void",
+        "markTestSkipped": "void"
+      },
+      "fields": {}
+    },
+    "TestCase": {
+      "methods": {
+        "expectException": "void",
+        "expectExceptionMessage": "void",
+        "expectExceptionCode": "void",
+        "markTestSkipped": "void",
+        "assertEquals": "void",
+        "setUp": "void",
+        "tearDown": "void",
+        "getMockBuilder": "MockBuilder",
+        "createMock": "Mock",
+        "expectOutputString": "void"
+      },
+      "fields": {}
+    },
+    "DateTime": {
+      "methods": {
+        "format": "string",
+        "modify": "DateTime",
+        "setDate": "DateTime",
+        "setTime": "DateTime",
+        "add": "DateTime",
+        "sub": "DateTime",
+        "diff": "DateInterval",
+        "getTimestamp": "int",
+        "setTimezone": "DateTime",
+        "createFromFormat": "DateTime"
+      },
+      "fields": {}
+    },
+    "Exception": {
+      "methods": {
+        "getMessage": "string",
+        "getCode": "int",
+        "getFile": "string",
+        "getLine": "int",
+        "getTrace": "array",
+        "getPrevious": "Exception",
+        "getTraceAsString": "string"
+      },
+      "fields": {}
+    },
+    "Artisan": {
+      "methods": {
+        "call": "int",
+        "queue": "PendingDispatch",
+        "all": "array",
+        "output": "string"
+      },
+      "fields": {}
+    },
+    "Bus": {
+      "methods": {
+        "dispatch": "mixed",
+        "dispatchSync": "mixed",
+        "chain": "PendingChain",
+        "fake": "void",
+        "assertDispatched": "void"
+      },
+      "fields": {}
+    },
+    "Gate": {
+      "methods": {
+        "allows": "bool",
+        "denies": "bool",
+        "authorize": "Response",
+        "define": "Gate",
+        "policy": "Gate"
+      },
+      "fields": {}
+    },
+    "Crypt": {
+      "methods": {
+        "encrypt": "string",
+        "decrypt": "mixed",
+        "encryptString": "string",
+        "decryptString": "string"
+      },
+      "fields": {}
+    },
+    "Notification": {
+      "methods": {
+        "send": "void",
+        "fake": "void",
+        "assertSentTo": "void",
+        "route": "AnonymousNotifiable"
+      },
+      "fields": {}
+    },
+    "collection": {
+      "methods": {
+        "all": "array",
+        "count": "int",
+        "first": "mixed",
+        "last": "mixed",
+        "pluck": "Collection",
+        "map": "Collection",
+        "filter": "Collection",
+        "each": "Collection",
+        "sum": "mixed",
+        "avg": "mixed",
+        "groupBy": "Collection",
+        "sortBy": "Collection",
+        "merge": "Collection"
+      },
+      "fields": {}
+    }
+  }
+}

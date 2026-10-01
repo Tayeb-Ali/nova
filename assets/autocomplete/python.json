@@ -5,17 +5,26 @@
         "getcwd": "str",
         "listdir": "list",
         "makedirs": "None",
+        "mkdir": "None",
         "remove": "None",
+        "unlink": "None",
         "rename": "None",
+        "rmdir": "None",
         "system": "int",
         "getenv": "str",
-        "walk": "generator"
+        "walk": "generator",
+        "stat": "stat_result",
+        "chmod": "None",
+        "getpid": "int",
+        "urandom": "bytes",
+        "cpu_count": "int"
       },
       "fields": {
         "environ": "dict",
         "sep": "str",
         "linesep": "str",
-        "name": "str"
+        "name": "str",
+        "pathsep": "str"
       }
     },
     "path": {
@@ -28,14 +37,21 @@
         "splitext": "tuple",
         "isfile": "bool",
         "isdir": "bool",
+        "islink": "bool",
         "getsize": "int",
+        "getmtime": "float",
         "expanduser": "str",
         "relpath": "str"
       },
       "fields": {}
     },
     "sys": {
-      "methods": { "exit": "None" },
+      "methods": {
+        "exit": "None",
+        "exc_info": "tuple",
+        "getrecursionlimit": "int",
+        "setrecursionlimit": "None"
+      },
       "fields": {
         "argv": "list",
         "path": "list",
@@ -46,7 +62,9 @@
         "stderr": "file",
         "modules": "dict",
         "executable": "str",
-        "maxsize": "int"
+        "maxsize": "int",
+        "version_info": "tuple",
+        "byteorder": "str"
       }
     },
     "json": {
@@ -54,7 +72,10 @@
         "load": "Any",
         "loads": "Any",
         "dump": "None",
-        "dumps": "str"
+        "dumps": "str",
+        "JSONDecoder": "class",
+        "JSONEncoder": "class",
+        "JSONDecodeError": "exception"
       },
       "fields": {}
     },
@@ -70,13 +91,22 @@
         "log10": "float",
         "exp": "float",
         "sin": "float",
-        "cos": "float"
+        "cos": "float",
+        "tan": "float",
+        "asin": "float",
+        "acos": "float",
+        "atan": "float",
+        "degrees": "float",
+        "radians": "float",
+        "isclose": "bool",
+        "comb": "int"
       },
       "fields": {
         "pi": "float",
         "e": "float",
         "tau": "float",
-        "inf": "float"
+        "inf": "float",
+        "nan": "float"
       }
     },
     "re": {
@@ -88,28 +118,41 @@
         "finditer": "iterator",
         "sub": "str",
         "split": "list",
-        "compile": "Pattern"
+        "compile": "Pattern",
+        "escape": "str",
+        "error": "exception"
       },
       "fields": {
         "IGNORECASE": "flag",
         "MULTILINE": "flag",
-        "DOTALL": "flag"
+        "DOTALL": "flag",
+        "VERBOSE": "flag"
       }
     },
     "random": {
       "methods": {
         "random": "float",
         "randint": "int",
+        "randrange": "int",
         "choice": "Any",
+        "choices": "list",
         "shuffle": "None",
         "sample": "list",
         "uniform": "float",
+        "gauss": "float",
+        "getrandbits": "int",
         "seed": "None"
       },
       "fields": {}
     },
     "datetime": {
-      "methods": {},
+      "methods": {
+        "now": "datetime",
+        "today": "datetime",
+        "strptime": "datetime",
+        "fromtimestamp": "datetime",
+        "combine": "datetime"
+      },
       "fields": {
         "date": "class",
         "time": "class",
@@ -125,7 +168,726 @@
         "put": "Response",
         "delete": "Response",
         "patch": "Response",
-        "head": "Response"
+        "head": "Response",
+        "options": "Response",
+        "Session": "class"
+      },
+      "fields": {
+        "codes": "dict"
+      }
+    },
+    "collections": {
+      "methods": {
+        "Counter": "class",
+        "defaultdict": "class",
+        "deque": "class",
+        "namedtuple": "function",
+        "OrderedDict": "class",
+        "ChainMap": "class"
+      },
+      "fields": {}
+    },
+    "itertools": {
+      "methods": {
+        "chain": "iterator",
+        "cycle": "iterator",
+        "count": "iterator",
+        "repeat": "iterator",
+        "product": "iterator",
+        "permutations": "iterator",
+        "combinations": "iterator",
+        "groupby": "iterator",
+        "islice": "iterator",
+        "starmap": "iterator",
+        "takewhile": "iterator",
+        "dropwhile": "iterator",
+        "zip_longest": "iterator"
+      },
+      "fields": {}
+    },
+    "functools": {
+      "methods": {
+        "reduce": "Any",
+        "lru_cache": "decorator",
+        "cache": "decorator",
+        "partial": "partial",
+        "wraps": "decorator",
+        "singledispatch": "function",
+        "total_ordering": "decorator",
+        "cached_property": "property"
+      },
+      "fields": {
+        "WRAPPER_ASSIGNMENTS": "tuple"
+      }
+    },
+    "typing": {
+      "methods": {
+        "List": "type",
+        "Dict": "type",
+        "Tuple": "type",
+        "Union": "type",
+        "Any": "type",
+        "Callable": "type",
+        "Literal": "type",
+        "TypedDict": "class",
+        "Protocol": "class",
+        "TypeVar": "TypeVar",
+        "overload": "decorator",
+        "cast": "Any",
+        "Final": "type",
+        "Optional": "type"
+      },
+      "fields": {}
+    },
+    "dataclasses": {
+      "methods": {
+        "dataclass": "decorator",
+        "field": "Field",
+        "asdict": "dict",
+        "astuple": "tuple",
+        "replace": "Any",
+        "is_dataclass": "bool",
+        "make_dataclass": "type",
+        "FrozenInstanceError": "exception"
+      },
+      "fields": {}
+    },
+    "enum": {
+      "methods": {
+        "Enum": "class",
+        "IntEnum": "class",
+        "Flag": "class",
+        "auto": "auto",
+        "unique": "decorator"
+      },
+      "fields": {
+        "name": "str",
+        "value": "Any"
+      }
+    },
+    "pathlib": {
+      "methods": {
+        "Path": "class",
+        "PurePath": "class",
+        "PosixPath": "class",
+        "PurePosixPath": "class",
+        "WindowsPath": "class"
+      },
+      "fields": {}
+    },
+    "Path": {
+      "methods": {
+        "exists": "bool",
+        "mkdir": "None",
+        "write_text": "None",
+        "read_text": "str",
+        "glob": "generator",
+        "unlink": "None",
+        "rename": "None",
+        "iterdir": "generator",
+        "touch": "None",
+        "is_file": "bool"
+      },
+      "fields": {
+        "name": "str",
+        "suffix": "str",
+        "stem": "str",
+        "parent": "Path"
+      }
+    },
+    "shutil": {
+      "methods": {
+        "copy": "str",
+        "copytree": "str",
+        "rmtree": "None",
+        "move": "str",
+        "disk_usage": "namedtuple",
+        "which": "str",
+        "make_archive": "str",
+        "unpack_archive": "None"
+      },
+      "fields": {}
+    },
+    "subprocess": {
+      "methods": {
+        "run": "CompletedProcess",
+        "Popen": "class",
+        "call": "int",
+        "check_output": "bytes",
+        "CompletedProcess": "class"
+      },
+      "fields": {
+        "PIPE": "int",
+        "STDOUT": "int",
+        "DEVNULL": "int"
+      }
+    },
+    "threading": {
+      "methods": {
+        "Thread": "class",
+        "Lock": "class",
+        "Event": "class",
+        "Semaphore": "class",
+        "Timer": "class",
+        "current_thread": "Thread",
+        "active_count": "int"
+      },
+      "fields": {}
+    },
+    "asyncio": {
+      "methods": {
+        "run": "Any",
+        "sleep": "None",
+        "gather": "tuple",
+        "create_task": "Task",
+        "Task": "class",
+        "Future": "class",
+        "Lock": "class",
+        "Queue": "class",
+        "Event": "class",
+        "Semaphore": "class",
+        "get_event_loop": "loop",
+        "wait_for": "Any",
+        "shield": "Any"
+      },
+      "fields": {}
+    },
+    "sqlite3": {
+      "methods": {
+        "connect": "Connection",
+        "register_adapter": "None",
+        "register_converter": "None",
+        "complete_statement": "bool"
+      },
+      "fields": {
+        "PARSE_DECLTYPES": "int",
+        "PARSE_COLNAMES": "int",
+        "version": "str",
+        "sqlite_version": "str"
+      }
+    },
+    "conn": {
+      "methods": {
+        "execute": "Cursor",
+        "executemany": "Cursor",
+        "executescript": "Cursor",
+        "commit": "None",
+        "rollback": "None",
+        "close": "None",
+        "cursor": "Cursor"
+      },
+      "fields": {
+        "isolation_level": "str",
+        "in_transaction": "bool"
+      }
+    },
+    "cursor": {
+      "methods": {
+        "execute": "Cursor",
+        "executemany": "Cursor",
+        "fetchone": "tuple",
+        "fetchall": "list",
+        "fetchmany": "list",
+        "close": "None"
+      },
+      "fields": {
+        "description": "tuple",
+        "lastrowid": "int",
+        "rowcount": "int"
+      }
+    },
+    "logging": {
+      "methods": {
+        "getLogger": "Logger",
+        "basicConfig": "None",
+        "info": "None",
+        "debug": "None",
+        "warning": "None",
+        "error": "None",
+        "critical": "None",
+        "exception": "None",
+        "shutdown": "None"
+      },
+      "fields": {
+        "DEBUG": "int",
+        "INFO": "int",
+        "WARNING": "int",
+        "ERROR": "int",
+        "CRITICAL": "int"
+      }
+    },
+    "unittest": {
+      "methods": {
+        "TestCase": "class",
+        "main": "None",
+        "mock": "module",
+        "skip": "decorator",
+        "expectedFailure": "decorator"
+      },
+      "fields": {}
+    },
+    "assert": {
+      "methods": {
+        "assertEqual": "None",
+        "assertTrue": "None",
+        "assertFalse": "None",
+        "assertIn": "None",
+        "assertRaises": "context",
+        "assertIsNone": "None",
+        "assertIsNotNone": "None",
+        "fail": "None"
+      },
+      "fields": {}
+    },
+    "argparse": {
+      "methods": {
+        "ArgumentParser": "class",
+        "Namespace": "class",
+        "ArgumentError": "exception",
+        "FileType": "class"
+      },
+      "fields": {
+        "SUPPRESS": "str",
+        "REMAINDER": "str",
+        "PARSER": "str"
+      }
+    },
+    "parser": {
+      "methods": {
+        "add_argument": "None",
+        "parse_args": "Namespace",
+        "add_subparsers": "subparsers",
+        "set_defaults": "None",
+        "error": "None"
+      },
+      "fields": {
+        "prog": "str",
+        "description": "str"
+      }
+    },
+    "csv": {
+      "methods": {
+        "reader": "iterator",
+        "writer": "writer",
+        "DictReader": "iterator",
+        "DictWriter": "writer"
+      },
+      "fields": {
+        "QUOTE_MINIMAL": "int",
+        "QUOTE_ALL": "int"
+      }
+    },
+    "io": {
+      "methods": {
+        "StringIO": "class",
+        "BytesIO": "class",
+        "open": "file"
+      },
+      "fields": {
+        "SEEK_SET": "int",
+        "SEEK_CUR": "int",
+        "SEEK_END": "int"
+      }
+    },
+    "pickle": {
+      "methods": {
+        "dump": "None",
+        "load": "Any",
+        "dumps": "bytes",
+        "loads": "Any",
+        "Pickler": "class",
+        "Unpickler": "class"
+      },
+      "fields": {
+        "HIGHEST_PROTOCOL": "int"
+      }
+    },
+    "copy": {
+      "methods": {
+        "copy": "Any",
+        "deepcopy": "Any",
+        "Error": "exception"
+      },
+      "fields": {}
+    },
+    "pprint": {
+      "methods": {
+        "pprint": "None",
+        "pformat": "str",
+        "isreadable": "bool",
+        "PrettyPrinter": "class",
+        "saferepr": "str"
+      },
+      "fields": {}
+    },
+    "traceback": {
+      "methods": {
+        "format_exc": "str",
+        "print_exc": "None",
+        "extract_tb": "StackSummary",
+        "format_exception": "str",
+        "format_tb": "list"
+      },
+      "fields": {}
+    },
+    "warnings": {
+      "methods": {
+        "warn": "None",
+        "filterwarnings": "None",
+        "simplefilter": "None",
+        "catch_warnings": "context",
+        "showwarning": "None"
+      },
+      "fields": {}
+    },
+    "contextlib": {
+      "methods": {
+        "contextmanager": "decorator",
+        "suppress": "context",
+        "closing": "context",
+        "redirect_stdout": "context",
+        "ExitStack": "class",
+        "asynccontextmanager": "decorator"
+      },
+      "fields": {}
+    },
+    "abc": {
+      "methods": {
+        "ABC": "class",
+        "ABCMeta": "class",
+        "abstractmethod": "decorator",
+        "get_cache_token": "tuple",
+        "update_abstractmethods": "None"
+      },
+      "fields": {}
+    },
+    "decimal": {
+      "methods": {
+        "Decimal": "class",
+        "getcontext": "Context",
+        "setcontext": "None",
+        "localcontext": "context"
+      },
+      "fields": {
+        "ROUND_HALF_UP": "str",
+        "ROUND_DOWN": "str"
+      }
+    },
+    "statistics": {
+      "methods": {
+        "mean": "float",
+        "median": "float",
+        "mode": "Any",
+        "stdev": "float",
+        "variance": "float",
+        "pstdev": "float",
+        "pvariance": "float",
+        "multimode": "list"
+      },
+      "fields": {}
+    },
+    "hashlib": {
+      "methods": {
+        "md5": "hash",
+        "sha1": "hash",
+        "sha256": "hash",
+        "sha512": "hash",
+        "new": "hash"
+      },
+      "fields": {
+        "algorithms_available": "set"
+      }
+    },
+    "secrets": {
+      "methods": {
+        "token_hex": "str",
+        "token_urlsafe": "str",
+        "choice": "Any",
+        "randbelow": "int",
+        "compare_digest": "bool"
+      },
+      "fields": {}
+    },
+    "uuid": {
+      "methods": {
+        "uuid4": "UUID",
+        "uuid5": "UUID",
+        "uuid1": "UUID",
+        "uuid3": "UUID",
+        "UUID": "class"
+      },
+      "fields": {
+        "NAMESPACE_DNS": "UUID"
+      }
+    },
+    "time": {
+      "methods": {
+        "sleep": "None",
+        "time": "float",
+        "localtime": "struct_time",
+        "gmtime": "struct_time",
+        "strftime": "str",
+        "strptime": "struct_time",
+        "monotonic": "float",
+        "perf_counter": "float"
+      },
+      "fields": {}
+    },
+    "calendar": {
+      "methods": {
+        "month": "str",
+        "calendar": "str",
+        "isleap": "bool",
+        "weekday": "int",
+        "monthrange": "tuple"
+      },
+      "fields": {}
+    },
+    "operator": {
+      "methods": {
+        "add": "Any",
+        "mul": "Any",
+        "itemgetter": "callable",
+        "attrgetter": "callable",
+        "methodcaller": "callable",
+        "lt": "bool",
+        "eq": "bool",
+        "not_": "bool",
+        "and_": "Any",
+        "or_": "Any"
+      },
+      "fields": {}
+    },
+    "inspect": {
+      "methods": {
+        "getsource": "str",
+        "signature": "Signature",
+        "isfunction": "bool",
+        "isclass": "bool",
+        "getmembers": "list",
+        "stack": "list",
+        "currentframe": "frame"
+      },
+      "fields": {}
+    },
+    "http_server": {
+      "methods": {
+        "HTTPServer": "class",
+        "BaseHTTPRequestHandler": "class",
+        "SimpleHTTPRequestHandler": "class",
+        "ThreadingHTTPServer": "class",
+        "CGIHTTPRequestHandler": "class"
+      },
+      "fields": {}
+    },
+    "urllib_request": {
+      "methods": {
+        "urlopen": "response",
+        "Request": "class",
+        "urlretrieve": "tuple",
+        "build_opener": "opener",
+        "pathname2url": "str"
+      },
+      "fields": {}
+    },
+    "urllib_parse": {
+      "methods": {
+        "urlparse": "ParseResult",
+        "urlencode": "str",
+        "quote": "str",
+        "unquote": "str",
+        "urljoin": "str",
+        "urlsplit": "SplitResult",
+        "parse_qsl": "list"
+      },
+      "fields": {}
+    },
+    "socket": {
+      "methods": {
+        "socket": "class",
+        "gethostname": "str",
+        "gethostbyname": "str",
+        "create_connection": "socket",
+        "getaddrinfo": "list"
+      },
+      "fields": {
+        "AF_INET": "int",
+        "SOCK_STREAM": "int"
+      }
+    },
+    "smtplib": {
+      "methods": {
+        "SMTP": "class",
+        "SMTP_SSL": "class",
+        "SMTPException": "exception",
+        "SMTPAuthenticationError": "exception",
+        "SMTPConnectError": "exception"
+      },
+      "fields": {}
+    },
+    "ftplib": {
+      "methods": {
+        "FTP": "class",
+        "FTP_TLS": "class",
+        "error_perm": "exception",
+        "error_temp": "exception",
+        "error_reply": "exception"
+      },
+      "fields": {}
+    },
+    "ET": {
+      "methods": {
+        "parse": "ElementTree",
+        "fromstring": "Element",
+        "tostring": "bytes",
+        "Element": "class",
+        "SubElement": "class",
+        "Comment": "Element",
+        "ElementTree": "class"
+      },
+      "fields": {}
+    },
+    "email": {
+      "methods": {
+        "message_from_string": "Message",
+        "message_from_bytes": "Message",
+        "Parser": "class",
+        "Message": "class"
+      },
+      "fields": {
+        "policy": "EmailPolicy"
+      }
+    },
+    "doctest": {
+      "methods": {
+        "testmod": "TestResults",
+        "testfile": "TestResults",
+        "run_docstring_examples": "None",
+        "DocTestSuite": "TestSuite"
+      },
+      "fields": {
+        "ELLIPSIS": "int",
+        "NORMALIZE_WHITESPACE": "int"
+      }
+    },
+    "pdb": {
+      "methods": {
+        "set_trace": "None",
+        "run": "None",
+        "post_mortem": "None",
+        "Pdb": "class",
+        "runeval": "Any"
+      },
+      "fields": {}
+    },
+    "np": {
+      "methods": {
+        "array": "ndarray",
+        "zeros": "ndarray",
+        "ones": "ndarray",
+        "arange": "ndarray",
+        "linspace": "ndarray",
+        "mean": "float",
+        "sum": "Any",
+        "max": "Any",
+        "reshape": "ndarray",
+        "concatenate": "ndarray",
+        "dot": "ndarray"
+      },
+      "fields": {
+        "pi": "float",
+        "nan": "float",
+        "inf": "float"
+      }
+    },
+    "pd": {
+      "methods": {
+        "DataFrame": "class",
+        "Series": "class",
+        "read_csv": "DataFrame",
+        "read_excel": "DataFrame",
+        "read_json": "DataFrame",
+        "concat": "DataFrame",
+        "merge": "DataFrame",
+        "date_range": "DatetimeIndex",
+        "isna": "bool",
+        "notna": "bool",
+        "set_option": "None"
+      },
+      "fields": {}
+    },
+    "plt": {
+      "methods": {
+        "plot": "list",
+        "scatter": "PathCollection",
+        "bar": "BarContainer",
+        "hist": "tuple",
+        "show": "None",
+        "figure": "Figure",
+        "subplot": "Axes",
+        "xlabel": "None",
+        "ylabel": "None",
+        "title": "None",
+        "legend": "None",
+        "savefig": "None",
+        "xlim": "tuple",
+        "ylim": "tuple"
+      },
+      "fields": {}
+    },
+    "flask": {
+      "methods": {
+        "Flask": "class",
+        "render_template": "str",
+        "jsonify": "Response",
+        "url_for": "str",
+        "redirect": "Response",
+        "abort": "None",
+        "Blueprint": "class"
+      },
+      "fields": {
+        "session": "dict",
+        "g": "object"
+      }
+    },
+    "models": {
+      "methods": {
+        "Model": "class",
+        "CharField": "Field",
+        "IntegerField": "Field",
+        "ForeignKey": "Field",
+        "ManyToManyField": "Field",
+        "DateTimeField": "Field",
+        "BooleanField": "Field",
+        "TextField": "Field"
+      },
+      "fields": {}
+    },
+    "fastapi": {
+      "methods": {
+        "FastAPI": "class",
+        "APIRouter": "class",
+        "Depends": "Any",
+        "HTTPException": "exception",
+        "get": "decorator",
+        "post": "decorator",
+        "put": "decorator",
+        "delete": "decorator",
+        "include_router": "None"
+      },
+      "fields": {
+        "status": "module"
+      }
+    },
+    "pytest": {
+      "methods": {
+        "raises": "context",
+        "fixture": "decorator",
+        "mark": "MarkDecorator",
+        "param": "ParamSet",
+        "skip": "None",
+        "fail": "None",
+        "approx": "approx"
       },
       "fields": {}
     }

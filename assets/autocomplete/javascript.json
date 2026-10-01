@@ -108,7 +108,9 @@
         "any": "Promise",
         "race": "Promise",
         "resolve": "Promise",
-        "reject": "Promise"
+        "reject": "Promise",
+        "withResolvers": "object",
+        "try": "Promise"
       },
       "fields": {}
     },
@@ -146,42 +148,100 @@
       "methods": {
         "exit": "void",
         "cwd": "string",
+        "chdir": "void",
         "uptime": "number",
         "hrtime": "any",
         "memoryUsage": "object",
+        "cpuUsage": "object",
+        "resourceUsage": "object",
+        "constrainedMemory": "number",
+        "availableMemory": "number",
         "nextTick": "void",
-        "on": "void"
+        "on": "void",
+        "kill": "void",
+        "abort": "void",
+        "disconnect": "void",
+        "send": "boolean",
+        "umask": "number",
+        "dlopen": "void",
+        "loadEnvFile": "void",
+        "getBuiltinModule": "any",
+        "setUncaughtExceptionCaptureCallback": "void",
+        "hasUncaughtExceptionCaptureCallback": "boolean",
+        "getuid": "number",
+        "getgid": "number",
+        "setuid": "void",
+        "setgid": "void"
       },
       "fields": {
         "env": "object",
         "argv": "string[]",
         "version": "string",
+        "versions": "object",
         "platform": "string",
+        "arch": "string",
         "pid": "number",
+        "title": "string",
+        "execPath": "string",
+        "execArgv": "string[]",
+        "exitCode": "number",
+        "connected": "boolean",
+        "config": "object",
+        "release": "object",
+        "features": "object",
         "stdout": "stream",
         "stdin": "stream",
         "stderr": "stream"
       }
     },
+    "require": {
+      "methods": { "resolve": "string" },
+      "fields": { "cache": "object", "extensions": "object", "main": "object" }
+    },
     "module": {
-      "methods": {},
-      "fields": { "exports": "any" }
+      "methods": {
+        "createRequire": "function",
+        "findPackageJSON": "string",
+        "register": "void",
+        "syncBuiltinESMExports": "void"
+      },
+      "fields": { "exports": "any", "builtinModules": "string[]" }
     },
     "document": {
       "methods": {
         "getElementById": "Element",
         "querySelector": "Element",
         "querySelectorAll": "Element[]",
+        "getElementsByClassName": "Element[]",
+        "getElementsByTagName": "Element[]",
+        "getElementsByName": "Element[]",
         "createElement": "Element",
+        "createElementNS": "Element",
         "createTextNode": "Text",
+        "createComment": "Comment",
+        "createDocumentFragment": "Fragment",
+        "createRange": "Range",
+        "createEvent": "Event",
+        "importNode": "Element",
+        "adoptNode": "Element",
+        "hasFocus": "boolean",
+        "elementFromPoint": "Element",
         "addEventListener": "void",
-        "removeEventListener": "void"
+        "removeEventListener": "void",
+        "dispatchEvent": "boolean"
       },
       "fields": {
         "body": "Element",
         "head": "Element",
         "title": "string",
-        "cookie": "string"
+        "cookie": "string",
+        "documentElement": "Element",
+        "activeElement": "Element",
+        "readyState": "string",
+        "referrer": "string",
+        "characterSet": "string",
+        "visibilityState": "string",
+        "fullscreenElement": "Element"
       }
     },
     "window": {
@@ -194,9 +254,20 @@
         "setInterval": "number",
         "clearTimeout": "void",
         "clearInterval": "void",
+        "requestAnimationFrame": "number",
+        "cancelAnimationFrame": "void",
+        "getComputedStyle": "CSSStyle",
+        "matchMedia": "MediaQuery",
+        "scrollTo": "void",
+        "scrollBy": "void",
+        "scroll": "void",
         "open": "Window",
         "close": "void",
-        "addEventListener": "void"
+        "addEventListener": "void",
+        "removeEventListener": "void",
+        "dispatchEvent": "boolean",
+        "postMessage": "void",
+        "getSelection": "Selection"
       },
       "fields": {
         "localStorage": "Storage",
@@ -204,8 +275,14 @@
         "location": "Location",
         "navigator": "Navigator",
         "document": "Document",
+        "history": "History",
+        "screen": "Screen",
         "innerWidth": "number",
-        "innerHeight": "number"
+        "innerHeight": "number",
+        "scrollX": "number",
+        "scrollY": "number",
+        "devicePixelRatio": "number",
+        "name": "string"
       }
     },
     "localStorage": {
@@ -239,13 +316,671 @@
       }
     },
     "navigator": {
-      "methods": {},
+      "methods": {
+        "canShare": "boolean",
+        "share": "Promise",
+        "registerProtocolHandler": "void",
+        "vibrate": "boolean",
+        "sendBeacon": "boolean"
+      },
       "fields": {
         "userAgent": "string",
         "language": "string",
+        "languages": "string[]",
         "onLine": "boolean",
-        "clipboard": "object"
+        "clipboard": "object",
+        "geolocation": "object",
+        "mediaDevices": "object",
+        "serviceWorker": "object",
+        "permissions": "object",
+        "storage": "object",
+        "hardwareConcurrency": "number",
+        "maxTouchPoints": "number",
+        "cookieEnabled": "boolean",
+        "pdfViewerEnabled": "boolean"
       }
+    },
+    "history": {
+      "methods": {
+        "back": "void",
+        "forward": "void",
+        "go": "void",
+        "pushState": "void",
+        "replaceState": "void"
+      },
+      "fields": { "length": "number", "state": "any", "scrollRestoration": "string" }
+    },
+    "screen": {
+      "methods": {},
+      "fields": {
+        "width": "number",
+        "height": "number",
+        "availWidth": "number",
+        "availHeight": "number",
+        "colorDepth": "number",
+        "orientation": "object"
+      }
+    },
+    "Date": {
+      "methods": { "now": "number", "parse": "number", "UTC": "number" },
+      "fields": {}
+    },
+    "RegExp": {
+      "methods": { "escape": "string" },
+      "fields": {}
+    },
+    "Map": {
+      "methods": { "groupBy": "Map" },
+      "fields": {}
+    },
+    "BigInt": {
+      "methods": { "asIntN": "bigint", "asUintN": "bigint" },
+      "fields": {}
+    },
+    "Proxy": {
+      "methods": { "revocable": "object" },
+      "fields": {}
+    },
+    "Intl": {
+      "methods": {
+        "getCanonicalLocales": "string[]",
+        "supportedValuesOf": "string[]",
+        "DateTimeFormat": "object",
+        "NumberFormat": "object",
+        "Collator": "object"
+      },
+      "fields": {}
+    },
+    "performance": {
+      "methods": {
+        "now": "number",
+        "mark": "void",
+        "measure": "object",
+        "clearMarks": "void",
+        "clearMeasures": "void",
+        "getEntries": "object[]",
+        "getEntriesByName": "object[]",
+        "getEntriesByType": "object[]",
+        "eventLoopUtilization": "object",
+        "timerify": "function"
+      },
+      "fields": { "timeOrigin": "number" }
+    },
+    "Headers": {
+      "methods": {
+        "append": "void",
+        "delete": "void",
+        "get": "string",
+        "has": "boolean",
+        "set": "void",
+        "entries": "Iterator",
+        "keys": "Iterator",
+        "values": "Iterator",
+        "forEach": "void"
+      },
+      "fields": {}
+    },
+    "FormData": {
+      "methods": {
+        "append": "void",
+        "delete": "void",
+        "get": "any",
+        "getAll": "any[]",
+        "has": "boolean",
+        "set": "void",
+        "entries": "Iterator",
+        "keys": "Iterator",
+        "values": "Iterator"
+      },
+      "fields": {}
+    },
+    "Response": {
+      "methods": { "json": "Response", "redirect": "Response", "error": "Response" },
+      "fields": {}
+    },
+    "WebSocket": {
+      "methods": { "send": "void", "close": "void" },
+      "fields": {
+        "OPEN": "number",
+        "CONNECTING": "number",
+        "CLOSING": "number",
+        "CLOSED": "number"
+      }
+    },
+    "AbortSignal": {
+      "methods": { "timeout": "AbortSignal", "any": "AbortSignal", "abort": "AbortSignal" },
+      "fields": {}
+    },
+    "TextEncoder": {
+      "methods": { "encode": "Uint8Array", "encodeInto": "object" },
+      "fields": {}
+    },
+    "TextDecoder": {
+      "methods": { "decode": "string" },
+      "fields": {}
+    },
+    "fs": {
+      "methods": {
+        "readFile": "void",
+        "readFileSync": "any",
+        "writeFile": "void",
+        "writeFileSync": "void",
+        "appendFile": "void",
+        "appendFileSync": "void",
+        "existsSync": "boolean",
+        "mkdir": "void",
+        "mkdirSync": "void",
+        "readdir": "void",
+        "readdirSync": "string[]",
+        "stat": "void",
+        "statSync": "Stats",
+        "lstatSync": "Stats",
+        "unlink": "void",
+        "unlinkSync": "void",
+        "rename": "void",
+        "renameSync": "void",
+        "copyFile": "void",
+        "copyFileSync": "void",
+        "rm": "void",
+        "rmSync": "void",
+        "createReadStream": "stream",
+        "createWriteStream": "stream",
+        "watch": "watcher",
+        "openSync": "number",
+        "closeSync": "void",
+        "realpathSync": "string",
+        "mkdtempSync": "string",
+        "opendirSync": "Dir",
+        "globSync": "string[]"
+      },
+      "fields": { "promises": "object", "constants": "object" }
+    },
+    "path": {
+      "methods": {
+        "join": "string",
+        "resolve": "string",
+        "basename": "string",
+        "dirname": "string",
+        "extname": "string",
+        "parse": "object",
+        "format": "string",
+        "normalize": "string",
+        "isAbsolute": "boolean",
+        "relative": "string",
+        "toNamespacedPath": "string"
+      },
+      "fields": { "sep": "string", "delimiter": "string", "posix": "object", "win32": "object" }
+    },
+    "os": {
+      "methods": {
+        "platform": "string",
+        "arch": "string",
+        "hostname": "string",
+        "homedir": "string",
+        "tmpdir": "string",
+        "freemem": "number",
+        "totalmem": "number",
+        "cpus": "object[]",
+        "uptime": "number",
+        "loadavg": "number[]",
+        "release": "string",
+        "type": "string",
+        "version": "string",
+        "userInfo": "object",
+        "networkInterfaces": "object",
+        "availableParallelism": "number",
+        "machine": "string",
+        "endianness": "string"
+      },
+      "fields": { "EOL": "string" }
+    },
+    "http": {
+      "methods": {
+        "createServer": "Server",
+        "get": "ClientRequest",
+        "request": "ClientRequest"
+      },
+      "fields": {
+        "METHODS": "string[]",
+        "STATUS_CODES": "object",
+        "globalAgent": "Agent",
+        "maxHeaderSize": "number"
+      }
+    },
+    "https": {
+      "methods": {
+        "createServer": "Server",
+        "get": "ClientRequest",
+        "request": "ClientRequest"
+      },
+      "fields": { "globalAgent": "Agent" }
+    },
+    "net": {
+      "methods": {
+        "createServer": "Server",
+        "createConnection": "Socket",
+        "connect": "Socket",
+        "isIP": "number",
+        "isIPv4": "boolean",
+        "isIPv6": "boolean"
+      },
+      "fields": {}
+    },
+    "url": {
+      "methods": {
+        "parse": "object",
+        "format": "string",
+        "resolve": "string",
+        "fileURLToPath": "string",
+        "pathToFileURL": "URL",
+        "domainToASCII": "string",
+        "domainToUnicode": "string"
+      },
+      "fields": {}
+    },
+    "URL": {
+      "methods": {
+        "canParse": "boolean",
+        "createObjectURL": "string",
+        "revokeObjectURL": "void"
+      },
+      "fields": {}
+    },
+    "URLSearchParams": {
+      "methods": {
+        "append": "void",
+        "delete": "void",
+        "get": "string",
+        "getAll": "string[]",
+        "has": "boolean",
+        "set": "void",
+        "sort": "void",
+        "toString": "string",
+        "keys": "Iterator",
+        "values": "Iterator",
+        "entries": "Iterator"
+      },
+      "fields": { "size": "number" }
+    },
+    "util": {
+      "methods": {
+        "format": "string",
+        "inspect": "string",
+        "promisify": "function",
+        "callbackify": "function",
+        "inherits": "void",
+        "deprecate": "function",
+        "isDeepStrictEqual": "boolean",
+        "stripVTControlCharacters": "string",
+        "getSystemErrorName": "string",
+        "parseArgs": "object",
+        "styleText": "string"
+      },
+      "fields": { "types": "object", "debuglog": "function" }
+    },
+    "events": {
+      "methods": {
+        "once": "Promise",
+        "on": "AsyncIterator",
+        "getEventListeners": "function[]",
+        "getMaxListeners": "number",
+        "addAbortListener": "Disposable"
+      },
+      "fields": {
+        "defaultMaxListeners": "number",
+        "errorMonitor": "symbol",
+        "captureRejections": "symbol"
+      }
+    },
+    "EventEmitter": {
+      "methods": {
+        "on": "object",
+        "once": "object",
+        "off": "object",
+        "emit": "boolean",
+        "addListener": "object",
+        "removeListener": "object",
+        "removeAllListeners": "object",
+        "setMaxListeners": "object",
+        "getMaxListeners": "number",
+        "listenerCount": "number",
+        "listeners": "function[]",
+        "rawListeners": "function[]",
+        "prependListener": "object",
+        "prependOnceListener": "object"
+      },
+      "fields": {}
+    },
+    "crypto": {
+      "methods": {
+        "randomBytes": "Buffer",
+        "randomUUID": "string",
+        "randomInt": "number",
+        "createHash": "Hash",
+        "createHmac": "Hmac",
+        "createCipheriv": "Cipher",
+        "createDecipheriv": "Decipher",
+        "createSign": "Sign",
+        "createVerify": "Verify",
+        "createPublicKey": "KeyObject",
+        "createPrivateKey": "KeyObject",
+        "generateKeyPairSync": "object",
+        "generateKeySync": "KeyObject",
+        "pbkdf2Sync": "Buffer",
+        "scryptSync": "Buffer",
+        "timingSafeEqual": "boolean",
+        "getHashes": "string[]",
+        "getCiphers": "string[]",
+        "getCurves": "string[]",
+        "getRandomValues": "object"
+      },
+      "fields": { "subtle": "object", "webcrypto": "object", "constants": "object" }
+    },
+    "subtle": {
+      "methods": {
+        "digest": "Promise",
+        "encrypt": "Promise",
+        "decrypt": "Promise",
+        "sign": "Promise",
+        "verify": "Promise",
+        "generateKey": "Promise",
+        "importKey": "Promise",
+        "exportKey": "Promise",
+        "deriveKey": "Promise",
+        "deriveBits": "Promise",
+        "wrapKey": "Promise",
+        "unwrapKey": "Promise"
+      },
+      "fields": {}
+    },
+    "Buffer": {
+      "methods": {
+        "from": "Buffer",
+        "alloc": "Buffer",
+        "allocUnsafe": "Buffer",
+        "allocUnsafeSlow": "Buffer",
+        "concat": "Buffer",
+        "isBuffer": "boolean",
+        "byteLength": "number",
+        "compare": "number",
+        "isEncoding": "boolean"
+      },
+      "fields": { "poolSize": "number" }
+    },
+    "stream": {
+      "methods": { "pipeline": "void", "finished": "void" },
+      "fields": {}
+    },
+    "Readable": {
+      "methods": { "from": "Readable" },
+      "fields": {}
+    },
+    "child_process": {
+      "methods": {
+        "exec": "ChildProcess",
+        "execSync": "Buffer",
+        "execFile": "ChildProcess",
+        "execFileSync": "Buffer",
+        "spawn": "ChildProcess",
+        "spawnSync": "object",
+        "fork": "ChildProcess"
+      },
+      "fields": {}
+    },
+    "readline": {
+      "methods": {
+        "createInterface": "Interface",
+        "clearLine": "void",
+        "clearScreenDown": "void",
+        "cursorTo": "void",
+        "emitKeypressEvents": "void"
+      },
+      "fields": {}
+    },
+    "querystring": {
+      "methods": {
+        "parse": "object",
+        "stringify": "string",
+        "escape": "string",
+        "unescape": "string"
+      },
+      "fields": {}
+    },
+    "assert": {
+      "methods": {
+        "ok": "void",
+        "equal": "void",
+        "notEqual": "void",
+        "strictEqual": "void",
+        "notStrictEqual": "void",
+        "deepEqual": "void",
+        "notDeepEqual": "void",
+        "deepStrictEqual": "void",
+        "notDeepStrictEqual": "void",
+        "throws": "void",
+        "doesNotThrow": "void",
+        "rejects": "Promise",
+        "doesNotReject": "Promise",
+        "ifError": "void",
+        "match": "void",
+        "doesNotMatch": "void",
+        "fail": "void"
+      },
+      "fields": {}
+    },
+    "timers": {
+      "methods": {
+        "setTimeout": "Timeout",
+        "clearTimeout": "void",
+        "setInterval": "Timeout",
+        "clearInterval": "void",
+        "setImmediate": "Immediate",
+        "clearImmediate": "void"
+      },
+      "fields": { "promises": "object" }
+    },
+    "zlib": {
+      "methods": {
+        "gzip": "void",
+        "gunzip": "void",
+        "gzipSync": "Buffer",
+        "gunzipSync": "Buffer",
+        "deflate": "void",
+        "inflate": "void",
+        "deflateSync": "Buffer",
+        "inflateSync": "Buffer",
+        "brotliCompress": "void",
+        "brotliDecompress": "void",
+        "brotliCompressSync": "Buffer",
+        "brotliDecompressSync": "Buffer",
+        "createGzip": "object",
+        "createGunzip": "object"
+      },
+      "fields": { "constants": "object" }
+    },
+    "worker_threads": {
+      "methods": {
+        "receiveMessageOnPort": "object",
+        "moveMessagePortToContext": "object",
+        "markAsUntransferable": "void",
+        "getEnvironmentData": "any",
+        "setEnvironmentData": "void"
+      },
+      "fields": {
+        "isMainThread": "boolean",
+        "threadId": "number",
+        "workerData": "any",
+        "parentPort": "object"
+      }
+    },
+    "cluster": {
+      "methods": {
+        "fork": "Worker",
+        "setupPrimary": "void",
+        "disconnect": "void"
+      },
+      "fields": { "isPrimary": "boolean", "isWorker": "boolean", "workers": "object" }
+    },
+    "dgram": {
+      "methods": { "createSocket": "Socket" },
+      "fields": {}
+    },
+    "dns": {
+      "methods": {
+        "lookup": "void",
+        "resolve": "void",
+        "reverse": "void",
+        "getServers": "string[]",
+        "setServers": "void"
+      },
+      "fields": { "promises": "object" }
+    },
+    "express": {
+      "methods": {
+        "json": "function",
+        "urlencoded": "function",
+        "static": "function",
+        "Router": "Router"
+      },
+      "fields": {}
+    },
+    "app": {
+      "methods": {
+        "get": "void",
+        "post": "void",
+        "put": "void",
+        "delete": "void",
+        "patch": "void",
+        "options": "void",
+        "head": "void",
+        "all": "void",
+        "use": "void",
+        "listen": "Server",
+        "set": "void",
+        "engine": "void",
+        "param": "void",
+        "route": "Route",
+        "render": "void"
+      },
+      "fields": { "locals": "object", "mountpath": "string" }
+    },
+    "req": {
+      "methods": {
+        "get": "string",
+        "accepts": "any",
+        "acceptsCharsets": "any",
+        "acceptsEncodings": "any",
+        "acceptsLanguages": "any",
+        "is": "any",
+        "param": "string",
+        "range": "any"
+      },
+      "fields": {
+        "params": "object",
+        "query": "object",
+        "body": "any",
+        "headers": "object",
+        "cookies": "object",
+        "signedCookies": "object",
+        "ip": "string",
+        "ips": "string[]",
+        "path": "string",
+        "method": "string",
+        "url": "string",
+        "originalUrl": "string",
+        "baseUrl": "string",
+        "hostname": "string",
+        "protocol": "string",
+        "secure": "boolean",
+        "xhr": "boolean",
+        "route": "object",
+        "app": "object"
+      }
+    },
+    "res": {
+      "methods": {
+        "send": "object",
+        "json": "object",
+        "status": "object",
+        "redirect": "void",
+        "render": "void",
+        "download": "void",
+        "sendFile": "void",
+        "cookie": "object",
+        "clearCookie": "object",
+        "set": "object",
+        "get": "string",
+        "type": "object",
+        "format": "void",
+        "links": "object",
+        "location": "object",
+        "vary": "object",
+        "append": "object",
+        "attachment": "object",
+        "end": "object"
+      },
+      "fields": { "locals": "object", "headersSent": "boolean", "statusCode": "number", "app": "object" }
+    },
+    "router": {
+      "methods": {
+        "get": "void",
+        "post": "void",
+        "put": "void",
+        "delete": "void",
+        "patch": "void",
+        "all": "void",
+        "use": "void",
+        "route": "Route",
+        "param": "void"
+      },
+      "fields": {}
+    },
+    "React": {
+      "methods": {
+        "createElement": "Element",
+        "cloneElement": "Element",
+        "createContext": "Context",
+        "createRef": "Ref",
+        "forwardRef": "Component",
+        "memo": "Component",
+        "lazy": "Component",
+        "isValidElement": "boolean",
+        "useState": "array",
+        "useEffect": "void",
+        "useContext": "any",
+        "useReducer": "array",
+        "useCallback": "function",
+        "useMemo": "any",
+        "useRef": "Ref",
+        "useImperativeHandle": "void",
+        "useLayoutEffect": "void",
+        "useDebugValue": "void",
+        "useId": "string",
+        "useSyncExternalStore": "any",
+        "useTransition": "array",
+        "useDeferredValue": "any",
+        "startTransition": "void",
+        "act": "Promise"
+      },
+      "fields": {
+        "version": "string",
+        "Fragment": "Component",
+        "StrictMode": "Component",
+        "Suspense": "Component",
+        "Profiler": "Component",
+        "Children": "object"
+      }
+    },
+    "ReactDOM": {
+      "methods": {
+        "render": "void",
+        "hydrate": "void",
+        "unmountComponentAtNode": "boolean",
+        "createPortal": "Element",
+        "flushSync": "void",
+        "findDOMNode": "Element"
+      },
+      "fields": {}
     }
   }
 }

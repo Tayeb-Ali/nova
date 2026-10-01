@@ -1,0 +1,81 @@
+{
+  "receivers": {
+    "listOf": {
+      "methods": {
+        "get": "T",
+        "add": "Boolean",
+        "remove": "Boolean",
+        "map": "List",
+        "filter": "List",
+        "forEach": "Unit",
+        "first": "T",
+        "last": "T",
+        "isEmpty": "Boolean",
+        "size": "Int"
+      },
+      "fields": {}
+    },
+    "mutableListOf": {
+      "methods": {
+        "add": "Boolean",
+        "remove": "Boolean",
+        "clear": "Unit",
+        "sort": "Unit"
+      },
+      "fields": {}
+    },
+    "mapOf": {
+      "methods": {
+        "get": "V?",
+        "put": "V?",
+        "remove": "V?",
+        "containsKey": "Boolean",
+        "keys": "Set",
+        "values": "Collection"
+      },
+      "fields": {}
+    },
+    "String": {
+      "methods": {
+        "length": "Int",
+        "substring": "String",
+        "startsWith": "Boolean",
+        "endsWith": "Boolean",
+        "contains": "Boolean",
+        "replace": "String",
+        "split": "List",
+        "trim": "String",
+        "uppercase": "String",
+        "lowercase": "String"
+      },
+      "fields": {}
+    },
+    "Int": {
+      "methods": {
+        "toString": "String",
+        "toDouble": "Double",
+        "toLong": "Long"
+      },
+      "fields": {}
+    },
+    "System": {
+      "methods": {},
+      "fields": {
+        "out": "PrintStream",
+        "err": "PrintStream"
+      }
+    },
+    "println": {
+      "methods": {},
+      "fields": {}
+    },
+    "lazy": {
+      "methods": {},
+      "fields": {}
+    },
+    "Companion": {
+      "methods": {},
+      "fields": {}
+    }
+  }
+}

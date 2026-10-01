@@ -17,7 +17,12 @@
     },
     "double": {
       "methods": { "parse": "double", "tryParse": "double?" },
-      "fields": {}
+      "fields": {
+        "infinity": "double",
+        "nan": "double",
+        "maxFinite": "double",
+        "minPositive": "double"
+      }
     },
     "num": {
       "methods": { "parse": "num", "tryParse": "num?" },
@@ -90,6 +95,22 @@
       },
       "fields": {}
     },
+    "StreamController": {
+      "methods": { "broadcast": "StreamController" },
+      "fields": {}
+    },
+    "Timer": {
+      "methods": { "periodic": "Timer", "run": "void" },
+      "fields": {}
+    },
+    "Completer": {
+      "methods": { "sync": "Completer" },
+      "fields": {}
+    },
+    "Zone": {
+      "methods": {},
+      "fields": { "current": "Zone" }
+    },
     "RegExp": {
       "methods": { "escape": "String" },
       "fields": {}
@@ -112,8 +133,724 @@
       "methods": { "hashAll": "int", "hashAllUnordered": "int" },
       "fields": {}
     },
+    "json": {
+      "methods": { "decode": "dynamic", "encode": "String" },
+      "fields": {}
+    },
+    "utf8": {
+      "methods": { "decode": "String", "encode": "List<int>" },
+      "fields": {}
+    },
+    "base64": {
+      "methods": { "encode": "String", "decode": "List<int>", "normalize": "String" },
+      "fields": {}
+    },
+    "Platform": {
+      "methods": {},
+      "fields": {
+        "operatingSystem": "String",
+        "operatingSystemVersion": "String",
+        "numberOfProcessors": "int",
+        "localeName": "String",
+        "script": "String",
+        "executable": "String",
+        "resolvedExecutable": "String",
+        "version": "String",
+        "environment": "Map",
+        "pathSeparator": "String"
+      }
+    },
+    "FileSystemEntity": {
+      "methods": {
+        "isFileSync": "bool",
+        "isDirectorySync": "bool",
+        "isLinkSync": "bool",
+        "typeSync": "FileSystemEntityType"
+      },
+      "fields": {}
+    },
+    "Directory": {
+      "methods": {},
+      "fields": { "current": "Directory" }
+    },
+    "Process": {
+      "methods": {
+        "run": "Future",
+        "runSync": "ProcessResult",
+        "start": "Future"
+      },
+      "fields": {}
+    },
+    "Socket": {
+      "methods": { "connect": "Future" },
+      "fields": {}
+    },
+    "WebSocket": {
+      "methods": { "connect": "Future" },
+      "fields": {}
+    },
+    "InternetAddress": {
+      "methods": {},
+      "fields": {
+        "loopbackIPv4": "InternetAddress",
+        "loopbackIPv6": "InternetAddress",
+        "anyIPv4": "InternetAddress",
+        "anyIPv6": "InternetAddress"
+      }
+    },
     "WidgetsFlutterBinding": {
       "methods": { "ensureInitialized": "binding" },
+      "fields": { "instance": "binding" }
+    },
+    "WidgetsBinding": {
+      "methods": {},
+      "fields": { "instance": "WidgetsBinding" }
+    },
+    "Navigator": {
+      "methods": {
+        "push": "Future",
+        "pop": "void",
+        "pushNamed": "Future",
+        "popUntil": "void",
+        "pushReplacement": "Future",
+        "pushAndRemoveUntil": "Future",
+        "canPop": "bool",
+        "maybePop": "Future",
+        "of": "NavigatorState",
+        "maybeOf": "NavigatorState?"
+      },
+      "fields": {}
+    },
+    "Theme": {
+      "methods": { "of": "ThemeData", "maybeOf": "ThemeData?" },
+      "fields": {}
+    },
+    "ThemeData": {
+      "methods": { "light": "ThemeData", "dark": "ThemeData" },
+      "fields": {}
+    },
+    "Color": {
+      "methods": { "fromARGB": "Color", "fromRGBO": "Color", "lerp": "Color?" },
+      "fields": {}
+    },
+    "ColorScheme": {
+      "methods": { "fromSeed": "ColorScheme", "light": "ColorScheme", "dark": "ColorScheme" },
+      "fields": {}
+    },
+    "MediaQuery": {
+      "methods": {
+        "of": "MediaQueryData",
+        "maybeOf": "MediaQueryData?",
+        "sizeOf": "Size",
+        "paddingOf": "EdgeInsets",
+        "viewInsetsOf": "EdgeInsets",
+        "orientationOf": "Orientation",
+        "devicePixelRatioOf": "double",
+        "textScalerOf": "TextScaler"
+      },
+      "fields": {}
+    },
+    "Scaffold": {
+      "methods": { "of": "ScaffoldState", "maybeOf": "ScaffoldState?" },
+      "fields": {}
+    },
+    "ScaffoldMessenger": {
+      "methods": { "of": "ScaffoldMessengerState", "maybeOf": "ScaffoldMessengerState?" },
+      "fields": {}
+    },
+    "Form": {
+      "methods": { "of": "FormState?", "maybeOf": "FormState?" },
+      "fields": {}
+    },
+    "FocusScope": {
+      "methods": { "of": "FocusScopeNode", "maybeOf": "FocusScopeNode?" },
+      "fields": {}
+    },
+    "HapticFeedback": {
+      "methods": {
+        "lightImpact": "Future",
+        "mediumImpact": "Future",
+        "heavyImpact": "Future",
+        "selectionClick": "Future",
+        "vibrate": "Future"
+      },
+      "fields": {}
+    },
+    "SystemNavigator": {
+      "methods": { "pop": "Future" },
+      "fields": {}
+    },
+    "SystemChrome": {
+      "methods": {
+        "setSystemUIOverlayStyle": "Future",
+        "setEnabledSystemUIMode": "Future",
+        "setPreferredOrientations": "Future",
+        "setApplicationSwitcherDescription": "Future"
+      },
+      "fields": {}
+    },
+    "Clipboard": {
+      "methods": { "setData": "Future", "getData": "Future" },
+      "fields": {}
+    },
+    "EdgeInsets": {
+      "methods": {
+        "all": "EdgeInsets",
+        "symmetric": "EdgeInsets",
+        "only": "EdgeInsets",
+        "fromLTRB": "EdgeInsets"
+      },
+      "fields": { "zero": "EdgeInsets" }
+    },
+    "BorderRadius": {
+      "methods": {
+        "circular": "BorderRadius",
+        "only": "BorderRadius",
+        "all": "BorderRadius",
+        "vertical": "BorderRadius",
+        "horizontal": "BorderRadius"
+      },
+      "fields": { "zero": "BorderRadius" }
+    },
+    "Border": {
+      "methods": { "all": "Border", "symmetric": "Border" },
+      "fields": {}
+    },
+    "BorderSide": {
+      "methods": {},
+      "fields": { "none": "BorderSide" }
+    },
+    "Alignment": {
+      "methods": {},
+      "fields": {
+        "topLeft": "Alignment",
+        "topCenter": "Alignment",
+        "topRight": "Alignment",
+        "centerLeft": "Alignment",
+        "center": "Alignment",
+        "centerRight": "Alignment",
+        "bottomLeft": "Alignment",
+        "bottomCenter": "Alignment",
+        "bottomRight": "Alignment"
+      }
+    },
+    "MainAxisAlignment": {
+      "methods": {},
+      "fields": {
+        "start": "MainAxisAlignment",
+        "end": "MainAxisAlignment",
+        "center": "MainAxisAlignment",
+        "spaceBetween": "MainAxisAlignment",
+        "spaceAround": "MainAxisAlignment",
+        "spaceEvenly": "MainAxisAlignment"
+      }
+    },
+    "CrossAxisAlignment": {
+      "methods": {},
+      "fields": {
+        "start": "CrossAxisAlignment",
+        "end": "CrossAxisAlignment",
+        "center": "CrossAxisAlignment",
+        "stretch": "CrossAxisAlignment",
+        "baseline": "CrossAxisAlignment"
+      }
+    },
+    "MainAxisSize": {
+      "methods": {},
+      "fields": { "min": "MainAxisSize", "max": "MainAxisSize" }
+    },
+    "FontWeight": {
+      "methods": {},
+      "fields": {
+        "w100": "FontWeight",
+        "w200": "FontWeight",
+        "w300": "FontWeight",
+        "w400": "FontWeight",
+        "w500": "FontWeight",
+        "w600": "FontWeight",
+        "w700": "FontWeight",
+        "w800": "FontWeight",
+        "w900": "FontWeight",
+        "normal": "FontWeight",
+        "bold": "FontWeight"
+      }
+    },
+    "FontStyle": {
+      "methods": {},
+      "fields": { "normal": "FontStyle", "italic": "FontStyle" }
+    },
+    "TextAlign": {
+      "methods": {},
+      "fields": {
+        "left": "TextAlign",
+        "right": "TextAlign",
+        "center": "TextAlign",
+        "justify": "TextAlign",
+        "start": "TextAlign",
+        "end": "TextAlign"
+      }
+    },
+    "TextOverflow": {
+      "methods": {},
+      "fields": {
+        "clip": "TextOverflow",
+        "fade": "TextOverflow",
+        "ellipsis": "TextOverflow",
+        "visible": "TextOverflow"
+      }
+    },
+    "TextDirection": {
+      "methods": {},
+      "fields": { "ltr": "TextDirection", "rtl": "TextDirection" }
+    },
+    "TextBaseline": {
+      "methods": {},
+      "fields": { "alphabetic": "TextBaseline", "ideographic": "TextBaseline" }
+    },
+    "TextDecoration": {
+      "methods": {},
+      "fields": {
+        "none": "TextDecoration",
+        "underline": "TextDecoration",
+        "overline": "TextDecoration",
+        "lineThrough": "TextDecoration"
+      }
+    },
+    "TextDecorationStyle": {
+      "methods": {},
+      "fields": {
+        "solid": "TextDecorationStyle",
+        "double": "TextDecorationStyle",
+        "dotted": "TextDecorationStyle",
+        "dashed": "TextDecorationStyle",
+        "wavy": "TextDecorationStyle"
+      }
+    },
+    "BoxFit": {
+      "methods": {},
+      "fields": {
+        "fill": "BoxFit",
+        "contain": "BoxFit",
+        "cover": "BoxFit",
+        "fitWidth": "BoxFit",
+        "fitHeight": "BoxFit",
+        "none": "BoxFit",
+        "scaleDown": "BoxFit"
+      }
+    },
+    "Axis": {
+      "methods": {},
+      "fields": { "horizontal": "Axis", "vertical": "Axis" }
+    },
+    "Brightness": {
+      "methods": {},
+      "fields": { "light": "Brightness", "dark": "Brightness" }
+    },
+    "ThemeMode": {
+      "methods": {},
+      "fields": { "system": "ThemeMode", "light": "ThemeMode", "dark": "ThemeMode" }
+    },
+    "TargetPlatform": {
+      "methods": {},
+      "fields": {
+        "android": "TargetPlatform",
+        "iOS": "TargetPlatform",
+        "macOS": "TargetPlatform",
+        "windows": "TargetPlatform",
+        "linux": "TargetPlatform",
+        "fuchsia": "TargetPlatform"
+      }
+    },
+    "Orientation": {
+      "methods": {},
+      "fields": { "portrait": "Orientation", "landscape": "Orientation" }
+    },
+    "ConnectionState": {
+      "methods": {},
+      "fields": {
+        "none": "ConnectionState",
+        "waiting": "ConnectionState",
+        "active": "ConnectionState",
+        "done": "ConnectionState"
+      }
+    },
+    "Curves": {
+      "methods": {},
+      "fields": {
+        "linear": "Curve",
+        "ease": "Curve",
+        "easeIn": "Curve",
+        "easeOut": "Curve",
+        "easeInOut": "Curve",
+        "fastOutSlowIn": "Curve",
+        "bounceIn": "Curve",
+        "bounceOut": "Curve",
+        "elasticIn": "Curve",
+        "elasticOut": "Curve",
+        "decelerate": "Curve"
+      }
+    },
+    "Clip": {
+      "methods": {},
+      "fields": {
+        "none": "Clip",
+        "hardEdge": "Clip",
+        "antiAlias": "Clip",
+        "antiAliasWithSaveLayer": "Clip"
+      }
+    },
+    "HitTestBehavior": {
+      "methods": {},
+      "fields": {
+        "opaque": "HitTestBehavior",
+        "deferToChild": "HitTestBehavior",
+        "translucent": "HitTestBehavior"
+      }
+    },
+    "StackFit": {
+      "methods": {},
+      "fields": {
+        "loose": "StackFit",
+        "expand": "StackFit",
+        "passthrough": "StackFit"
+      }
+    },
+    "WrapAlignment": {
+      "methods": {},
+      "fields": {
+        "start": "WrapAlignment",
+        "end": "WrapAlignment",
+        "center": "WrapAlignment",
+        "spaceBetween": "WrapAlignment",
+        "spaceAround": "WrapAlignment",
+        "spaceEvenly": "WrapAlignment"
+      }
+    },
+    "ImageRepeat": {
+      "methods": {},
+      "fields": {
+        "repeat": "ImageRepeat",
+        "repeatX": "ImageRepeat",
+        "repeatY": "ImageRepeat",
+        "noRepeat": "ImageRepeat"
+      }
+    },
+    "TileMode": {
+      "methods": {},
+      "fields": {
+        "clamp": "TileMode",
+        "repeated": "TileMode",
+        "mirror": "TileMode",
+        "decal": "TileMode"
+      }
+    },
+    "FilterQuality": {
+      "methods": {},
+      "fields": {
+        "none": "FilterQuality",
+        "low": "FilterQuality",
+        "medium": "FilterQuality",
+        "high": "FilterQuality"
+      }
+    },
+    "AnimationStatus": {
+      "methods": {},
+      "fields": {
+        "dismissed": "AnimationStatus",
+        "forward": "AnimationStatus",
+        "reverse": "AnimationStatus",
+        "completed": "AnimationStatus"
+      }
+    },
+    "DismissDirection": {
+      "methods": {},
+      "fields": {
+        "horizontal": "DismissDirection",
+        "vertical": "DismissDirection",
+        "endToStart": "DismissDirection",
+        "startToEnd": "DismissDirection",
+        "up": "DismissDirection",
+        "down": "DismissDirection",
+        "none": "DismissDirection"
+      }
+    },
+    "SnackBarBehavior": {
+      "methods": {},
+      "fields": { "fixed": "SnackBarBehavior", "floating": "SnackBarBehavior" }
+    },
+    "TabBarIndicatorSize": {
+      "methods": {},
+      "fields": { "tab": "TabBarIndicatorSize", "label": "TabBarIndicatorSize" }
+    },
+    "FloatingActionButtonLocation": {
+      "methods": {},
+      "fields": {
+        "centerDocked": "object",
+        "centerFloat": "object",
+        "endDocked": "object",
+        "endFloat": "object"
+      }
+    },
+    "VisualDensity": {
+      "methods": {},
+      "fields": {
+        "standard": "VisualDensity",
+        "compact": "VisualDensity",
+        "comfortable": "VisualDensity",
+        "minimumDensity": "VisualDensity",
+        "maximumDensity": "VisualDensity"
+      }
+    },
+    "Rect": {
+      "methods": {
+        "fromLTRB": "Rect",
+        "fromLTWH": "Rect",
+        "fromCircle": "Rect",
+        "fromCenter": "Rect",
+        "fromPoints": "Rect"
+      },
+      "fields": { "zero": "Rect" }
+    },
+    "Offset": {
+      "methods": {},
+      "fields": { "zero": "Offset", "infinite": "Offset" }
+    },
+    "Size": {
+      "methods": {
+        "fromWidth": "Size",
+        "fromHeight": "Size",
+        "fromRadius": "Size",
+        "square": "Size"
+      },
+      "fields": { "zero": "Size", "infinite": "Size" }
+    },
+    "Radius": {
+      "methods": { "circular": "Radius", "elliptical": "Radius" },
+      "fields": { "zero": "Radius" }
+    },
+    "ListView": {
+      "methods": { "builder": "ListView", "separated": "ListView", "custom": "ListView" },
+      "fields": {}
+    },
+    "GridView": {
+      "methods": {
+        "builder": "GridView",
+        "custom": "GridView",
+        "count": "GridView",
+        "extent": "GridView"
+      },
+      "fields": {}
+    },
+    "SizedBox": {
+      "methods": { "shrink": "SizedBox", "expand": "SizedBox", "square": "SizedBox" },
+      "fields": {}
+    },
+    "Positioned": {
+      "methods": { "fill": "Positioned" },
+      "fields": {}
+    },
+    "Image": {
+      "methods": {
+        "network": "Image",
+        "asset": "Image",
+        "file": "Image",
+        "memory": "Image"
+      },
+      "fields": {}
+    },
+    "ElevatedButton": {
+      "methods": { "styleFrom": "ButtonStyle" },
+      "fields": {}
+    },
+    "TextButton": {
+      "methods": { "styleFrom": "ButtonStyle" },
+      "fields": {}
+    },
+    "OutlinedButton": {
+      "methods": { "styleFrom": "ButtonStyle" },
+      "fields": {}
+    },
+    "IconButton": {
+      "methods": { "styleFrom": "ButtonStyle" },
+      "fields": {}
+    },
+    "FilledButton": {
+      "methods": { "styleFrom": "ButtonStyle" },
+      "fields": {}
+    },
+    "DateFormat": {
+      "methods": {
+        "yMd": "DateFormat",
+        "yMMMd": "DateFormat",
+        "jm": "DateFormat",
+        "Hm": "DateFormat",
+        "EEEE": "DateFormat",
+        "MMMM": "DateFormat"
+      },
+      "fields": {}
+    },
+    "NumberFormat": {
+      "methods": {
+        "decimalPattern": "NumberFormat",
+        "percentPattern": "NumberFormat",
+        "compact": "NumberFormat",
+        "currency": "NumberFormat"
+      },
+      "fields": {}
+    },
+    "AppLocalizations": {
+      "methods": { "of": "AppLocalizations" },
+      "fields": {}
+    },
+    "SharedPreferences": {
+      "methods": { "getInstance": "Future", "setMockInitialValues": "void" },
+      "fields": {}
+    },
+    "prefs": {
+      "methods": {
+        "getString": "String?",
+        "getInt": "int?",
+        "getBool": "bool?",
+        "getDouble": "double?",
+        "getStringList": "List?",
+        "setString": "Future",
+        "setInt": "Future",
+        "setBool": "Future",
+        "setDouble": "Future",
+        "setStringList": "Future",
+        "remove": "Future",
+        "clear": "Future",
+        "containsKey": "bool",
+        "reload": "Future"
+      },
+      "fields": {}
+    },
+    "dio": {
+      "methods": {
+        "get": "Future",
+        "post": "Future",
+        "put": "Future",
+        "delete": "Future",
+        "patch": "Future",
+        "head": "Future",
+        "download": "Future",
+        "request": "Future",
+        "fetch": "Future"
+      },
+      "fields": { "interceptors": "Interceptors", "options": "BaseOptions" }
+    },
+    "snapshot": {
+      "methods": { "requireData": "T" },
+      "fields": {
+        "hasData": "bool",
+        "hasError": "bool",
+        "data": "T?",
+        "error": "Object?",
+        "connectionState": "ConnectionState"
+      }
+    },
+    "ref": {
+      "methods": {
+        "watch": "T",
+        "read": "T",
+        "listen": "void",
+        "refresh": "T",
+        "invalidate": "void",
+        "exists": "bool",
+        "onDispose": "void"
+      },
+      "fields": {}
+    },
+    "context": {
+      "methods": {
+        "watch": "T",
+        "read": "T",
+        "select": "T",
+        "go": "void",
+        "push": "Future",
+        "pop": "void",
+        "canPop": "bool",
+        "goNamed": "void",
+        "pushNamed": "Future",
+        "replace": "void"
+      },
+      "fields": { "mounted": "bool", "theme": "ThemeData", "widget": "Widget" }
+    },
+    "Text": {
+      "methods": {},
+      "fields": {}
+    },
+    "Colors": {
+      "methods": {},
+      "fields": {
+        "red": "Color",
+        "pink": "Color",
+        "purple": "Color",
+        "deepPurple": "Color",
+        "indigo": "Color",
+        "blue": "Color",
+        "lightBlue": "Color",
+        "cyan": "Color",
+        "teal": "Color",
+        "green": "Color",
+        "lightGreen": "Color",
+        "lime": "Color",
+        "yellow": "Color",
+        "amber": "Color",
+        "orange": "Color",
+        "deepOrange": "Color",
+        "brown": "Color",
+        "grey": "Color",
+        "blueGrey": "Color",
+        "white": "Color",
+        "black": "Color",
+        "transparent": "Color"
+      }
+    },
+    "Icons": {
+      "methods": {},
+      "fields": {
+        "add": "IconData",
+        "edit": "IconData",
+        "delete": "IconData",
+        "save": "IconData",
+        "search": "IconData",
+        "settings": "IconData",
+        "home": "IconData",
+        "close": "IconData",
+        "menu": "IconData",
+        "arrow_back": "IconData",
+        "arrow_forward": "IconData",
+        "check": "IconData",
+        "clear": "IconData",
+        "favorite": "IconData",
+        "share": "IconData",
+        "send": "IconData",
+        "refresh": "IconData",
+        "more_vert": "IconData",
+        "play_arrow": "IconData",
+        "pause": "IconData",
+        "mic": "IconData",
+        "camera": "IconData",
+        "photo": "IconData",
+        "folder": "IconData",
+        "download": "IconData",
+        "upload": "IconData",
+        "notifications": "IconData",
+        "person": "IconData",
+        "lock": "IconData",
+        "visibility": "IconData",
+        "language": "IconData",
+        "dark_mode": "IconData",
+        "light_mode": "IconData",
+        "code": "IconData",
+        "terminal": "IconData",
+        "bug_report": "IconData",
+        "build": "IconData"
+      }
+    },
+    "debugPrint": {
+      "methods": {},
       "fields": {}
     }
   }

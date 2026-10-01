@@ -1,0 +1,308 @@
+{
+  "receivers": {
+    "printf": {
+      "methods": {},
+      "fields": {}
+    },
+    "stdio": {
+      "methods": {
+        "printf": "int",
+        "scanf": "int",
+        "fprintf": "int",
+        "fscanf": "int",
+        "sprintf": "int",
+        "sscanf": "int",
+        "snprintf": "int",
+        "fopen": "FILE*",
+        "fclose": "int",
+        "fread": "size_t",
+        "fwrite": "size_t",
+        "fgets": "char*",
+        "fputs": "int",
+        "fgetc": "int",
+        "fputc": "int",
+        "getchar": "int",
+        "putchar": "int",
+        "puts": "int",
+        "ungetc": "int",
+        "fseek": "int",
+        "ftell": "long",
+        "rewind": "void",
+        "feof": "int",
+        "ferror": "int",
+        "clearerr": "void",
+        "perror": "void",
+        "remove": "int",
+        "rename": "int",
+        "tmpfile": "FILE*",
+        "tmpnam": "char*",
+        "setvbuf": "int",
+        "setbuf": "void",
+        "fflush": "int"
+      },
+      "fields": {
+        "stdin": "FILE*",
+        "stdout": "FILE*",
+        "stderr": "FILE*",
+        "EOF": "int",
+        "SEEK_SET": "int",
+        "SEEK_CUR": "int",
+        "SEEK_END": "int"
+      }
+    },
+    "string": {
+      "methods": {
+        "strlen": "size_t",
+        "strcpy": "char*",
+        "strncpy": "char*",
+        "strcat": "char*",
+        "strncat": "char*",
+        "strcmp": "int",
+        "strncmp": "int",
+        "strstr": "char*",
+        "strchr": "char*",
+        "strrchr": "char*",
+        "strtok": "char*",
+        "strtok_r": "char*",
+        "strspn": "size_t",
+        "strcspn": "size_t",
+        "strpbrk": "char*",
+        "strerror": "char*",
+        "strcoll": "int",
+        "strxfrm": "size_t",
+        "strdup": "char*",
+        "strndup": "char*",
+        "memcpy": "void*",
+        "memmove": "void*",
+        "memset": "void*",
+        "memcmp": "int",
+        "memchr": "void*",
+        "sprintf": "int",
+        "sscanf": "int"
+      },
+      "fields": {}
+    },
+    "stdlib": {
+      "methods": {
+        "malloc": "void*",
+        "calloc": "void*",
+        "realloc": "void*",
+        "free": "void",
+        "atoi": "int",
+        "atol": "long",
+        "atoll": "long long",
+        "atof": "double",
+        "strtol": "long",
+        "strtoul": "unsigned long",
+        "strtoll": "long long",
+        "strtod": "double",
+        "strtof": "float",
+        "rand": "int",
+        "srand": "void",
+        "exit": "void",
+        "atexit": "int",
+        "abort": "void",
+        "getenv": "char*",
+        "system": "int",
+        "qsort": "void",
+        "bsearch": "void*",
+        "abs": "int",
+        "labs": "long",
+        "llabs": "long long",
+        "div": "div_t",
+        "ldiv": "ldiv_t"
+      },
+      "fields": {
+        "NULL": "void*",
+        "EXIT_SUCCESS": "int",
+        "EXIT_FAILURE": "int",
+        "RAND_MAX": "int"
+      }
+    },
+    "math": {
+      "methods": {
+        "sqrt": "double",
+        "cbrt": "double",
+        "pow": "double",
+        "hypot": "double",
+        "sin": "double",
+        "cos": "double",
+        "tan": "double",
+        "asin": "double",
+        "acos": "double",
+        "atan": "double",
+        "atan2": "double",
+        "exp": "double",
+        "exp2": "double",
+        "log": "double",
+        "log2": "double",
+        "log10": "double",
+        "abs": "int",
+        "fabs": "double",
+        "floor": "double",
+        "ceil": "double",
+        "round": "double",
+        "trunc": "double",
+        "fmod": "double",
+        "remainder": "double",
+        "fmin": "double",
+        "fmax": "double"
+      },
+      "fields": {
+        "M_PI": "double",
+        "M_E": "double",
+        "HUGE_VAL": "double"
+      }
+    },
+    "ctype": {
+      "methods": {
+        "isalpha": "int",
+        "isdigit": "int",
+        "isalnum": "int",
+        "isspace": "int",
+        "isupper": "int",
+        "islower": "int",
+        "ispunct": "int",
+        "iscntrl": "int",
+        "isxdigit": "int",
+        "isprint": "int",
+        "isgraph": "int",
+        "toupper": "int",
+        "tolower": "int"
+      },
+      "fields": {}
+    },
+    "time": {
+      "methods": {
+        "time": "time_t",
+        "localtime": "struct tm*",
+        "gmtime": "struct tm*",
+        "mktime": "time_t",
+        "difftime": "double",
+        "strftime": "size_t",
+        "clock": "clock_t",
+        "asctime": "char*",
+        "ctime": "char*"
+      },
+      "fields": { "CLOCKS_PER_SEC": "clock_t" }
+    },
+    "tm": {
+      "methods": {},
+      "fields": {
+        "tm_year": "int",
+        "tm_mon": "int",
+        "tm_mday": "int",
+        "tm_hour": "int",
+        "tm_min": "int",
+        "tm_sec": "int",
+        "tm_wday": "int",
+        "tm_yday": "int",
+        "tm_isdst": "int"
+      }
+    },
+    "tv": {
+      "methods": {},
+      "fields": { "tv_sec": "long", "tv_usec": "long" }
+    },
+    "st": {
+      "methods": {},
+      "fields": {
+        "st_size": "off_t",
+        "st_mode": "mode_t",
+        "st_mtime": "time_t",
+        "st_atime": "time_t",
+        "st_ctime": "time_t",
+        "st_nlink": "nlink_t",
+        "st_uid": "uid_t",
+        "st_gid": "gid_t"
+      }
+    },
+    "addr": {
+      "methods": {},
+      "fields": {
+        "sin_family": "short",
+        "sin_port": "uint16_t",
+        "sin_addr": "in_addr"
+      }
+    },
+    "assert": {
+      "methods": { "assert": "void" },
+      "fields": {}
+    },
+    "limits": {
+      "methods": {},
+      "fields": {
+        "INT_MAX": "int",
+        "INT_MIN": "int",
+        "UINT_MAX": "unsigned",
+        "LONG_MAX": "long",
+        "LONG_MIN": "long",
+        "LLONG_MAX": "long long",
+        "CHAR_MAX": "char",
+        "CHAR_MIN": "char",
+        "CHAR_BIT": "int",
+        "SHRT_MAX": "short",
+        "SHRT_MIN": "short",
+        "UCHAR_MAX": "unsigned char"
+      }
+    },
+    "stdint": {
+      "methods": {},
+      "fields": {
+        "INT8_MAX": "int8_t",
+        "INT16_MAX": "int16_t",
+        "INT32_MAX": "int32_t",
+        "INT64_MAX": "int64_t",
+        "UINT8_MAX": "uint8_t",
+        "UINT16_MAX": "uint16_t",
+        "UINT32_MAX": "uint32_t",
+        "UINT64_MAX": "uint64_t",
+        "SIZE_MAX": "size_t"
+      }
+    },
+    "float": {
+      "methods": {},
+      "fields": {
+        "FLT_MAX": "float",
+        "FLT_MIN": "float",
+        "DBL_MAX": "double",
+        "DBL_MIN": "double",
+        "FLT_EPSILON": "float",
+        "DBL_EPSILON": "double"
+      }
+    },
+    "errno": {
+      "methods": {},
+      "fields": {
+        "errno": "int",
+        "EPERM": "int",
+        "ENOENT": "int",
+        "ESRCH": "int",
+        "EINTR": "int",
+        "EIO": "int",
+        "ENOMEM": "int",
+        "EACCES": "int",
+        "EFAULT": "int",
+        "EEXIST": "int",
+        "EINVAL": "int",
+        "ENOSPC": "int",
+        "EPIPE": "int",
+        "EDOM": "int",
+        "ERANGE": "int"
+      }
+    },
+    "stdbool": {
+      "methods": {},
+      "fields": { "true": "bool", "false": "bool" }
+    },
+    "signal": {
+      "methods": { "signal": "sighandler_t", "raise": "int" },
+      "fields": {
+        "SIGINT": "int",
+        "SIGTERM": "int",
+        "SIGSEGV": "int",
+        "SIGABRT": "int"
+      }
+    }
+  }
+}

@@ -116,7 +116,29 @@ void main() {
 
   group("language snippets", () {
     test("every supported language has snippets", () {
-      for (final lang in ["python", "javascript", "php", "dart", "json"]) {
+      for (final lang in [
+        "python",
+        "javascript",
+        "typescript",
+        "php",
+        "dart",
+        "json",
+        "java",
+        "kotlin",
+        "go",
+        "rust",
+        "c",
+        "cpp",
+        "csharp",
+        "swift",
+        "ruby",
+        "sql",
+        "css",
+        "scss",
+        "xml",
+        "yaml",
+        "shell",
+      ]) {
         expect(snippetsForLanguage(lang), isNotEmpty, reason: lang);
       }
     });
@@ -124,6 +146,8 @@ void main() {
     test("aliases resolve, unknown resolves to empty", () {
       expect(normalizeLanguageId("py"), "python");
       expect(normalizeLanguageId("JS"), "javascript");
+      expect(normalizeLanguageId("ts"), "typescript");
+      expect(normalizeLanguageId("kt"), "kotlin");
       expect(snippetsForLanguage("cobol"), isEmpty);
       expect(snippetsForLanguage(null), isEmpty);
     });

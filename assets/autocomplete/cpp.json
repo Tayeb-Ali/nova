@@ -1,0 +1,406 @@
+{
+  "receivers": {
+    "std": {
+      "methods": {
+        "sort": "void",
+        "stable_sort": "void",
+        "find": "iterator",
+        "find_if": "iterator",
+        "max": "T",
+        "min": "T",
+        "max_element": "iterator",
+        "min_element": "iterator",
+        "swap": "void",
+        "move": "T",
+        "forward": "T",
+        "exchange": "T",
+        "getline": "istream",
+        "for_each": "function",
+        "transform": "iterator",
+        "copy": "iterator",
+        "copy_if": "iterator",
+        "fill": "void",
+        "generate": "void",
+        "reverse": "void",
+        "unique": "iterator",
+        "remove": "iterator",
+        "remove_if": "iterator",
+        "count": "size_t",
+        "count_if": "size_t",
+        "any_of": "bool",
+        "all_of": "bool",
+        "none_of": "bool",
+        "binary_search": "bool",
+        "lower_bound": "iterator",
+        "upper_bound": "iterator",
+        "equal_range": "pair",
+        "accumulate": "T",
+        "iota": "void",
+        "clamp": "T",
+        "next": "iterator",
+        "prev": "iterator",
+        "distance": "size_t",
+        "advance": "void",
+        "begin": "iterator",
+        "end": "iterator",
+        "size": "size_t",
+        "empty": "bool",
+        "data": "T*",
+        "to_string": "string",
+        "stoi": "int",
+        "stol": "long",
+        "stod": "double",
+        "make_pair": "pair",
+        "make_tuple": "tuple",
+        "tie": "tuple",
+        "make_shared": "shared_ptr",
+        "make_unique": "unique_ptr",
+        "make_optional": "optional",
+        "regex_match": "bool",
+        "regex_search": "bool",
+        "regex_replace": "string"
+      },
+      "fields": {
+        "cout": "ostream",
+        "cin": "istream",
+        "cerr": "ostream",
+        "clog": "ostream",
+        "endl": "manipulator",
+        "string": "type",
+        "vector": "type",
+        "map": "type",
+        "set": "type",
+        "unordered_map": "type",
+        "array": "type",
+        "deque": "type",
+        "list": "type",
+        "pair": "type",
+        "tuple": "type",
+        "optional": "type"
+      }
+    },
+    "string": {
+      "methods": {
+        "length": "size_t",
+        "size": "size_t",
+        "substr": "string",
+        "find": "size_t",
+        "rfind": "size_t",
+        "find_first_of": "size_t",
+        "find_last_of": "size_t",
+        "find_first_not_of": "size_t",
+        "replace": "string",
+        "append": "string",
+        "compare": "int",
+        "c_str": "const char*",
+        "data": "char*",
+        "empty": "bool",
+        "clear": "void",
+        "push_back": "void",
+        "pop_back": "void",
+        "insert": "string",
+        "erase": "string",
+        "reserve": "void",
+        "capacity": "size_t",
+        "shrink_to_fit": "void",
+        "resize": "void",
+        "at": "char",
+        "front": "char",
+        "back": "char",
+        "begin": "iterator",
+        "end": "iterator",
+        "copy": "size_t"
+      },
+      "fields": {
+        "npos": "size_t"
+      }
+    },
+    "str": {
+      "methods": {
+        "length": "size_t",
+        "size": "size_t",
+        "substr": "string",
+        "find": "size_t",
+        "rfind": "size_t",
+        "replace": "string",
+        "append": "string",
+        "compare": "int",
+        "c_str": "const char*",
+        "empty": "bool",
+        "clear": "void",
+        "at": "char",
+        "front": "char",
+        "back": "char"
+      },
+      "fields": {}
+    },
+    "string_view": {
+      "methods": {
+        "size": "size_t",
+        "length": "size_t",
+        "substr": "string_view",
+        "find": "size_t",
+        "rfind": "size_t",
+        "remove_prefix": "void",
+        "remove_suffix": "void",
+        "data": "const char*",
+        "empty": "bool",
+        "compare": "int",
+        "starts_with": "bool",
+        "ends_with": "bool"
+      },
+      "fields": { "npos": "size_t" }
+    },
+    "vector": {
+      "methods": {
+        "push_back": "void",
+        "emplace_back": "T",
+        "emplace": "iterator",
+        "pop_back": "void",
+        "size": "size_t",
+        "empty": "bool",
+        "clear": "void",
+        "at": "T",
+        "front": "T",
+        "back": "T",
+        "data": "T*",
+        "begin": "iterator",
+        "end": "iterator",
+        "rbegin": "iterator",
+        "rend": "iterator",
+        "erase": "iterator",
+        "insert": "iterator",
+        "assign": "void",
+        "reserve": "void",
+        "capacity": "size_t",
+        "shrink_to_fit": "void",
+        "resize": "void"
+      },
+      "fields": {}
+    },
+    "vec": {
+      "methods": {
+        "push_back": "void",
+        "emplace_back": "T",
+        "pop_back": "void",
+        "size": "size_t",
+        "empty": "bool",
+        "clear": "void",
+        "at": "T",
+        "front": "T",
+        "back": "T",
+        "begin": "iterator",
+        "end": "iterator",
+        "erase": "iterator",
+        "reserve": "void"
+      },
+      "fields": {}
+    },
+    "map": {
+      "methods": {
+        "insert": "pair",
+        "emplace": "pair",
+        "try_emplace": "pair",
+        "insert_or_assign": "pair",
+        "find": "iterator",
+        "erase": "size_t",
+        "contains": "bool",
+        "count": "size_t",
+        "at": "T",
+        "size": "size_t",
+        "empty": "bool",
+        "clear": "void",
+        "begin": "iterator",
+        "end": "iterator",
+        "lower_bound": "iterator",
+        "upper_bound": "iterator",
+        "equal_range": "pair"
+      },
+      "fields": {}
+    },
+    "unordered_map": {
+      "methods": {
+        "insert": "pair",
+        "emplace": "pair",
+        "find": "iterator",
+        "erase": "size_t",
+        "contains": "bool",
+        "count": "size_t",
+        "at": "T",
+        "reserve": "void",
+        "bucket_count": "size_t",
+        "load_factor": "float",
+        "max_load_factor": "float",
+        "rehash": "void",
+        "size": "size_t",
+        "empty": "bool",
+        "clear": "void",
+        "begin": "iterator",
+        "end": "iterator"
+      },
+      "fields": {}
+    },
+    "set": {
+      "methods": {
+        "insert": "pair",
+        "emplace": "pair",
+        "find": "iterator",
+        "erase": "size_t",
+        "contains": "bool",
+        "count": "size_t",
+        "lower_bound": "iterator",
+        "upper_bound": "iterator",
+        "size": "size_t",
+        "empty": "bool",
+        "clear": "void",
+        "begin": "iterator",
+        "end": "iterator"
+      },
+      "fields": {}
+    },
+    "deque": {
+      "methods": {
+        "push_back": "void",
+        "push_front": "void",
+        "emplace_back": "T",
+        "emplace_front": "T",
+        "pop_back": "void",
+        "pop_front": "void",
+        "at": "T",
+        "front": "T",
+        "back": "T",
+        "size": "size_t",
+        "empty": "bool",
+        "clear": "void",
+        "begin": "iterator",
+        "end": "iterator",
+        "insert": "iterator",
+        "erase": "iterator"
+      },
+      "fields": {}
+    },
+    "list": {
+      "methods": {
+        "push_back": "void",
+        "push_front": "void",
+        "emplace_back": "T",
+        "pop_back": "void",
+        "pop_front": "void",
+        "front": "T",
+        "back": "T",
+        "size": "size_t",
+        "empty": "bool",
+        "clear": "void",
+        "begin": "iterator",
+        "end": "iterator",
+        "insert": "iterator",
+        "erase": "iterator",
+        "remove": "void",
+        "remove_if": "void",
+        "sort": "void",
+        "reverse": "void",
+        "unique": "void",
+        "merge": "void",
+        "splice": "void"
+      },
+      "fields": {}
+    },
+    "queue": {
+      "methods": {
+        "push": "void",
+        "emplace": "T",
+        "pop": "void",
+        "front": "T",
+        "back": "T",
+        "size": "size_t",
+        "empty": "bool"
+      },
+      "fields": {}
+    },
+    "stack": {
+      "methods": {
+        "push": "void",
+        "emplace": "T",
+        "pop": "void",
+        "top": "T",
+        "size": "size_t",
+        "empty": "bool"
+      },
+      "fields": {}
+    },
+    "priority_queue": {
+      "methods": {
+        "push": "void",
+        "emplace": "T",
+        "pop": "void",
+        "top": "T",
+        "size": "size_t",
+        "empty": "bool"
+      },
+      "fields": {}
+    },
+    "array": {
+      "methods": {
+        "at": "T",
+        "front": "T",
+        "back": "T",
+        "data": "T*",
+        "size": "size_t",
+        "empty": "bool",
+        "fill": "void",
+        "begin": "iterator",
+        "end": "iterator",
+        "max_size": "size_t"
+      },
+      "fields": {}
+    },
+    "pair": {
+      "methods": {},
+      "fields": { "first": "T1", "second": "T2" }
+    },
+    "optional": {
+      "methods": {
+        "value": "T",
+        "value_or": "T",
+        "has_value": "bool",
+        "reset": "void",
+        "emplace": "T"
+      },
+      "fields": { "nullopt": "nullopt_t" }
+    },
+    "unique_ptr": {
+      "methods": {
+        "get": "T*",
+        "reset": "void",
+        "release": "T*",
+        "swap": "void"
+      },
+      "fields": {}
+    },
+    "shared_ptr": {
+      "methods": {
+        "get": "T*",
+        "reset": "void",
+        "swap": "void",
+        "use_count": "long"
+      },
+      "fields": {}
+    },
+    "mutex": {
+      "methods": { "lock": "void", "unlock": "void", "try_lock": "bool" },
+      "fields": {}
+    },
+    "ss": {
+      "methods": { "str": "string", "clear": "void" },
+      "fields": {}
+    },
+    "cout": {
+      "methods": {},
+      "fields": {}
+    },
+    "cin": {
+      "methods": {},
+      "fields": {}
+    }
+  }
+}

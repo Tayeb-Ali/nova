@@ -1,0 +1,97 @@
+{
+  "receivers": {
+    "String": {
+      "methods": {
+        "count": "Int",
+        "isEmpty": "Bool",
+        "contains": "Bool",
+        "hasPrefix": "Bool",
+        "hasSuffix": "Bool",
+        "lowercased": "String",
+        "uppercased": "String",
+        "split": "Array",
+        "replacingOccurrences": "String",
+        "append": "Void"
+      },
+      "fields": {}
+    },
+    "Array": {
+      "methods": {
+        "append": "Void",
+        "remove": "Element",
+        "map": "Array",
+        "filter": "Array",
+        "forEach": "Void",
+        "first": "Element?",
+        "last": "Element?",
+        "isEmpty": "Bool",
+        "count": "Int",
+        "sorted": "Array",
+        "contains": "Bool"
+      },
+      "fields": {}
+    },
+    "Dictionary": {
+      "methods": {
+        "updateValue": "Value?",
+        "removeValue": "Value?",
+        "keys": "Keys",
+        "values": "Values"
+      },
+      "fields": {}
+    },
+    "Int": {
+      "methods": {
+        "description": "String"
+      },
+      "fields": {
+        "max": "Int",
+        "min": "Int",
+        "zero": "Int"
+      }
+    },
+    "Double": {
+      "methods": {},
+      "fields": {
+        "pi": "Double",
+        "infinity": "Double"
+      }
+    },
+    "Date": {
+      "methods": {},
+      "fields": {}
+    },
+    "DateFormatter": {
+      "methods": {
+        "string": "String",
+        "date": "Date?"
+      },
+      "fields": {}
+    },
+    "UserDefaults": {
+      "methods": {
+        "string": "String?",
+        "integer": "Int",
+        "bool": "Bool",
+        "set": "Void",
+        "removeObject": "Void"
+      },
+      "fields": {
+        "standard": "UserDefaults"
+      }
+    },
+    "NotificationCenter": {
+      "methods": {
+        "post": "Void",
+        "addObserver": "NSObjectProtocol"
+      },
+      "fields": {
+        "default": "NotificationCenter"
+      }
+    },
+    "print": {
+      "methods": {},
+      "fields": {}
+    }
+  }
+}

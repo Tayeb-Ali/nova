@@ -4,10 +4,13 @@ import "package:flutter/material.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:nova/l10n/generated/app_localizations.dart";
 import "package:path/path.dart" as p;
+import "package:re_editor/re_editor.dart";
 
 import "../../core/settings_store.dart";
 import "../../core/ui/empty_state.dart";
+import "../lsp/lsp_completion_provider.dart";
 import "../lsp/lsp_providers.dart";
+import "../lsp/server_registry.dart";
 import "../editor/editor_engine.dart";
 import "../editor/re_editor_adapter.dart";
 import "../markdown/markdown_editor_view.dart";
@@ -221,6 +224,27 @@ class _EditorTabBodyState extends ConsumerState<_EditorTabBody> {
     ref.read(goLspManagerProvider).didOpenGoFile(project.path, widget.tab.path);
   }
 
+  /// Live server completions for languages with a registered stdio server
+  /// (gopls, pyright, typescript-server, phpactor). Best-effort: null when
+  /// the project is unknown or the language has no server, so the editor
+  /// falls back to instant local candidates.
+  Future<List<CodePrompt>> Function(String, int, int)? _lspCompletionFor() {
+    if (serverArgvFor(widget.tab.language) == null) return null;
+    final project = ref.read(activeProjectProvider);
+    if (project == null) return null;
+    final projectPath = project.path;
+    final language = widget.tab.language;
+    return (String filePath, int line, int character) async {
+      try {
+        final items = await ref
+            .read(goLspManagerProvider)
+            .completionFor(projectPath, language, filePath, line, character);
+        return lspItemsToPrompts(items);
+      } catch (_) {
+        return const [];
+      }
+    };
+  }
   /// Best-effort gopls didChange after save.
   void _notifyGoSave() {
     if (!widget.tab.path.endsWith('.go')) return;
@@ -464,6 +488,8 @@ class _EditorTabBodyState extends ConsumerState<_EditorTabBody> {
                       initialText: initialText,
                       language: widget.tab.language,
                       onChanged: _onChanged,
+                      filePath: widget.tab.path,
+                      lspCompletion: _lspCompletionFor(),
                     ),
             ),
           ],

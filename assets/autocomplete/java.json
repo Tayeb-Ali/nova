@@ -1,7 +1,21 @@
 {
   "receivers": {
     "System": {
-      "methods": {},
+      "methods": {
+        "currentTimeMillis": "long",
+        "nanoTime": "long",
+        "getenv": "String",
+        "getProperty": "String",
+        "getProperties": "Properties",
+        "setProperty": "String",
+        "clearProperty": "String",
+        "exit": "void",
+        "gc": "void",
+        "arraycopy": "void",
+        "lineSeparator": "String",
+        "identityHashCode": "int",
+        "console": "Console"
+      },
       "fields": {
         "out": "PrintStream",
         "err": "PrintStream",
@@ -14,6 +28,957 @@
         "print": "void",
         "printf": "void"
       },
+      "fields": {}
+    },
+    "String": {
+      "methods": {
+        "length": "int",
+        "isEmpty": "boolean",
+        "isBlank": "boolean",
+        "charAt": "char",
+        "codePointAt": "int",
+        "indexOf": "int",
+        "lastIndexOf": "int",
+        "contains": "boolean",
+        "startsWith": "boolean",
+        "endsWith": "boolean",
+        "equals": "boolean",
+        "equalsIgnoreCase": "boolean",
+        "contentEquals": "boolean",
+        "compareTo": "int",
+        "compareToIgnoreCase": "int",
+        "regionMatches": "boolean",
+        "toLowerCase": "String",
+        "toUpperCase": "String",
+        "trim": "String",
+        "strip": "String",
+        "stripLeading": "String",
+        "stripTrailing": "String",
+        "replace": "String",
+        "replaceAll": "String",
+        "replaceFirst": "String",
+        "split": "String[]",
+        "join": "String",
+        "format": "String",
+        "formatted": "String",
+        "valueOf": "String",
+        "copyValueOf": "String",
+        "concat": "String",
+        "substring": "String",
+        "subSequence": "CharSequence",
+        "toCharArray": "char[]",
+        "getBytes": "byte[]",
+        "matches": "boolean",
+        "repeat": "String",
+        "indent": "String",
+        "lines": "Stream",
+        "intern": "String",
+        "describeConstable": "Optional",
+        "translateEscapes": "String"
+      },
+      "fields": { "CASE_INSENSITIVE_ORDER": "Comparator" }
+    },
+    "StringBuilder": {
+      "methods": {
+        "append": "StringBuilder",
+        "insert": "StringBuilder",
+        "delete": "StringBuilder",
+        "deleteCharAt": "StringBuilder",
+        "reverse": "StringBuilder",
+        "toString": "String",
+        "length": "int",
+        "setLength": "void",
+        "capacity": "int",
+        "charAt": "char",
+        "substring": "String",
+        "setCharAt": "void"
+      },
+      "fields": {}
+    },
+    "StringBuffer": {
+      "methods": {
+        "append": "StringBuffer",
+        "insert": "StringBuffer",
+        "delete": "StringBuffer",
+        "reverse": "StringBuffer",
+        "toString": "String",
+        "length": "int",
+        "setLength": "void",
+        "capacity": "int"
+      },
+      "fields": {}
+    },
+    "Integer": {
+      "methods": {
+        "parseInt": "int",
+        "parseUnsignedInt": "int",
+        "valueOf": "Integer",
+        "toString": "String",
+        "toHexString": "String",
+        "toOctalString": "String",
+        "toBinaryString": "String",
+        "compare": "int",
+        "compareUnsigned": "int",
+        "max": "int",
+        "min": "int",
+        "sum": "int",
+        "signum": "int",
+        "rotateLeft": "int",
+        "rotateRight": "int",
+        "bitCount": "int",
+        "numberOfLeadingZeros": "int",
+        "decode": "Integer"
+      },
+      "fields": {
+        "MAX_VALUE": "int",
+        "MIN_VALUE": "int",
+        "SIZE": "int",
+        "BYTES": "int",
+        "TYPE": "Class"
+      }
+    },
+    "Long": {
+      "methods": {
+        "parseLong": "long",
+        "valueOf": "Long",
+        "toString": "String",
+        "toHexString": "String",
+        "compare": "int",
+        "max": "long",
+        "min": "long",
+        "sum": "long",
+        "signum": "int"
+      },
+      "fields": { "MAX_VALUE": "long", "MIN_VALUE": "long", "SIZE": "int" }
+    },
+    "Double": {
+      "methods": {
+        "parseDouble": "double",
+        "valueOf": "Double",
+        "toString": "String",
+        "isNaN": "boolean",
+        "isInfinite": "boolean",
+        "isFinite": "boolean",
+        "max": "double",
+        "min": "double",
+        "sum": "double",
+        "compare": "int"
+      },
+      "fields": {
+        "MAX_VALUE": "double",
+        "MIN_VALUE": "double",
+        "NaN": "double",
+        "POSITIVE_INFINITY": "double",
+        "NEGATIVE_INFINITY": "double"
+      }
+    },
+    "Boolean": {
+      "methods": {
+        "parseBoolean": "boolean",
+        "valueOf": "Boolean",
+        "toString": "String",
+        "logicalAnd": "boolean",
+        "logicalOr": "boolean",
+        "logicalXor": "boolean",
+        "compare": "int"
+      },
+      "fields": { "TRUE": "Boolean", "FALSE": "Boolean", "TYPE": "Class" }
+    },
+    "Character": {
+      "methods": {
+        "isLetter": "boolean",
+        "isDigit": "boolean",
+        "isWhitespace": "boolean",
+        "isLowerCase": "boolean",
+        "isUpperCase": "boolean",
+        "toLowerCase": "char",
+        "toUpperCase": "char",
+        "digit": "int",
+        "getNumericValue": "int",
+        "isAlphabetic": "boolean",
+        "isIdeographic": "boolean",
+        "toString": "String"
+      },
+      "fields": { "MAX_VALUE": "char", "MIN_VALUE": "char", "SIZE": "int" }
+    },
+    "Math": {
+      "methods": {
+        "abs": "int",
+        "max": "int",
+        "min": "int",
+        "pow": "double",
+        "sqrt": "double",
+        "cbrt": "double",
+        "hypot": "double",
+        "random": "double",
+        "round": "long",
+        "floor": "double",
+        "ceil": "double",
+        "rint": "double",
+        "sin": "double",
+        "cos": "double",
+        "tan": "double",
+        "asin": "double",
+        "acos": "double",
+        "atan": "double",
+        "atan2": "double",
+        "exp": "double",
+        "expm1": "double",
+        "log": "double",
+        "log10": "double",
+        "log1p": "double",
+        "signum": "double",
+        "addExact": "int",
+        "subtractExact": "int",
+        "multiplyExact": "int",
+        "floorDiv": "int",
+        "floorMod": "int",
+        "nextUp": "double",
+        "nextDown": "double",
+        "ulp": "double",
+        "copySign": "double"
+      },
+      "fields": { "PI": "double", "E": "double" }
+    },
+    "Arrays": {
+      "methods": {
+        "sort": "void",
+        "parallelSort": "void",
+        "binarySearch": "int",
+        "copyOf": "array",
+        "copyOfRange": "array",
+        "fill": "void",
+        "equals": "boolean",
+        "deepEquals": "boolean",
+        "toString": "String",
+        "deepToString": "String",
+        "asList": "List",
+        "stream": "Stream",
+        "setAll": "void",
+        "mismatch": "int",
+        "compare": "int",
+        "hashCode": "int"
+      },
+      "fields": {}
+    },
+    "Collections": {
+      "methods": {
+        "sort": "void",
+        "reverse": "void",
+        "shuffle": "void",
+        "max": "T",
+        "min": "T",
+        "binarySearch": "int",
+        "frequency": "int",
+        "disjoint": "boolean",
+        "unmodifiableList": "List",
+        "unmodifiableMap": "Map",
+        "unmodifiableSet": "Set",
+        "singletonList": "List",
+        "singletonMap": "Map",
+        "singleton": "Set",
+        "emptyList": "List",
+        "emptyMap": "Map",
+        "emptySet": "Set",
+        "synchronizedList": "List",
+        "synchronizedMap": "Map",
+        "checkedList": "List",
+        "nCopies": "List",
+        "rotate": "void",
+        "swap": "void",
+        "fill": "void",
+        "copy": "void",
+        "replaceAll": "boolean"
+      },
+      "fields": { "EMPTY_LIST": "List", "EMPTY_MAP": "Map", "EMPTY_SET": "Set" }
+    },
+    "ArrayList": {
+      "methods": {
+        "add": "boolean",
+        "addAll": "boolean",
+        "get": "E",
+        "set": "E",
+        "remove": "E",
+        "size": "int",
+        "isEmpty": "boolean",
+        "contains": "boolean",
+        "indexOf": "int",
+        "lastIndexOf": "int",
+        "clear": "void",
+        "toArray": "Object[]",
+        "iterator": "Iterator",
+        "listIterator": "ListIterator",
+        "stream": "Stream",
+        "forEach": "void",
+        "removeIf": "boolean",
+        "replaceAll": "void",
+        "sort": "void",
+        "subList": "List",
+        "ensureCapacity": "void",
+        "trimToSize": "void",
+        "clone": "Object"
+      },
+      "fields": {}
+    },
+    "LinkedList": {
+      "methods": {
+        "add": "boolean",
+        "addFirst": "void",
+        "addLast": "void",
+        "getFirst": "E",
+        "getLast": "E",
+        "removeFirst": "E",
+        "removeLast": "E",
+        "poll": "E",
+        "pollFirst": "E",
+        "pollLast": "E",
+        "peek": "E",
+        "peekFirst": "E",
+        "peekLast": "E",
+        "push": "void",
+        "pop": "E",
+        "offer": "boolean",
+        "offerFirst": "boolean",
+        "offerLast": "boolean",
+        "get": "E",
+        "size": "int",
+        "clear": "void"
+      },
+      "fields": {}
+    },
+    "HashMap": {
+      "methods": {
+        "put": "V",
+        "get": "V",
+        "getOrDefault": "V",
+        "remove": "V",
+        "containsKey": "boolean",
+        "containsValue": "boolean",
+        "keySet": "Set",
+        "values": "Collection",
+        "entrySet": "Set",
+        "size": "int",
+        "isEmpty": "boolean",
+        "clear": "void",
+        "putIfAbsent": "V",
+        "computeIfAbsent": "V",
+        "computeIfPresent": "V",
+        "compute": "V",
+        "merge": "V",
+        "replace": "V",
+        "replaceAll": "void",
+        "forEach": "void",
+        "clone": "Object"
+      },
+      "fields": {}
+    },
+    "HashSet": {
+      "methods": {
+        "add": "boolean",
+        "remove": "boolean",
+        "contains": "boolean",
+        "size": "int",
+        "isEmpty": "boolean",
+        "clear": "void",
+        "iterator": "Iterator",
+        "toArray": "Object[]",
+        "clone": "Object"
+      },
+      "fields": {}
+    },
+    "TreeMap": {
+      "methods": {
+        "put": "V",
+        "get": "V",
+        "remove": "V",
+        "firstKey": "K",
+        "lastKey": "K",
+        "headMap": "Map",
+        "tailMap": "Map",
+        "subMap": "Map",
+        "ceilingKey": "K",
+        "floorKey": "K",
+        "pollFirstEntry": "Entry",
+        "pollLastEntry": "Entry",
+        "size": "int",
+        "containsKey": "boolean"
+      },
+      "fields": {}
+    },
+    "List": {
+      "methods": {
+        "of": "List",
+        "copyOf": "List",
+        "add": "boolean",
+        "get": "E",
+        "set": "E",
+        "remove": "E",
+        "size": "int",
+        "isEmpty": "boolean",
+        "contains": "boolean",
+        "indexOf": "int",
+        "clear": "void",
+        "stream": "Stream",
+        "sort": "void",
+        "toArray": "Object[]"
+      },
+      "fields": {}
+    },
+    "Map": {
+      "methods": {
+        "of": "Map",
+        "ofEntries": "Map",
+        "entry": "Entry",
+        "copyOf": "Map",
+        "put": "V",
+        "get": "V",
+        "getOrDefault": "V",
+        "remove": "V",
+        "containsKey": "boolean",
+        "keySet": "Set",
+        "values": "Collection",
+        "entrySet": "Set",
+        "size": "int",
+        "isEmpty": "boolean",
+        "forEach": "void"
+      },
+      "fields": {}
+    },
+    "Set": {
+      "methods": {
+        "of": "Set",
+        "copyOf": "Set",
+        "add": "boolean",
+        "remove": "boolean",
+        "contains": "boolean",
+        "size": "int",
+        "isEmpty": "boolean",
+        "clear": "void",
+        "iterator": "Iterator"
+      },
+      "fields": {}
+    },
+    "Objects": {
+      "methods": {
+        "equals": "boolean",
+        "deepEquals": "boolean",
+        "hash": "int",
+        "hashCode": "int",
+        "toString": "String",
+        "requireNonNull": "T",
+        "isNull": "boolean",
+        "nonNull": "boolean",
+        "compare": "int",
+        "checkIndex": "int",
+        "checkFromToIndex": "int"
+      },
+      "fields": {}
+    },
+    "Optional": {
+      "methods": {
+        "of": "Optional",
+        "ofNullable": "Optional",
+        "empty": "Optional",
+        "isPresent": "boolean",
+        "isEmpty": "boolean",
+        "ifPresent": "void",
+        "ifPresentOrElse": "void",
+        "orElse": "T",
+        "orElseGet": "T",
+        "orElseThrow": "T",
+        "map": "Optional",
+        "flatMap": "Optional",
+        "filter": "Optional",
+        "stream": "Stream",
+        "or": "Optional"
+      },
+      "fields": {}
+    },
+    "Comparator": {
+      "methods": {
+        "comparing": "Comparator",
+        "comparingInt": "Comparator",
+        "comparingLong": "Comparator",
+        "comparingDouble": "Comparator",
+        "naturalOrder": "Comparator",
+        "reverseOrder": "Comparator",
+        "nullsFirst": "Comparator",
+        "nullsLast": "Comparator"
+      },
+      "fields": {}
+    },
+    "Collectors": {
+      "methods": {
+        "toList": "Collector",
+        "toSet": "Collector",
+        "toMap": "Collector",
+        "toCollection": "Collector",
+        "joining": "Collector",
+        "counting": "Collector",
+        "summingInt": "Collector",
+        "summingLong": "Collector",
+        "summingDouble": "Collector",
+        "averagingInt": "Collector",
+        "averagingDouble": "Collector",
+        "groupingBy": "Collector",
+        "partitioningBy": "Collector",
+        "mapping": "Collector",
+        "filtering": "Collector",
+        "reducing": "Collector",
+        "maxBy": "Collector",
+        "minBy": "Collector",
+        "summarizingInt": "Collector",
+        "toUnmodifiableList": "Collector",
+        "toUnmodifiableMap": "Collector"
+      },
+      "fields": {}
+    },
+    "Stream": {
+      "methods": {
+        "of": "Stream",
+        "empty": "Stream",
+        "generate": "Stream",
+        "iterate": "Stream",
+        "concat": "Stream",
+        "builder": "Builder",
+        "filter": "Stream",
+        "map": "Stream",
+        "flatMap": "Stream",
+        "distinct": "Stream",
+        "sorted": "Stream",
+        "limit": "Stream",
+        "skip": "Stream",
+        "forEach": "void",
+        "toArray": "Object[]",
+        "collect": "R",
+        "reduce": "Optional",
+        "count": "long",
+        "anyMatch": "boolean",
+        "allMatch": "boolean",
+        "noneMatch": "boolean",
+        "findFirst": "Optional",
+        "findAny": "Optional",
+        "min": "Optional",
+        "max": "Optional"
+      },
+      "fields": {}
+    },
+    "Scanner": {
+      "methods": {
+        "next": "String",
+        "nextLine": "String",
+        "nextInt": "int",
+        "nextLong": "long",
+        "nextDouble": "double",
+        "nextBoolean": "boolean",
+        "hasNext": "boolean",
+        "hasNextInt": "boolean",
+        "hasNextLine": "boolean",
+        "hasNextDouble": "boolean",
+        "close": "void",
+        "useDelimiter": "Scanner",
+        "reset": "Scanner",
+        "skip": "Scanner",
+        "findInLine": "String"
+      },
+      "fields": {}
+    },
+    "Files": {
+      "methods": {
+        "readString": "String",
+        "writeString": "Path",
+        "readAllLines": "List",
+        "readAllBytes": "byte[]",
+        "write": "Path",
+        "copy": "Path",
+        "move": "Path",
+        "delete": "void",
+        "deleteIfExists": "boolean",
+        "exists": "boolean",
+        "notExists": "boolean",
+        "createFile": "Path",
+        "createDirectory": "Path",
+        "createDirectories": "Path",
+        "createTempFile": "Path",
+        "createTempDirectory": "Path",
+        "list": "Stream",
+        "walk": "Stream",
+        "find": "Stream",
+        "lines": "Stream",
+        "size": "long",
+        "isDirectory": "boolean",
+        "isRegularFile": "boolean",
+        "isReadable": "boolean",
+        "isWritable": "boolean",
+        "isSameFile": "boolean",
+        "getLastModifiedTime": "FileTime",
+        "setLastModifiedTime": "Path",
+        "newBufferedReader": "BufferedReader",
+        "newBufferedWriter": "BufferedWriter",
+        "newInputStream": "InputStream",
+        "newOutputStream": "OutputStream",
+        "probeContentType": "String"
+      },
+      "fields": {}
+    },
+    "Paths": {
+      "methods": { "get": "Path", "of": "Path" },
+      "fields": {}
+    },
+    "Pattern": {
+      "methods": {
+        "compile": "Pattern",
+        "matches": "boolean",
+        "quote": "String",
+        "split": "String[]",
+        "matcher": "Matcher",
+        "asMatchPredicate": "Predicate",
+        "asPredicate": "Predicate"
+      },
+      "fields": {
+        "CASE_INSENSITIVE": "int",
+        "MULTILINE": "int",
+        "DOTALL": "int",
+        "UNICODE_CASE": "int",
+        "COMMENTS": "int",
+        "LITERAL": "int"
+      }
+    },
+    "Matcher": {
+      "methods": {
+        "matches": "boolean",
+        "find": "boolean",
+        "lookingAt": "boolean",
+        "group": "String",
+        "groupCount": "int",
+        "start": "int",
+        "end": "int",
+        "replaceAll": "String",
+        "replaceFirst": "String",
+        "reset": "Matcher",
+        "results": "Stream",
+        "hitEnd": "boolean"
+      },
+      "fields": {}
+    },
+    "LocalDate": {
+      "methods": {
+        "now": "LocalDate",
+        "of": "LocalDate",
+        "parse": "LocalDate",
+        "plusDays": "LocalDate",
+        "plusWeeks": "LocalDate",
+        "plusMonths": "LocalDate",
+        "plusYears": "LocalDate",
+        "minusDays": "LocalDate",
+        "minusMonths": "LocalDate",
+        "minusYears": "LocalDate",
+        "getYear": "int",
+        "getMonth": "Month",
+        "getMonthValue": "int",
+        "getDayOfMonth": "int",
+        "getDayOfWeek": "DayOfWeek",
+        "getDayOfYear": "int",
+        "isLeapYear": "boolean",
+        "isBefore": "boolean",
+        "isAfter": "boolean",
+        "isEqual": "boolean",
+        "until": "Period",
+        "atTime": "LocalDateTime",
+        "toEpochDay": "long",
+        "lengthOfMonth": "int",
+        "lengthOfYear": "int",
+        "withYear": "LocalDate",
+        "withMonth": "LocalDate",
+        "withDayOfMonth": "LocalDate"
+      },
+      "fields": { "MIN": "LocalDate", "MAX": "LocalDate" }
+    },
+    "LocalTime": {
+      "methods": {
+        "now": "LocalTime",
+        "of": "LocalTime",
+        "parse": "LocalTime",
+        "plusHours": "LocalTime",
+        "plusMinutes": "LocalTime",
+        "getHour": "int",
+        "getMinute": "int",
+        "getSecond": "int",
+        "toSecondOfDay": "int",
+        "isBefore": "boolean",
+        "isAfter": "boolean"
+      },
+      "fields": { "MIN": "LocalTime", "MAX": "LocalTime", "NOON": "LocalTime" }
+    },
+    "LocalDateTime": {
+      "methods": {
+        "now": "LocalDateTime",
+        "of": "LocalDateTime",
+        "parse": "LocalDateTime",
+        "plusDays": "LocalDateTime",
+        "minusDays": "LocalDateTime",
+        "toLocalDate": "LocalDate",
+        "toLocalTime": "LocalTime",
+        "getYear": "int",
+        "getMonthValue": "int",
+        "getDayOfMonth": "int",
+        "isBefore": "boolean",
+        "isAfter": "boolean"
+      },
+      "fields": { "MIN": "LocalDateTime", "MAX": "LocalDateTime" }
+    },
+    "Duration": {
+      "methods": {
+        "ofSeconds": "Duration",
+        "ofMillis": "Duration",
+        "ofMinutes": "Duration",
+        "ofHours": "Duration",
+        "ofDays": "Duration",
+        "parse": "Duration",
+        "toMillis": "long",
+        "toSeconds": "long",
+        "toMinutes": "long",
+        "toHours": "long",
+        "plus": "Duration",
+        "minus": "Duration",
+        "multipliedBy": "Duration",
+        "isZero": "boolean",
+        "isNegative": "boolean",
+        "abs": "Duration"
+      },
+      "fields": { "ZERO": "Duration" }
+    },
+    "Instant": {
+      "methods": {
+        "now": "Instant",
+        "ofEpochMilli": "Instant",
+        "ofEpochSecond": "Instant",
+        "parse": "Instant",
+        "toEpochMilli": "long",
+        "getEpochSecond": "long",
+        "plus": "Instant",
+        "minus": "Instant",
+        "isBefore": "boolean",
+        "isAfter": "boolean"
+      },
+      "fields": { "EPOCH": "Instant", "MIN": "Instant", "MAX": "Instant" }
+    },
+    "Thread": {
+      "methods": {
+        "sleep": "void",
+        "currentThread": "Thread",
+        "yield": "void",
+        "activeCount": "int",
+        "dumpStack": "void",
+        "holdsLock": "boolean",
+        "interrupted": "boolean",
+        "start": "void",
+        "run": "void",
+        "join": "void",
+        "interrupt": "void",
+        "isAlive": "boolean",
+        "setName": "void",
+        "getName": "String",
+        "setDaemon": "void",
+        "isDaemon": "boolean"
+      },
+      "fields": {
+        "MAX_PRIORITY": "int",
+        "MIN_PRIORITY": "int",
+        "NORM_PRIORITY": "int"
+      }
+    },
+    "Executors": {
+      "methods": {
+        "newFixedThreadPool": "ExecutorService",
+        "newCachedThreadPool": "ExecutorService",
+        "newSingleThreadExecutor": "ExecutorService",
+        "newScheduledThreadPool": "ScheduledExecutorService",
+        "newSingleThreadScheduledExecutor": "ScheduledExecutorService",
+        "newVirtualThreadPerTaskExecutor": "ExecutorService",
+        "newWorkStealingPool": "ExecutorService",
+        "callable": "Callable",
+        "unconfigurableExecutorService": "ExecutorService"
+      },
+      "fields": {}
+    },
+    "CompletableFuture": {
+      "methods": {
+        "supplyAsync": "CompletableFuture",
+        "runAsync": "CompletableFuture",
+        "completedFuture": "CompletableFuture",
+        "failedFuture": "CompletableFuture",
+        "allOf": "CompletableFuture",
+        "anyOf": "CompletableFuture",
+        "join": "T",
+        "get": "T",
+        "getNow": "T",
+        "thenApply": "CompletableFuture",
+        "thenAccept": "CompletableFuture",
+        "thenRun": "CompletableFuture",
+        "exceptionally": "CompletableFuture",
+        "handle": "CompletableFuture",
+        "isDone": "boolean",
+        "isCancelled": "boolean",
+        "cancel": "boolean",
+        "complete": "boolean"
+      },
+      "fields": {}
+    },
+    "BigDecimal": {
+      "methods": {
+        "add": "BigDecimal",
+        "subtract": "BigDecimal",
+        "multiply": "BigDecimal",
+        "divide": "BigDecimal",
+        "remainder": "BigDecimal",
+        "pow": "BigDecimal",
+        "abs": "BigDecimal",
+        "negate": "BigDecimal",
+        "compareTo": "int",
+        "toString": "String",
+        "toPlainString": "String",
+        "valueOf": "BigDecimal",
+        "setScale": "BigDecimal",
+        "intValue": "int",
+        "longValue": "long",
+        "doubleValue": "double",
+        "stripTrailingZeros": "BigDecimal",
+        "scale": "int",
+        "precision": "int",
+        "signum": "int"
+      },
+      "fields": {
+        "ZERO": "BigDecimal",
+        "ONE": "BigDecimal",
+        "TEN": "BigDecimal"
+      }
+    },
+    "BigInteger": {
+      "methods": {
+        "add": "BigInteger",
+        "subtract": "BigInteger",
+        "multiply": "BigInteger",
+        "divide": "BigInteger",
+        "mod": "BigInteger",
+        "pow": "BigInteger",
+        "gcd": "BigInteger",
+        "abs": "BigInteger",
+        "negate": "BigInteger",
+        "compareTo": "int",
+        "valueOf": "BigInteger",
+        "toString": "String",
+        "intValue": "int",
+        "longValue": "long",
+        "isProbablePrime": "boolean",
+        "nextProbablePrime": "BigInteger",
+        "bitLength": "int"
+      },
+      "fields": { "ZERO": "BigInteger", "ONE": "BigInteger", "TEN": "BigInteger" }
+    },
+    "UUID": {
+      "methods": {
+        "randomUUID": "UUID",
+        "fromString": "UUID",
+        "nameUUIDFromBytes": "UUID",
+        "toString": "String",
+        "getMostSignificantBits": "long",
+        "getLeastSignificantBits": "long",
+        "version": "int",
+        "variant": "int",
+        "timestamp": "long",
+        "clockSequence": "int"
+      },
+      "fields": {}
+    },
+    "Random": {
+      "methods": {
+        "nextInt": "int",
+        "nextLong": "long",
+        "nextDouble": "double",
+        "nextFloat": "float",
+        "nextBoolean": "boolean",
+        "nextBytes": "void",
+        "nextGaussian": "double",
+        "setSeed": "void",
+        "ints": "IntStream",
+        "longs": "LongStream",
+        "doubles": "DoubleStream"
+      },
+      "fields": {}
+    },
+    "Logger": {
+      "methods": {
+        "getLogger": "Logger",
+        "info": "void",
+        "warning": "void",
+        "severe": "void",
+        "fine": "void",
+        "finer": "void",
+        "config": "void",
+        "log": "void",
+        "entering": "void",
+        "exiting": "void",
+        "setLevel": "void",
+        "getName": "String"
+      },
+      "fields": { "global": "Logger" }
+    },
+    "Assertions": {
+      "methods": {
+        "assertEquals": "void",
+        "assertNotEquals": "void",
+        "assertTrue": "void",
+        "assertFalse": "void",
+        "assertNull": "void",
+        "assertNotNull": "void",
+        "assertSame": "void",
+        "assertNotSame": "void",
+        "assertThrows": "T",
+        "assertDoesNotThrow": "T",
+        "assertArrayEquals": "void",
+        "assertIterableEquals": "void",
+        "assertLinesMatch": "void",
+        "assertTimeout": "T",
+        "assertTimeoutPreemptively": "T",
+        "fail": "V"
+      },
+      "fields": {}
+    },
+    "Mockito": {
+      "methods": {
+        "mock": "T",
+        "spy": "T",
+        "when": "OngoingStubbing",
+        "verify": "T",
+        "times": "VerificationMode",
+        "never": "VerificationMode",
+        "atLeastOnce": "VerificationMode",
+        "atLeast": "VerificationMode",
+        "atMost": "VerificationMode",
+        "any": "T",
+        "eq": "T",
+        "anyString": "String",
+        "anyInt": "int",
+        "anyList": "List",
+        "doReturn": "Stubber",
+        "doThrow": "Stubber",
+        "doNothing": "Stubber",
+        "doAnswer": "Stubber",
+        "doCallRealMethod": "Stubber",
+        "mockStatic": "MockedStatic",
+        "validateMockitoUsage": "void",
+        "clearInvocations": "void",
+        "inOrder": "InOrder"
+      },
+      "fields": {}
+    },
+    "Function": {
+      "methods": { "identity": "Function" },
+      "fields": {}
+    },
+    "Predicate": {
+      "methods": { "isEqual": "Predicate", "not": "Predicate" },
       "fields": {}
     }
   }

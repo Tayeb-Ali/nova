@@ -1,7 +1,8 @@
+import "dart:async";
+
 import "package:flutter/material.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
-import "package:re_editor/re_editor.dart";
-import "package:re_highlight/re_highlight.dart";
+import "package:re_editor/re_editor.dart";import "package:re_highlight/re_highlight.dart";
 import "package:re_highlight/languages/dart.dart";
 import "package:re_highlight/languages/javascript.dart";
 import "package:re_highlight/languages/php.dart";
@@ -61,6 +62,16 @@ class ReEditorAdapter extends ConsumerStatefulWidget {
   /// Call `findMode()` once before typing so the search state initializes.
   final void Function(CodeFindController controller)? onFindControllerReady;
 
+  /// Absolute file path of the edited document, when known. Used only to
+  /// scope live LSP completion fetches; null disables them.
+  final String? filePath;
+
+  /// Live server completions at (`filePath`, 0-based line/char), or null
+  /// when no server is available for the file. Results are cached into the
+  /// prompts builder (debounced) and merged with instant local candidates.
+  final Future<List<CodePrompt>> Function(String filePath, int line, int char)?
+      lspCompletion;
+
   const ReEditorAdapter({
     super.key,
     required this.initialText,
@@ -68,6 +79,8 @@ class ReEditorAdapter extends ConsumerStatefulWidget {
     required this.onChanged,
     this.initialLine,
     this.onFindControllerReady,
+    this.filePath,
+    this.lspCompletion,
   });
 
   @override
@@ -80,6 +93,8 @@ class _ReEditorAdapterState extends ConsumerState<ReEditorAdapter> {
   late final CodeFindController _findController;
   late NovaPromptsBuilder _promptsBuilder;
   bool _didInitialJump = false;
+  Timer? _lspDebounce;
+  int _lspRequestId = 0;
 
   @override
   void initState() {
@@ -135,6 +150,7 @@ class _ReEditorAdapterState extends ConsumerState<ReEditorAdapter> {
 
   @override
   void dispose() {
+    _lspDebounce?.cancel();
     _findController.dispose();
     _controller.dispose();
     _scrollController.verticalScroller.dispose();
@@ -197,6 +213,30 @@ class _ReEditorAdapterState extends ConsumerState<ReEditorAdapter> {
       default:
         return null;
     }
+  }
+
+  /// Debounced live-completion fetch: the sync autocomplete contract cannot
+  /// await the server, so results are parked in
+  /// [NovaPromptsBuilder.externalPrompts] and merged on the next keystroke.
+  /// Stale responses (a newer keystroke has since fired) are dropped.
+  void _scheduleLspFetch() {
+    final fetch = widget.lspCompletion;
+    final path = widget.filePath;
+    if (fetch == null || path == null) return;
+    _lspDebounce?.cancel();
+    final int line = _controller.selection.extentIndex;
+    final int character = _controller.selection.extentOffset;
+    _lspDebounce = Timer(const Duration(milliseconds: 400), () async {
+      final int request = ++_lspRequestId;
+      final List<CodePrompt> prompts = await fetch(path, line, character);
+      if (!mounted || request != _lspRequestId) return;
+      _promptsBuilder.externalPrompts = prompts;
+    });
+  }
+
+  void _onTextChanged() {
+    widget.onChanged(_controller.text);
+    _scheduleLspFetch();
   }
 
   CodeEditorStyle? _styleFor(
@@ -275,7 +315,7 @@ class _ReEditorAdapterState extends ConsumerState<ReEditorAdapter> {
           ],
         );
       },
-      onChanged: (_) => widget.onChanged(_controller.text),
+      onChanged: (_) => _onTextChanged(),
     );
     if (autocompleteEnabled) {
       _promptsBuilder.documentText = _controller.text;

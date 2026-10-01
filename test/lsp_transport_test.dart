@@ -87,7 +87,9 @@ void main() {
     expect(serverCommandFor('go'), 'gopls serve');
     expect(serverArgvFor('go'), ['gopls', 'serve']);
     expect(lspInstallHints['go'], 'apt install gopls');
-    expect(serverArgvFor('rust'), isNull);
+    expect(serverCommandFor('rust'), 'rust-analyzer');
+    expect(serverArgvFor('rust'), ['rust-analyzer']);
+    expect(serverArgvFor('cobol'), isNull);
   });
 
   test('transport decodes split Content-Length frames', () async {

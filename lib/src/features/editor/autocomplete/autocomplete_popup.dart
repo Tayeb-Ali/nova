@@ -1,6 +1,7 @@
 import "package:flutter/material.dart";
 import "package:re_editor/re_editor.dart";
 
+import "completion_ranker.dart";
 import "language_snippets.dart";
 
 /// Maximum height of the suggestion list.
@@ -218,8 +219,9 @@ String? _detailFor(CodePrompt prompt) {
   return "keyword";
 }
 
-/// Renders [word] with the typed [input] prefix bolded. Falls back to a
-/// case-insensitive match highlight, then to plain text.
+/// Renders [word] with the typed [input] characters highlighted JetBrains-style.
+/// Prefix hits bold the leading run; fuzzy hits (e.g. `prln` in `println`)
+/// bold each matched character in order; falls back to plain text.
 InlineSpan _wordSpan(
   String word,
   String input,
@@ -229,28 +231,33 @@ InlineSpan _wordSpan(
   final TextStyle base = TextStyle(color: baseColor, fontSize: 13);
   final TextStyle match =
       TextStyle(color: matchColor, fontWeight: FontWeight.bold, fontSize: 13);
-  if (input.isNotEmpty && word.startsWith(input)) {
-    return TextSpan(
-      children: [
-        TextSpan(text: word.substring(0, input.length), style: match),
-        TextSpan(text: word.substring(input.length), style: base),
-      ],
+  if (input.isEmpty) return TextSpan(text: word, style: base);
+  final List<int> hits = fuzzyMatchIndices(word, input);
+  if (hits.isEmpty) return TextSpan(text: word, style: base);
+  final Set<int> hitSet = hits.toSet();
+  final List<InlineSpan> children = [];
+  final StringBuffer run = StringBuffer();
+  bool? inMatch;
+  for (int i = 0; i < word.length; i++) {
+    final bool isHit = hitSet.contains(i);
+    if (inMatch == null || isHit != inMatch) {
+      if (run.isNotEmpty) {
+        children.add(
+          TextSpan(
+            text: run.toString(),
+            style: inMatch == true ? match : base,
+          ),
+        );
+        run.clear();
+      }
+      inMatch = isHit;
+    }
+    run.write(word[i]);
+  }
+  if (run.isNotEmpty) {
+    children.add(
+      TextSpan(text: run.toString(), style: inMatch == true ? match : base),
     );
   }
-  final int index = input.isEmpty
-      ? -1
-      : word.toLowerCase().indexOf(input.toLowerCase());
-  if (index >= 0) {
-    return TextSpan(
-      children: [
-        TextSpan(text: word.substring(0, index), style: base),
-        TextSpan(
-          text: word.substring(index, index + input.length),
-          style: match,
-        ),
-        TextSpan(text: word.substring(index + input.length), style: base),
-      ],
-    );
-  }
-  return TextSpan(text: word, style: base);
+  return TextSpan(children: children);
 }

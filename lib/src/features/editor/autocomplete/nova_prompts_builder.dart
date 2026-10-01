@@ -27,6 +27,7 @@ import "package:re_highlight/languages/makefile.dart";
 import "package:re_highlight/re_highlight.dart";
 
 import "language_members.dart";
+import "completion_ranker.dart";
 import "language_snippets.dart";
 
 /// Extracts identifier-like words from editor text.
@@ -35,14 +36,21 @@ final RegExp _identifierPattern = RegExp(r"[A-Za-z_][A-Za-z0-9_]{2,}");
 /// Upper bound for document-word prompts merged into a single result.
 const int _maxDocumentWords = 300;
 
-/// Combines three prompt sources for a re_highlight [Mode] language:
+/// Combines four prompt sources for a re_highlight [Mode] language:
 /// (a) the language's own keywords, via an internal
 /// [DefaultCodeAutocompletePromptsBuilder] (which reads the `keyword`,
 /// `built_in`, `literal` and `type` lists from [Mode.keywords]),
 /// (b) the single-line snippets from [languageSnippets] for [languageId],
 /// passed as `directPrompts` so they share the same prefix matching,
 /// (c) identifier words from the edited text, wrapped as
-/// [CodeKeywordPrompt] and appended after the delegate results.
+/// [CodeKeywordPrompt] and appended after the delegate results,
+/// (d) cached LSP completions via [externalPrompts] (filled asynchronously
+/// by the editor wiring; the sync [build] contract merges them when present).
+///
+/// Matching is JetBrains-style fuzzy ([fuzzyScore] in `completion_ranker.dart`)
+/// instead of the prefix-only [CodePrompt.match]: the delegate still supplies
+/// its prefix hits, and every pool is additionally fuzzy-filtered and ranked
+/// so `prln` finds `println` and `lgo` still offers `log`.
 ///
 /// Composition is used instead of subclassing because
 /// [DefaultCodeAutocompletePromptsBuilder] is an abstract factory whose
@@ -79,6 +87,13 @@ class NovaPromptsBuilder implements CodeAutocompletePromptsBuilder {
   /// current line. The wiring step can assign the whole buffer here to get
   /// true document-wide suggestions.
   String? documentText;
+
+  /// Cached LSP completions merged on top of local candidates.
+  ///
+  /// The [build] contract is synchronous, so live server results are fetched
+  /// elsewhere (debounced, with timeout) and parked here; the next keystroke
+  /// merges them into the popup without blocking typing.
+  List<CodePrompt> externalPrompts = const [];
 
   final List<CodePrompt> _snippets;
   late final DefaultCodeAutocompletePromptsBuilder _delegate;
@@ -166,6 +181,18 @@ class NovaPromptsBuilder implements CodeAutocompletePromptsBuilder {
   static final RegExp _memberPattern =
       RegExp(r"([A-Za-z_$][A-Za-z0-9_$]*)\.([A-Za-z_$][A-Za-z0-9_$]*)?$");
 
+  /// Matches `receiver->partial|` at the caret (PHP object operator).
+  /// The receiver may carry one leading `$` (`$request->input`); it is
+  /// stripped for lookup (raw first, then stripped).
+  static final RegExp _arrowPattern =
+      RegExp(r"([A-Za-z_$][A-Za-z0-9_$]*)->([A-Za-z_$][A-Za-z0-9_$]*)?$");
+
+  /// Matches `receiver::partial|` at the caret (PHP/C++/Rust scope
+  /// resolution). The receiver never starts with `$`, so a lone `:`
+  /// (ternary/label) or `<...>` generics can never match.
+  static final RegExp _scopePattern =
+      RegExp(r"([A-Za-z_][A-Za-z0-9_$]*)::([A-Za-z_$][A-Za-z0-9_$]*)?$");
+
   @override
   CodeAutocompleteEditingValue? build(
     BuildContext context,
@@ -183,42 +210,52 @@ class NovaPromptsBuilder implements CodeAutocompletePromptsBuilder {
     if (input.isEmpty) {
       return base;
     }
-    if (base == null) {
-      // No keyword or snippet matched (and we are not inside a string
-      // literal): still offer snippet aliases and document words.
-      if (_isInsideString(codeLine.text, selection)) {
-        return null;
+    final Set<String> seen = <String>{};
+    final List<CodePrompt> merged = <CodePrompt>[];
+    if (base != null) {
+      for (final prompt in base.prompts) {
+        if (seen.add(prompt.word)) merged.add(prompt);
       }
-      final List<CodePrompt> fallback = [
-        ..._snippets.where((CodePrompt prompt) => prompt.match(input)),
-        ..._documentWordPrompts(
-          source: documentText ?? codeLine.text,
-          input: input,
-          excludedWords: _wordsOf(_snippets),
-        ),
-      ];
-      if (fallback.isEmpty) {
-        return null;
-      }
-      return CodeAutocompleteEditingValue(
-        input: input,
-        prompts: fallback,
-        index: 0,
-      );
     }
-    final List<CodePrompt> words = _documentWordPrompts(
-      source: documentText ?? codeLine.text,
-      input: input,
-      excludedWords: _wordsOf(base.prompts),
+    // Fuzzy extras the prefix-only delegate missed: keywords (re-extracted
+    // so subsequence hits like `prln`->`println` surface), snippets under
+    // an alias, document words, and cached LSP items.
+    final List<CodePrompt> fuzzyPool = <CodePrompt>[
+      ...extractLanguageKeywords(language),
+      ..._snippets,
+      ..._documentWordCandidates(
+        source: documentText ?? codeLine.text,
+        excludedWords: seen,
+      ),
+      ...externalPrompts,
+    ];
+    final List<CodePrompt> ranked = rankPrompts(
+      fuzzyPool.where((p) => !seen.contains(p.word)).toList(),
+      input,
     );
-    if (words.isEmpty) {
-      return base;
+    for (final prompt in ranked) {
+      if (seen.add(prompt.word)) merged.add(prompt);
     }
-    return base.copyWith(prompts: [...base.prompts, ...words]);
+    if (merged.isEmpty) return null;
+    // Final JetBrains-style ordering across all pools.
+    final List<CodePrompt> ordered = rankPrompts(merged, input, limit: 50);
+    if (ordered.isEmpty) {
+      return base ??
+          CodeAutocompleteEditingValue(input: input, prompts: merged, index: 0);
+    }
+    return CodeAutocompleteEditingValue(
+      input: input,
+      prompts: ordered,
+      index: 0,
+    );
   }
 
-  /// Detects a member access (`receiver.partial`) immediately before the
-  /// caret and returns its prompts, or null to use the normal flow.
+  /// Detects a member access (`receiver.partial`, `receiver->partial`,
+  /// or `receiver::partial`) immediately before the caret and returns its
+  /// prompts, or null to use the normal flow.
+  /// Matching is fuzzy so `con.lgo` still offers `log`. When several
+  /// operators could match at the caret, the rightmost (nearest-caret) one
+  /// wins; a match ending elsewhere falls through to the normal flow.
   CodeAutocompleteEditingValue? _memberCompletion(
     String lineText,
     CodeLineSelection selection,
@@ -227,31 +264,87 @@ class NovaPromptsBuilder implements CodeAutocompletePromptsBuilder {
     if (_isInsideString(lineText, selection)) {
       return null;
     }
-    final match = _memberPattern.firstMatch(lineText.substring(0, end));
-    // Anchor at the caret: the match must end exactly where typing stopped.
-    if (match == null || match.end != end) {
+    final String before = lineText.substring(0, end);
+    final RegExpMatch? dotMatch = _memberPattern.firstMatch(before);
+    final RegExpMatch? arrowMatch = _arrowPattern.firstMatch(before);
+    final RegExpMatch? scopeMatch = _scopePattern.firstMatch(before);
+    // Each pattern is `$`-anchored, so a hit always ends at the caret;
+    // the explicit end check keeps the anchor contract obvious.
+    RegExpMatch? best;
+    bool bestIsArrow = false;
+    void consider(RegExpMatch? candidate, bool isArrow) {
+      if (candidate == null || candidate.end != end) {
+        return;
+      }
+      if (best == null || candidate.start > best!.start) {
+        best = candidate;
+        bestIsArrow = isArrow;
+      }
+    }
+
+    consider(dotMatch, false);
+    consider(arrowMatch, true);
+    consider(scopeMatch, false);
+    final RegExpMatch? match = best;
+    if (match == null) {
       return null;
     }
-    final prompts = memberPrompts(
+    final String receiver = match.group(1)!;
+    final String partial = match.group(2) ?? "";
+    List<CodePrompt>? all = MemberRegistry.membersFor(
       languageId,
-      match.group(1)!,
-      match.group(2) ?? "",
+      receiver,
     );
-    if (prompts == null) {
-      return null;
+    // PHP variables carry `$` (`$request->input`) while tables register
+    // bare keys (`request`): try the raw receiver first so `$foo` keys
+    // keep working, then one stripped `$`.
+    if (all == null &&
+        bestIsArrow &&
+        receiver.startsWith(r"$") &&
+        receiver.length > 1) {
+      all = MemberRegistry.membersFor(
+        languageId,
+        receiver.substring(1),
+      );
     }
+    if (all == null) {
+      // Unknown receiver: fall back to the legacy prefix lookup (usually
+      // null too) so behavior never regresses.
+      List<CodePrompt>? legacy = memberPrompts(languageId, receiver, partial);
+      if (legacy == null &&
+          bestIsArrow &&
+          receiver.startsWith(r"$") &&
+          receiver.length > 1) {
+        legacy = memberPrompts(
+          languageId,
+          receiver.substring(1),
+          partial,
+        );
+      }
+      if (legacy == null) return null;
+      return CodeAutocompleteEditingValue(
+        input: partial,
+        prompts: legacy,
+        index: 0,
+      );
+    }
+    final List<CodePrompt> ranked = rankPrompts(
+      all,
+      partial,
+      memberContext: true,
+    );
+    if (ranked.isEmpty) return null;
     return CodeAutocompleteEditingValue(
-      input: match.group(2) ?? "",
-      prompts: prompts,
+      input: partial,
+      prompts: ranked,
       index: 0,
     );
   }
 
-  /// Collects identifier words from [source] that match [input], skipping
-  /// words already suggested and capping the result at [_maxDocumentWords].
-  List<CodePrompt> _documentWordPrompts({
+  /// Raw identifier candidates from [source] (unfiltered); fuzzy ranking
+  /// happens in [build] so prefix and subsequence hits share one ordering.
+  List<CodePrompt> _documentWordCandidates({
     required String source,
-    required String input,
     required Set<String> excludedWords,
   }) {
     final Set<String> seen = <String>{...excludedWords};
@@ -266,20 +359,12 @@ class NovaPromptsBuilder implements CodeAutocompletePromptsBuilder {
       if (int.tryParse(word) != null) {
         continue;
       }
-      final CodePrompt prompt = CodeKeywordPrompt(word: word);
-      if (!prompt.match(input)) {
-        continue;
-      }
       if (!seen.add(word)) {
         continue;
       }
-      prompts.add(prompt);
+      prompts.add(CodeKeywordPrompt(word: word));
     }
     return prompts;
-  }
-
-  static Set<String> _wordsOf(List<CodePrompt> prompts) {
-    return prompts.map((CodePrompt prompt) => prompt.word).toSet();
   }
 
   /// Replicates the delegate's typed-prefix extraction for the fallback

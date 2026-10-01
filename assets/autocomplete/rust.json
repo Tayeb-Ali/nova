@@ -1,0 +1,645 @@
+{
+  "receivers": {
+    "String": {
+      "methods": {
+        "new": "String",
+        "from": "String",
+        "len": "usize",
+        "is_empty": "bool",
+        "contains": "bool",
+        "starts_with": "bool",
+        "ends_with": "bool",
+        "replace": "String",
+        "split": "Split",
+        "trim": "str",
+        "to_uppercase": "String",
+        "to_lowercase": "String",
+        "parse": "Result",
+        "chars": "Chars",
+        "lines": "Lines",
+        "push_str": "void",
+        "push": "void",
+        "pop": "Option",
+        "clear": "void",
+        "truncate": "void",
+        "insert": "void",
+        "remove": "char",
+        "split_off": "String",
+        "drain": "Drain",
+        "as_str": "&str"
+      },
+      "fields": {}
+    },
+    "Vec": {
+      "methods": {
+        "new": "Vec",
+        "with_capacity": "Vec",
+        "push": "void",
+        "pop": "Option",
+        "len": "usize",
+        "is_empty": "bool",
+        "contains": "bool",
+        "iter": "Iter",
+        "map": "Map",
+        "filter": "Filter",
+        "collect": "B",
+        "extend": "void",
+        "retain": "void",
+        "dedup": "void",
+        "sort": "void",
+        "sort_unstable": "void",
+        "reverse": "void",
+        "swap_remove": "T",
+        "truncate": "void",
+        "clear": "void",
+        "first": "Option",
+        "last": "Option",
+        "get": "Option",
+        "iter_mut": "IterMut",
+        "windows": "Windows",
+        "chunks": "Chunks"
+      },
+      "fields": {}
+    },
+    "vec": {
+      "methods": {},
+      "fields": {}
+    },
+    "Option": {
+      "methods": {
+        "is_some": "bool",
+        "is_none": "bool",
+        "unwrap": "T",
+        "unwrap_or": "T",
+        "expect": "T",
+        "map": "Option",
+        "and_then": "Option",
+        "ok_or": "Result",
+        "unwrap_or_else": "T",
+        "unwrap_or_default": "T",
+        "filter": "Option",
+        "zip": "Option",
+        "transpose": "Result",
+        "as_ref": "Option",
+        "as_mut": "Option",
+        "is_some_and": "bool",
+        "cloned": "Option"
+      },
+      "fields": {
+        "None": "Option",
+        "Some": "Option"
+      }
+    },
+    "Result": {
+      "methods": {
+        "is_ok": "bool",
+        "is_err": "bool",
+        "unwrap": "T",
+        "expect": "T",
+        "map": "Result",
+        "map_err": "Result",
+        "and_then": "Result",
+        "unwrap_or": "T",
+        "unwrap_or_else": "T",
+        "unwrap_or_default": "T",
+        "ok": "Option",
+        "err": "Option",
+        "transpose": "Option",
+        "inspect": "Result",
+        "inspect_err": "Result"
+      },
+      "fields": {
+        "Ok": "Result",
+        "Err": "Result"
+      }
+    },
+    "HashMap": {
+      "methods": {
+        "new": "HashMap",
+        "insert": "Option",
+        "get": "Option",
+        "remove": "Option",
+        "contains_key": "bool",
+        "keys": "Keys",
+        "values": "Values",
+        "len": "usize",
+        "with_capacity": "HashMap",
+        "entry": "Entry",
+        "iter": "Iter",
+        "iter_mut": "IterMut",
+        "clear": "void",
+        "is_empty": "bool",
+        "remove_entry": "Option",
+        "get_mut": "Option",
+        "drain": "Drain"
+      },
+      "fields": {}
+    },
+    "println": {
+      "methods": {},
+      "fields": {}
+    },
+    "print": {
+      "methods": {},
+      "fields": {}
+    },
+    "fs": {
+      "methods": {
+        "read_to_string": "Result",
+        "write": "Result",
+        "read": "Result",
+        "create_dir": "Result",
+        "remove_file": "Result",
+        "exists": "bool",
+        "read_dir": "Result",
+        "create_dir_all": "Result",
+        "remove_dir_all": "Result",
+        "rename": "Result",
+        "copy": "Result",
+        "metadata": "Result",
+        "canonicalize": "Result",
+        "try_exists": "Result",
+        "File": "File",
+        "OpenOptions": "OpenOptions"
+      },
+      "fields": {}
+    },
+    "io": {
+      "methods": {
+        "stdin": "Stdin",
+        "stdout": "Stdout",
+        "stderr": "Stderr",
+        "copy": "Result",
+        "empty": "Empty",
+        "repeat": "Repeat",
+        "sink": "Sink",
+        "BufReader": "BufReader",
+        "BufWriter": "BufWriter",
+        "Write": "Result",
+        "BufRead": "BufRead"
+      },
+      "fields": {}
+    },
+    "str": {
+      "methods": {
+        "len": "usize",
+        "is_empty": "bool",
+        "contains": "bool",
+        "starts_with": "bool",
+        "ends_with": "bool",
+        "replace": "String",
+        "split": "Split",
+        "lines": "Lines",
+        "trim": "&str",
+        "to_uppercase": "String",
+        "to_lowercase": "String",
+        "parse": "Result",
+        "chars": "Chars",
+        "bytes": "Bytes",
+        "as_bytes": "&[u8]",
+        "repeat": "String",
+        "to_string": "String"
+      },
+      "fields": {}
+    },
+    "HashSet": {
+      "methods": {
+        "new": "HashSet",
+        "insert": "bool",
+        "remove": "bool",
+        "contains": "bool",
+        "len": "usize",
+        "is_empty": "bool",
+        "iter": "Iter",
+        "union": "Union",
+        "intersection": "Intersection",
+        "difference": "Difference",
+        "get": "Option"
+      },
+      "fields": {}
+    },
+    "BTreeMap": {
+      "methods": {
+        "new": "BTreeMap",
+        "insert": "Option",
+        "get": "Option",
+        "remove": "Option",
+        "contains_key": "bool",
+        "len": "usize",
+        "iter": "Iter",
+        "keys": "Keys",
+        "values": "Values",
+        "range": "Range",
+        "first_key_value": "Option",
+        "last_key_value": "Option"
+      },
+      "fields": {}
+    },
+    "BTreeSet": {
+      "methods": {
+        "new": "BTreeSet",
+        "insert": "bool",
+        "remove": "bool",
+        "contains": "bool",
+        "len": "usize",
+        "iter": "Iter",
+        "first": "Option",
+        "last": "Option",
+        "range": "Range"
+      },
+      "fields": {}
+    },
+    "VecDeque": {
+      "methods": {
+        "new": "VecDeque",
+        "push_back": "void",
+        "push_front": "void",
+        "pop_back": "Option",
+        "pop_front": "Option",
+        "len": "usize",
+        "front": "Option",
+        "back": "Option",
+        "iter": "Iter",
+        "make_contiguous": "&mut [T]",
+        "as_slices": "(&[T], &[T])"
+      },
+      "fields": {}
+    },
+    "BinaryHeap": {
+      "methods": {
+        "new": "BinaryHeap",
+        "push": "void",
+        "pop": "Option",
+        "peek": "Option",
+        "len": "usize",
+        "is_empty": "bool",
+        "iter": "Iter",
+        "retain": "void",
+        "into_sorted_vec": "Vec"
+      },
+      "fields": {}
+    },
+    "env": {
+      "methods": {
+        "args": "Args",
+        "vars": "Vars",
+        "var": "Result",
+        "set_var": "void",
+        "remove_var": "void",
+        "current_dir": "Result",
+        "set_current_dir": "Result",
+        "temp_dir": "PathBuf",
+        "current_exe": "Result",
+        "var_os": "Option",
+        "split_paths": "SplitPaths",
+        "join_paths": "Result"
+      },
+      "fields": {}
+    },
+    "process": {
+      "methods": {
+        "Command": "Command",
+        "Stdio": "Stdio",
+        "Child": "Child",
+        "Output": "Output",
+        "ExitStatus": "ExitStatus",
+        "exit": "void",
+        "abort": "void",
+        "id": "u32"
+      },
+      "fields": {}
+    },
+    "thread": {
+      "methods": {
+        "spawn": "JoinHandle",
+        "sleep": "void",
+        "current": "Thread",
+        "park": "void",
+        "yield_now": "void",
+        "available_parallelism": "Result",
+        "scope": "T"
+      },
+      "fields": {}
+    },
+    "sync": {
+      "methods": {
+        "Mutex": "Mutex",
+        "RwLock": "RwLock",
+        "Arc": "Arc",
+        "mpsc": "mpsc",
+        "channel": "Receiver",
+        "Barrier": "Barrier",
+        "Condvar": "Condvar",
+        "Once": "Once",
+        "OnceLock": "OnceLock"
+      },
+      "fields": {}
+    },
+    "mpsc": {
+      "methods": {
+        "channel": "Receiver",
+        "send": "Result",
+        "recv": "Result",
+        "try_recv": "Result",
+        "send_timeout": "Result",
+        "Sender": "Sender",
+        "Receiver": "Receiver"
+      },
+      "fields": {}
+    },
+    "path": {
+      "methods": {
+        "Path": "Path",
+        "PathBuf": "PathBuf",
+        "Component": "Component",
+        "new": "Path",
+        "join": "PathBuf",
+        "exists": "bool"
+      },
+      "fields": {}
+    },
+    "Path": {
+      "methods": {
+        "new": "&Path",
+        "join": "PathBuf",
+        "file_name": "Option",
+        "extension": "Option",
+        "parent": "Option",
+        "exists": "bool",
+        "is_file": "bool",
+        "is_dir": "bool",
+        "to_str": "Option",
+        "to_path_buf": "PathBuf",
+        "components": "Components",
+        "strip_prefix": "Result",
+        "starts_with": "bool",
+        "ends_with": "bool"
+      },
+      "fields": {}
+    },
+    "PathBuf": {
+      "methods": {
+        "new": "PathBuf",
+        "push": "void",
+        "set_extension": "bool",
+        "file_name": "Option",
+        "extension": "Option",
+        "parent": "Option",
+        "exists": "bool",
+        "is_file": "bool",
+        "is_dir": "bool",
+        "to_str": "Option",
+        "join": "PathBuf",
+        "components": "Components",
+        "strip_prefix": "Result",
+        "as_path": "&Path"
+      },
+      "fields": {}
+    },
+    "time": {
+      "methods": {
+        "Instant": "Instant",
+        "Duration": "Duration",
+        "SystemTime": "SystemTime"
+      },
+      "fields": {
+        "UNIX_EPOCH": "SystemTime"
+      }
+    },
+    "Instant": {
+      "methods": {
+        "now": "Instant",
+        "elapsed": "Duration",
+        "duration_since": "Duration",
+        "checked_add": "Option",
+        "checked_sub": "Option"
+      },
+      "fields": {}
+    },
+    "Duration": {
+      "methods": {
+        "new": "Duration",
+        "from_secs": "Duration",
+        "from_millis": "Duration",
+        "from_micros": "Duration",
+        "as_secs": "u64",
+        "as_millis": "u128",
+        "as_micros": "u128",
+        "as_nanos": "u128",
+        "checked_add": "Option",
+        "checked_sub": "Option",
+        "is_zero": "bool"
+      },
+      "fields": {}
+    },
+    "SystemTime": {
+      "methods": {
+        "now": "SystemTime",
+        "elapsed": "Result",
+        "duration_since": "Result",
+        "checked_add": "Option",
+        "checked_sub": "Option"
+      },
+      "fields": {}
+    },
+    "fmt": {
+      "methods": {
+        "format": "String"
+      },
+      "fields": {}
+    },
+    "mem": {
+      "methods": {
+        "replace": "T",
+        "swap": "void",
+        "size_of": "usize",
+        "align_of": "usize",
+        "forget": "void",
+        "transmute": "U",
+        "take": "T",
+        "drop": "void"
+      },
+      "fields": {}
+    },
+    "cmp": {
+      "methods": {
+        "min": "T",
+        "max": "T",
+        "min_by": "T",
+        "max_by": "T",
+        "Reverse": "Reverse"
+      },
+      "fields": {}
+    },
+    "char": {
+      "methods": {
+        "is_alphabetic": "bool",
+        "is_numeric": "bool",
+        "is_alphanumeric": "bool",
+        "is_whitespace": "bool",
+        "is_uppercase": "bool",
+        "is_lowercase": "bool",
+        "to_uppercase": "ToUppercase",
+        "to_lowercase": "ToLowercase",
+        "to_digit": "Option",
+        "from_digit": "Option",
+        "len_utf8": "usize",
+        "is_control": "bool"
+      },
+      "fields": {}
+    },
+    "iter": {
+      "methods": {
+        "empty": "Empty",
+        "once": "Once",
+        "repeat": "Repeat",
+        "repeat_with": "RepeatWith",
+        "successors": "Successors",
+        "from_fn": "FromFn"
+      },
+      "fields": {}
+    },
+    "serde_json": {
+      "methods": {
+        "from_str": "Result",
+        "to_string": "Result",
+        "from_value": "Result",
+        "to_value": "Result",
+        "from_slice": "Result",
+        "to_vec": "Result",
+        "Value": "Value"
+      },
+      "fields": {}
+    },
+    "Value": {
+      "methods": {
+        "get": "Option",
+        "as_str": "Option",
+        "as_i64": "Option",
+        "is_null": "bool"
+      },
+      "fields": {
+        "Null": "Value",
+        "Bool": "Value",
+        "Number": "Value",
+        "String": "Value",
+        "Array": "Value",
+        "Object": "Value"
+      }
+    },
+    "tokio": {
+      "methods": {
+        "spawn": "JoinHandle"
+      },
+      "fields": {}
+    },
+    "runtime": {
+      "methods": {
+        "Builder": "Builder"
+      },
+      "fields": {}
+    },
+    "Builder": {
+      "methods": {
+        "new_current_thread": "Builder",
+        "new_multi_thread": "Builder",
+        "enable_all": "Builder",
+        "build": "Result"
+      },
+      "fields": {}
+    },
+    "task": {
+      "methods": {
+        "spawn": "JoinHandle",
+        "yield_now": "void",
+        "JoinSet": "JoinSet"
+      },
+      "fields": {}
+    },
+    "JoinSet": {
+      "methods": {
+        "new": "JoinSet",
+        "spawn": "AbortHandle",
+        "join_next": "Option"
+      },
+      "fields": {}
+    },
+    "rand": {
+      "methods": {
+        "thread_rng": "ThreadRng",
+        "Rng": "Rng"
+      },
+      "fields": {}
+    },
+    "Rng": {
+      "methods": {
+        "gen": "T",
+        "gen_range": "T"
+      },
+      "fields": {}
+    },
+    "regex": {
+      "methods": {
+        "Regex": "Regex",
+        "Captures": "Captures"
+      },
+      "fields": {}
+    },
+    "Regex": {
+      "methods": {
+        "new": "Result",
+        "is_match": "bool",
+        "find": "Option",
+        "captures": "Option",
+        "replace_all": "String",
+        "replace": "String",
+        "split": "Split"
+      },
+      "fields": {}
+    },
+    "anyhow": {
+      "methods": {
+        "Context": "Context",
+        "anyhow": "Error",
+        "bail": "Result",
+        "ensure": "Result"
+      },
+      "fields": {}
+    },
+    "Context": {
+      "methods": {
+        "context": "Result",
+        "with_context": "Result"
+      },
+      "fields": {}
+    },
+    "thiserror": {
+      "methods": {
+        "Error": "Error"
+      },
+      "fields": {}
+    },
+    "once_cell": {
+      "methods": {
+        "Lazy": "Lazy",
+        "OnceCell": "OnceCell"
+      },
+      "fields": {}
+    },
+    "OnceCell": {
+      "methods": {
+        "new": "OnceCell",
+        "get": "Option",
+        "get_or_init": "T",
+        "set": "Result"
+      },
+      "fields": {}
+    },
+    "Lazy": {
+      "methods": {
+        "new": "Lazy"
+      },
+      "fields": {}
+    }
+  }
+}

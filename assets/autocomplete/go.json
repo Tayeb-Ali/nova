@@ -2,23 +2,721 @@
   "receivers": {
     "fmt": {
       "methods": {
-        "Println": "void",
+        "Print": "void",
         "Printf": "void",
+        "Println": "void",
         "Sprint": "string",
+        "Sprintf": "string",
+        "Sprintln": "string",
+        "Fprint": "void",
+        "Fprintf": "void",
+        "Fprintln": "void",
+        "Scan": "void",
+        "Scanln": "void",
+        "Sscanf": "void",
         "Errorf": "error"
+      },
+      "fields": {}
+    },
+    "strings": {
+      "methods": {
+        "Contains": "bool",
+        "HasPrefix": "bool",
+        "HasSuffix": "bool",
+        "Index": "int",
+        "Split": "list",
+        "Join": "string",
+        "Replace": "string",
+        "ReplaceAll": "string",
+        "ToLower": "string",
+        "ToUpper": "string",
+        "TrimSpace": "string",
+        "Fields": "list",
+        "Count": "int",
+        "EqualFold": "bool"
+      },
+      "fields": {}
+    },
+    "strconv": {
+      "methods": {
+        "Itoa": "string",
+        "Atoi": "int",
+        "ParseInt": "int",
+        "ParseUint": "int",
+        "ParseFloat": "float",
+        "ParseBool": "bool",
+        "FormatInt": "string",
+        "FormatUint": "string",
+        "FormatFloat": "string",
+        "FormatBool": "string",
+        "Quote": "string",
+        "Unquote": "string",
+        "AppendInt": "bytes",
+        "CanBackquote": "bool"
+      },
+      "fields": {}
+    },
+    "errors": {
+      "methods": {
+        "New": "error",
+        "Is": "bool",
+        "As": "bool",
+        "Unwrap": "error",
+        "Join": "error"
       },
       "fields": {}
     },
     "os": {
       "methods": {
         "Getenv": "string",
+        "Setenv": "error",
+        "LookupEnv": "string",
+        "Environ": "list",
+        "Getwd": "string",
+        "MkdirAll": "error",
+        "RemoveAll": "error",
+        "Create": "file",
+        "Open": "file",
+        "OpenFile": "file",
+        "ReadFile": "bytes",
+        "WriteFile": "error",
+        "Stat": "fileinfo",
         "Exit": "void"
       },
       "fields": {
         "Args": "list",
+        "Stdin": "file",
+        "Stdout": "file",
         "Stderr": "file",
-        "Stdout": "file"
+        "PathSeparator": "string",
+        "O_RDONLY": "int",
+        "O_RDWR": "int",
+        "O_CREATE": "int"
       }
+    },
+    "io": {
+      "methods": {
+        "Copy": "int",
+        "CopyN": "int",
+        "ReadAll": "bytes",
+        "ReadFull": "void",
+        "WriteString": "int",
+        "Pipe": "void",
+        "MultiReader": "reader",
+        "MultiWriter": "writer",
+        "TeeReader": "reader",
+        "LimitReader": "reader"
+      },
+      "fields": {
+        "Discard": "writer",
+        "EOF": "error"
+      }
+    },
+    "path": {
+      "methods": {
+        "Base": "string",
+        "Dir": "string",
+        "Ext": "string",
+        "Join": "string",
+        "Clean": "string",
+        "Split": "string",
+        "IsAbs": "bool",
+        "Match": "bool"
+      },
+      "fields": {}
+    },
+    "filepath": {
+      "methods": {
+        "Join": "string",
+        "Abs": "string",
+        "Base": "string",
+        "Dir": "string",
+        "Ext": "string",
+        "Clean": "string",
+        "Split": "string",
+        "Walk": "error",
+        "WalkDir": "error",
+        "Glob": "list",
+        "Rel": "string",
+        "IsAbs": "bool",
+        "Match": "bool",
+        "ToSlash": "string"
+      },
+      "fields": {
+        "Separator": "string",
+        "ListSeparator": "string"
+      }
+    },
+    "net": {
+      "methods": {
+        "Dial": "conn",
+        "Listen": "listener",
+        "LookupHost": "list",
+        "LookupIP": "list",
+        "ParseIP": "ip",
+        "JoinHostPort": "string",
+        "SplitHostPort": "string",
+        "InterfaceAddrs": "list",
+        "CIDRMask": "ipmask"
+      },
+      "fields": {
+        "IPv4len": "int",
+        "IPv6len": "int"
+      }
+    },
+    "http": {
+      "methods": {
+        "Get": "response",
+        "Post": "response",
+        "PostForm": "response",
+        "Head": "response",
+        "Handle": "void",
+        "HandleFunc": "void",
+        "ListenAndServe": "error",
+        "NewServeMux": "mux",
+        "FileServer": "handler",
+        "StripPrefix": "handler",
+        "Redirect": "void",
+        "NotFound": "handler",
+        "Error": "void",
+        "SetCookie": "void"
+      },
+      "fields": {
+        "Client": "struct",
+        "Request": "struct",
+        "Response": "struct",
+        "Server": "struct",
+        "DefaultClient": "client",
+        "DefaultServeMux": "mux",
+        "StatusOK": "int",
+        "StatusNotFound": "int",
+        "StatusInternalServerError": "int",
+        "MethodGet": "string",
+        "MethodPost": "string"
+      }
+    },
+    "url": {
+      "methods": {
+        "Parse": "url",
+        "ParseRequestURI": "url",
+        "QueryEscape": "string",
+        "QueryUnescape": "string",
+        "PathEscape": "string",
+        "PathUnescape": "string"
+      },
+      "fields": {
+        "URL": "struct",
+        "Values": "struct"
+      }
+    },
+    "context": {
+      "methods": {
+        "Background": "context",
+        "TODO": "context",
+        "WithCancel": "context",
+        "WithTimeout": "context",
+        "WithDeadline": "context",
+        "WithValue": "context",
+        "AfterFunc": "stopfunc",
+        "WithoutCancel": "context"
+      },
+      "fields": {}
+    },
+    "time": {
+      "methods": {
+        "Now": "time",
+        "Sleep": "void",
+        "Since": "duration",
+        "Until": "duration",
+        "Parse": "time",
+        "ParseDuration": "duration",
+        "Date": "time",
+        "Unix": "time",
+        "After": "channel",
+        "AfterFunc": "timer",
+        "Tick": "channel",
+        "NewTicker": "ticker",
+        "NewTimer": "timer"
+      },
+      "fields": {
+        "Duration": "struct",
+        "Month": "struct",
+        "Weekday": "struct",
+        "UTC": "location",
+        "Local": "location",
+        "ANSIC": "string",
+        "Kitchen": "string",
+        "RFC3339": "string"
+      }
+    },
+    "sync": {
+      "methods": {
+        "WaitGroup": "struct",
+        "Mutex": "struct",
+        "RWMutex": "struct",
+        "Once": "struct",
+        "Map": "struct",
+        "Pool": "struct",
+        "Cond": "struct",
+        "OnceFunc": "func",
+        "OnceValue": "func",
+        "OnceValues": "func"
+      },
+      "fields": {}
+    },
+    "atomic": {
+      "methods": {
+        "AddInt64": "int",
+        "LoadInt64": "int",
+        "StoreInt64": "void",
+        "SwapInt64": "int",
+        "CompareAndSwapInt64": "bool",
+        "AddUint64": "int",
+        "LoadUint64": "int",
+        "StoreUint64": "void",
+        "SwapUint64": "int",
+        "CompareAndSwapUint64": "bool"
+      },
+      "fields": {}
+    },
+    "sort": {
+      "methods": {
+        "Sort": "void",
+        "IsSorted": "bool",
+        "Search": "int",
+        "Strings": "void",
+        "Ints": "void",
+        "Float64s": "void",
+        "Slice": "void",
+        "Reverse": "void",
+        "SearchStrings": "int",
+        "SearchInts": "int"
+      },
+      "fields": {}
+    },
+    "regexp": {
+      "methods": {
+        "Compile": "regexp",
+        "CompilePOSIX": "regexp",
+        "MustCompile": "regexp",
+        "MustCompilePOSIX": "regexp",
+        "MatchString": "bool",
+        "QuoteMeta": "string"
+      },
+      "fields": {}
+    },
+    "bytes": {
+      "methods": {
+        "Compare": "int",
+        "Contains": "bool",
+        "Index": "int",
+        "Split": "list",
+        "Join": "bytes",
+        "ToLower": "bytes",
+        "ToUpper": "bytes",
+        "TrimSpace": "bytes",
+        "Fields": "list",
+        "Replace": "bytes",
+        "Count": "int",
+        "Equal": "bool",
+        "HasPrefix": "bool",
+        "NewBuffer": "buffer"
+      },
+      "fields": {}
+    },
+    "bufio": {
+      "methods": {
+        "NewReader": "reader",
+        "NewWriter": "writer",
+        "NewScanner": "scanner",
+        "NewReadWriter": "readwriter",
+        "ScanLines": "bool",
+        "ScanWords": "bool",
+        "ScanRunes": "bool",
+        "ScanBytes": "bool"
+      },
+      "fields": {
+        "Reader": "struct",
+        "Writer": "struct",
+        "Scanner": "struct"
+      }
+    },
+    "log": {
+      "methods": {
+        "Print": "void",
+        "Printf": "void",
+        "Println": "void",
+        "Fatal": "void",
+        "Fatalf": "void",
+        "Fatalln": "void",
+        "Panic": "void",
+        "Panicf": "void",
+        "Panicln": "void",
+        "New": "logger",
+        "SetOutput": "void",
+        "SetPrefix": "void",
+        "Default": "logger"
+      },
+      "fields": {
+        "LstdFlags": "int",
+        "Lshortfile": "int",
+        "Llongfile": "int"
+      }
+    },
+    "testing": {
+      "methods": {
+        "Short": "bool",
+        "Verbose": "bool",
+        "AllocsPerRun": "float"
+      },
+      "fields": {
+        "T": "struct",
+        "B": "struct"
+      }
+    },
+    "flag": {
+      "methods": {
+        "String": "string",
+        "Int": "int",
+        "Bool": "bool",
+        "Float64": "float",
+        "Duration": "duration",
+        "Parse": "void",
+        "Args": "list",
+        "Lookup": "flag",
+        "Set": "error",
+        "Visit": "void",
+        "Var": "void",
+        "Func": "void"
+      },
+      "fields": {}
+    },
+    "math": {
+      "methods": {
+        "Abs": "float",
+        "Max": "float",
+        "Min": "float",
+        "Pow": "float",
+        "Sqrt": "float",
+        "Floor": "float",
+        "Ceil": "float",
+        "Round": "float",
+        "Trunc": "float",
+        "Log": "float",
+        "Log10": "float",
+        "Sin": "float",
+        "Cos": "float",
+        "IsNaN": "bool"
+      },
+      "fields": {
+        "Pi": "float",
+        "E": "float",
+        "MaxInt": "int",
+        "MinInt": "int",
+        "MaxFloat64": "float",
+        "SmallestNonzeroFloat64": "float"
+      }
+    },
+    "rand": {
+      "methods": {
+        "Intn": "int",
+        "Int63": "int",
+        "Float64": "float",
+        "Uint64": "int",
+        "Perm": "list",
+        "Shuffle": "void",
+        "Seed": "void",
+        "New": "rand",
+        "NewSource": "source",
+        "Read": "int",
+        "ExpFloat64": "float",
+        "NormFloat64": "float"
+      },
+      "fields": {}
+    },
+    "json": {
+      "methods": {
+        "Marshal": "bytes",
+        "Unmarshal": "error",
+        "NewEncoder": "encoder",
+        "NewDecoder": "decoder",
+        "MarshalIndent": "bytes",
+        "Compact": "error",
+        "Indent": "error",
+        "Valid": "bool",
+        "HTMLEscape": "void"
+      },
+      "fields": {
+        "Encoder": "struct",
+        "Decoder": "struct",
+        "RawMessage": "struct"
+      }
+    },
+    "base64": {
+      "methods": {
+        "NewEncoder": "writer",
+        "NewDecoder": "reader"
+      },
+      "fields": {
+        "StdEncoding": "encoding",
+        "URLEncoding": "encoding",
+        "RawStdEncoding": "encoding"
+      }
+    },
+    "hex": {
+      "methods": {
+        "EncodeToString": "string",
+        "DecodeString": "bytes",
+        "Encode": "void",
+        "Decode": "void",
+        "DecodedLen": "int",
+        "EncodedLen": "int"
+      },
+      "fields": {}
+    },
+    "crc32": {
+      "methods": {
+        "ChecksumIEEE": "int",
+        "NewIEEE": "hash",
+        "MakeTable": "table",
+        "Update": "int"
+      },
+      "fields": {
+        "IEEE": "table",
+        "Castagnoli": "table",
+        "Koopman": "table"
+      }
+    },
+    "sha256": {
+      "methods": {
+        "New": "hash",
+        "Sum256": "bytes"
+      },
+      "fields": {}
+    },
+    "template": {
+      "methods": {
+        "New": "template",
+        "Must": "template",
+        "ParseFiles": "template",
+        "ParseGlob": "template",
+        "Execute": "error",
+        "ExecuteTemplate": "error"
+      },
+      "fields": {}
+    },
+    "sql": {
+      "methods": {
+        "Open": "db",
+        "OpenDB": "db",
+        "Drivers": "list",
+        "Register": "void"
+      },
+      "fields": {}
+    },
+    "db": {
+      "methods": {
+        "Query": "rows",
+        "QueryRow": "row",
+        "Exec": "result",
+        "Prepare": "stmt",
+        "Begin": "tx",
+        "Close": "error",
+        "Ping": "error",
+        "Where": "db",
+        "First": "db",
+        "Find": "db",
+        "Create": "db",
+        "Save": "db",
+        "Delete": "db",
+        "Model": "db"
+      },
+      "fields": {}
+    },
+    "rows": {
+      "methods": {
+        "Next": "bool",
+        "Scan": "error",
+        "Close": "error",
+        "Columns": "list",
+        "Err": "error"
+      },
+      "fields": {}
+    },
+    "embed": {
+      "methods": {
+        "Open": "file",
+        "ReadFile": "bytes",
+        "ReadDir": "list",
+        "Glob": "list"
+      },
+      "fields": {
+        "FS": "struct"
+      }
+    },
+    "slices": {
+      "methods": {
+        "Sort": "void",
+        "Contains": "bool",
+        "Index": "int",
+        "Clone": "list",
+        "Delete": "list",
+        "Insert": "list",
+        "Compact": "list",
+        "Reverse": "void",
+        "SortFunc": "void",
+        "BinarySearch": "int",
+        "Min": "void",
+        "Max": "void",
+        "Equal": "bool",
+        "Concat": "list"
+      },
+      "fields": {}
+    },
+    "maps": {
+      "methods": {
+        "Keys": "list",
+        "Values": "list",
+        "Equal": "bool",
+        "Clone": "map",
+        "Copy": "void",
+        "DeleteFunc": "void"
+      },
+      "fields": {}
+    },
+    "cmp": {
+      "methods": {
+        "Compare": "int",
+        "Less": "bool",
+        "Or": "void"
+      },
+      "fields": {}
+    },
+    "utf8": {
+      "methods": {
+        "RuneCountInString": "int",
+        "ValidString": "bool",
+        "DecodeRuneInString": "string",
+        "EncodeRune": "int",
+        "RuneLen": "int"
+      },
+      "fields": {
+        "RuneError": "string",
+        "UTFMax": "int",
+        "RuneSelf": "int"
+      }
+    },
+    "reflect": {
+      "methods": {
+        "TypeOf": "type",
+        "ValueOf": "value",
+        "DeepEqual": "bool",
+        "New": "value",
+        "Zero": "value",
+        "Copy": "int",
+        "Indirect": "value",
+        "PtrTo": "type",
+        "SliceOf": "type",
+        "MapOf": "type",
+        "VisibleFields": "list"
+      },
+      "fields": {
+        "Value": "struct",
+        "Type": "struct"
+      }
+    },
+    "runtime": {
+      "methods": {
+        "NumCPU": "int",
+        "GOMAXPROCS": "int",
+        "GC": "void",
+        "Goexit": "void",
+        "Gosched": "void",
+        "Caller": "bool",
+        "ReadMemStats": "void",
+        "SetFinalizer": "void",
+        "KeepAlive": "void",
+        "Version": "string",
+        "LockOSThread": "void",
+        "UnlockOSThread": "void"
+      },
+      "fields": {
+        "GOOS": "string",
+        "GOARCH": "string"
+      }
+    },
+    "gin": {
+      "methods": {
+        "Default": "engine",
+        "New": "engine"
+      },
+      "fields": {
+        "H": "struct"
+      }
+    },
+    "c": {
+      "methods": {
+        "JSON": "void",
+        "String": "void",
+        "Param": "string",
+        "Query": "string",
+        "QueryParam": "string",
+        "PostForm": "string",
+        "FormValue": "string",
+        "Bind": "error",
+        "ShouldBind": "error",
+        "Status": "void",
+        "Redirect": "void",
+        "File": "void",
+        "HTML": "void",
+        "NoContent": "void"
+      },
+      "fields": {}
+    },
+    "echo": {
+      "methods": {
+        "New": "echo"
+      },
+      "fields": {}
+    },
+    "cobra": {
+      "methods": {
+        "Command": "struct"
+      },
+      "fields": {}
+    },
+    "cmd": {
+      "methods": {
+        "Execute": "error",
+        "Flags": "void",
+        "PersistentFlags": "void"
+      },
+      "fields": {
+        "Use": "string",
+        "Short": "string"
+      }
+    },
+    "viper": {
+      "methods": {
+        "GetString": "string",
+        "GetInt": "int",
+        "GetBool": "bool",
+        "Set": "void",
+        "ReadInConfig": "error",
+        "AutomaticEnv": "void",
+        "SetConfigFile": "void",
+        "Unmarshal": "error",
+        "AllSettings": "map",
+        "IsSet": "bool",
+        "SetDefault": "void"
+      },
+      "fields": {}
+    },
+    "gorm": {
+      "methods": {
+        "Open": "db"
+      },
+      "fields": {}
     }
   }
 }
