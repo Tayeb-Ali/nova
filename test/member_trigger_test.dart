@@ -81,14 +81,17 @@ void main() {
   CodeAutocompleteEditingValue? buildAt(
     BuildContext ctx,
     String languageId,
-    String text,
-  ) {
+    String text, {
+    int? offset,
+    String? documentText,
+  }) {
     final NovaPromptsBuilder builder =
         NovaPromptsBuilder(languageId: languageId);
+    if (documentText != null) builder.documentText = documentText;
     return builder.build(
       ctx,
       CodeLine(text),
-      CodeLineSelection.collapsed(index: 0, offset: text.length),
+      CodeLineSelection.collapsed(index: 0, offset: offset ?? text.length),
     );
   }
 
@@ -193,5 +196,51 @@ void main() {
     final CodeAutocompleteEditingValue? result =
         buildAt(ctx, 'php', 'Map<String, int>');
     expect(wordsOf(result), isNot(contains('genericsBogusMember')));
+  });
+
+  testWidgets('no popup inside a terminated string', (tester) async {
+    final BuildContext ctx = await pumpContext(tester);
+    // Caret after `pr`, before the closing quote: inside the literal.
+    final CodeAutocompleteEditingValue? result =
+        buildAt(ctx, 'dart', 'print("pr")', offset: 9);
+    expect(result, isNull);
+  });
+
+  testWidgets('code between two strings still completes', (tester) async {
+    final BuildContext ctx = await pumpContext(tester);
+    // Even quote parity before the caret: the caret is code, not string.
+    final CodeAutocompleteEditingValue? result =
+        buildAt(ctx, 'dart', '"a" + pr"b"', offset: 8);
+    expect(result, isNotNull);
+    expect(wordsOf(result), contains('print'));
+  });
+
+  testWidgets('escaped quotes do not toggle the string guard', (tester) async {
+    final BuildContext ctx = await pumpContext(tester);
+    // `\"` is escaped: two unescaped quotes before the caret (even).
+    final CodeAutocompleteEditingValue? result =
+        buildAt(ctx, 'dart', '"a\\"b" + pr"c"', offset: 11);
+    expect(result, isNotNull);
+    expect(wordsOf(result), contains('print'));
+  });
+
+  testWidgets('lone apostrophe without closer keeps completion', (tester) async {
+    final BuildContext ctx = await pumpContext(tester);
+    final CodeAutocompleteEditingValue? result =
+        buildAt(ctx, 'dart', "// don't pr");
+    expect(result, isNotNull);
+    expect(wordsOf(result), contains('print'));
+  });
+
+  testWidgets('two-letter document words are suggested', (tester) async {
+    final BuildContext ctx = await pumpContext(tester);
+    final CodeAutocompleteEditingValue? result = buildAt(
+      ctx,
+      'dart',
+      'o',
+      documentText: 'os ok',
+    );
+    expect(result, isNotNull);
+    expect(wordsOf(result), containsAll(['os', 'ok']));
   });
 }

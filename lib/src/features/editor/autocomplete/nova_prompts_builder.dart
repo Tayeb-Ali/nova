@@ -30,8 +30,10 @@ import "language_members.dart";
 import "completion_ranker.dart";
 import "language_snippets.dart";
 
-/// Extracts identifier-like words from editor text.
-final RegExp _identifierPattern = RegExp(r"[A-Za-z_][A-Za-z0-9_]{2,}");
+/// Extracts identifier-like words from editor text (two or more
+/// characters: single-letter variables are noise, but `id`, `db`, `os`
+/// deserve suggestions like any longer name).
+final RegExp _identifierPattern = RegExp(r"[A-Za-z_][A-Za-z0-9_]+");
 
 /// Upper bound for document-word prompts merged into a single result.
 const int _maxDocumentWords = 300;
@@ -199,6 +201,12 @@ class NovaPromptsBuilder implements CodeAutocompletePromptsBuilder {
     CodeLine codeLine,
     CodeLineSelection selection,
   ) {
+    // Inside a string literal neither members nor keywords apply. Without
+    // this, the delegate's null (its own string guard) would fall through
+    // to snippet/document-word suggestions for the quoted text.
+    if (_isInsideString(codeLine.text, selection)) {
+      return null;
+    }
     // Member completions win over keywords: `console.` offers log/error/…
     final memberResult = _memberCompletion(codeLine.text, selection);
     if (memberResult != null) {
@@ -261,9 +269,6 @@ class NovaPromptsBuilder implements CodeAutocompletePromptsBuilder {
     CodeLineSelection selection,
   ) {
     final int end = selection.extentOffset.clamp(0, lineText.length);
-    if (_isInsideString(lineText, selection)) {
-      return null;
-    }
     final String before = lineText.substring(0, end);
     final RegExpMatch? dotMatch = _memberPattern.firstMatch(before);
     final RegExpMatch? arrowMatch = _arrowPattern.firstMatch(before);
@@ -386,13 +391,41 @@ class NovaPromptsBuilder implements CodeAutocompletePromptsBuilder {
         codeUnit == 95;
   }
 
-  /// Mirrors the delegate's string-literal guard: a quote character on both
-  /// sides of the caret suppresses suggestions.
+  /// String-literal guard: suppresses suggestions while the caret sits
+  /// inside `'...'` or `"..."` on the current line.
+  ///
+  /// Two conditions, both required:
+  /// * an ODD count of unescaped quotes before the caret (parity: the
+  ///   caret is inside an opened literal; `"a" + x` is even, so code
+  ///   between two literals keeps completing — the old "quote on both
+  ///   sides" check wrongly suppressed that);
+  /// * a quote character after the caret (the literal's closer; this
+  ///   keeps completion working in unterminated strings and after lone
+  ///   apostrophes such as `// don't`, matching the delegate's contract).
+  /// Escaped quotes (`\"`, `\'`) never toggle the parity.
   static bool _isInsideString(String lineText, CodeLineSelection selection) {
     final int end = selection.extentOffset.clamp(0, lineText.length);
     final String before = lineText.substring(0, end);
     final String after = lineText.substring(end);
-    return (before.contains("'") || before.contains("\"")) &&
-        (after.contains("'") || after.contains("\""));
+    if (!after.contains("'") && !after.contains('"')) return false;
+    return _hasOddUnescapedQuote(before, "'") ||
+        _hasOddUnescapedQuote(before, '"');
+  }
+
+  /// Counts [quote] occurrences in [text] that are NOT escaped (preceded
+  /// by an even run of backslashes) and reports odd parity.
+  static bool _hasOddUnescapedQuote(String text, String quote) {
+    int count = 0;
+    for (int i = 0; i < text.length; i++) {
+      if (text[i] != quote) continue;
+      int slashes = 0;
+      int j = i - 1;
+      while (j >= 0 && text.codeUnitAt(j) == 92) {
+        slashes++;
+        j--;
+      }
+      if (slashes.isEven) count++;
+    }
+    return count.isOdd;
   }
 }

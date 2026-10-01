@@ -111,24 +111,32 @@ int kindBoost(CodePrompt prompt, {bool memberContext = false}) {
 }
 
 /// Filters [candidates] by [input] with [fuzzyScore] and returns them best
-/// first (score + [kindBoost], stable for ties). Exact duplicates
+/// first (score + [kindBoost]). Exact duplicates
 /// (`word == input`) are dropped, mirroring [CodePrompt.match].
+/// Ties keep input order (stable): without this the popup row order can
+/// shuffle between keystrokes when scores are equal.
 List<CodePrompt> rankPrompts(
   List<CodePrompt> candidates,
   String input, {
   bool memberContext = false,
   int limit = kMaxCompletionPrompts,
 }) {
-  final List<({CodePrompt prompt, int score})> scored = [];
-  for (final prompt in candidates) {
+  final List<({CodePrompt prompt, int score, int index})> scored = [];
+  for (int i = 0; i < candidates.length; i++) {
+    final CodePrompt prompt = candidates[i];
     final int? base = fuzzyScore(prompt.word, input);
     if (base == null) continue;
     scored.add((
       prompt: prompt,
       score: base + kindBoost(prompt, memberContext: memberContext),
+      index: i,
     ));
   }
-  scored.sort((a, b) => b.score.compareTo(a.score));
+  scored.sort((a, b) {
+    final int byScore = b.score.compareTo(a.score);
+    if (byScore != 0) return byScore;
+    return a.index.compareTo(b.index);
+  });
   return [
     for (int i = 0; i < scored.length && i < limit; i++) scored[i].prompt,
   ];
@@ -138,8 +146,17 @@ List<CodePrompt> rankPrompts(
 /// `re_editor`'s private `_DefaultCodeAutocompletePromptsBuilder` (it reads
 /// the `keyword`, `built_in`, `literal` and `type` lists from
 /// [Mode.keywords], which is the only public surface available).
+/// Additionally accepts the hljs shorthand where the whole [Mode.keywords]
+/// or a single category is a whitespace-separated [String] instead of a
+/// [List] — those words are real keywords the delegate itself misses.
 List<CodeKeywordPrompt> extractLanguageKeywords(Mode? language) {
   final dynamic keywords = language?.keywords;
+  if (keywords is String) {
+    return [
+      for (final word in keywords.split(RegExp(r"\s+")))
+        if (word.isNotEmpty) CodeKeywordPrompt(word: word),
+    ];
+  }
   if (keywords is! Map) return const [];
   final List<CodeKeywordPrompt> out = [];
   for (final key in const ["keyword", "built_in", "literal", "type"]) {
@@ -148,6 +165,12 @@ List<CodeKeywordPrompt> extractLanguageKeywords(Mode? language) {
       for (final item in list) {
         if (item is String && item.isNotEmpty) {
           out.add(CodeKeywordPrompt(word: item));
+        }
+      }
+    } else if (list is String) {
+      for (final word in list.split(RegExp(r"\s+"))) {
+        if (word.isNotEmpty) {
+          out.add(CodeKeywordPrompt(word: word));
         }
       }
     }

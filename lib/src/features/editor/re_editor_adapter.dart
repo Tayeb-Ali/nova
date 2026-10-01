@@ -2,7 +2,8 @@ import "dart:async";
 
 import "package:flutter/material.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
-import "package:re_editor/re_editor.dart";import "package:re_highlight/re_highlight.dart";
+import "package:re_editor/re_editor.dart";
+import "package:re_highlight/re_highlight.dart";
 import "package:re_highlight/languages/dart.dart";
 import "package:re_highlight/languages/javascript.dart";
 import "package:re_highlight/languages/php.dart";

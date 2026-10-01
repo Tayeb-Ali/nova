@@ -46,7 +46,25 @@
         "split": "List",
         "trim": "String",
         "uppercase": "String",
-        "lowercase": "String"
+        "lowercase": "String",
+        "isEmpty": "Boolean",
+        "isBlank": "Boolean",
+        "toInt": "Int",
+        "toIntOrNull": "Int?",
+        "toDouble": "Double",
+        "toBoolean": "Boolean",
+        "lines": "List",
+        "padStart": "String",
+        "padEnd": "String",
+        "removePrefix": "String",
+        "removeSuffix": "String",
+        "chunked": "List",
+        "reversed": "String",
+        "drop": "String",
+        "take": "String",
+        "last": "Char",
+        "first": "Char",
+        "toCharArray": "CharArray"
       },
       "fields": {}
     },
@@ -54,15 +72,30 @@
       "methods": {
         "toString": "String",
         "toDouble": "Double",
-        "toLong": "Long"
+        "toLong": "Long",
+        "toFloat": "Float",
+        "coerceIn": "Int",
+        "coerceAtLeast": "Int",
+        "coerceAtMost": "Int",
+        "downTo": "IntProgression",
+        "until": "IntRange",
+        "compareTo": "Int"
       },
       "fields": {}
     },
     "System": {
-      "methods": {},
+      "methods": {
+        "exit": "Unit",
+        "currentTimeMillis": "Long",
+        "nanoTime": "Long",
+        "getenv": "String?",
+        "getProperty": "String?",
+        "lineSeparator": "String"
+      },
       "fields": {
         "out": "PrintStream",
-        "err": "PrintStream"
+        "err": "PrintStream",
+        "in": "InputStream"
       }
     },
     "println": {
@@ -75,6 +108,622 @@
     },
     "Companion": {
       "methods": {},
+      "fields": {}
+    },
+    "Long": {
+      "methods": {
+        "toString": "String",
+        "toInt": "Int",
+        "toDouble": "Double",
+        "toFloat": "Float",
+        "coerceIn": "Long",
+        "coerceAtLeast": "Long",
+        "coerceAtMost": "Long",
+        "compareTo": "Int"
+      },
+      "fields": {}
+    },
+    "Double": {
+      "methods": {
+        "toString": "String",
+        "toInt": "Int",
+        "toLong": "Long",
+        "toFloat": "Float",
+        "coerceIn": "Double",
+        "coerceAtLeast": "Double",
+        "coerceAtMost": "Double",
+        "compareTo": "Int"
+      },
+      "fields": {}
+    },
+    "Float": {
+      "methods": {
+        "toString": "String",
+        "toInt": "Int",
+        "toLong": "Long",
+        "toDouble": "Double",
+        "coerceIn": "Float",
+        "coerceAtLeast": "Float",
+        "coerceAtMost": "Float",
+        "compareTo": "Int"
+      },
+      "fields": {}
+    },
+    "Boolean": {
+      "methods": {
+        "toString": "String",
+        "compareTo": "Int",
+        "not": "Boolean",
+        "and": "Boolean",
+        "or": "Boolean"
+      },
+      "fields": {}
+    },
+    "Char": {
+      "methods": {
+        "toString": "String",
+        "compareTo": "Int",
+        "isLetter": "Boolean",
+        "isDigit": "Boolean",
+        "isWhitespace": "Boolean",
+        "uppercase": "Char",
+        "lowercase": "Char",
+        "digit": "Int"
+      },
+      "fields": {}
+    },
+    "list": {
+      "methods": {
+        "add": "Boolean",
+        "get": "T",
+        "set": "T",
+        "remove": "Boolean",
+        "size": "Int",
+        "isEmpty": "Boolean",
+        "contains": "Boolean",
+        "indexOf": "Int",
+        "clear": "Unit",
+        "first": "T",
+        "last": "T",
+        "map": "List",
+        "filter": "List",
+        "forEach": "Unit",
+        "sorted": "List",
+        "sum": "Number",
+        "toSet": "Set",
+        "subList": "List"
+      },
+      "fields": {}
+    },
+    "map": {
+      "methods": {
+        "put": "V?",
+        "get": "V?",
+        "remove": "V?",
+        "containsKey": "Boolean",
+        "keys": "Set",
+        "values": "Collection",
+        "size": "Int",
+        "isEmpty": "Boolean",
+        "clear": "Unit",
+        "getOrDefault": "V?",
+        "putIfAbsent": "V?",
+        "forEach": "Unit"
+      },
+      "fields": {}
+    },
+    "set": {
+      "methods": {
+        "add": "Boolean",
+        "remove": "Boolean",
+        "contains": "Boolean",
+        "size": "Int",
+        "isEmpty": "Boolean",
+        "clear": "Unit",
+        "first": "T",
+        "union": "Set",
+        "intersect": "Set",
+        "subtract": "Set"
+      },
+      "fields": {}
+    },
+    "str": {
+      "methods": {
+        "length": "Int",
+        "isEmpty": "Boolean",
+        "substring": "String",
+        "split": "List",
+        "contains": "Boolean",
+        "trim": "String",
+        "replace": "String",
+        "lowercase": "String",
+        "uppercase": "String"
+      },
+      "fields": {}
+    },
+    "sb": {
+      "methods": {
+        "append": "StringBuilder",
+        "toString": "String",
+        "reverse": "StringBuilder",
+        "length": "Int",
+        "clear": "Unit",
+        "setLength": "Unit"
+      },
+      "fields": {}
+    },
+    "Dispatchers": {
+      "methods": {},
+      "fields": {
+        "Main": "CoroutineDispatcher",
+        "IO": "CoroutineDispatcher",
+        "Default": "CoroutineDispatcher",
+        "Unconfined": "CoroutineDispatcher"
+      }
+    },
+    "GlobalScope": {
+      "methods": {
+        "launch": "Job",
+        "async": "Deferred"
+      },
+      "fields": {}
+    },
+    "Job": {
+      "methods": {
+        "cancel": "Unit",
+        "join": "Unit",
+        "cancelAndJoin": "Unit",
+        "invokeOnCompletion": "DisposableHandle"
+      },
+      "fields": {
+        "isActive": "Boolean",
+        "isCompleted": "Boolean",
+        "isCancelled": "Boolean"
+      }
+    },
+    "Deferred": {
+      "methods": {
+        "await": "T",
+        "cancel": "Unit",
+        "getCompleted": "T"
+      },
+      "fields": {
+        "isCompleted": "Boolean"
+      }
+    },
+    "Mutex": {
+      "methods": {
+        "lock": "Unit",
+        "unlock": "Unit",
+        "tryLock": "Boolean",
+        "holdsLock": "Boolean",
+        "withLock": "T"
+      },
+      "fields": {}
+    },
+    "Channel": {
+      "methods": {
+        "send": "Unit",
+        "receive": "E",
+        "close": "Boolean",
+        "trySend": "ChannelResult",
+        "tryReceive": "ChannelResult"
+      },
+      "fields": {
+        "isClosedForSend": "Boolean"
+      }
+    },
+    "Flow": {
+      "methods": {
+        "collect": "Unit",
+        "map": "Flow",
+        "filter": "Flow",
+        "first": "T",
+        "single": "T",
+        "toList": "List",
+        "toSet": "Set",
+        "count": "Int",
+        "reduce": "T",
+        "fold": "R",
+        "onEach": "Flow",
+        "catch": "Flow"
+      },
+      "fields": {}
+    },
+    "SupervisorJob": {
+      "methods": {
+        "cancel": "Unit",
+        "join": "Unit"
+      },
+      "fields": {
+        "isActive": "Boolean",
+        "isCompleted": "Boolean",
+        "isCancelled": "Boolean"
+      }
+    },
+    "scope": {
+      "methods": {
+        "launch": "Job",
+        "async": "Deferred"
+      },
+      "fields": {}
+    },
+    "lifecycleScope": {
+      "methods": {
+        "launch": "Job"
+      },
+      "fields": {}
+    },
+    "Result": {
+      "methods": {
+        "getOrNull": "T?",
+        "getOrThrow": "T",
+        "isSuccess": "Boolean",
+        "isFailure": "Boolean",
+        "map": "Result",
+        "recover": "Result",
+        "fold": "R",
+        "onSuccess": "Result",
+        "onFailure": "Result",
+        "exceptionOrNull": "Throwable?",
+        "getOrDefault": "T",
+        "getOrElse": "T"
+      },
+      "fields": {}
+    },
+    "Pair": {
+      "methods": {},
+      "fields": {
+        "first": "A",
+        "second": "B"
+      }
+    },
+    "Triple": {
+      "methods": {},
+      "fields": {
+        "first": "A",
+        "second": "B",
+        "third": "C"
+      }
+    },
+    "Regex": {
+      "methods": {
+        "fromLiteral": "Regex",
+        "escapeReplacement": "String",
+        "matches": "Boolean",
+        "containsMatchIn": "Boolean",
+        "find": "MatchResult?",
+        "findAll": "Sequence",
+        "replace": "String",
+        "split": "List"
+      },
+      "fields": {}
+    },
+    "Clock": {
+      "methods": {},
+      "fields": {
+        "System": "Clock"
+      }
+    },
+    "TimeZone": {
+      "methods": {
+        "currentSystemDefault": "TimeZone",
+        "of": "TimeZone"
+      },
+      "fields": {
+        "UTC": "TimeZone"
+      }
+    },
+    "Log": {
+      "methods": {
+        "d": "Int",
+        "i": "Int",
+        "e": "Int",
+        "w": "Int",
+        "v": "Int",
+        "wtf": "Int",
+        "println": "Int",
+        "isLoggable": "Boolean",
+        "getStackTraceFromString": "String"
+      },
+      "fields": {}
+    },
+    "Toast": {
+      "methods": {
+        "makeText": "Toast"
+      },
+      "fields": {
+        "LENGTH_SHORT": "Int",
+        "LENGTH_LONG": "Int"
+      }
+    },
+    "intent": {
+      "methods": {
+        "putExtra": "Intent",
+        "getStringExtra": "String?",
+        "getIntExtra": "Int",
+        "getBooleanExtra": "Boolean",
+        "hasExtra": "Boolean",
+        "getAction": "String?",
+        "setAction": "Intent",
+        "getData": "Uri?",
+        "getExtras": "Bundle?",
+        "addFlags": "Intent",
+        "setData": "Intent"
+      },
+      "fields": {}
+    },
+    "bundle": {
+      "methods": {
+        "putString": "Unit",
+        "getString": "String?",
+        "putInt": "Unit",
+        "getInt": "Int",
+        "putBoolean": "Unit",
+        "getBoolean": "Boolean",
+        "containsKey": "Boolean",
+        "remove": "Unit",
+        "clear": "Unit",
+        "keySet": "Set"
+      },
+      "fields": {}
+    },
+    "context": {
+      "methods": {
+        "getString": "String",
+        "getColor": "Int",
+        "getDrawable": "Drawable?",
+        "getSystemService": "Any?",
+        "getPackageName": "String",
+        "getResources": "Resources",
+        "getSharedPreferences": "SharedPreferences",
+        "getCacheDir": "File",
+        "getFilesDir": "File"
+      },
+      "fields": {
+        "contentResolver": "ContentResolver"
+      }
+    },
+    "view": {
+      "methods": {
+        "findViewById": "T",
+        "setOnClickListener": "Unit",
+        "setVisibility": "Unit"
+      },
+      "fields": {
+        "visibility": "Int"
+      }
+    },
+    "cursor": {
+      "methods": {
+        "moveToFirst": "Boolean",
+        "moveToNext": "Boolean",
+        "moveToPosition": "Boolean",
+        "getString": "String?",
+        "getInt": "Int",
+        "getLong": "Long",
+        "getDouble": "Double",
+        "getColumnIndex": "Int",
+        "getColumnIndexOrThrow": "Int",
+        "close": "Unit",
+        "getCount": "Int",
+        "isClosed": "Boolean"
+      },
+      "fields": {}
+    },
+    "db": {
+      "methods": {
+        "insert": "Long",
+        "query": "Cursor",
+        "rawQuery": "Cursor",
+        "execSQL": "Unit",
+        "update": "Int",
+        "delete": "Int",
+        "close": "Unit",
+        "beginTransaction": "Unit",
+        "setTransactionSuccessful": "Unit",
+        "endTransaction": "Unit",
+        "isOpen": "Boolean"
+      },
+      "fields": {}
+    },
+    "prefs": {
+      "methods": {
+        "getString": "String?",
+        "getInt": "Int",
+        "getBoolean": "Boolean",
+        "getFloat": "Float",
+        "getStringSet": "Set?",
+        "contains": "Boolean",
+        "edit": "Editor"
+      },
+      "fields": {}
+    },
+    "editor": {
+      "methods": {
+        "putString": "Editor",
+        "putInt": "Editor",
+        "putBoolean": "Editor",
+        "putFloat": "Editor",
+        "putStringSet": "Editor",
+        "remove": "Editor",
+        "clear": "Editor",
+        "apply": "Unit",
+        "commit": "Boolean"
+      },
+      "fields": {}
+    },
+    "holder": {
+      "methods": {
+        "getAdapterPosition": "Int",
+        "getBindingAdapterPosition": "Int"
+      },
+      "fields": {
+        "itemView": "View"
+      }
+    },
+    "Modifier": {
+      "methods": {
+        "fillMaxSize": "Modifier",
+        "fillMaxWidth": "Modifier",
+        "fillMaxHeight": "Modifier",
+        "padding": "Modifier",
+        "clickable": "Modifier",
+        "background": "Modifier",
+        "clip": "Modifier",
+        "weight": "Modifier",
+        "size": "Modifier",
+        "width": "Modifier",
+        "height": "Modifier",
+        "offset": "Modifier",
+        "alpha": "Modifier",
+        "rotate": "Modifier",
+        "scale": "Modifier",
+        "border": "Modifier",
+        "shadow": "Modifier",
+        "align": "Modifier",
+        "wrapContentSize": "Modifier",
+        "verticalScroll": "Modifier",
+        "horizontalScroll": "Modifier",
+        "testTag": "Modifier",
+        "semantics": "Modifier"
+      },
+      "fields": {}
+    },
+    "MaterialTheme": {
+      "methods": {},
+      "fields": {
+        "colorScheme": "ColorScheme",
+        "typography": "Typography",
+        "shapes": "Shapes"
+      }
+    },
+    "Arrangement": {
+      "methods": {
+        "spacedBy": "Arrangement"
+      },
+      "fields": {
+        "Start": "Arrangement",
+        "End": "Arrangement",
+        "Center": "Arrangement",
+        "Top": "Arrangement",
+        "Bottom": "Arrangement",
+        "SpaceBetween": "Arrangement",
+        "SpaceAround": "Arrangement",
+        "SpaceEvenly": "Arrangement"
+      }
+    },
+    "Alignment": {
+      "methods": {},
+      "fields": {
+        "TopStart": "Alignment",
+        "TopCenter": "Alignment",
+        "TopEnd": "Alignment",
+        "CenterStart": "Alignment",
+        "Center": "Alignment",
+        "CenterEnd": "Alignment",
+        "BottomStart": "Alignment",
+        "BottomCenter": "Alignment",
+        "BottomEnd": "Alignment"
+      }
+    },
+    "navController": {
+      "methods": {
+        "navigate": "Unit",
+        "popBackStack": "Boolean",
+        "navigateUp": "Boolean",
+        "clearBackStack": "Unit"
+      },
+      "fields": {}
+    },
+    "snackbarHostState": {
+      "methods": {
+        "showSnackbar": "SnackbarResult"
+      },
+      "fields": {}
+    },
+    "scrollState": {
+      "methods": {
+        "animateScrollTo": "Unit",
+        "scrollTo": "Unit"
+      },
+      "fields": {
+        "value": "Int",
+        "maxValue": "Int"
+      }
+    },
+    "lazyListState": {
+      "methods": {
+        "animateScrollToItem": "Unit",
+        "scrollToItem": "Unit"
+      },
+      "fields": {
+        "firstVisibleItemIndex": "Int"
+      }
+    },
+    "Json": {
+      "methods": {
+        "parseToJsonElement": "JsonElement",
+        "encodeToString": "String",
+        "decodeFromString": "T"
+      },
+      "fields": {
+        "Default": "Json"
+      }
+    },
+    "client": {
+      "methods": {
+        "get": "HttpResponse",
+        "post": "HttpResponse",
+        "put": "HttpResponse",
+        "delete": "HttpResponse",
+        "close": "Unit"
+      },
+      "fields": {}
+    },
+    "Assertions": {
+      "methods": {
+        "assertEquals": "Unit",
+        "assertNotEquals": "Unit",
+        "assertTrue": "Unit",
+        "assertFalse": "Unit",
+        "assertNull": "Unit",
+        "assertNotNull": "Unit",
+        "assertSame": "Unit",
+        "assertFailsWith": "T",
+        "assertIs": "Unit",
+        "assertContains": "Unit",
+        "fail": "Nothing"
+      },
+      "fields": {}
+    },
+    "Mockito": {
+      "methods": {
+        "mock": "T",
+        "whenever": "OngoingStubbing",
+        "verify": "T",
+        "times": "VerificationMode",
+        "never": "VerificationMode",
+        "any": "T",
+        "eq": "T"
+      },
+      "fields": {}
+    },
+    "Random": {
+      "methods": {
+        "nextInt": "Int",
+        "nextDouble": "Double",
+        "nextBoolean": "Boolean",
+        "nextLong": "Long",
+        "nextBytes": "ByteArray",
+        "nextBits": "Int"
+      },
+      "fields": {}
+    },
+    "Uuid": {
+      "methods": {
+        "random": "Uuid"
+      },
       "fields": {}
     }
   }

@@ -53,7 +53,7 @@ class _EmptyAutocompletePopup extends StatelessWidget
   }
 }
 
-class _AutocompletePopup extends StatelessWidget
+class _AutocompletePopup extends StatefulWidget
     implements PreferredSizeWidget {
   const _AutocompletePopup({
     required this.notifier,
@@ -72,10 +72,51 @@ class _AutocompletePopup extends StatelessWidget
   }
 
   @override
+  State<_AutocompletePopup> createState() => _AutocompletePopupState();
+}
+
+/// Keeps the keyboard-selected row visible: re_editor moves
+/// [CodeAutocompleteEditingValue.index] via arrow keys without scrolling,
+/// so the highlight used to disappear off-screen in long lists.
+class _AutocompletePopupState extends State<_AutocompletePopup> {
+  late final ScrollController _scrollController;
+  int _lastIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController = ScrollController();
+    _lastIndex = widget.notifier.value.index;
+    widget.notifier.addListener(_followSelection);
+  }
+
+  @override
+  void dispose() {
+    widget.notifier.removeListener(_followSelection);
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _followSelection() {
+    if (!mounted) return;
+    final int index = widget.notifier.value.index;
+    if (index == _lastIndex) return;
+    _lastIndex = index;
+    // Deferred: the notifier can fire during layout, when jumpTo would
+    // throw; by post-frame the list metrics are ready.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || !_scrollController.hasClients) return;
+      final double target = (8 + index * _kRowHeight - _kMaxPopupHeight / 2)
+          .clamp(0.0, _scrollController.position.maxScrollExtent);
+      _scrollController.jumpTo(target);
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     final ColorScheme colors = Theme.of(context).colorScheme;
     return ValueListenableBuilder<CodeAutocompleteEditingValue>(
-      valueListenable: notifier,
+      valueListenable: widget.notifier,
       builder: (BuildContext context, CodeAutocompleteEditingValue value, _) {
         if (value.prompts.isEmpty) {
           return const SizedBox.shrink();
@@ -94,6 +135,7 @@ class _AutocompletePopup extends StatelessWidget
               maxHeight: _kMaxPopupHeight,
             ),
             child: ListView.builder(
+              controller: _scrollController,
               padding: const EdgeInsets.symmetric(vertical: 8),
               shrinkWrap: true,
               itemCount: value.prompts.length,
@@ -103,7 +145,7 @@ class _AutocompletePopup extends StatelessWidget
                   prompt: prompt,
                   input: value.input,
                   selected: index == value.index,
-                  onTap: () => onSelected(
+                  onTap: () => widget.onSelected(
                     value.copyWith(index: index).autocomplete,
                   ),
                 );

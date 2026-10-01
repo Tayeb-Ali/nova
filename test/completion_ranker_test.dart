@@ -1,6 +1,7 @@
 import "package:flutter_test/flutter_test.dart";
 import "package:re_editor/re_editor.dart";
 import "package:re_highlight/languages/dart.dart";
+import "package:re_highlight/re_highlight.dart";
 
 import "package:nova/src/features/editor/autocomplete/completion_ranker.dart";
 
@@ -118,6 +119,19 @@ void main() {
       );
       expect(prompts.first.word, "logy");
     });
+
+    test("ties keep input order (no popup flicker)", () {
+      const CodeKeywordPrompt a = CodeKeywordPrompt(word: "print");
+      const CodeKeywordPrompt b = CodeKeywordPrompt(word: "prink");
+      expect(
+        rankPrompts([a, b], "prin").map((p) => p.word).toList(),
+        ["print", "prink"],
+      );
+      expect(
+        rankPrompts([b, a], "prin").map((p) => p.word).toList(),
+        ["prink", "print"],
+      );
+    });
   });
 
   group("extractLanguageKeywords", () {
@@ -129,6 +143,22 @@ void main() {
 
     test("null language yields empty", () {
       expect(extractLanguageKeywords(null), isEmpty);
+    });
+
+    test("string-form keywords are split", () {
+      final words = extractLanguageKeywords(Mode(keywords: "if else for"))
+          .map((p) => p.word);
+      expect(words, containsAll(["if", "else", "for"]));
+    });
+
+    test("string-valued categories are split", () {
+      final words = extractLanguageKeywords(
+        Mode(keywords: {
+          "keyword": "if else",
+          "built_in": ["print"],
+        }),
+      ).map((p) => p.word);
+      expect(words, containsAll(["if", "else", "print"]));
     });
   });
 }

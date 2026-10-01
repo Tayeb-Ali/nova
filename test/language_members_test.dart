@@ -195,6 +195,20 @@ void main() {
       expect(table['Carbon']!.map((p) => p.word), contains('now'));
       expect(table['Assert']!.map((p) => p.word), contains('assertEquals'));
     });
+    test('kotlin table covers stdlib, android and compose', () {
+      final table = MemberRegistry.parseReceivers(loadTable('kotlin'));
+      expect(table['String']!.map((p) => p.word), contains('substring'));
+      expect(table['list']!.map((p) => p.word), contains('map'));
+      expect(table['Dispatchers']!.map((p) => p.word), contains('Main'));
+      expect(table['Flow']!.map((p) => p.word), contains('collect'));
+      expect(table['Result']!.map((p) => p.word), contains('getOrNull'));
+      expect(table['Log']!.map((p) => p.word), contains('d'));
+      expect(table['intent']!.map((p) => p.word), contains('putExtra'));
+      expect(table['Modifier']!.map((p) => p.word), contains('fillMaxSize'));
+      expect(table['MaterialTheme']!.map((p) => p.word), contains('colorScheme'));
+      expect(table['navController']!.map((p) => p.word), contains('navigate'));
+      expect(table['Json']!.map((p) => p.word), contains('decodeFromString'));
+    });
     test('new tables parse: kotlin, rust, php, c, cpp, swift', () {
       final kotlin = MemberRegistry.parseReceivers(loadTable('kotlin'));
       expect(kotlin['String']!.map((p) => p.word), contains('substring'));
