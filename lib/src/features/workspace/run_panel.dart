@@ -113,188 +113,291 @@ class _RunPanelState extends ConsumerState<RunPanel> {
     final output = ref.watch(runOutputProvider);
     final project = ref.watch(activeProjectProvider);
     final scheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final l10n = AppLocalizations.of(context);
+    final running = pid != null;
+    final canRun = safeSelected != null && project != null && !running;
     _scrollToBottom();
     return Material(
       color: scheme.surfaceContainerLow,
       child: SizedBox(
-        height: _consoleVisible ? 220 : 64,
+        height: _consoleVisible ? 248 : 60,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            // ── Toolbar: [primary Run/Stop] [task selector] [clear] [collapse]
+            // زر تشغيل واحد فقط — لا أيقونة حالة مكررة.
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+              padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
               child: Row(
                 children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: scheme.surfaceContainerHigh,
-                      border: Border.all(color: scheme.outlineVariant),
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: Icon(
-                      pid == null ? Icons.play_arrow : Icons.stop,
-                      size: 18,
-                      color: scheme.primary,
-                    ),
+                  // Primary action — the ONLY run/stop affordance.
+                  SizedBox(
+                    height: 44,
+                    child: running
+                        ? FilledButton.icon(
+                            onPressed: () => _stop(pid),
+                            style: FilledButton.styleFrom(
+                              backgroundColor: scheme.errorContainer,
+                              foregroundColor: scheme.onErrorContainer,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                              ),
+                            ),
+                            icon: const Icon(Icons.stop_rounded, size: 20),
+                            label: Text(l10n.actionStop),
+                          )
+                        : FilledButton.icon(
+                            onPressed: canRun
+                                ? () => _run(safeSelected)
+                                : null,
+                            style: FilledButton.styleFrom(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                              ),
+                            ),
+                            icon: const Icon(Icons.play_arrow_rounded, size: 20),
+                            label: Text(l10n.actionRun),
+                          ),
                   ),
                   const SizedBox(width: 8),
+                  // Task selector — fixed height, text always clipped INSIDE.
                   Expanded(
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      height: 44,
+                      padding: const EdgeInsets.symmetric(horizontal: 4),
                       decoration: BoxDecoration(
                         color: scheme.surfaceContainerHighest,
                         border: Border.all(color: scheme.outlineVariant),
-                        borderRadius: BorderRadius.circular(4),
+                        borderRadius: BorderRadius.circular(12),
                       ),
-                      child: DropdownButton<IdeTask>(
-                        value: safeSelected,
-                        isExpanded: true,
-                        underline: const SizedBox.shrink(),
-                        hint: Text(
-                          AppLocalizations.of(context).runNoTasks,
-                          style: TextStyle(color: scheme.onSurfaceVariant),
-                        ),
-                        selectedItemBuilder: (context) => [
-                          for (final task in tasks)
-                            Text(task.name, overflow: TextOverflow.ellipsis),
-                        ],
-                        items: [
-                          for (final task in tasks)
-                            DropdownMenuItem(
-                              value: task,
-                              child: Text(
-                                task.name,
-                                overflow: TextOverflow.ellipsis,
+                      alignment: Alignment.center,
+                      child: DropdownButtonHideUnderline(
+                        child: DropdownButton<IdeTask>(
+                          value: safeSelected,
+                          isExpanded: true,
+                          isDense: true,
+                          borderRadius: BorderRadius.circular(12),
+                          icon: Padding(
+                            padding: const EdgeInsets.only(right: 8, left: 4),
+                            child: Icon(
+                              Icons.keyboard_arrow_down_rounded,
+                              size: 20,
+                              color: scheme.onSurfaceVariant,
+                            ),
+                          ),
+                          hint: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 12),
+                            child: Text(
+                              l10n.runNoTasks,
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
+                              style: textTheme.bodyMedium?.copyWith(
+                                color: scheme.onSurfaceVariant,
                               ),
                             ),
-                        ],
-                        onChanged: (task) {
-                          if (task != null) {
-                            ref.read(runTaskProvider.notifier).state = task;
-                          }
-                        },
+                          ),
+                          selectedItemBuilder: (context) => [
+                            for (final task in tasks)
+                              Align(
+                                alignment: AlignmentDirectional.centerStart,
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                  ),
+                                  // Filenames are LTR even in an RTL UI —
+                                  // keeps "index.php" inside the box.
+                                  child: Directionality(
+                                    textDirection: TextDirection.ltr,
+                                    child: Text(
+                                      task.name,
+                                      overflow: TextOverflow.ellipsis,
+                                      maxLines: 1,
+                                      style: textTheme.bodyMedium?.copyWith(
+                                        color: scheme.onSurface,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                          ],
+                          items: [
+                            for (final task in tasks)
+                              DropdownMenuItem(
+                                value: task,
+                                child: Directionality(
+                                  textDirection: TextDirection.ltr,
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                        Icons.description_outlined,
+                                        size: 16,
+                                        color: scheme.onSurfaceVariant,
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Expanded(
+                                        child: Text(
+                                          task.name,
+                                          overflow: TextOverflow.ellipsis,
+                                          maxLines: 1,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                          ],
+                          // Lock the selector while a process runs so the
+                          // label can't drift mid-execution.
+                          onChanged: running
+                              ? null
+                              : (task) {
+                                  if (task != null) {
+                                    ref
+                                        .read(runTaskProvider.notifier)
+                                        .state = task;
+                                  }
+                                },
+                        ),
                       ),
                     ),
                   ),
                   const SizedBox(width: 8),
-                  if (pid == null)
-                    FilledButton.icon(
-                      onPressed: (safeSelected == null || project == null)
-                          ? null
-                          : () => _run(safeSelected),
-                      style: FilledButton.styleFrom(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 4,
-                        ),
-                        visualDensity: VisualDensity.compact,
-                      ),
-                      icon: const Icon(Icons.play_arrow, size: 18),
-                      label: Text(AppLocalizations.of(context).actionRun),
-                    )
-                  else
-                    FilledButton.icon(
-                      onPressed: () => _stop(pid),
-                      style: FilledButton.styleFrom(
-                        backgroundColor: scheme.errorContainer,
-                        foregroundColor: scheme.onErrorContainer,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 4,
-                        ),
-                        visualDensity: VisualDensity.compact,
-                      ),
-                      icon: const Icon(Icons.stop, size: 18),
-                      label: Text(AppLocalizations.of(context).actionStop),
-                    ),
-                  const SizedBox(width: 4),
-                  IconButton(
-                    onPressed: () =>
-                        ref.read(runOutputProvider.notifier).clear(),
-                    tooltip: AppLocalizations.of(context).runClearOutput,
-                    visualDensity: VisualDensity.compact,
-                    style: IconButton.styleFrom(
-                      backgroundColor: scheme.surfaceContainerHigh,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      padding: const EdgeInsets.all(8),
-                    ),
-                    icon: const Icon(
-                      Icons.cleaning_services_outlined,
-                      size: 18,
-                    ),
+                  _ToolIconButton(
+                    tooltip: l10n.runClearOutput,
+                    icon: Icons.cleaning_services_outlined,
+                    onPressed: output.isEmpty
+                        ? null
+                        : () => ref.read(runOutputProvider.notifier).clear(),
                   ),
-                  const SizedBox(width: 4),
-                  IconButton(
+                  const SizedBox(width: 8),
+                  _ToolIconButton(
+                    tooltip: _consoleVisible
+                        ? l10n.runHideConsole
+                        : l10n.runShowConsole,
+                    icon: _consoleVisible
+                        ? Icons.keyboard_arrow_down_rounded
+                        : Icons.keyboard_arrow_up_rounded,
                     onPressed: () =>
                         setState(() => _consoleVisible = !_consoleVisible),
-                    tooltip: _consoleVisible
-                        ? AppLocalizations.of(context).runHideConsole
-                        : AppLocalizations.of(context).runShowConsole,
-                    visualDensity: VisualDensity.compact,
-                    style: IconButton.styleFrom(
-                      backgroundColor: scheme.surfaceContainerHigh,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      padding: const EdgeInsets.all(8),
-                    ),
-                    icon: Icon(
-                      _consoleVisible
-                          ? Icons.keyboard_arrow_down
-                          : Icons.keyboard_arrow_up,
-                      size: 18,
-                    ),
                   ),
                 ],
               ),
             ),
-            if (_consoleVisible) ...[
+            // Thin progress line while a process runs — no extra buttons.
+            if (running)
+              SizedBox(
+                height: 2,
+                child: LinearProgressIndicator(
+                  backgroundColor: Colors.transparent,
+                  color: scheme.primary,
+                ),
+              )
+            else
               Divider(height: 1, color: scheme.outlineVariant),
+            if (_consoleVisible) ...[
               Expanded(
-                child: output.isEmpty
-                    ? Padding(
-                        padding: const EdgeInsets.all(8),
-                        child: Text(
-                          pid != null
-                              ? AppLocalizations.of(context).runStartingProcess
-                              : AppLocalizations.of(context).runEmptyHint,
-                          style: Theme.of(context).textTheme.bodySmall
-                              ?.copyWith(color: scheme.onSurfaceVariant),
-                        ),
-                      )
-                    : Container(
-                        margin: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: scheme.surfaceContainerHighest,
-                          border: Border.all(color: scheme.outlineVariant),
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: SingleChildScrollView(
-                          controller: _scrollController,
-                          padding: const EdgeInsets.all(8),
-                          child: SelectableText(
-                            output,
-                            style: TextStyle(
-                              fontFamily: "monospace",
-                              fontSize: 11,
-                              color: scheme.onSurface,
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(12, 8, 12, 12),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: scheme.surfaceContainerHighest,
+                      border: Border.all(color: scheme.outlineVariant),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    clipBehavior: Clip.antiAlias,
+                    child: output.isEmpty
+                        ? Center(
+                            child: Padding(
+                              padding: const EdgeInsets.all(16),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    running
+                                        ? Icons.hourglass_top_rounded
+                                        : Icons.terminal_rounded,
+                                    size: 28,
+                                    color: scheme.onSurfaceVariant,
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    running
+                                        ? l10n.runStartingProcess
+                                        : l10n.runEmptyHint,
+                                    textAlign: TextAlign.center,
+                                    style: textTheme.bodySmall?.copyWith(
+                                      color: scheme.onSurfaceVariant,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          )
+                        : SingleChildScrollView(
+                            controller: _scrollController,
+                            padding: const EdgeInsets.all(12),
+                            child: SelectableText(
+                              output,
+                              style: TextStyle(
+                                fontFamily: "monospace",
+                                fontSize: 12,
+                                height: 1.5,
+                                color: scheme.onSurface,
+                              ),
                             ),
                           ),
-                        ),
-                      ),
+                  ),
+                ),
               ),
             ],
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// Small 44×44 tonal icon button used for secondary toolbar actions.
+class _ToolIconButton extends StatelessWidget {
+  final String tooltip;
+  final IconData icon;
+  final VoidCallback? onPressed;
+
+  const _ToolIconButton({
+    required this.tooltip,
+    required this.icon,
+    required this.onPressed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return SizedBox(
+      width: 44,
+      height: 44,
+      child: IconButton(
+        onPressed: onPressed,
+        tooltip: tooltip,
+        style: IconButton.styleFrom(
+          backgroundColor: scheme.surfaceContainerHigh,
+          foregroundColor: scheme.onSurfaceVariant,
+          disabledBackgroundColor: scheme.surfaceContainerHigh.withValues(
+            alpha: 0.5,
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          padding: EdgeInsets.zero,
+        ),
+        icon: Icon(icon, size: 20),
       ),
     );
   }
