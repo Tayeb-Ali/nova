@@ -35,6 +35,12 @@ android {
             abiFilters += listOf("arm64-v8a", "x86_64")
         }
 
+        // Patrol E2E: JUnit runner that executes Flutter integration tests.
+        // clearPackageData=false: the default wipe would delete the installed
+        // bootstrap + user projects. Run patrol with --no-uninstall too.
+        testInstrumentationRunner = "pl.leancode.patrol.PatrolJUnitRunner"
+        testInstrumentationRunnerArguments["clearPackageData"] = "false"
+
         externalNativeBuild {
             cmake {
                 cFlags += "-std=c99"
@@ -94,6 +100,10 @@ android {
         }
     }
 
+    testOptions {
+        execution = "ANDROIDX_TEST_ORCHESTRATOR"
+    }
+
     packaging {
         jniLibs {
             useLegacyPackaging = true
@@ -111,6 +121,10 @@ android {
 
 dependencies {
     implementation("org.apache.commons:commons-compress:1.27.1")
+    // Patrol E2E instrumentation runner.
+    androidTestImplementation("androidx.test.ext:junit:1.2.1")
+    androidTestImplementation("androidx.test:runner:1.5.1")
+    androidTestUtil("androidx.test:orchestrator:1.5.1")
 }
 
 kotlin {

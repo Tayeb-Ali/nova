@@ -38,7 +38,10 @@ class ShellExecutor(private val context: Context) {
         return pb
     }
 
-    /** Synchronous run; returns (merged stdout+stderr) or a failure. */
+    /** Synchronous run; returns (merged stdout+stderr) or a failure.
+     *  The timeout bounds the WHOLE call: wait for exit first (killing on
+     *  timeout), then drain output. Reading the stream before waiting (the old
+     *  order) hangs forever when a child keeps stdout open. */
     fun execute(
         command: String,
         args: List<String> = emptyList(),
@@ -46,18 +49,48 @@ class ShellExecutor(private val context: Context) {
         env: Map<String, String> = emptyMap(),
         timeoutMs: Long = 600_000,
     ): Result<String> {
+        val started = System.currentTimeMillis()
+        android.util.Log.i("NovaShell", "exec: $command ${args.joinToString(" ")}".trim())
+        val result = doExecute(command, args, cwd, env, timeoutMs)
+        val ms = System.currentTimeMillis() - started
+        android.util.Log.i(
+            "NovaShell",
+            "done(${ms}ms): ${result.fold({ "<ok ${it.length}b>" }, { "FAIL ${it.message}" })}"
+        )
+        return result
+    }
+
+    private fun doExecute(
+        command: String,
+        args: List<String>,
+        cwd: String?,
+        env: Map<String, String>,
+        timeoutMs: Long,
+    ): Result<String> {
         return runCatching {
             val pb = buildProcess(command, args, cwd, env)
             val p = pb.start()
-            val output = p.inputStream.bufferedReader().use { it.readText() }
+            // Drain stdout concurrently so a large output can never block the
+            // child on a full pipe while we wait for exit.
+            val output = StringBuilder()
+            val drain = Thread {
+                try {
+                    p.inputStream.bufferedReader().useLines { lines ->
+                        lines.forEach { output.append(it).append('\n') }
+                    }
+                } catch (_: Exception) {
+                }
+            }.apply { isDaemon = true; start() }
             if (!p.waitFor(timeoutMs, TimeUnit.MILLISECONDS)) {
                 p.destroyForcibly()
                 error("Command timed out: $command ${args.joinToString(" ")}".trim())
             }
+            drain.join(10_000)
+            val text = output.toString()
             if (p.exitValue() != 0) {
-                error(output.ifBlank { "Command failed: $command" })
+                error(text.ifBlank { "Command failed: $command" })
             }
-            output
+            text
         }
     }
 

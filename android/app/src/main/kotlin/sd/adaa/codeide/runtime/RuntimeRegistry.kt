@@ -27,6 +27,12 @@ data class RuntimeDefinition(
      * (go/rust/java/dart/c + their packs).
      */
     val supportedAbis: List<String> = emptyList(),
+    /**
+     * Extra apt packages fetched alongside [packageName] (Termux splits some
+     * toolchains: `npm` ships separately from `nodejs`). Downloaded by the
+     * same `apt install --download-only` call and unpacked together.
+     */
+    val extraPackages: List<String> = emptyList(),
 )
 
 object RuntimeRegistry {
@@ -35,11 +41,13 @@ object RuntimeRegistry {
 
     val all: List<RuntimeDefinition> = listOf(
         RuntimeDefinition("php", "PHP", "php", "php", listOf("php")),
-        RuntimeDefinition("node", "Node.js", "node", "nodejs", listOf("node", "npm", "npx")),
+        RuntimeDefinition("node", "Node.js", "node", "nodejs", listOf("node", "npm", "npx"),
+            extraPackages = listOf("npm")),
         RuntimeDefinition("python", "Python", "python3", "python", listOf("python", "python3", "pip")),
         RuntimeDefinition("git", "Git", "git", "git", listOf("git")),
         RuntimeDefinition("composer", "Composer", "composer", "composer", listOf("composer")),
-        RuntimeDefinition("openssh", "OpenSSH", "ssh", "openssh", listOf("ssh", "scp", "sftp")),
+        RuntimeDefinition("openssh", "OpenSSH", "ssh", "openssh", listOf("ssh", "scp", "sftp"),
+            listOf("-V")),
         // ---- Phase 3 language pack (built from source for our prefix) ----
         // Package names verified against the Nova apt repo after the build;
         // install/update/remove flow is unchanged (apt by packageName).
@@ -51,7 +59,8 @@ object RuntimeRegistry {
         RuntimeDefinition("ruby", "Ruby", "ruby", "ruby", listOf("ruby", "gem", "irb")),
         RuntimeDefinition("java", "Java", "java", "openjdk-25", listOf("java", "javac", "jar"),
             supportedAbis = arm64Only),
-        RuntimeDefinition("kotlin", "Kotlin", "kotlinc", "kotlin", listOf("kotlinc", "kotlin")),
+        RuntimeDefinition("kotlin", "Kotlin", "kotlinc", "kotlin", listOf("kotlinc", "kotlin"),
+            listOf("-version")),
         RuntimeDefinition("dart", "Dart", "dart", "dart", listOf("dart"),
             supportedAbis = arm64Only),
         // Clang 21 (apt package `clang`): C/C++ frontend; version probing is

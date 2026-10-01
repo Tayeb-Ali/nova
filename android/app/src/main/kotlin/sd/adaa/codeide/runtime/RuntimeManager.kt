@@ -57,23 +57,13 @@ class RuntimeManager(
         }
         val def = byId(id)
         val env = EnvironmentManager.buildEnvironment(context, execMode = execMode)
-        onProgress("apt update")
-        runCatching {
-            shell.execute(File(prefix, "bin/apt").absolutePath, listOf("update"), cwd.absolutePath, env, 120_000)
-        }
-        onProgress("apt download ${def.packageName}")
-        clearArchives()
-        val download = runCatching {
-            shell.execute(
-                File(prefix, "bin/apt").absolutePath,
-                listOf("install", "--download-only", "-y", "--no-install-recommends", def.packageName),
-                cwd.absolutePath,
-                env,
-                600_000,
-            )
-        }
+        // --reinstall: apt re-downloads even when its status db claims the
+        // package is installed. Fresh bootstraps can ship gutted files with
+        // a stale "installed" status (python's dangling symlinks); without
+        // this flag apt fetches nothing and install wrongly fails.
+        val download = downloadDebs(def, onProgress, env, reinstall = true)
         download
-            .mapCatching { unpacking(debsInArchives(), onProgress, env) }
+            .mapCatching { finishDownload(def, onProgress, env) }
             .onSuccess {
                 installer.patchExisting()
                 done(Result.success(Unit))
@@ -114,28 +104,69 @@ class RuntimeManager(
         }
         val def = byId(id)
         val env = EnvironmentManager.buildEnvironment(context, execMode = execMode)
+        // Plain fetch: succeeds with zero debs when already at newest
+        // version (finishDownload short-circuits to success then).
+        val download = downloadDebs(def, onProgress, env, reinstall = false)
+        download
+            .mapCatching { finishDownload(def, onProgress, env) }
+            .onSuccess {
+                installer.patchExisting()
+                done(Result.success(Unit))
+            }
+            .onFailure { done(Result.failure(it)) }
+    }
+
+    /**
+     * apt update + download-only fetch of a package. With [reinstall], apt
+     * re-downloads the .deb even when its status db claims the package is
+     * installed (repairs bootstraps that ship gutted files with a stale
+     * "installed" status, e.g. python's dangling symlinks).
+     */
+    private fun downloadDebs(
+        def: RuntimeDefinition,
+        onProgress: (String) -> Unit,
+        env: Map<String, String>,
+        reinstall: Boolean,
+    ): Result<Unit> {
         onProgress("apt update")
         runCatching {
             shell.execute(File(prefix, "bin/apt").absolutePath, listOf("update"), cwd.absolutePath, env, 120_000)
         }
         onProgress("apt download ${def.packageName}")
         clearArchives()
-        val download = runCatching {
-            shell.execute(
-                File(prefix, "bin/apt").absolutePath,
-                listOf("install", "--download-only", "-y", "--no-install-recommends", def.packageName),
-                cwd.absolutePath,
-                env,
-                600_000,
-            )
+        return runCatching {
+            val args = mutableListOf("install", "--download-only", "-y", "--no-install-recommends")
+            if (reinstall) args.add("--reinstall")
+            args.add(def.packageName)
+            args.addAll(def.extraPackages)
+            shell.execute(File(prefix, "bin/apt").absolutePath, args, cwd.absolutePath, env, 600_000)
+            Unit
         }
-        download
-            .mapCatching { unpacking(debsInArchives(), onProgress, env) }
-            .onSuccess {
-                installer.patchExisting()
-                done(Result.success(Unit))
+    }
+
+    /** Unpacks freshly downloaded debs, or succeeds when apt fetched nothing
+     *  because the package is already installed and usable. */
+    private fun finishDownload(
+        def: RuntimeDefinition,
+        onProgress: (String) -> Unit,
+        env: Map<String, String>,
+    ) {
+        val debs = debsInArchives()
+        android.util.Log.i(
+            "NovaShell",
+            "post-download v2: pkg=${def.packageName} debs=${debs.size} installed=${isInstalled(def)}",
+        )
+        if (debs.isEmpty()) {
+            // apt fetched nothing: package already at newest version or repo
+            // has nothing for us. Succeed when the binary is usable; fail
+            // only when nothing is actually installed.
+            if (!isInstalled(def)) {
+                throw IllegalStateException("No .deb archives found after download. Check network / repository.")
             }
-            .onFailure { done(Result.failure(it)) }
+            onProgress("already installed ${def.packageName}")
+        } else {
+            unpacking(def, debs, onProgress, env)
+        }
     }
 
     // ---------------------------------------------------------------------
@@ -167,6 +198,7 @@ class RuntimeManager(
      * through untouched and still land correctly.
      */
     private fun unpacking(
+        def: RuntimeDefinition,
         debs: List<File>,
         onProgress: (String) -> Unit,
         env: Map<String, String>,
@@ -176,9 +208,15 @@ class RuntimeManager(
         }
         val dpkgDeb = File(prefix, "bin/dpkg-deb").absolutePath
         val tar = File(prefix, "bin/tar").absolutePath
+        // GNU tar --transform uses POSIX BRE: `(...)` is LITERAL, so the old
+        // `(\./)?` groups never matched and every path passed through into a
+        // nested files/data/... tree. Emit the optional `./` as explicit rules.
         val transform = "s#^\\./data/data/com\\.termux/files/usr/#usr/#;" +
-            "s#^(\\./)?data/user/0/sd\\.adaa\\.codeide/files/usr/#usr/#;" +
-            "s#^(\\./)?data/data/sd\\.adaa\\.codeide/files/usr/#usr/#"
+            "s#^data/data/com\\.termux/files/usr/#usr/#;" +
+            "s#^\\./data/user/0/sd\\.adaa\\.codeide/files/usr/#usr/#;" +
+            "s#^data/user/0/sd\\.adaa\\.codeide/files/usr/#usr/#;" +
+            "s#^\\./data/data/sd\\.adaa\\.codeide/files/usr/#usr/#;" +
+            "s#^data/data/sd\\.adaa\\.codeide/files/usr/#usr/#"
         for (deb in debs) {
             onProgress("unpacking ${deb.name}")
             // Extract via dpkg-deb -> tar pipe in one go.
@@ -192,6 +230,29 @@ class RuntimeManager(
             )
             if (res.isFailure) {
                 throw IllegalStateException("Extracting ${deb.name} failed: ${res.exceptionOrNull()?.message}")
+            }
+        }
+        // openjdk debs ship the JDK under usr/lib/jvm/<name>/bin with no
+        // usr/bin links (those are created by postinst update-alternatives,
+        // which never runs for manual unpacks). Link them so bin/java etc.
+        // exist and `isInstalled("java")` flips on.
+        if (def.id == "java") linkJvmBins()
+    }
+
+    private fun linkJvmBins() {
+        val binDir = File(prefix, "bin")
+        val jvmDir = File(prefix, "lib/jvm")
+        val jvms = jvmDir.listFiles { f -> f.isDirectory }
+            ?.sortedByDescending { it.name } ?: return
+        for (jvm in jvms) {
+            val jvmBin = File(jvm, "bin")
+            val exes = jvmBin.listFiles { f -> f.isFile } ?: continue
+            for (exe in exes) {
+                val link = File(binDir, exe.name)
+                if (link.exists()) continue
+                runCatching {
+                    java.nio.file.Files.createSymbolicLink(link.toPath(), exe.toPath())
+                }
             }
         }
     }

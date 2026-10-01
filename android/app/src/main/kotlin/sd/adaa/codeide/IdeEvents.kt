@@ -17,10 +17,12 @@ object IdeEvents {
     private val mainHandler = Handler(Looper.getMainLooper())
 
     fun emit(event: Map<String, Any?>) {
+        android.util.Log.i("IDE-EVENT", event.toString())
         mainHandler.post { sink?.success(event) }
     }
 
     fun emitError(code: String, message: String, details: Any?) {
+        android.util.Log.i("IDE-EVENT", "error $code: $message")
         mainHandler.post { sink?.error(code, message, details) }
     }
 }

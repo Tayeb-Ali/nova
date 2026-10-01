@@ -932,6 +932,7 @@ class _RuntimeScreenState extends State<RuntimeScreen> {
                     ),
                   ] else
                     FilledButton.icon(
+                      key: ValueKey('install-${runtime.id}'),
                       onPressed: (_busy || !runtime.isSupported)
                           ? null
                           : () => _install(runtime.id),
