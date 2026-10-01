@@ -120,8 +120,11 @@ class _RunPanelState extends ConsumerState<RunPanel> {
     _scrollToBottom();
     return Material(
       color: scheme.surfaceContainerLow,
+      // Expanded console needs a bounded height; collapsed is just the
+      // toolbar (+1px divider/progress) so it sizes itself — a fixed
+      // height here would overflow by that 1px (collapse_test).
       child: SizedBox(
-        height: _consoleVisible ? 248 : 60,
+        height: _consoleVisible ? 248 : null,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -282,9 +285,11 @@ class _RunPanelState extends ConsumerState<RunPanel> {
                     tooltip: _consoleVisible
                         ? l10n.runHideConsole
                         : l10n.runShowConsole,
+                    // NOTE: exact (non-rounded) arrow icons — collapse_test
+                    // finds the toggle by Icons.keyboard_arrow_down.
                     icon: _consoleVisible
-                        ? Icons.keyboard_arrow_down_rounded
-                        : Icons.keyboard_arrow_up_rounded,
+                        ? Icons.keyboard_arrow_down
+                        : Icons.keyboard_arrow_up,
                     onPressed: () =>
                         setState(() => _consoleVisible = !_consoleVisible),
                   ),

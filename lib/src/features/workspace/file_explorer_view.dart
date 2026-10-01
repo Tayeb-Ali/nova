@@ -253,18 +253,50 @@ class _FileExplorerViewState extends ConsumerState<FileExplorerView> {
     }
     final files = ref.watch(fileEntriesProvider(dir));
     return files.when(
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (e, _) => Center(
-        child: Text(
-          AppLocalizations.of(context).commonError("$e"),
-          style: TextStyle(color: Theme.of(context).colorScheme.error),
+      loading: () => LayoutBuilder(
+        builder: (context, constraints) => SingleChildScrollView(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minHeight: constraints.maxHeight),
+            child: const Center(child: CircularProgressIndicator()),
+          ),
+        ),
+      ),
+      error: (e, _) => LayoutBuilder(
+        builder: (context, constraints) => SingleChildScrollView(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minHeight: constraints.maxHeight),
+            child: Center(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Text(
+                  AppLocalizations.of(context).commonError("$e"),
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.error,
+                  ),
+                ),
+              ),
+            ),
+          ),
         ),
       ),
       data: (entries) {
         if (entries.isEmpty) {
-          return EmptyState(
-            icon: Icons.folder_open_outlined,
-            title: AppLocalizations.of(context).explorerEmptyFolder,
+          // Scroll-wrapped so the empty state never overflows the flex
+          // area on short viewports (small phones, tall tool drawer).
+          // ConstrainedBox keeps it vertically centered when it fits.
+          return LayoutBuilder(
+            builder: (context, constraints) => SingleChildScrollView(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minHeight: constraints.maxHeight,
+                ),
+                child: EmptyState(
+                  icon: Icons.folder_open_outlined,
+                  title: AppLocalizations.of(context).explorerEmptyFolder,
+                ),
+              ),
+            ),
           );
         }
         return ListView.builder(
@@ -324,70 +356,92 @@ class _FileExplorerViewState extends ConsumerState<FileExplorerView> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(8, 8, 8, 4),
-          child: Text(
-            AppLocalizations.of(context).explorerTitle,
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: Theme.of(context).colorScheme.primary,
-              letterSpacing: 1.2,
-            ),
-          ),
-        ),
-        if (dir != null && project != null)
-          Container(
-            margin: const EdgeInsets.symmetric(horizontal: 8),
-            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surfaceContainerLow,
-              border: Border.all(
-                color: Theme.of(context).colorScheme.outlineVariant,
-              ),
-              borderRadius: BorderRadius.circular(4),
-            ),
-            child: Row(
+        // Fixed chrome scrolls instead of overflowing when the pane is
+        // squeezed to a few dozen px (e.g. open keyboard + tall tool
+        // drawer leave ~91px). Flexible-loose leaves the list every
+        // remaining pixel and takes nothing when there is none.
+        Flexible(
+          fit: FlexFit.loose,
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              mainAxisSize: MainAxisSize.min,
               children: [
-                IconButton(
-                  icon: const Icon(Icons.arrow_upward, size: 18),
-                  tooltip: AppLocalizations.of(context).explorerGoUp,
-                  visualDensity: VisualDensity.compact,
-                  style: IconButton.styleFrom(
-                    backgroundColor: Theme.of(context)
-                        .colorScheme
-                        .surfaceContainerHigh,
-                    shape: RoundedRectangleBorder(
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(8, 8, 8, 4),
+                  child: Text(
+                    AppLocalizations.of(context).explorerTitle,
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      color: Theme.of(context).colorScheme.primary,
+                      letterSpacing: 1.2,
+                    ),
+                  ),
+                ),
+                if (dir != null && project != null)
+                  Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 8),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 4,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.surfaceContainerLow,
+                      border: Border.all(
+                        color: Theme.of(context).colorScheme.outlineVariant,
+                      ),
                       borderRadius: BorderRadius.circular(4),
                     ),
-                    padding: const EdgeInsets.all(8),
+                    child: Row(
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.arrow_upward, size: 18),
+                          tooltip: AppLocalizations.of(context).explorerGoUp,
+                          visualDensity: VisualDensity.compact,
+                          style: IconButton.styleFrom(
+                            backgroundColor: Theme.of(context)
+                                .colorScheme
+                                .surfaceContainerHigh,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            padding: const EdgeInsets.all(8),
+                          ),
+                          onPressed: upEnabled
+                              ? () => ref
+                                    .read(currentDirProvider.notifier)
+                                    .state = p.dirname(dir)
+                              : null,
+                        ),
+                        Icon(
+                          Icons.folder,
+                          size: 16,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                        const SizedBox(width: 4),
+                        Expanded(child: _breadcrumb(ref, dir, project)),
+                      ],
+                    ),
                   ),
-                  onPressed: upEnabled
-                      ? () => ref.read(currentDirProvider.notifier).state = p
-                            .dirname(dir)
-                      : null,
+                Padding(
+                  padding: const EdgeInsets.all(8),
+                  child: FilledButton.tonalIcon(
+                    onPressed: _newFile,
+                    style: FilledButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      visualDensity: VisualDensity.compact,
+                    ),
+                    icon: const Icon(Icons.add, size: 18),
+                    label: Text(AppLocalizations.of(context).explorerNewFile),
+                  ),
                 ),
-                Icon(
-                  Icons.folder,
-                  size: 16,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-                const SizedBox(width: 4),
-                Expanded(child: _breadcrumb(ref, dir, project)),
               ],
             ),
-          ),
-        Padding(
-          padding: const EdgeInsets.all(8),
-          child: FilledButton.tonalIcon(
-            onPressed: _newFile,
-            style: FilledButton.styleFrom(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(4),
-              ),
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              visualDensity: VisualDensity.compact,
-            ),
-            icon: const Icon(Icons.add, size: 18),
-            label: Text(AppLocalizations.of(context).explorerNewFile),
           ),
         ),
         Divider(height: 1, color: Theme.of(context).colorScheme.outlineVariant),
