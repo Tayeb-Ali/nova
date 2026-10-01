@@ -1168,4 +1168,19 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get runtimeDescNovaDart => 'Dart — أدوات سطر الأوامر';
+
+  @override
+  String get splashTagline => 'بيئة التطوير في جيبك';
+
+  @override
+  String get splashStatusEngine => 'تهيئة المحرك…';
+
+  @override
+  String get splashStatusSettings => 'تحميل الإعدادات…';
+
+  @override
+  String get splashStatusRuntime => 'فحص بيئة التشغيل…';
+
+  @override
+  String get splashStatusWorkspace => 'تجهيز مساحة العمل…';
 }

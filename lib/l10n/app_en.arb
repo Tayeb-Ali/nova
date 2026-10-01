@@ -685,5 +685,15 @@
   "runtimeDescNovaPython": "Python + pip — scripts and data",
   "@runtimeDescNovaPython": { "description": "Runtime desc: nova-python" },
   "runtimeDescNovaDart": "Dart — CLI tools",
-  "@runtimeDescNovaDart": { "description": "Runtime desc: nova-dart" }
+  "@runtimeDescNovaDart": { "description": "Runtime desc: nova-dart" },
+  "splashTagline": "Your dev environment in your pocket",
+  "@splashTagline": { "description": "Splash: tagline under the Nova logo" },
+  "splashStatusEngine": "Initializing engine…",
+  "@splashStatusEngine": { "description": "Splash: loader status while warming the engine" },
+  "splashStatusSettings": "Loading settings…",
+  "@splashStatusSettings": { "description": "Splash: loader status while loading settings" },
+  "splashStatusRuntime": "Checking runtime…",
+  "@splashStatusRuntime": { "description": "Splash: loader status while probing the runtime" },
+  "splashStatusWorkspace": "Preparing workspace…",
+  "@splashStatusWorkspace": { "description": "Splash: loader status while preparing the workspace" }
 }

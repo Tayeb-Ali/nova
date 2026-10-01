@@ -39,6 +39,7 @@ flutter:
   generate: true
   assets:
     - assets/autocomplete/
+    - assets/icon/
 
 # Patrol E2E config (test-only; see integration_test/patrol_ruby_test.dart).
 # Native setup (PatrolJUnitRunner + MainActivityTest) intentionally NOT added

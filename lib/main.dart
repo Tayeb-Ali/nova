@@ -1,6 +1,7 @@
 import "dart:async";
 
 import "package:flutter/material.dart";
+import "package:flutter/services.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:shared_preferences/shared_preferences.dart";
 
@@ -28,6 +29,18 @@ Future<void> _persistFirstError(FlutterErrorDetails details) async {
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // Brand-colored system bars from the very first frame: the native launch
+  // theme already paints #13151B, and this keeps the status/nav bars dark
+  // while Flutter initializes (no white flash on either edge).
+  SystemChrome.setSystemUIOverlayStyle(
+    const SystemUiOverlayStyle(
+      statusBarColor: Color(0xFF13151B),
+      statusBarIconBrightness: Brightness.light,
+      statusBarBrightness: Brightness.dark,
+      systemNavigationBarColor: Color(0xFF13151B),
+      systemNavigationBarIconBrightness: Brightness.light,
+    ),
+  );
   try {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_crashKey);

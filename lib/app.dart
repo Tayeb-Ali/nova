@@ -10,6 +10,7 @@ import "src/features/editor/theme/app_theme.dart";
 import "src/features/editor/theme/theme_pack_store.dart";
 import "src/features/runtime/runtime_screen.dart";
 import "src/features/settings/settings_screen.dart";
+import "src/features/splash/splash_screen.dart";
 import "src/features/workspace/projects_hub_screen.dart";
 import "src/features/workspace/workspace_screen.dart";
 
@@ -38,7 +39,9 @@ class NovaApp extends ConsumerWidget {
           : Locale(settings.appLocale!),
       supportedLocales: AppLocalizations.supportedLocales,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
-      home: const IdeShell(),
+      // Branded splash first: holds a loader until the engine is warm, then
+      // fades into the shell. Kills the white first-frame flash.
+      home: const SplashGate(child: IdeShell()),
     );
   }
 }
@@ -69,12 +72,18 @@ class _IdeShellState extends State<IdeShell> {
   Future<void> _checkBootstrap() async {
     if (_bootstrapPromptShown) return;
     _bootstrapPromptShown = true;
+    // Reuse the splash gate's probe when available (no second bridge call).
+    final cached = SplashBootstrap.probed ? SplashBootstrap.lastStatus : null;
     bool missing = false;
-    try {
-      final status = await SetupService().getStatus();
-      missing = !status.ready;
-    } catch (_) {
-      return;
+    if (cached != null) {
+      missing = !cached.ready;
+    } else {
+      try {
+        final status = await SetupService().getStatus();
+        missing = !status.ready;
+      } catch (_) {
+        return;
+      }
     }
     if (!missing || !mounted) return;
     // Setup wizard (NEXT_PLAN 3.2): slim/full choice + progress + retry.

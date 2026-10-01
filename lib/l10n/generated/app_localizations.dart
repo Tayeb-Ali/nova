@@ -2149,6 +2149,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Dart — CLI tools'**
   String get runtimeDescNovaDart;
+
+  /// Splash: tagline under the Nova logo
+  ///
+  /// In en, this message translates to:
+  /// **'Your dev environment in your pocket'**
+  String get splashTagline;
+
+  /// Splash: loader status while warming the engine
+  ///
+  /// In en, this message translates to:
+  /// **'Initializing engine…'**
+  String get splashStatusEngine;
+
+  /// Splash: loader status while loading settings
+  ///
+  /// In en, this message translates to:
+  /// **'Loading settings…'**
+  String get splashStatusSettings;
+
+  /// Splash: loader status while probing the runtime
+  ///
+  /// In en, this message translates to:
+  /// **'Checking runtime…'**
+  String get splashStatusRuntime;
+
+  /// Splash: loader status while preparing the workspace
+  ///
+  /// In en, this message translates to:
+  /// **'Preparing workspace…'**
+  String get splashStatusWorkspace;
 }
 
 class _AppLocalizationsDelegate

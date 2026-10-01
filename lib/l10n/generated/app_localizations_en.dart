@@ -1170,4 +1170,19 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get runtimeDescNovaDart => 'Dart — CLI tools';
+
+  @override
+  String get splashTagline => 'Your dev environment in your pocket';
+
+  @override
+  String get splashStatusEngine => 'Initializing engine…';
+
+  @override
+  String get splashStatusSettings => 'Loading settings…';
+
+  @override
+  String get splashStatusRuntime => 'Checking runtime…';
+
+  @override
+  String get splashStatusWorkspace => 'Preparing workspace…';
 }

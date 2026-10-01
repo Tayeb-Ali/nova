@@ -342,5 +342,10 @@
   "runtimeDescNovaSystems": "Rust + Go + make + cmake — لغات الأنظمة",
   "runtimeDescNovaJvm": "Java 25 + Kotlin — منصة JVM",
   "runtimeDescNovaPython": "Python + pip — سكربتات وبيانات",
-  "runtimeDescNovaDart": "Dart — أدوات سطر الأوامر"
+  "runtimeDescNovaDart": "Dart — أدوات سطر الأوامر",
+  "splashTagline": "بيئة التطوير في جيبك",
+  "splashStatusEngine": "تهيئة المحرك…",
+  "splashStatusSettings": "تحميل الإعدادات…",
+  "splashStatusRuntime": "فحص بيئة التشغيل…",
+  "splashStatusWorkspace": "تجهيز مساحة العمل…"
 }
