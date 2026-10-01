@@ -8498,6 +8498,8 @@ data/data/sd.adaa.codeide/files/usr/share/gobject-introspection-1.0/gdump.c     
 data/data/sd.adaa.codeide/files/usr/share/man/man1/g-ir-compiler.1.gz            gobject-introspection
 data/data/sd.adaa.codeide/files/usr/share/man/man1/g-ir-doc-tool.1.gz            gobject-introspection
 data/data/sd.adaa.codeide/files/usr/share/man/man1/g-ir-generate.1.gz            gobject-introspection
+data/data/sd.adaa.codeide/files/usr/bin/gopls                                    gopls
+data/data/sd.adaa.codeide/files/usr/share/doc/gopls/copyright                    gopls
 data/data/sd.adaa.codeide/files/usr/bin/gpgv                                     gpgv
 data/data/sd.adaa.codeide/files/usr/share/man/man1/gpgv.1.gz                     gpgv
 data/data/sd.adaa.codeide/files/usr/bin/egrep                                    grep

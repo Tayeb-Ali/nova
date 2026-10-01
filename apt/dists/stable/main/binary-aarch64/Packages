@@ -928,6 +928,20 @@ SHA1: 6570a7fcffad7f2d9718b8ab74e0f63cb1b69456
 SHA256: 7b730a15bfb38d4efbb5bdb28c92a933045c6028ea6545b6dd5d1aa5344e0241
 SHA512: b200260e7cd00b8e4b59fbbd8ea0940ab2a9a300856baf92fe6db55ae54e3c75faecfb675e3d0085f3e5049b4d04cacd05487ce016759fef0e6528d7e954f8f5
 
+Package: gopls
+Architecture: aarch64
+Installed-Size: 31392
+Maintainer: Joshua Kahn <tom@termux.dev>
+Version: 0.23.0
+Homepage: https://github.com/golang/tools
+Description: The official Go language server
+Filename: dists/stable/main/binary-aarch64/gopls_0.23.0_aarch64.deb
+Size: 7687048
+MD5Sum: 41875ca702757915131427ba9d5c798e
+SHA1: 360984808ef75bdd83fa996adca195581de8a328
+SHA256: 89162f207fc8343146ee91ae67cb4ae22c78a9a177eabd97b93f73a05525c7d9
+SHA512: d5a3bae3c049e20eb1e64d9847e4e59412f6650f560293e61eedfcf6dfae2399220aff8c150bd8a75031f7ee788497abdcccb8a2d2fe6a623505434d70a044a1
+
 Package: gpgv
 Architecture: aarch64
 Installed-Size: 508

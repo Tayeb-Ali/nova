@@ -21469,6 +21469,8 @@ data/data/sd.adaa.codeide/files/usr/lib/go/src/weak/doc.go                      
 data/data/sd.adaa.codeide/files/usr/lib/go/src/weak/pointer.go                   golang
 data/data/sd.adaa.codeide/files/usr/lib/go/src/weak/pointer_test.go              golang
 data/data/sd.adaa.codeide/files/usr/share/doc/golang/copyright                   golang
+data/data/sd.adaa.codeide/files/usr/bin/gopls                                    gopls
+data/data/sd.adaa.codeide/files/usr/share/doc/gopls/copyright                    gopls
 data/data/sd.adaa.codeide/files/usr/bin/gpgv                                     gpgv
 data/data/sd.adaa.codeide/files/usr/share/man/man1/gpgv.1.gz                     gpgv
 data/data/sd.adaa.codeide/files/usr/bin/egrep                                    grep
