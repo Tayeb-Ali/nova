@@ -3,10 +3,15 @@ package sd.adaa.codeide.runtime
 import android.content.Context
 import sd.adaa.codeide.BuildConfig
 import sd.adaa.codeide.EnvironmentManager
+import sd.adaa.codeide.IdeEvents
 import sd.adaa.codeide.IdeService
 import sd.adaa.codeide.bridge.RuntimeInfo
 import sd.adaa.codeide.process.ShellExecutor
 import java.io.File
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 
 /**
  * Installs / inspects / removes runtimes through the embedded bootstrap's apt
@@ -31,11 +36,48 @@ class RuntimeManager(
     private val cwd get() = EnvironmentManager.home(context)
     private val env get() = EnvironmentManager.buildEnvironment(context)
 
-    fun getRuntimes(): List<RuntimeInfo> = RuntimeRegistry.all.map { toInfo(it) }
+    // Version cache: Pigeon handlers run on the platform main thread, so
+    // getRuntimes()/getRuntime() must never block on process exec. Probing
+    // every installed binary costs seconds (kotlinc alone takes ~4s of JVM
+    // startup) and trips an ANR with 500+ skipped frames. The hot path below
+    // does only File.exists checks + cache reads; version probing happens on
+    // a background pool and notifies Dart with `runtimeVersionsRefreshed`.
+    private val versionCache = ConcurrentHashMap<String, String>()
+    private val probedAt = ConcurrentHashMap<String, Long>()
+    private val versionProbes: ExecutorService =
+        Executors.newFixedThreadPool(4) { r ->
+            Thread(r).apply { isDaemon = true; name = "runtime-version" }
+        }
+    private val refreshCoordinator: ExecutorService =
+        Executors.newSingleThreadExecutor { r ->
+            Thread(r).apply { isDaemon = true; name = "runtime-refresh" }
+        }
 
+    @Volatile
+    private var refreshInFlight = false
+
+    @Volatile
+    private var refreshAgain = false
+
+    companion object {
+        private const val VERSION_TTL_MS = 60_000L
+        private const val VERSION_TIMEOUT_MS = 10_000L
+    }
+
+    /** Fast path: install flags + cached versions only, never execs. */
+    fun getRuntimes(): List<RuntimeInfo> {
+        val infos = RuntimeRegistry.all.map { toInfoFast(it) }
+        val stale = RuntimeRegistry.all.filter { needsProbe(it) }
+        if (stale.isNotEmpty()) refreshVersionsAsync(stale)
+        return infos
+    }
+
+    /** Fast path: install flag + cached version only, never execs. */
     fun getRuntime(id: String): RuntimeInfo {
         val def = byId(id)
-        return toInfo(def)
+        val info = toInfoFast(def)
+        if (needsProbe(def)) refreshVersionsAsync(listOf(def))
+        return info
     }
 
     fun isInstalled(id: String): Boolean {
@@ -66,6 +108,7 @@ class RuntimeManager(
             .mapCatching { finishDownload(def, onProgress, env) }
             .onSuccess {
                 installer.patchExisting()
+                invalidateVersion(def.id)
                 done(Result.success(Unit))
             }
             .onFailure { done(Result.failure(it)) }
@@ -87,7 +130,10 @@ class RuntimeManager(
                 removeById(def)
             }
         }
-        result.onSuccess { done(Result.success(Unit)) }
+        result.onSuccess {
+            invalidateVersion(def.id)
+            done(Result.success(Unit))
+        }
             .onFailure { done(Result.failure(it)) }
     }
 
@@ -111,6 +157,7 @@ class RuntimeManager(
             .mapCatching { finishDownload(def, onProgress, env) }
             .onSuccess {
                 installer.patchExisting()
+                invalidateVersion(def.id)
                 done(Result.success(Unit))
             }
             .onFailure { done(Result.failure(it)) }
@@ -270,10 +317,10 @@ class RuntimeManager(
     private fun byId(id: String): RuntimeDefinition =
         requireNotNull(RuntimeRegistry.get(id)) { "Unknown runtime: $id" }
 
-    private fun toInfo(def: RuntimeDefinition): RuntimeInfo = RuntimeInfo(
+    private fun toInfoFast(def: RuntimeDefinition): RuntimeInfo = RuntimeInfo(
         id = def.id,
         displayName = def.displayName,
-        version = queryVersion(def),
+        version = versionCache[def.id],
         installed = isInstalled(def),
         executable = def.executable,
         supported = def.supportedAbis.isEmpty() ||
@@ -290,13 +337,73 @@ class RuntimeManager(
         return binary.exists()
     }
 
-    private fun queryVersion(def: RuntimeDefinition): String? {
+    private fun needsProbe(def: RuntimeDefinition): Boolean {
+        if (def.isPack) return false
+        if (!isInstalled(def)) return false
+        val at = probedAt[def.id] ?: return true
+        return System.currentTimeMillis() - at > VERSION_TTL_MS
+    }
+
+    private fun invalidateVersion(id: String) {
+        versionCache.remove(id)
+        probedAt.remove(id)
+    }
+
+    /**
+     * Probes [defs] off the main thread (up to 4 concurrent execs) and emits
+     * `runtimeVersionsRefreshed` when the cache is filled. Coalesces bursts:
+     * while one refresh is in flight, further triggers just set [refreshAgain].
+     */
+    private fun refreshVersionsAsync(defs: List<RuntimeDefinition>) {
+        synchronized(this) {
+            if (refreshInFlight) {
+                refreshAgain = true
+                return
+            }
+            refreshInFlight = true
+        }
+        refreshCoordinator.execute {
+            try {
+                val futures = defs.map { def ->
+                    versionProbes.submit<String?> { probeVersion(def) }
+                }
+                futures.forEachIndexed { index, future ->
+                    val def = defs[index]
+                    val version = runCatching {
+                        future.get(VERSION_TIMEOUT_MS + 5_000, TimeUnit.MILLISECONDS)
+                    }.getOrNull()
+                    probedAt[def.id] = System.currentTimeMillis()
+                    if (version != null) {
+                        versionCache[def.id] = version
+                    } else {
+                        versionCache.remove(def.id)
+                    }
+                }
+                IdeEvents.emit(mapOf("event" to "runtimeVersionsRefreshed"))
+            } catch (_: Exception) {
+            } finally {
+                val again = synchronized(this) {
+                    refreshInFlight = false
+                    val a = refreshAgain
+                    refreshAgain = false
+                    a
+                }
+                if (again) {
+                    val stale = RuntimeRegistry.all.filter { needsProbe(it) }
+                    if (stale.isNotEmpty()) refreshVersionsAsync(stale)
+                }
+            }
+        }
+    }
+
+    /** Blocking single probe; runs only on [versionProbes] threads. */
+    private fun probeVersion(def: RuntimeDefinition): String? {
         // Packs have no single version; the tile shows member state instead.
         if (def.isPack) return null
         val executable = File(prefix, "bin/${def.executable}")
         if (!executable.exists()) return null
         val output = runCatching {
-            shell.execute(executable.absolutePath, def.versionArgs, cwd.absolutePath, env, 60_000)
+            shell.execute(executable.absolutePath, def.versionArgs, cwd.absolutePath, env, VERSION_TIMEOUT_MS)
                 .getOrNull()
         }.getOrNull() ?: return null
         return output.lineSequence().firstOrNull { it.isNotBlank() }?.trim()

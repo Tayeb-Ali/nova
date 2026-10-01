@@ -139,6 +139,10 @@ class _RuntimeScreenState extends State<RuntimeScreen> {
       case 'runtimeFailed':
         _finishRuntime(raw['id'] as String?, raw['error'] as String?);
         break;
+      case 'runtimeVersionsRefreshed':
+        // Native version probes finish off-thread; re-fetch (cache-hit, fast).
+        unawaited(_refreshRuntimesQuiet());
+        break;
     }
   }
 
@@ -316,6 +320,21 @@ class _RuntimeScreenState extends State<RuntimeScreen> {
 
   Future<void> _refreshAll() async {
     await Future.wait([_loadSetupStatus(), _refreshRuntimes()]);
+  }
+
+  /// Best-effort list refresh without touching the loading spinner (used when
+  /// native background version probes complete).
+  Future<void> _refreshRuntimesQuiet() async {
+    try {
+      final List<RuntimeInfo> list = await _runtimeService.getRuntimes();
+      if (!mounted) return;
+      setState(() {
+        _runtimes = list;
+        _runtimesError = null;
+      });
+    } catch (_) {
+      // Keep the existing list; versions refresh is best-effort.
+    }
   }
 
   Future<void> _startSetup() async {
