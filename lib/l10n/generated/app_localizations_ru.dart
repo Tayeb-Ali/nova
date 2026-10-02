@@ -1559,4 +1559,321 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get onboard4Body =>
       'Открывайте папки, просматривайте файлы и делайте commit из любого места.';
+
+  @override
+  String get tourBack => 'Назад';
+
+  @override
+  String get tourHubSearchTitle => 'Поиск проектов';
+
+  @override
+  String get tourHubSearchBody =>
+      'Фильтруйте список проектов по имени. Нажмите на поле и вводите текст — список сужается по мере ввода.';
+
+  @override
+  String get tourHubNewTitle => 'Создание проекта';
+
+  @override
+  String get tourHubNewBody =>
+      'Создайте новый проект из шаблона. Нажатие открывает диалог создания — нажмите «Отмена» (или Далее), чтобы остаться в туре.';
+
+  @override
+  String get tourHubCardTitle => 'Ваши проекты';
+
+  @override
+  String get tourHubCardBody =>
+      'Нажмите на карточку проекта, чтобы сделать его активным. Выделенная карточка — та, которую используют редактор и инструменты запуска.';
+
+  @override
+  String get tourHubOpenTitle => 'Открытие редактора';
+
+  @override
+  String get tourHubOpenBody =>
+      'Перейдите в рабочую область активного проекта. Нажмите Далее, чтобы остаться в туре, — нажатие на плитку сейчас покинет хаб и досрочно завершит тур.';
+
+  @override
+  String get tourHubRecentTitle => 'Недавние файлы';
+
+  @override
+  String get tourHubRecentBody =>
+      'Открывайте последние отредактированные файлы из всех проектов. Нажатие открывает файл сразу в редакторе.';
+
+  @override
+  String get tourHubNavTitle => 'Навигация';
+
+  @override
+  String get tourHubNavBody =>
+      'Разделы нижней панели: Проекты (здесь), Редактор (рабочая область), Среда выполнения (настройка языков), Настройки. Кнопка ? повторяет тур в любой момент.';
+
+  @override
+  String get tourEdProjectTitle => 'Переключение проекта';
+
+  @override
+  String get tourEdProjectBody =>
+      'Переключайте активный проект — проводник, редактор и инструменты запуска последуют за ним. Нажатие открывает меню: ничего не выбирайте (Назад) или нажмите Далее, чтобы продолжить.';
+
+  @override
+  String get tourEdPaletteTitle => 'Командная палитра';
+
+  @override
+  String get tourEdPaletteBody =>
+      'Нечёткий поиск файлов и команд инструментов и тем. Нажатие открывает палитру — нажмите Назад (или Далее), чтобы продолжить тур.';
+
+  @override
+  String get tourEdEntryTitle => 'Файлы проекта';
+
+  @override
+  String get tourEdEntryBody =>
+      'Нажмите на файл, чтобы открыть его в редакторе, — это гарантирует открытую вкладку для следующих шагов. Долгое нажатие — переименование и удаление.';
+
+  @override
+  String get tourEdNewFileTitle => 'Новый файл';
+
+  @override
+  String get tourEdNewFileBody =>
+      'Создайте файл в текущей папке. Нажатие запрашивает имя — закройте диалог кнопкой «Отмена» (или нажмите Далее), чтобы продолжить.';
+
+  @override
+  String get tourEdGoUpTitle => 'Вверх';
+
+  @override
+  String get tourEdGoUpBody =>
+      'Перемещает проводник в родительскую папку. Недоступно в корне проекта.';
+
+  @override
+  String get tourEdExplorerTitle => 'Видимость проводника';
+
+  @override
+  String get tourEdExplorerBody =>
+      'Скрывает панель файлов, чтобы расширить редактор. Все файловые шаги уже выполнены, так что нажимать сейчас безопасно — нажмите ещё раз, чтобы вернуть панель.';
+
+  @override
+  String get tourEdTabsTitle => 'Открытые вкладки';
+
+  @override
+  String get tourEdTabsBody =>
+      'Каждый открытый файл — это вкладка. Нажмите на вкладку, чтобы переключиться на неё.';
+
+  @override
+  String get tourEdSaveTitle => 'Сохранение';
+
+  @override
+  String get tourEdSaveBody =>
+      'Записывает текущий файл на диск. Для файла без изменений это просто подтверждает, что всё сохранено.';
+
+  @override
+  String get tourEdReloadTitle => 'Перезагрузка';
+
+  @override
+  String get tourEdReloadBody =>
+      'Перечитывает файл с диска. Файлы без изменений перезагружаются тихо; файлы с правками сначала запрашивают подтверждение.';
+
+  @override
+  String get tourEdAiTitle => 'ИИ-помощник';
+
+  @override
+  String get tourEdAiBody =>
+      'Объясняйте, дополняйте или редактируйте выделенный код с помощью ИИ. Нажатие открывает панель ИИ — закройте её, чтобы продолжить тур.';
+
+  @override
+  String get tourEdPreviewTitle => 'Предпросмотр Markdown';
+
+  @override
+  String get tourEdPreviewBody =>
+      'Markdown-файлы переключаются здесь между редактированием и отрендеренным предпросмотром. Для файлов кода скрыто.';
+
+  @override
+  String get tourEdRunTabTitle => 'Инструменты запуска';
+
+  @override
+  String get tourEdRunTabBody =>
+      'Переключает нижнюю панель: Запуск, Терминал, Git, Процессы. Этот шаг выбирает Запуск, чтобы следующие шаги были видны.';
+
+  @override
+  String get tourEdTaskTitle => 'Задача запуска';
+
+  @override
+  String get tourEdTaskBody =>
+      'Выберите обнаруженную задачу для запуска, например run или test для этого проекта. Нажатие открывает меню — выберите задачу или нажмите Далее.';
+
+  @override
+  String get tourEdRunTitle => 'Запуск';
+
+  @override
+  String get tourEdRunBody =>
+      'Запускает выбранную задачу — вывод идёт ниже. Нажатие реально запускает процесс; остановите его той же кнопкой.';
+
+  @override
+  String get tourEdDefTitle => 'Переход к определению';
+
+  @override
+  String get tourEdDefBody =>
+      'Переходит к символу под курсором. Вы можете оказаться в другом файле — оставшиеся шаги работают и там.';
+
+  @override
+  String get tourEdTabCloseTitle => 'Закрытие вкладки';
+
+  @override
+  String get tourEdTabCloseBody =>
+      'Закрывает эту вкладку; несохранённые правки запрашивают подтверждение. Если это ваша единственная вкладка, нажмите Далее вместо ×, чтобы не прерывать тур.';
+
+  @override
+  String get tourEdDeleteTitle => 'Удаление проекта';
+
+  @override
+  String get tourEdDeleteBody =>
+      'Удаляет весь проект после подтверждения. Нажатие открывает диалог — выберите «Отмена», чтобы сохранить проект и открыть последний шаг.';
+
+  @override
+  String get tourEdFocusTitle => 'Фокус-режим';
+
+  @override
+  String get tourEdFocusBody =>
+      'Скрывает всё оформление для редактирования без отвлечений. Нажатие включает фокус-режим — для возврата используйте кнопку выхода в узкой панели.';
+
+  @override
+  String get tourRtSearchTitle => 'Поиск среды выполнения';
+
+  @override
+  String get tourRtSearchBody =>
+      'Вводите текст, чтобы отфильтровать список сред выполнения. Пробовать безопасно — это только фильтрует, ничего не устанавливается.';
+
+  @override
+  String get tourRtSetupTitle => 'Настройка Bootstrap';
+
+  @override
+  String get tourRtSetupBody =>
+      'Кнопка «Начать настройку» скачивает Linux-bootstrap. Нажимайте её по-настоящему, только когда готовы к загрузке.';
+
+  @override
+  String get tourRtInstallTitle => 'Установка среды выполнения';
+
+  @override
+  String get tourRtInstallBody =>
+      'Эта кнопка «Установить» запускает НАСТОЯЩЕЕ скачивание и установку. Нажимайте её по-настоящему, только если эта среда нужна вам сейчас, — она последняя не просто так.';
+
+  @override
+  String get tourTermPasteTitle => 'Вставка в терминал';
+
+  @override
+  String get tourTermPasteBody =>
+      'Вставляет текст из буфера обмена в оболочку. Настоящее нажатие, но безвредное — текст вводится без нажатия Enter.';
+
+  @override
+  String get tourTermTabTitle => 'Клавиша Tab';
+
+  @override
+  String get tourTermTabBody =>
+      'Отправляет Tab для автодополнения в оболочке. Настоящее нажатие, безвредно.';
+
+  @override
+  String get tourTermCtrlCTitle => 'Клавиша Ctrl+C';
+
+  @override
+  String get tourTermCtrlCBody =>
+      'Отправляет прерывание (Ctrl+C). Безвредно на пустой строке; отменяет выполняющуюся команду.';
+
+  @override
+  String get tourTermNewTabTitle => 'Новая вкладка терминала';
+
+  @override
+  String get tourTermNewTabBody =>
+      'Открывает настоящую новую вкладку оболочки (до 5). Безвредно — закройте её через × на её чипе. Последняя не просто так: она меняет полосу вкладок.';
+
+  @override
+  String get tourSetAccountTitle => 'Аккаунт';
+
+  @override
+  String get tourSetAccountBody =>
+      'Здесь находятся статус входа и действия с аккаунтом.';
+
+  @override
+  String get tourSetLangTitle => 'Язык';
+
+  @override
+  String get tourSetLangBody =>
+      'Переключайте язык приложения здесь. Настоящее нажатие применяется сразу.';
+
+  @override
+  String get tourSetAiKeyTitle => 'API-ключ ИИ';
+
+  @override
+  String get tourSetAiKeyBody =>
+      'Вставьте сюда ключ вашего ИИ-провайдера. Он хранится в защищённом хранилище и больше никогда не показывается.';
+
+  @override
+  String get tourSetSaveTitle => 'Сохранение настроек';
+
+  @override
+  String get tourSetSaveBody =>
+      'По-настоящему сохраняет всё на этой странице. Безвредно — можно вернуть обратно в любой момент. Последняя не просто так.';
+
+  @override
+  String get tourGitStatusTitle => 'Обновление статуса';
+
+  @override
+  String get tourGitStatusBody =>
+      'Обновляет git-статус текущего проекта. Настоящее обновление, безвредно.';
+
+  @override
+  String get tourGitCommitTitle => 'Commit';
+
+  @override
+  String get tourGitCommitBody =>
+      'Открывает запрос сообщения commit. Можно отменить — ничего не будет зафиксировано до подтверждения. Последний не просто так.';
+
+  @override
+  String get tourNotifMarkReadTitle => 'Отметить все как прочитанные';
+
+  @override
+  String get tourNotifMarkReadBody =>
+      'Отмечает все уведомления прочитанными. Настоящее действие, но безвредное — записи остаются, исчезают только точки непрочитанных.';
+
+  @override
+  String get tourReplay => 'Повторить обучение';
+
+  @override
+  String get tourResetDone => 'Туры сброшены — нажмите ? на любом экране';
+
+  @override
+  String get tourEdNewProjectTitle => 'Новый проект';
+
+  @override
+  String get tourEdNewProjectBody =>
+      'Создайте ещё один проект из шаблона. Во время тура только для чтения — попробуйте сами потом с помощью этой же кнопки.';
+
+  @override
+  String get tourEdTermTabTitle => 'Панель терминала';
+
+  @override
+  String get tourEdTermTabBody =>
+      'Переключает нижнюю панель на встроенный терминал. Настоящее нажатие — сеанс оболочки остаётся активным при переключении.';
+
+  @override
+  String get tourEdGitTabTitle => 'Панель Git';
+
+  @override
+  String get tourEdGitTabBody =>
+      'Переключает нижнюю панель на Git: статус, индексация, commit и ветки этого проекта.';
+
+  @override
+  String get tourEdProcTabTitle => 'Панель процессов';
+
+  @override
+  String get tourEdProcTabBody =>
+      'Переключает нижнюю панель на Процессы: каждая выполняющаяся команда с выводом и кнопкой остановки.';
+
+  @override
+  String get tourEdToolsTitle => 'Скрытие инструментов';
+
+  @override
+  String get tourEdToolsBody =>
+      'Сворачивает всю нижнюю панель для максимальной высоты редактора. Нажатие скрывает её сейчас — верните её тонкой полосой-захватом или нажмите Далее.';
+
+  @override
+  String get tourEdToolbarTitle => 'Скрытие панели инструментов';
+
+  @override
+  String get tourEdToolbarBody =>
+      'Сворачивает верхнюю панель в полосу 28px. Нажатие скрывает её сейчас — восстановите кнопкой раскрытия в полосе, затем выполните последний шаг.';
 }

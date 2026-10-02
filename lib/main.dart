@@ -14,6 +14,7 @@ import "src/core/services/app_info_service.dart";
 import "src/core/services/notification_service.dart";
 import "src/features/notifications/notification_model.dart";
 import "src/features/notifications/notifications_store.dart";
+import "src/features/tour/tours/register_tours.dart";
 
 /// Key holding the first framework error of the current process, if any.
 /// Read on-device without racing logcat:
@@ -108,6 +109,9 @@ Future<void> main() async {
   // Foreground notification + auth handling is owned by other agents;
   // this only guarantees Firebase is ready and background taps don't crash.
   await _initFirebase();
+  // Wire tour content builders once so the first-run hub auto-start has
+  // something to run (TourService.hubTargetsBuilder).
+  registerTours();
   // Detect version/build from the platform package before the first frame,
   // so the splash footer and Settings > About read them synchronously.
   // Best-effort (never throws): labels hide themselves if it fails.

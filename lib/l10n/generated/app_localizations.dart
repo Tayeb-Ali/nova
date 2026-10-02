@@ -2865,6 +2865,552 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Open folders, browse files, and commit from anywhere.'**
   String get onboard4Body;
+
+  /// Tour: back to the previous step
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get tourBack;
+
+  /// Tour: hub search step title
+  ///
+  /// In en, this message translates to:
+  /// **'Search projects'**
+  String get tourHubSearchTitle;
+
+  /// Tour: hub search step body
+  ///
+  /// In en, this message translates to:
+  /// **'Filter the project list by name. Tap the field and type — the list narrows as you type.'**
+  String get tourHubSearchBody;
+
+  /// Tour: hub new-project step title
+  ///
+  /// In en, this message translates to:
+  /// **'Create a project'**
+  String get tourHubNewTitle;
+
+  /// Tour: hub new-project step body
+  ///
+  /// In en, this message translates to:
+  /// **'Start a new project from a template. Pressing it opens the create dialog — Cancel it (or tap Next) to stay in the tour.'**
+  String get tourHubNewBody;
+
+  /// Tour: hub project-card step title
+  ///
+  /// In en, this message translates to:
+  /// **'Your projects'**
+  String get tourHubCardTitle;
+
+  /// Tour: hub project-card step body
+  ///
+  /// In en, this message translates to:
+  /// **'Tap a project card to make it the active project. The highlighted card is the one the editor and run tools use.'**
+  String get tourHubCardBody;
+
+  /// Tour: hub open-editor step title
+  ///
+  /// In en, this message translates to:
+  /// **'Open the editor'**
+  String get tourHubOpenTitle;
+
+  /// Tour: hub open-editor step body
+  ///
+  /// In en, this message translates to:
+  /// **'Jump into the workspace for the active project. Tap Next to stay in the tour — pressing the tile now leaves the hub and ends the tour early.'**
+  String get tourHubOpenBody;
+
+  /// Tour: hub recent-files step title
+  ///
+  /// In en, this message translates to:
+  /// **'Recent files'**
+  String get tourHubRecentTitle;
+
+  /// Tour: hub recent-files step body
+  ///
+  /// In en, this message translates to:
+  /// **'Reopen the last files you edited, across all projects. Tapping one opens it straight in the editor.'**
+  String get tourHubRecentBody;
+
+  /// Tour: hub navigation step title
+  ///
+  /// In en, this message translates to:
+  /// **'Getting around'**
+  String get tourHubNavTitle;
+
+  /// Tour: hub navigation step body
+  ///
+  /// In en, this message translates to:
+  /// **'Bottom bar destinations: Projects (here), Editor (workspace), Runtime (language setup), Settings. The ? button replays a tour anytime.'**
+  String get tourHubNavBody;
+
+  /// Tour: editor project-switcher step title
+  ///
+  /// In en, this message translates to:
+  /// **'Project switcher'**
+  String get tourEdProjectTitle;
+
+  /// Tour: editor project-switcher step body
+  ///
+  /// In en, this message translates to:
+  /// **'Switch the active project — explorer, editor and run tools follow. Pressing opens the menu: pick nothing (Back) or tap Next to continue.'**
+  String get tourEdProjectBody;
+
+  /// Tour: editor command-palette step title
+  ///
+  /// In en, this message translates to:
+  /// **'Command palette'**
+  String get tourEdPaletteTitle;
+
+  /// Tour: editor command-palette step body
+  ///
+  /// In en, this message translates to:
+  /// **'Fuzzy-find files and run tool/theme commands. Pressing opens the palette — go Back (or tap Next) to continue the tour.'**
+  String get tourEdPaletteBody;
+
+  /// Tour: editor file-entry step title
+  ///
+  /// In en, this message translates to:
+  /// **'Project files'**
+  String get tourEdEntryTitle;
+
+  /// Tour: editor file-entry step body
+  ///
+  /// In en, this message translates to:
+  /// **'Tap a file to open it in the editor — this guarantees an open tab for the next steps. Long-press for rename and delete.'**
+  String get tourEdEntryBody;
+
+  /// Tour: editor new-file step title
+  ///
+  /// In en, this message translates to:
+  /// **'New file'**
+  String get tourEdNewFileTitle;
+
+  /// Tour: editor new-file step body
+  ///
+  /// In en, this message translates to:
+  /// **'Create a file in the current folder. Pressing asks for a name — Cancel the dialog (or tap Next) to continue.'**
+  String get tourEdNewFileBody;
+
+  /// Tour: editor go-up step title
+  ///
+  /// In en, this message translates to:
+  /// **'Go up'**
+  String get tourEdGoUpTitle;
+
+  /// Tour: editor go-up step body
+  ///
+  /// In en, this message translates to:
+  /// **'Move the explorer to the parent folder. Disabled at the project root.'**
+  String get tourEdGoUpBody;
+
+  /// Tour: editor explorer-visibility step title
+  ///
+  /// In en, this message translates to:
+  /// **'Explorer visibility'**
+  String get tourEdExplorerTitle;
+
+  /// Tour: editor explorer-visibility step body
+  ///
+  /// In en, this message translates to:
+  /// **'Hide the file pane for more editor width. All file steps are done, so pressing it now is safe — press again to bring the pane back.'**
+  String get tourEdExplorerBody;
+
+  /// Tour: editor tabs step title
+  ///
+  /// In en, this message translates to:
+  /// **'Open tabs'**
+  String get tourEdTabsTitle;
+
+  /// Tour: editor tabs step body
+  ///
+  /// In en, this message translates to:
+  /// **'Every open file is a tab. Tap a tab to switch to it.'**
+  String get tourEdTabsBody;
+
+  /// Tour: editor save step title
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get tourEdSaveTitle;
+
+  /// Tour: editor save step body
+  ///
+  /// In en, this message translates to:
+  /// **'Write the current file to disk. On a clean file this just confirms everything is saved.'**
+  String get tourEdSaveBody;
+
+  /// Tour: editor reload step title
+  ///
+  /// In en, this message translates to:
+  /// **'Reload'**
+  String get tourEdReloadTitle;
+
+  /// Tour: editor reload step body
+  ///
+  /// In en, this message translates to:
+  /// **'Re-read the file from disk. Clean files reload silently; dirty files ask for confirmation first.'**
+  String get tourEdReloadBody;
+
+  /// Tour: editor AI-assist step title
+  ///
+  /// In en, this message translates to:
+  /// **'AI assist'**
+  String get tourEdAiTitle;
+
+  /// Tour: editor AI-assist step body
+  ///
+  /// In en, this message translates to:
+  /// **'Explain, complete or edit the selected code with AI. Pressing opens the AI sheet — close it to continue the tour.'**
+  String get tourEdAiBody;
+
+  /// Tour: editor markdown-preview step title
+  ///
+  /// In en, this message translates to:
+  /// **'Markdown preview'**
+  String get tourEdPreviewTitle;
+
+  /// Tour: editor markdown-preview step body
+  ///
+  /// In en, this message translates to:
+  /// **'Markdown files toggle between edit and rendered preview here. Hidden for code files.'**
+  String get tourEdPreviewBody;
+
+  /// Tour: editor run-tools step title
+  ///
+  /// In en, this message translates to:
+  /// **'Run tools'**
+  String get tourEdRunTabTitle;
+
+  /// Tour: editor run-tools step body
+  ///
+  /// In en, this message translates to:
+  /// **'Switch the bottom drawer: Run, Terminal, Git, Processes. This step selects Run so the next steps are visible.'**
+  String get tourEdRunTabBody;
+
+  /// Tour: editor run-task step title
+  ///
+  /// In en, this message translates to:
+  /// **'Run task'**
+  String get tourEdTaskTitle;
+
+  /// Tour: editor run-task step body
+  ///
+  /// In en, this message translates to:
+  /// **'Pick the detected task to run, e.g. run or test for this project. Pressing opens the menu — choose a task or tap Next.'**
+  String get tourEdTaskBody;
+
+  /// Tour: editor run step title
+  ///
+  /// In en, this message translates to:
+  /// **'Run'**
+  String get tourEdRunTitle;
+
+  /// Tour: editor run step body
+  ///
+  /// In en, this message translates to:
+  /// **'Start the selected task — output streams below. Pressing really starts a process; stop it from the same button.'**
+  String get tourEdRunBody;
+
+  /// Tour: editor go-to-definition step title
+  ///
+  /// In en, this message translates to:
+  /// **'Go to definition'**
+  String get tourEdDefTitle;
+
+  /// Tour: editor go-to-definition step body
+  ///
+  /// In en, this message translates to:
+  /// **'Jump to the symbol under the caret. You may land in another file — the remaining steps still work there.'**
+  String get tourEdDefBody;
+
+  /// Tour: editor close-tab step title
+  ///
+  /// In en, this message translates to:
+  /// **'Close tab'**
+  String get tourEdTabCloseTitle;
+
+  /// Tour: editor close-tab step body
+  ///
+  /// In en, this message translates to:
+  /// **'Close this tab; unsaved edits ask for confirmation. If this is your only tab, tap Next instead of the × to keep the tour intact.'**
+  String get tourEdTabCloseBody;
+
+  /// Tour: editor delete-project step title
+  ///
+  /// In en, this message translates to:
+  /// **'Delete project'**
+  String get tourEdDeleteTitle;
+
+  /// Tour: editor delete-project step body
+  ///
+  /// In en, this message translates to:
+  /// **'Remove the whole project after a confirmation. Pressing opens the dialog — choose Cancel to keep the project and reveal the last step.'**
+  String get tourEdDeleteBody;
+
+  /// Tour: editor focus-mode step title
+  ///
+  /// In en, this message translates to:
+  /// **'Focus mode'**
+  String get tourEdFocusTitle;
+
+  /// Tour: editor focus-mode step body
+  ///
+  /// In en, this message translates to:
+  /// **'Hide all chrome for distraction-free editing. Pressing enters focus mode — use the exit button in the slim bar to return.'**
+  String get tourEdFocusBody;
+
+  /// Tour: runtime search step title
+  ///
+  /// In en, this message translates to:
+  /// **'Find a runtime'**
+  String get tourRtSearchTitle;
+
+  /// Tour: runtime search step body
+  ///
+  /// In en, this message translates to:
+  /// **'Type here to filter the runtime list. Safe to try — it only filters, nothing is installed.'**
+  String get tourRtSearchBody;
+
+  /// Tour: runtime bootstrap-setup step title
+  ///
+  /// In en, this message translates to:
+  /// **'Bootstrap setup'**
+  String get tourRtSetupTitle;
+
+  /// Tour: runtime bootstrap-setup step body
+  ///
+  /// In en, this message translates to:
+  /// **'Start Setup downloads the Linux bootstrap. Tap it for real only when you are ready to download.'**
+  String get tourRtSetupBody;
+
+  /// Tour: runtime install step title
+  ///
+  /// In en, this message translates to:
+  /// **'Install a runtime'**
+  String get tourRtInstallTitle;
+
+  /// Tour: runtime install step body
+  ///
+  /// In en, this message translates to:
+  /// **'This Install button starts a REAL download and install. Press it for real only if you want that runtime now — it is last for a reason.'**
+  String get tourRtInstallBody;
+
+  /// Tour: terminal paste step title
+  ///
+  /// In en, this message translates to:
+  /// **'Paste into terminal'**
+  String get tourTermPasteTitle;
+
+  /// Tour: terminal paste step body
+  ///
+  /// In en, this message translates to:
+  /// **'Pastes clipboard text into the shell. A real press, but harmless — it types without pressing Enter.'**
+  String get tourTermPasteBody;
+
+  /// Tour: terminal Tab-key step title
+  ///
+  /// In en, this message translates to:
+  /// **'Tab key'**
+  String get tourTermTabTitle;
+
+  /// Tour: terminal Tab-key step body
+  ///
+  /// In en, this message translates to:
+  /// **'Sends Tab for shell autocomplete. A real press, harmless.'**
+  String get tourTermTabBody;
+
+  /// Tour: terminal Ctrl+C step title
+  ///
+  /// In en, this message translates to:
+  /// **'Ctrl+C key'**
+  String get tourTermCtrlCTitle;
+
+  /// Tour: terminal Ctrl+C step body
+  ///
+  /// In en, this message translates to:
+  /// **'Sends an interrupt (Ctrl+C). Harmless on an empty prompt; it would cancel a running command.'**
+  String get tourTermCtrlCBody;
+
+  /// Tour: terminal new-tab step title
+  ///
+  /// In en, this message translates to:
+  /// **'New terminal tab'**
+  String get tourTermNewTabTitle;
+
+  /// Tour: terminal new-tab step body
+  ///
+  /// In en, this message translates to:
+  /// **'Opens a real new shell tab (up to 5). Harmless — close it with the × on its chip. Last because it changes the tab strip.'**
+  String get tourTermNewTabBody;
+
+  /// Tour: settings account step title
+  ///
+  /// In en, this message translates to:
+  /// **'Account'**
+  String get tourSetAccountTitle;
+
+  /// Tour: settings account step body
+  ///
+  /// In en, this message translates to:
+  /// **'Your sign-in status and account actions live here.'**
+  String get tourSetAccountBody;
+
+  /// Tour: settings language step title
+  ///
+  /// In en, this message translates to:
+  /// **'Language'**
+  String get tourSetLangTitle;
+
+  /// Tour: settings language step body
+  ///
+  /// In en, this message translates to:
+  /// **'Switch the app language here. A real press takes effect immediately.'**
+  String get tourSetLangBody;
+
+  /// Tour: settings AI-key step title
+  ///
+  /// In en, this message translates to:
+  /// **'AI API key'**
+  String get tourSetAiKeyTitle;
+
+  /// Tour: settings AI-key step body
+  ///
+  /// In en, this message translates to:
+  /// **'Paste your AI provider key here. It stays in secure storage and is never shown again.'**
+  String get tourSetAiKeyBody;
+
+  /// Tour: settings save step title
+  ///
+  /// In en, this message translates to:
+  /// **'Save settings'**
+  String get tourSetSaveTitle;
+
+  /// Tour: settings save step body
+  ///
+  /// In en, this message translates to:
+  /// **'Saves everything on this page for real. Harmless — you can change it back any time. Last for that reason.'**
+  String get tourSetSaveBody;
+
+  /// Tour: git refresh-status step title
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh status'**
+  String get tourGitStatusTitle;
+
+  /// Tour: git refresh-status step body
+  ///
+  /// In en, this message translates to:
+  /// **'Reloads git status for the current project. A real reload, harmless.'**
+  String get tourGitStatusBody;
+
+  /// Tour: git commit step title
+  ///
+  /// In en, this message translates to:
+  /// **'Commit'**
+  String get tourGitCommitTitle;
+
+  /// Tour: git commit step body
+  ///
+  /// In en, this message translates to:
+  /// **'Opens the commit message prompt. You can cancel — nothing is committed until you confirm. Last for that reason.'**
+  String get tourGitCommitBody;
+
+  /// Tour: notifications mark-read step title
+  ///
+  /// In en, this message translates to:
+  /// **'Mark all read'**
+  String get tourNotifMarkReadTitle;
+
+  /// Tour: notifications mark-read step body
+  ///
+  /// In en, this message translates to:
+  /// **'Marks every notification read. Real but harmless — entries stay, only the unread dots clear.'**
+  String get tourNotifMarkReadBody;
+
+  /// Tour: replay-tour action title
+  ///
+  /// In en, this message translates to:
+  /// **'Replay guided tour'**
+  String get tourReplay;
+
+  /// Tour: tours-reset confirmation
+  ///
+  /// In en, this message translates to:
+  /// **'Tours reset — tap ? on any screen'**
+  String get tourResetDone;
+
+  /// Tour: editor new-project step title
+  ///
+  /// In en, this message translates to:
+  /// **'New project'**
+  String get tourEdNewProjectTitle;
+
+  /// Tour: editor new-project step body
+  ///
+  /// In en, this message translates to:
+  /// **'Create another project from a template. Read-only during the tour — try it yourself afterwards from this same button.'**
+  String get tourEdNewProjectBody;
+
+  /// Tour: editor terminal-tab step title
+  ///
+  /// In en, this message translates to:
+  /// **'Terminal drawer'**
+  String get tourEdTermTabTitle;
+
+  /// Tour: editor terminal-tab step body
+  ///
+  /// In en, this message translates to:
+  /// **'Switch the bottom drawer to the embedded terminal. A real press — the shell session stays alive when you switch away.'**
+  String get tourEdTermTabBody;
+
+  /// Tour: editor git-tab step title
+  ///
+  /// In en, this message translates to:
+  /// **'Git drawer'**
+  String get tourEdGitTabTitle;
+
+  /// Tour: editor git-tab step body
+  ///
+  /// In en, this message translates to:
+  /// **'Switch the bottom drawer to Git: status, stage, commit and branches for this project.'**
+  String get tourEdGitTabBody;
+
+  /// Tour: editor processes-tab step title
+  ///
+  /// In en, this message translates to:
+  /// **'Processes drawer'**
+  String get tourEdProcTabTitle;
+
+  /// Tour: editor processes-tab step body
+  ///
+  /// In en, this message translates to:
+  /// **'Switch the bottom drawer to Processes: every running command with its output and a stop button.'**
+  String get tourEdProcTabBody;
+
+  /// Tour: editor tools-hide step title
+  ///
+  /// In en, this message translates to:
+  /// **'Hide the tools'**
+  String get tourEdToolsTitle;
+
+  /// Tour: editor tools-hide step body
+  ///
+  /// In en, this message translates to:
+  /// **'Collapse the whole bottom drawer for maximum editor height. Pressing hides it now — bring it back with the thin grabber strip, or tap Next.'**
+  String get tourEdToolsBody;
+
+  /// Tour: editor toolbar-hide step title
+  ///
+  /// In en, this message translates to:
+  /// **'Hide the toolbar'**
+  String get tourEdToolbarTitle;
+
+  /// Tour: editor toolbar-hide step body
+  ///
+  /// In en, this message translates to:
+  /// **'Collapse the top bar into a 28px strip. Pressing hides it now — restore it with the expand button in the strip, then take the last step.'**
+  String get tourEdToolbarBody;
 }
 
 class _AppLocalizationsDelegate

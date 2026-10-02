@@ -3,6 +3,7 @@ import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:nova/l10n/generated/app_localizations.dart";
 
 import "../../core/models/project.dart";
+import "../tour/tour.dart";
 import "new_project_dialog.dart";
 import "task_detector.dart";
 import "workspace_providers.dart";
@@ -251,7 +252,12 @@ class _ProjectsHubScreenState extends ConsumerState<ProjectsHubScreen> {
     final active = ref.watch(activeProjectProvider);
     final recentFiles = ref.watch(recentFilesProvider);
     return Scaffold(
-      appBar: AppBar(title: Text(AppLocalizations.of(context).navProjects)),
+      appBar: AppBar(
+        title: Text(AppLocalizations.of(context).navProjects),
+        actions: [
+          TourButton(tourId: "hub", buildTargets: buildHubTargets),
+        ],
+      ),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : RefreshIndicator(
@@ -279,6 +285,7 @@ class _ProjectsHubScreenState extends ConsumerState<ProjectsHubScreen> {
                   ),
                   const SizedBox(height: 12),
                   TextField(
+                    key: TourKeys.hubSearch,
                     controller: _searchController,
                     decoration: InputDecoration(
                       hintText: AppLocalizations.of(context).projectsSearchHint,
@@ -302,15 +309,17 @@ class _ProjectsHubScreenState extends ConsumerState<ProjectsHubScreen> {
                   if (projects == null || projects.isEmpty)
                     _EmptyProjects(colors: colors, onNewProject: _newProject)
                   else
-                    ..._filtered(projects).map(
-                      (p) => Padding(
+                    ..._filtered(projects).asMap().entries.map(
+                      (e) => Padding(
+                        key: e.key == 0 ? TourKeys.hubProjectCard : null,
                         padding: const EdgeInsets.only(bottom: 8),
                         child: _ProjectCard(
                           colors: colors,
-                          project: p,
-                          isActive: active?.path == p.path,
-                          onOpen: () => _selectProject(p, openEditor: true),
-                          onDelete: () => _deleteProject(p),
+                          project: e.value,
+                          isActive: active?.path == e.value.path,
+                          onOpen: () =>
+                              _selectProject(e.value, openEditor: true),
+                          onDelete: () => _deleteProject(e.value),
                         ),
                       ),
                     ),
@@ -399,6 +408,7 @@ class _HubActions extends StatelessWidget {
       childAspectRatio: 1.45,
       children: [
         _ActionTile(
+          key: TourKeys.hubNewProject,
           colors: colors,
           icon: Icons.create_new_folder,
           label: l10n.projectsNewProject,
@@ -407,6 +417,7 @@ class _HubActions extends StatelessWidget {
           onTap: onNewProject,
         ),
         _ActionTile(
+          key: TourKeys.hubOpenEditor,
           colors: colors,
           icon: Icons.code,
           label: l10n.projectsOpenEditor,
@@ -415,6 +426,7 @@ class _HubActions extends StatelessWidget {
           onTap: onOpenEditor,
         ),
         _ActionTile(
+          key: TourKeys.hubRefresh,
           colors: colors,
           icon: Icons.refresh,
           label: l10n.actionRefresh,
@@ -437,6 +449,7 @@ class _HubActions extends StatelessWidget {
 
 class _ActionTile extends StatelessWidget {
   const _ActionTile({
+    super.key,
     required this.colors,
     required this.icon,
     required this.label,
@@ -683,6 +696,7 @@ class _RecentFilesCard extends StatelessWidget {
           for (var i = 0; i < files.length; i++) ...[
             if (i > 0) Divider(height: 1, color: colors.outlineVariant),
             ListTile(
+              key: i == 0 ? TourKeys.hubRecentFile : null,
               leading: Icon(_iconForPath(files[i]), color: colors.primary),
               title: Directionality(
                 textDirection: TextDirection.ltr,

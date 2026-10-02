@@ -6,6 +6,7 @@ import "package:path/path.dart" as p;
 import "../../core/models/project.dart";
 import "../../core/ui/text_prompt_dialog.dart";
 import "../../core/ui/empty_state.dart";
+import "../tour/tour.dart";
 import "workspace_providers.dart";
 
 /// File explorer for the active project, walking ProjectService.listFiles
@@ -307,6 +308,7 @@ class _FileExplorerViewState extends ConsumerState<FileExplorerView> {
             return Padding(
               padding: const EdgeInsets.only(bottom: 2),
               child: ListTile(
+                key: i == 0 ? TourKeys.explorerEntry : null,
                 dense: true,
                 visualDensity: VisualDensity.compact,
                 contentPadding: const EdgeInsets.symmetric(horizontal: 8),
@@ -394,6 +396,7 @@ class _FileExplorerViewState extends ConsumerState<FileExplorerView> {
                     child: Row(
                       children: [
                         IconButton(
+                          key: TourKeys.explorerGoUp,
                           icon: const Icon(Icons.arrow_upward, size: 18),
                           tooltip: AppLocalizations.of(context).explorerGoUp,
                           visualDensity: VisualDensity.compact,
@@ -425,6 +428,7 @@ class _FileExplorerViewState extends ConsumerState<FileExplorerView> {
                 Padding(
                   padding: const EdgeInsets.all(8),
                   child: FilledButton.tonalIcon(
+                    key: TourKeys.explorerNewFile,
                     onPressed: _newFile,
                     style: FilledButton.styleFrom(
                       shape: RoundedRectangleBorder(

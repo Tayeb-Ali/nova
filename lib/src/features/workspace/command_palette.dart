@@ -6,6 +6,7 @@ import "../../core/models/project.dart";
 import "../../core/ui/empty_state.dart";
 import "../editor/theme/theme_pack_store.dart";
 import "../search/search_screen.dart";
+import "../tour/tour.dart";
 import "workspace_providers.dart";
 
 /// Command palette: fuzzy-ish file + command search for the workspace.
@@ -290,6 +291,7 @@ class _CommandPaletteDialogState
             mainAxisSize: MainAxisSize.min,
             children: [
               TextField(
+                key: TourKeys.paletteField,
                 controller: _controller,
                 autofocus: true,
                 decoration: InputDecoration(

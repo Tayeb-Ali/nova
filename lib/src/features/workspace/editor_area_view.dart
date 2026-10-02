@@ -13,6 +13,7 @@ import "../lsp/definition_service.dart";
 import "../lsp/lsp_completion_provider.dart";
 import "../lsp/lsp_providers.dart";
 import "../lsp/server_registry.dart";
+import "../tour/tour.dart";
 import "../ai/ai_actions.dart";
 import "../editor/editor_engine.dart";
 import "../editor/re_editor_adapter.dart";
@@ -196,7 +197,12 @@ class _TabStrip extends ConsumerWidget {
     _close(ref, tab.id);
   }
 
-  Widget _tabChip(BuildContext context, WidgetRef ref, EditorTabModel tab) {
+  Widget _tabChip(
+    BuildContext context,
+    WidgetRef ref,
+    EditorTabModel tab, {
+    bool isFirst = false,
+  }) {
     final selected = tab.id == activeId;
     final scheme = Theme.of(context).colorScheme;
     return Padding(
@@ -244,6 +250,7 @@ class _TabStrip extends ConsumerWidget {
                   ),
                   const SizedBox(width: 2),
                   InkWell(
+                    key: isFirst ? TourKeys.wsTabClose : null,
                     onTap: () => _closeGuarded(context, ref, tab),
                     child: Padding(
                       padding: const EdgeInsets.all(2),
@@ -277,6 +284,7 @@ class _TabStrip extends ConsumerWidget {
     final focus = ref.watch(focusModeProvider);
 
     return Container(
+      key: TourKeys.wsTabStrip,
       height: 48,
       color: scheme.surfaceContainerLow,
       child: LayoutBuilder(
@@ -289,13 +297,19 @@ class _TabStrip extends ConsumerWidget {
             children: [
               // Scrollable tab chips.
               Expanded(
-                child: ListView(
-                  scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
-                  children: [
-                    for (final tab in tabs) _tabChip(context, ref, tab),
-                  ],
-                ),
+                  child: ListView(
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    children: [
+                      for (var i = 0; i < tabs.length; i++)
+                        _tabChip(
+                          context,
+                          ref,
+                          tabs[i],
+                          isFirst: i == 0,
+                        ),
+                    ],
+                  ),
               ),
               // Action buttons pinned to the trailing edge.
               if (actions.loaded) ...[
@@ -368,6 +382,7 @@ class _TabStrip extends ConsumerWidget {
                 else ...[
                   if (actions.isMarkdown)
                     IconButton(
+                      key: TourKeys.wsPreview,
                       onPressed: actions.togglePreview,
                       visualDensity: VisualDensity.compact,
                       tooltip: actions.showPreview
@@ -381,6 +396,7 @@ class _TabStrip extends ConsumerWidget {
                       ),
                     ),
                   IconButton(
+                    key: TourKeys.wsFocus,
                     onPressed: () =>
                         ref.read(focusModeProvider.notifier).state = !focus,
                     visualDensity: VisualDensity.compact,
@@ -392,6 +408,7 @@ class _TabStrip extends ConsumerWidget {
                     ),
                   ),
                   IconButton(
+                    key: TourKeys.wsReload,
                     onPressed: actions.reload,
                     visualDensity: VisualDensity.compact,
                     tooltip: l10n.actionRefresh,
@@ -399,6 +416,7 @@ class _TabStrip extends ConsumerWidget {
                   ),
                   if (actions.askAi != null)
                     IconButton(
+                      key: TourKeys.wsAi,
                       onPressed: actions.askAi,
                       visualDensity: VisualDensity.compact,
                       tooltip: l10n.aiTitle,
@@ -406,12 +424,14 @@ class _TabStrip extends ConsumerWidget {
                     ),
                   if (actions.goToDefinition != null)
                     IconButton(
+                      key: TourKeys.wsDefinition,
                       onPressed: actions.goToDefinition,
                       visualDensity: VisualDensity.compact,
                       tooltip: l10n.editorGoToDefinition,
                       icon: const Icon(Icons.open_in_new, size: 18),
                     ),
                   IconButton(
+                    key: TourKeys.wsSave,
                     onPressed: actions.save,
                     visualDensity: VisualDensity.compact,
                     tooltip: l10n.actionSave,

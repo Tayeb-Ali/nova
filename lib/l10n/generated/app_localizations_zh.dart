@@ -1525,4 +1525,289 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get onboard4Body => '打开文件夹、浏览文件，随时随地 commit。';
+
+  @override
+  String get tourBack => '返回';
+
+  @override
+  String get tourHubSearchTitle => '搜索项目';
+
+  @override
+  String get tourHubSearchBody => '按名称筛选项目列表。点击输入框并输入 — 列表会随输入实时缩小范围。';
+
+  @override
+  String get tourHubNewTitle => '创建项目';
+
+  @override
+  String get tourHubNewBody => '从模板开始一个新项目。点击会打开创建对话框 — 选择“取消”（或点击下一步）即可留在导览中。';
+
+  @override
+  String get tourHubCardTitle => '你的项目';
+
+  @override
+  String get tourHubCardBody => '点击项目卡片将其设为当前项目。高亮的卡片即编辑器与运行工具所使用的项目。';
+
+  @override
+  String get tourHubOpenTitle => '打开编辑器';
+
+  @override
+  String get tourHubOpenBody =>
+      '进入当前项目的工作区。点击下一步可留在导览中 — 若现在点击该磁贴，将离开项目中心并提前结束导览。';
+
+  @override
+  String get tourHubRecentTitle => '最近的文件';
+
+  @override
+  String get tourHubRecentBody => '重新打开你在所有项目中最近编辑过的文件。点击其中一个即可直接在编辑器中打开。';
+
+  @override
+  String get tourHubNavTitle => '应用导航';
+
+  @override
+  String get tourHubNavBody =>
+      '底部栏目的地：项目（当前页）、编辑器（工作区）、运行时（语言配置）、设置。? 按钮可随时重播导览。';
+
+  @override
+  String get tourEdProjectTitle => '项目切换器';
+
+  @override
+  String get tourEdProjectBody =>
+      '切换当前项目 — 文件浏览器、编辑器与运行工具都会跟随切换。点击会打开菜单：不做选择（返回）或点击下一步继续。';
+
+  @override
+  String get tourEdPaletteTitle => '命令面板';
+
+  @override
+  String get tourEdPaletteBody =>
+      '模糊查找文件并运行工具/主题命令。点击会打开命令面板 — 选择返回（或点击下一步）即可继续导览。';
+
+  @override
+  String get tourEdEntryTitle => '项目文件';
+
+  @override
+  String get tourEdEntryBody => '点击文件即可在编辑器中打开 — 这可确保后续步骤有已打开的标签页。长按可重命名或删除。';
+
+  @override
+  String get tourEdNewFileTitle => '新建文件';
+
+  @override
+  String get tourEdNewFileBody => '在当前文件夹中新建文件。点击会要求输入名称 — 取消该对话框（或点击下一步）即可继续。';
+
+  @override
+  String get tourEdGoUpTitle => '返回上级';
+
+  @override
+  String get tourEdGoUpBody => '将文件浏览器定位到父文件夹。在项目根目录下不可用。';
+
+  @override
+  String get tourEdExplorerTitle => '文件浏览器显隐';
+
+  @override
+  String get tourEdExplorerBody =>
+      '隐藏文件窗格以获得更宽的编辑区。文件相关步骤已完成，现在点击是安全的 — 再次点击即可恢复窗格。';
+
+  @override
+  String get tourEdTabsTitle => '打开的标签页';
+
+  @override
+  String get tourEdTabsBody => '每个打开的文件都是一个标签页。点击标签页即可切换。';
+
+  @override
+  String get tourEdSaveTitle => '保存';
+
+  @override
+  String get tourEdSaveBody => '将当前文件写入磁盘。若文件没有未保存的更改，只会确认一切已保存。';
+
+  @override
+  String get tourEdReloadTitle => '重新加载';
+
+  @override
+  String get tourEdReloadBody => '从磁盘重新读取文件。无更改的文件会静默重载；有未保存更改的文件会先要求确认。';
+
+  @override
+  String get tourEdAiTitle => 'AI 助手';
+
+  @override
+  String get tourEdAiBody => '用 AI 解释、补全或编辑选中的代码。点击会打开 AI 面板 — 关闭它即可继续导览。';
+
+  @override
+  String get tourEdPreviewTitle => 'Markdown 预览';
+
+  @override
+  String get tourEdPreviewBody => 'Markdown 文件可在此切换编辑与渲染预览。代码文件不显示此项。';
+
+  @override
+  String get tourEdRunTabTitle => '运行工具';
+
+  @override
+  String get tourEdRunTabBody => '切换底部抽屉：运行、终端、Git、进程。此步骤会选中“运行”，以便后续步骤可见。';
+
+  @override
+  String get tourEdTaskTitle => '运行任务';
+
+  @override
+  String get tourEdTaskBody =>
+      '选择要运行的已检测任务，例如本项目的 run 或 test。点击会打开菜单 — 选择一个任务或点击下一步。';
+
+  @override
+  String get tourEdRunTitle => '运行';
+
+  @override
+  String get tourEdRunBody => '启动所选任务 — 输出会实时显示在下方。点击会真正启动一个进程；可用同一按钮停止它。';
+
+  @override
+  String get tourEdDefTitle => '转到定义';
+
+  @override
+  String get tourEdDefBody => '跳转到光标处的符号定义。你可能会落到另一个文件 — 其余步骤在那里同样有效。';
+
+  @override
+  String get tourEdTabCloseTitle => '关闭标签页';
+
+  @override
+  String get tourEdTabCloseBody =>
+      '关闭此标签页；未保存的编辑会要求确认。若这是你唯一的标签页，请点击下一步而非 ×，以保持导览完整。';
+
+  @override
+  String get tourEdDeleteTitle => '删除项目';
+
+  @override
+  String get tourEdDeleteBody => '确认后删除整个项目。点击会打开对话框 — 选择“取消”可保留项目并显示最后一步。';
+
+  @override
+  String get tourEdFocusTitle => '专注模式';
+
+  @override
+  String get tourEdFocusBody => '隐藏所有界面元素，进入无干扰编辑。点击即进入专注模式 — 用纤细栏中的退出按钮返回。';
+
+  @override
+  String get tourRtSearchTitle => '查找运行时';
+
+  @override
+  String get tourRtSearchBody => '在此输入以筛选运行时列表。放心尝试 — 这只会筛选，不会安装任何东西。';
+
+  @override
+  String get tourRtSetupTitle => 'Bootstrap 设置';
+
+  @override
+  String get tourRtSetupBody => '点击开始设置会下载 Linux bootstrap。仅在你准备好下载时才真正点击它。';
+
+  @override
+  String get tourRtInstallTitle => '安装运行时';
+
+  @override
+  String get tourRtInstallBody =>
+      '此安装按钮会启动真正的下载与安装。仅在你现在确实需要该运行时才真正点击 — 它排在最后是有原因的。';
+
+  @override
+  String get tourTermPasteTitle => '粘贴到终端';
+
+  @override
+  String get tourTermPasteBody =>
+      '将剪贴板文本粘贴到 shell 中。点击会真正执行，但无害 — 只会输入文本，不会按下回车。';
+
+  @override
+  String get tourTermTabTitle => 'Tab 键';
+
+  @override
+  String get tourTermTabBody => '发送 Tab 以触发 shell 自动补全。点击会真正执行，但无害。';
+
+  @override
+  String get tourTermCtrlCTitle => 'Ctrl+C 键';
+
+  @override
+  String get tourTermCtrlCBody => '发送中断信号 (Ctrl+C)。在空提示符下无害；若有命令正在运行，会取消该命令。';
+
+  @override
+  String get tourTermNewTabTitle => '新建终端标签页';
+
+  @override
+  String get tourTermNewTabBody =>
+      '打开一个真正的 shell 新标签页（最多 5 个）。无害 — 用其标签上的 × 关闭它。排在最后是因为它会改变标签栏。';
+
+  @override
+  String get tourSetAccountTitle => '账户';
+
+  @override
+  String get tourSetAccountBody => '你的登录状态与账户操作都在这里。';
+
+  @override
+  String get tourSetLangTitle => '语言';
+
+  @override
+  String get tourSetLangBody => '在此切换应用语言。点击立即生效。';
+
+  @override
+  String get tourSetAiKeyTitle => 'AI API 密钥';
+
+  @override
+  String get tourSetAiKeyBody => '在此粘贴 AI 服务商密钥。它保存在安全存储中，不会再次显示。';
+
+  @override
+  String get tourSetSaveTitle => '保存设置';
+
+  @override
+  String get tourSetSaveBody => '真正保存本页的所有设置。无害 — 你随时可以改回来。排在最后是有原因的。';
+
+  @override
+  String get tourGitStatusTitle => '刷新状态';
+
+  @override
+  String get tourGitStatusBody => '重新加载当前项目的 Git 状态。真正的重新加载，但无害。';
+
+  @override
+  String get tourGitCommitTitle => 'Commit';
+
+  @override
+  String get tourGitCommitBody =>
+      '打开 commit 信息输入框。你可以取消 — 确认之前不会真正提交。排在最后是有原因的。';
+
+  @override
+  String get tourNotifMarkReadTitle => '全部标为已读';
+
+  @override
+  String get tourNotifMarkReadBody => '将所有通知标为已读。真正执行但无害 — 条目保留，只清除未读圆点。';
+
+  @override
+  String get tourReplay => '重播导览';
+
+  @override
+  String get tourResetDone => '导览已重置 — 点击任意屏幕上的 ?';
+
+  @override
+  String get tourEdNewProjectTitle => '新建项目';
+
+  @override
+  String get tourEdNewProjectBody => '从模板再建一个项目。导览期间只读 — 之后可用同一按钮亲自尝试。';
+
+  @override
+  String get tourEdTermTabTitle => '终端抽屉';
+
+  @override
+  String get tourEdTermTabBody => '将底部抽屉切换到内嵌终端。真正的切换 — 切换走后 shell 会话仍保持运行。';
+
+  @override
+  String get tourEdGitTabTitle => 'Git 抽屉';
+
+  @override
+  String get tourEdGitTabBody => '将底部抽屉切换到 Git：查看本项目的状态、暂存、commit 与分支。';
+
+  @override
+  String get tourEdProcTabTitle => '进程抽屉';
+
+  @override
+  String get tourEdProcTabBody => '将底部抽屉切换到进程：每个正在运行的命令及其输出，还有停止按钮。';
+
+  @override
+  String get tourEdToolsTitle => '隐藏工具';
+
+  @override
+  String get tourEdToolsBody => '收起整个底部抽屉以获得最大编辑高度。点击会立即隐藏 — 用细长的抓取条恢复，或点击下一步。';
+
+  @override
+  String get tourEdToolbarTitle => '隐藏工具栏';
+
+  @override
+  String get tourEdToolbarBody =>
+      '将顶栏收起为 28px 的细条。点击会立即隐藏 — 用细条中的展开按钮恢复，然后完成最后一步。';
 }

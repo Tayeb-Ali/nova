@@ -1566,4 +1566,322 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get onboard4Body =>
       'Ouvre des dossiers, parcours les fichiers et fais des commits depuis n’importe où.';
+
+  @override
+  String get tourBack => 'Retour';
+
+  @override
+  String get tourHubSearchTitle => 'Rechercher des projets';
+
+  @override
+  String get tourHubSearchBody =>
+      'Filtre la liste des projets par nom. Touche le champ et tape — la liste se réduit au fur et à mesure.';
+
+  @override
+  String get tourHubNewTitle => 'Créer un projet';
+
+  @override
+  String get tourHubNewBody =>
+      'Démarre un nouveau projet depuis un modèle. Le bouton ouvre le dialogue de création — annule-le (ou touche Suivant) pour rester dans la visite.';
+
+  @override
+  String get tourHubCardTitle => 'Tes projets';
+
+  @override
+  String get tourHubCardBody =>
+      'Touche une carte de projet pour en faire le projet actif. La carte surlignée est celle qu’utilisent l’éditeur et les outils d’exécution.';
+
+  @override
+  String get tourHubOpenTitle => 'Ouvrir l’éditeur';
+
+  @override
+  String get tourHubOpenBody =>
+      'Ouvre l’espace de travail du projet actif. Touche Suivant pour rester dans la visite — toucher la tuile maintenant quitte l’accueil et termine la visite plus tôt.';
+
+  @override
+  String get tourHubRecentTitle => 'Fichiers récents';
+
+  @override
+  String get tourHubRecentBody =>
+      'Rouvre les derniers fichiers que tu as modifiés, tous projets confondus. En toucher un l’ouvre directement dans l’éditeur.';
+
+  @override
+  String get tourHubNavTitle => 'Se repérer';
+
+  @override
+  String get tourHubNavBody =>
+      'Destinations de la barre du bas : Projets (ici), Éditeur (espace de travail), Runtime (configuration des langages), Paramètres. Le bouton ? rejoue une visite à tout moment.';
+
+  @override
+  String get tourEdProjectTitle => 'Sélecteur de projet';
+
+  @override
+  String get tourEdProjectBody =>
+      'Change de projet actif — l’explorateur, l’éditeur et les outils d’exécution suivent. Le bouton ouvre le menu : ne choisis rien (Retour) ou touche Suivant pour continuer.';
+
+  @override
+  String get tourEdPaletteTitle => 'Palette de commandes';
+
+  @override
+  String get tourEdPaletteBody =>
+      'Retrouve des fichiers en recherche approximative et lance des commandes d’outils et de thème. Le bouton ouvre la palette — fais Retour (ou touche Suivant) pour continuer la visite.';
+
+  @override
+  String get tourEdEntryTitle => 'Fichiers du projet';
+
+  @override
+  String get tourEdEntryBody =>
+      'Touche un fichier pour l’ouvrir dans l’éditeur — cela garantit un onglet ouvert pour les prochaines étapes. Appui long pour renommer et supprimer.';
+
+  @override
+  String get tourEdNewFileTitle => 'Nouveau fichier';
+
+  @override
+  String get tourEdNewFileBody =>
+      'Crée un fichier dans le dossier actuel. Le bouton demande un nom — annule le dialogue (ou touche Suivant) pour continuer.';
+
+  @override
+  String get tourEdGoUpTitle => 'Remonter';
+
+  @override
+  String get tourEdGoUpBody =>
+      'Remonte l’explorateur vers le dossier parent. Désactivé à la racine du projet.';
+
+  @override
+  String get tourEdExplorerTitle => 'Visibilité de l’explorateur';
+
+  @override
+  String get tourEdExplorerBody =>
+      'Masque le panneau des fichiers pour élargir l’éditeur. Les étapes de fichiers sont terminées, tu peux donc le toucher sans risque — touche-le à nouveau pour réafficher le panneau.';
+
+  @override
+  String get tourEdTabsTitle => 'Onglets ouverts';
+
+  @override
+  String get tourEdTabsBody =>
+      'Chaque fichier ouvert est un onglet. Touche un onglet pour y passer.';
+
+  @override
+  String get tourEdSaveTitle => 'Enregistrer';
+
+  @override
+  String get tourEdSaveBody =>
+      'Écrit le fichier actuel sur le disque. Sur un fichier sans modifications, cela confirme simplement que tout est enregistré.';
+
+  @override
+  String get tourEdReloadTitle => 'Recharger';
+
+  @override
+  String get tourEdReloadBody =>
+      'Relit le fichier depuis le disque. Les fichiers sans modifications se rechargent silencieusement ; les fichiers modifiés demandent d’abord confirmation.';
+
+  @override
+  String get tourEdAiTitle => 'Assistant IA';
+
+  @override
+  String get tourEdAiBody =>
+      'Explique, complète ou modifie le code sélectionné avec l’IA. Le bouton ouvre la feuille IA — ferme-la pour continuer la visite.';
+
+  @override
+  String get tourEdPreviewTitle => 'Aperçu Markdown';
+
+  @override
+  String get tourEdPreviewBody =>
+      'Les fichiers Markdown basculent ici entre édition et aperçu rendu. Masqué pour les fichiers de code.';
+
+  @override
+  String get tourEdRunTabTitle => 'Outils d’exécution';
+
+  @override
+  String get tourEdRunTabBody =>
+      'Bascule le tiroir du bas : Exécuter, Terminal, Git, Processus. Cette étape sélectionne Exécuter pour que les prochaines étapes soient visibles.';
+
+  @override
+  String get tourEdTaskTitle => 'Tâche d’exécution';
+
+  @override
+  String get tourEdTaskBody =>
+      'Choisis la tâche détectée à exécuter, ex. run ou test pour ce projet. Le bouton ouvre le menu — choisis une tâche ou touche Suivant.';
+
+  @override
+  String get tourEdRunTitle => 'Exécuter';
+
+  @override
+  String get tourEdRunBody =>
+      'Démarre la tâche sélectionnée — la sortie défile ci-dessous. Le bouton démarre vraiment un processus ; arrête-le depuis le même bouton.';
+
+  @override
+  String get tourEdDefTitle => 'Aller à la définition';
+
+  @override
+  String get tourEdDefBody =>
+      'Saute vers le symbole sous le curseur. Tu peux atterrir dans un autre fichier — les étapes restantes y fonctionnent aussi.';
+
+  @override
+  String get tourEdTabCloseTitle => 'Fermer l’onglet';
+
+  @override
+  String get tourEdTabCloseBody =>
+      'Ferme cet onglet ; les modifications non enregistrées demandent confirmation. Si c’est ton seul onglet, touche Suivant plutôt que × pour garder la visite intacte.';
+
+  @override
+  String get tourEdDeleteTitle => 'Supprimer le projet';
+
+  @override
+  String get tourEdDeleteBody =>
+      'Supprime tout le projet après confirmation. Le bouton ouvre le dialogue — choisis Annuler pour garder le projet et révéler la dernière étape.';
+
+  @override
+  String get tourEdFocusTitle => 'Mode concentration';
+
+  @override
+  String get tourEdFocusBody =>
+      'Masque toute l’interface pour éditer sans distraction. Le bouton active le mode concentration — utilise le bouton de sortie dans la barre fine pour revenir.';
+
+  @override
+  String get tourRtSearchTitle => 'Trouver un runtime';
+
+  @override
+  String get tourRtSearchBody =>
+      'Tape ici pour filtrer la liste des runtimes. Essaie sans crainte — cela ne fait que filtrer, rien n’est installé.';
+
+  @override
+  String get tourRtSetupTitle => 'Configuration du bootstrap';
+
+  @override
+  String get tourRtSetupBody =>
+      'Démarrer la configuration télécharge le bootstrap Linux. Touche-le pour de vrai seulement quand tu es prêt à télécharger.';
+
+  @override
+  String get tourRtInstallTitle => 'Installer un runtime';
+
+  @override
+  String get tourRtInstallBody =>
+      'Ce bouton Installer lance un VRAI téléchargement et une VRAIE installation. Touche-le pour de vrai seulement si tu veux ce runtime maintenant — il est en dernier pour une bonne raison.';
+
+  @override
+  String get tourTermPasteTitle => 'Coller dans le terminal';
+
+  @override
+  String get tourTermPasteBody =>
+      'Colle le texte du presse-papiers dans le shell. Un vrai appui, mais sans danger — cela tape sans appuyer sur Entrée.';
+
+  @override
+  String get tourTermTabTitle => 'Touche Tab';
+
+  @override
+  String get tourTermTabBody =>
+      'Envoie Tab pour l’autocomplétion du shell. Un vrai appui, sans danger.';
+
+  @override
+  String get tourTermCtrlCTitle => 'Touche Ctrl+C';
+
+  @override
+  String get tourTermCtrlCBody =>
+      'Envoie une interruption (Ctrl+C). Sans danger sur une invite vide ; cela annulerait une commande en cours.';
+
+  @override
+  String get tourTermNewTabTitle => 'Nouvel onglet de terminal';
+
+  @override
+  String get tourTermNewTabBody =>
+      'Ouvre un vrai nouvel onglet de shell (jusqu’à 5). Sans danger — ferme-le avec le × sur sa pastille. En dernier car cela modifie la barre d’onglets.';
+
+  @override
+  String get tourSetAccountTitle => 'Compte';
+
+  @override
+  String get tourSetAccountBody =>
+      'Ton statut de connexion et les actions de compte se trouvent ici.';
+
+  @override
+  String get tourSetLangTitle => 'Langue';
+
+  @override
+  String get tourSetLangBody =>
+      'Change la langue de l’application ici. Un vrai appui prend effet immédiatement.';
+
+  @override
+  String get tourSetAiKeyTitle => 'Clé API IA';
+
+  @override
+  String get tourSetAiKeyBody =>
+      'Colle ici la clé de ton fournisseur IA. Elle reste dans le stockage sécurisé et n’est plus jamais affichée.';
+
+  @override
+  String get tourSetSaveTitle => 'Enregistrer les paramètres';
+
+  @override
+  String get tourSetSaveBody =>
+      'Enregistre vraiment tout sur cette page. Sans danger — tu peux revenir en arrière à tout moment. En dernier pour cette raison.';
+
+  @override
+  String get tourGitStatusTitle => 'Actualiser le statut';
+
+  @override
+  String get tourGitStatusBody =>
+      'Recharge le statut Git du projet actuel. Un vrai rechargement, sans danger.';
+
+  @override
+  String get tourGitCommitTitle => 'Commit';
+
+  @override
+  String get tourGitCommitBody =>
+      'Ouvre l’invite du message de commit. Tu peux annuler — rien n’est commité tant que tu ne confirmes pas. En dernier pour cette raison.';
+
+  @override
+  String get tourNotifMarkReadTitle => 'Tout marquer comme lu';
+
+  @override
+  String get tourNotifMarkReadBody =>
+      'Marque chaque notification comme lue. Réel mais sans danger — les entrées restent, seuls les points non lus s’effacent.';
+
+  @override
+  String get tourReplay => 'Rejouer la visite guidée';
+
+  @override
+  String get tourResetDone =>
+      'Visites réinitialisées — touche ? sur n’importe quel écran';
+
+  @override
+  String get tourEdNewProjectTitle => 'Nouveau projet';
+
+  @override
+  String get tourEdNewProjectBody =>
+      'Crée un autre projet depuis un modèle. Lecture seule pendant la visite — essaie toi-même ensuite depuis ce même bouton.';
+
+  @override
+  String get tourEdTermTabTitle => 'Tiroir du terminal';
+
+  @override
+  String get tourEdTermTabBody =>
+      'Bascule le tiroir du bas vers le terminal intégré. Un vrai appui — la session shell reste active quand tu changes d’onglet.';
+
+  @override
+  String get tourEdGitTabTitle => 'Tiroir Git';
+
+  @override
+  String get tourEdGitTabBody =>
+      'Bascule le tiroir du bas vers Git : statut, indexation, commit et branches pour ce projet.';
+
+  @override
+  String get tourEdProcTabTitle => 'Tiroir des processus';
+
+  @override
+  String get tourEdProcTabBody =>
+      'Bascule le tiroir du bas vers les processus : chaque commande en cours avec sa sortie et un bouton d’arrêt.';
+
+  @override
+  String get tourEdToolsTitle => 'Masquer les outils';
+
+  @override
+  String get tourEdToolsBody =>
+      'Réduit tout le tiroir du bas pour un éditeur au maximum. Le bouton le masque maintenant — réaffiche-le avec la fine bande de préhension, ou touche Suivant.';
+
+  @override
+  String get tourEdToolbarTitle => 'Masquer la barre d’outils';
+
+  @override
+  String get tourEdToolbarBody =>
+      'Réduit la barre du haut en une bande de 28px. Le bouton la masque maintenant — restaure-la avec le bouton d’expansion dans la bande, puis fais la dernière étape.';
 }

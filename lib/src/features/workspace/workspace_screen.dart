@@ -7,6 +7,7 @@ import "../../core/ui/keyboard_visibility.dart";
 import "../git/git_screen.dart";
 import "../process/process_screen.dart";
 import "../terminal/terminal_screen.dart";
+import "../tour/tour.dart";
 import "editor_area_view.dart";
 import "command_palette.dart";
 import "file_explorer_view.dart";
@@ -121,6 +122,13 @@ class _WorkspaceScreenState extends ConsumerState<WorkspaceScreen> {
                         children: [
                           for (int i = 0; i < labels.length; i++)
                             TextButton.icon(
+                              key: switch (i) {
+                                0 => TourKeys.wsRunTab,
+                                1 => TourKeys.wsTerminalTab,
+                                2 => TourKeys.wsGitTab,
+                                3 => TourKeys.wsProcessesTab,
+                                _ => null,
+                              },
                               onPressed: () => setState(
                                 () => _toolIndex = _toolIndex == i ? -1 : i,
                               ),
@@ -142,6 +150,7 @@ class _WorkspaceScreenState extends ConsumerState<WorkspaceScreen> {
                     ),
                   ),
                   IconButton(
+                    key: TourKeys.wsToolsHide,
                     onPressed: () => setState(() => _toolIndex = -1),
                     tooltip: l10n.toolsHide,
                     icon: const Icon(Icons.expand_more),
@@ -331,6 +340,7 @@ class _WorkspaceScreenState extends ConsumerState<WorkspaceScreen> {
         : null;
     return DropdownButtonHideUnderline(
       child: DropdownButton<String>(
+        key: TourKeys.wsProjectDropdown,
         value: value,
         isExpanded: true,
         hint: Text(AppLocalizations.of(context).projectSelect),
@@ -408,6 +418,7 @@ class _WorkspaceScreenState extends ConsumerState<WorkspaceScreen> {
                     ),
                     const Spacer(),
                     IconButton(
+                      key: TourKeys.wsToolbarShow,
                       onPressed: () => setState(() => _appBarCollapsed = false),
                       tooltip: AppLocalizations.of(context).toolbarShow,
                       iconSize: 18,
@@ -426,11 +437,13 @@ class _WorkspaceScreenState extends ConsumerState<WorkspaceScreen> {
               title: _projectSelector(context, projects, activeProject),
               actions: [
                 IconButton(
+                  key: TourKeys.wsToolbarHide,
                   onPressed: () => setState(() => _appBarCollapsed = true),
                   tooltip: AppLocalizations.of(context).toolbarHide,
                   icon: const Icon(Icons.expand_less),
                 ),
                 IconButton(
+                  key: TourKeys.wsPalette,
                   onPressed: () => showCommandPalette(
                     context,
                     ref,
@@ -441,6 +454,7 @@ class _WorkspaceScreenState extends ConsumerState<WorkspaceScreen> {
                   icon: const Icon(Icons.search),
                 ),
                 IconButton(
+                  key: TourKeys.wsExplorerToggle,
                   onPressed: () =>
                       setState(() => _explorerVisible = !_explorerVisible),
                   tooltip: _explorerVisible
@@ -449,17 +463,20 @@ class _WorkspaceScreenState extends ConsumerState<WorkspaceScreen> {
                   icon: Icon(_explorerVisible ? Icons.menu_open : Icons.menu),
                 ),
                 IconButton(
+                  key: TourKeys.wsNewProject,
                   onPressed: _newProject,
                   tooltip: AppLocalizations.of(context).projectNew,
                   icon: const Icon(Icons.create_new_folder),
                 ),
                 IconButton(
+                  key: TourKeys.wsDeleteProject,
                   onPressed: activeProject == null
                       ? null
                       : () => _deleteProject(activeProject),
                   tooltip: AppLocalizations.of(context).projectDelete,
                   icon: const Icon(Icons.delete_outline),
                 ),
+                TourButton(tourId: "editor", buildTargets: buildEditorTargets),
               ],
             ),
       body: _initialLoading

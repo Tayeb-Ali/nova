@@ -10,6 +10,7 @@ import '../../core/models/runtime.dart';
 import '../../core/services/runtime_service.dart';
 import '../../core/services/setup_service.dart';
 import '../../core/ui/empty_state.dart';
+import '../tour/tour.dart';
 
 /// Runtime manager: bootstrap status + install/update/remove runtimes
 /// (task.md §29).
@@ -507,7 +508,12 @@ class _RuntimeScreenState extends State<RuntimeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(AppLocalizations.of(context).runtimeTitle)),
+      appBar: AppBar(
+        title: Text(AppLocalizations.of(context).runtimeTitle),
+        actions: const [
+          TourButton(tourId: 'runtime', buildTargets: buildRuntimeTargets),
+        ],
+      ),
       // Tablet (rail ≥700px): keep the column readable on wide screens.
       body: Align(
         alignment: Alignment.topCenter,
@@ -640,6 +646,7 @@ class _RuntimeScreenState extends State<RuntimeScreen> {
               ),
               const SizedBox(height: 8),
               FilledButton.icon(
+                key: TourKeys.rtStartSetup,
                 onPressed: _startSetup,
                 style: FilledButton.styleFrom(
                   shape: RoundedRectangleBorder(
@@ -705,10 +712,22 @@ class _RuntimeScreenState extends State<RuntimeScreen> {
     // Installed packs merge into the installed section; available packs
     // get their own top section (one-tap groups).
     final installedNonPacks = installed.where((r) => !r.isPack).toList();
+    // First installable runtime (display order) owns the tour key so the
+    // coach points at exactly one Install button.
+    String? firstInstallId;
+    for (final section in [packs, availableLanguages, availableTools]) {
+      for (final r in section) {
+        if (!r.installed) {
+          firstInstallId ??= r.id;
+        }
+      }
+      if (firstInstallId != null) break;
+    }
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         TextField(
+          key: TourKeys.rtSearch,
           controller: _searchController,
           onChanged: (v) => setState(() => _runtimeQuery = v),
           decoration: InputDecoration(
@@ -740,17 +759,32 @@ class _RuntimeScreenState extends State<RuntimeScreen> {
         if (packs.isNotEmpty) ...[
           _buildSectionHeader(
               AppLocalizations.of(context).runtimePacksSection(packs.length), Icons.widgets_outlined),
-          for (final r in packs) _buildRuntimeTile(r),
+          for (final r in packs)
+            _buildRuntimeTile(
+              r,
+              installButtonKey:
+                  r.id == firstInstallId ? TourKeys.rtInstallFirst : null,
+            ),
         ],
         if (availableLanguages.isNotEmpty) ...[
           _buildSectionHeader(
               AppLocalizations.of(context).runtimeLanguagesSection(availableLanguages.length), Icons.code),
-          for (final r in availableLanguages) _buildRuntimeTile(r),
+          for (final r in availableLanguages)
+            _buildRuntimeTile(
+              r,
+              installButtonKey:
+                  r.id == firstInstallId ? TourKeys.rtInstallFirst : null,
+            ),
         ],
         if (availableTools.isNotEmpty) ...[
           _buildSectionHeader(
               AppLocalizations.of(context).runtimeToolsSection(availableTools.length), Icons.build_outlined),
-          for (final r in availableTools) _buildRuntimeTile(r),
+          for (final r in availableTools)
+            _buildRuntimeTile(
+              r,
+              installButtonKey:
+                  r.id == firstInstallId ? TourKeys.rtInstallFirst : null,
+            ),
         ],
       ],
     );
@@ -776,7 +810,7 @@ class _RuntimeScreenState extends State<RuntimeScreen> {
     );
   }
 
-  Widget _buildRuntimeTile(RuntimeInfo runtime) {
+  Widget _buildRuntimeTile(RuntimeInfo runtime, {Key? installButtonKey}) {
     final bool isActive = _activeId == runtime.id;
     final scheme = Theme.of(context).colorScheme;
     return Card(
@@ -951,7 +985,8 @@ class _RuntimeScreenState extends State<RuntimeScreen> {
                     ),
                   ] else
                     FilledButton.icon(
-                      key: ValueKey('install-${runtime.id}'),
+                      key: installButtonKey ??
+                          ValueKey('install-${runtime.id}'),
                       onPressed: (_busy || !runtime.isSupported)
                           ? null
                           : () => _install(runtime.id),

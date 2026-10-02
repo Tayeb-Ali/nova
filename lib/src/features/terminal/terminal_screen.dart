@@ -7,6 +7,7 @@ import 'package:xterm/xterm.dart';
 
 import '../../core/models/terminal_session.dart';
 import '../../core/services/terminal_service.dart';
+import '../tour/tour.dart';
 
 /// Terminal: interactive PTY shell via xterm (task.md §8–§12).
 class TerminalScreen extends StatefulWidget {
@@ -315,6 +316,7 @@ class _TerminalScreenState extends State<TerminalScreen> {
         title: Text(AppLocalizations.of(context).terminalTitle),
         actions: [
           IconButton(
+            key: TourKeys.termNewTab,
             tooltip: AppLocalizations.of(context).terminalNewSession,
             onPressed: creating ? null : _addTab,
             icon: creating
@@ -326,9 +328,14 @@ class _TerminalScreenState extends State<TerminalScreen> {
                 : const Icon(Icons.add_box_outlined),
           ),
           IconButton(
+            key: TourKeys.termPaste,
             tooltip: AppLocalizations.of(context).terminalPaste,
             onPressed: _paste,
             icon: const Icon(Icons.content_paste_go),
+          ),
+          const TourButton(
+            tourId: 'terminal',
+            buildTargets: buildTerminalTargets,
           ),
         ],
       ),
@@ -439,9 +446,13 @@ class _TerminalScreenState extends State<TerminalScreen> {
         scrollDirection: Axis.horizontal,
         child: Row(
           children: [
-            _accessoryTextKey(l10n.terminalKeyTab, '\t'),
+            _accessoryTextKey(
+              l10n.terminalKeyTab,
+              '\t',
+              key: TourKeys.termTabKey,
+            ),
             _accessoryTextKey(l10n.terminalKeyEsc, '\x1b'),
-            _accessoryTextKey('^C', '\x03'),
+            _accessoryTextKey('^C', '\x03', key: TourKeys.termCtrlC),
             _accessoryIconKey(
               Icons.keyboard_arrow_up,
               l10n.terminalKeyUp,
@@ -472,12 +483,13 @@ class _TerminalScreenState extends State<TerminalScreen> {
   }
 
   /// Small filled-tonal button (height ~36) showing a short text label.
-  Widget _accessoryTextKey(String label, String data) {
+  Widget _accessoryTextKey(String label, String data, {Key? key}) {
     return Padding(
       padding: const EdgeInsets.only(right: 6),
       child: SizedBox(
         height: 36,
         child: FilledButton.tonal(
+          key: key,
           onPressed: () {
             final tab = _activeTab;
             if (tab != null) _onTabInput(tab, data);

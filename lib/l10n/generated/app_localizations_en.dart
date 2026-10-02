@@ -1553,4 +1553,321 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get onboard4Body =>
       'Open folders, browse files, and commit from anywhere.';
+
+  @override
+  String get tourBack => 'Back';
+
+  @override
+  String get tourHubSearchTitle => 'Search projects';
+
+  @override
+  String get tourHubSearchBody =>
+      'Filter the project list by name. Tap the field and type — the list narrows as you type.';
+
+  @override
+  String get tourHubNewTitle => 'Create a project';
+
+  @override
+  String get tourHubNewBody =>
+      'Start a new project from a template. Pressing it opens the create dialog — Cancel it (or tap Next) to stay in the tour.';
+
+  @override
+  String get tourHubCardTitle => 'Your projects';
+
+  @override
+  String get tourHubCardBody =>
+      'Tap a project card to make it the active project. The highlighted card is the one the editor and run tools use.';
+
+  @override
+  String get tourHubOpenTitle => 'Open the editor';
+
+  @override
+  String get tourHubOpenBody =>
+      'Jump into the workspace for the active project. Tap Next to stay in the tour — pressing the tile now leaves the hub and ends the tour early.';
+
+  @override
+  String get tourHubRecentTitle => 'Recent files';
+
+  @override
+  String get tourHubRecentBody =>
+      'Reopen the last files you edited, across all projects. Tapping one opens it straight in the editor.';
+
+  @override
+  String get tourHubNavTitle => 'Getting around';
+
+  @override
+  String get tourHubNavBody =>
+      'Bottom bar destinations: Projects (here), Editor (workspace), Runtime (language setup), Settings. The ? button replays a tour anytime.';
+
+  @override
+  String get tourEdProjectTitle => 'Project switcher';
+
+  @override
+  String get tourEdProjectBody =>
+      'Switch the active project — explorer, editor and run tools follow. Pressing opens the menu: pick nothing (Back) or tap Next to continue.';
+
+  @override
+  String get tourEdPaletteTitle => 'Command palette';
+
+  @override
+  String get tourEdPaletteBody =>
+      'Fuzzy-find files and run tool/theme commands. Pressing opens the palette — go Back (or tap Next) to continue the tour.';
+
+  @override
+  String get tourEdEntryTitle => 'Project files';
+
+  @override
+  String get tourEdEntryBody =>
+      'Tap a file to open it in the editor — this guarantees an open tab for the next steps. Long-press for rename and delete.';
+
+  @override
+  String get tourEdNewFileTitle => 'New file';
+
+  @override
+  String get tourEdNewFileBody =>
+      'Create a file in the current folder. Pressing asks for a name — Cancel the dialog (or tap Next) to continue.';
+
+  @override
+  String get tourEdGoUpTitle => 'Go up';
+
+  @override
+  String get tourEdGoUpBody =>
+      'Move the explorer to the parent folder. Disabled at the project root.';
+
+  @override
+  String get tourEdExplorerTitle => 'Explorer visibility';
+
+  @override
+  String get tourEdExplorerBody =>
+      'Hide the file pane for more editor width. All file steps are done, so pressing it now is safe — press again to bring the pane back.';
+
+  @override
+  String get tourEdTabsTitle => 'Open tabs';
+
+  @override
+  String get tourEdTabsBody =>
+      'Every open file is a tab. Tap a tab to switch to it.';
+
+  @override
+  String get tourEdSaveTitle => 'Save';
+
+  @override
+  String get tourEdSaveBody =>
+      'Write the current file to disk. On a clean file this just confirms everything is saved.';
+
+  @override
+  String get tourEdReloadTitle => 'Reload';
+
+  @override
+  String get tourEdReloadBody =>
+      'Re-read the file from disk. Clean files reload silently; dirty files ask for confirmation first.';
+
+  @override
+  String get tourEdAiTitle => 'AI assist';
+
+  @override
+  String get tourEdAiBody =>
+      'Explain, complete or edit the selected code with AI. Pressing opens the AI sheet — close it to continue the tour.';
+
+  @override
+  String get tourEdPreviewTitle => 'Markdown preview';
+
+  @override
+  String get tourEdPreviewBody =>
+      'Markdown files toggle between edit and rendered preview here. Hidden for code files.';
+
+  @override
+  String get tourEdRunTabTitle => 'Run tools';
+
+  @override
+  String get tourEdRunTabBody =>
+      'Switch the bottom drawer: Run, Terminal, Git, Processes. This step selects Run so the next steps are visible.';
+
+  @override
+  String get tourEdTaskTitle => 'Run task';
+
+  @override
+  String get tourEdTaskBody =>
+      'Pick the detected task to run, e.g. run or test for this project. Pressing opens the menu — choose a task or tap Next.';
+
+  @override
+  String get tourEdRunTitle => 'Run';
+
+  @override
+  String get tourEdRunBody =>
+      'Start the selected task — output streams below. Pressing really starts a process; stop it from the same button.';
+
+  @override
+  String get tourEdDefTitle => 'Go to definition';
+
+  @override
+  String get tourEdDefBody =>
+      'Jump to the symbol under the caret. You may land in another file — the remaining steps still work there.';
+
+  @override
+  String get tourEdTabCloseTitle => 'Close tab';
+
+  @override
+  String get tourEdTabCloseBody =>
+      'Close this tab; unsaved edits ask for confirmation. If this is your only tab, tap Next instead of the × to keep the tour intact.';
+
+  @override
+  String get tourEdDeleteTitle => 'Delete project';
+
+  @override
+  String get tourEdDeleteBody =>
+      'Remove the whole project after a confirmation. Pressing opens the dialog — choose Cancel to keep the project and reveal the last step.';
+
+  @override
+  String get tourEdFocusTitle => 'Focus mode';
+
+  @override
+  String get tourEdFocusBody =>
+      'Hide all chrome for distraction-free editing. Pressing enters focus mode — use the exit button in the slim bar to return.';
+
+  @override
+  String get tourRtSearchTitle => 'Find a runtime';
+
+  @override
+  String get tourRtSearchBody =>
+      'Type here to filter the runtime list. Safe to try — it only filters, nothing is installed.';
+
+  @override
+  String get tourRtSetupTitle => 'Bootstrap setup';
+
+  @override
+  String get tourRtSetupBody =>
+      'Start Setup downloads the Linux bootstrap. Tap it for real only when you are ready to download.';
+
+  @override
+  String get tourRtInstallTitle => 'Install a runtime';
+
+  @override
+  String get tourRtInstallBody =>
+      'This Install button starts a REAL download and install. Press it for real only if you want that runtime now — it is last for a reason.';
+
+  @override
+  String get tourTermPasteTitle => 'Paste into terminal';
+
+  @override
+  String get tourTermPasteBody =>
+      'Pastes clipboard text into the shell. A real press, but harmless — it types without pressing Enter.';
+
+  @override
+  String get tourTermTabTitle => 'Tab key';
+
+  @override
+  String get tourTermTabBody =>
+      'Sends Tab for shell autocomplete. A real press, harmless.';
+
+  @override
+  String get tourTermCtrlCTitle => 'Ctrl+C key';
+
+  @override
+  String get tourTermCtrlCBody =>
+      'Sends an interrupt (Ctrl+C). Harmless on an empty prompt; it would cancel a running command.';
+
+  @override
+  String get tourTermNewTabTitle => 'New terminal tab';
+
+  @override
+  String get tourTermNewTabBody =>
+      'Opens a real new shell tab (up to 5). Harmless — close it with the × on its chip. Last because it changes the tab strip.';
+
+  @override
+  String get tourSetAccountTitle => 'Account';
+
+  @override
+  String get tourSetAccountBody =>
+      'Your sign-in status and account actions live here.';
+
+  @override
+  String get tourSetLangTitle => 'Language';
+
+  @override
+  String get tourSetLangBody =>
+      'Switch the app language here. A real press takes effect immediately.';
+
+  @override
+  String get tourSetAiKeyTitle => 'AI API key';
+
+  @override
+  String get tourSetAiKeyBody =>
+      'Paste your AI provider key here. It stays in secure storage and is never shown again.';
+
+  @override
+  String get tourSetSaveTitle => 'Save settings';
+
+  @override
+  String get tourSetSaveBody =>
+      'Saves everything on this page for real. Harmless — you can change it back any time. Last for that reason.';
+
+  @override
+  String get tourGitStatusTitle => 'Refresh status';
+
+  @override
+  String get tourGitStatusBody =>
+      'Reloads git status for the current project. A real reload, harmless.';
+
+  @override
+  String get tourGitCommitTitle => 'Commit';
+
+  @override
+  String get tourGitCommitBody =>
+      'Opens the commit message prompt. You can cancel — nothing is committed until you confirm. Last for that reason.';
+
+  @override
+  String get tourNotifMarkReadTitle => 'Mark all read';
+
+  @override
+  String get tourNotifMarkReadBody =>
+      'Marks every notification read. Real but harmless — entries stay, only the unread dots clear.';
+
+  @override
+  String get tourReplay => 'Replay guided tour';
+
+  @override
+  String get tourResetDone => 'Tours reset — tap ? on any screen';
+
+  @override
+  String get tourEdNewProjectTitle => 'New project';
+
+  @override
+  String get tourEdNewProjectBody =>
+      'Create another project from a template. Read-only during the tour — try it yourself afterwards from this same button.';
+
+  @override
+  String get tourEdTermTabTitle => 'Terminal drawer';
+
+  @override
+  String get tourEdTermTabBody =>
+      'Switch the bottom drawer to the embedded terminal. A real press — the shell session stays alive when you switch away.';
+
+  @override
+  String get tourEdGitTabTitle => 'Git drawer';
+
+  @override
+  String get tourEdGitTabBody =>
+      'Switch the bottom drawer to Git: status, stage, commit and branches for this project.';
+
+  @override
+  String get tourEdProcTabTitle => 'Processes drawer';
+
+  @override
+  String get tourEdProcTabBody =>
+      'Switch the bottom drawer to Processes: every running command with its output and a stop button.';
+
+  @override
+  String get tourEdToolsTitle => 'Hide the tools';
+
+  @override
+  String get tourEdToolsBody =>
+      'Collapse the whole bottom drawer for maximum editor height. Pressing hides it now — bring it back with the thin grabber strip, or tap Next.';
+
+  @override
+  String get tourEdToolbarTitle => 'Hide the toolbar';
+
+  @override
+  String get tourEdToolbarBody =>
+      'Collapse the top bar into a 28px strip. Pressing hides it now — restore it with the expand button in the strip, then take the last step.';
 }

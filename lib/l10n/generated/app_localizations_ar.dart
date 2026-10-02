@@ -1547,4 +1547,321 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get onboard4Body =>
       'افتح المجلدات، تصفح الملفات، ونفّذ الـ commit من أي مكان.';
+
+  @override
+  String get tourBack => 'رجوع';
+
+  @override
+  String get tourHubSearchTitle => 'البحث في المشاريع';
+
+  @override
+  String get tourHubSearchBody =>
+      'صفِّ قائمة المشاريع بالاسم. المس حقل البحث واكتب — تضيق القائمة أثناء الكتابة.';
+
+  @override
+  String get tourHubNewTitle => 'إنشاء مشروع';
+
+  @override
+  String get tourHubNewBody =>
+      'ابدأ مشروعًا جديدًا من قالب. الضغط يفتح حوار الإنشاء — ألغه (أو المس «التالي») للبقاء في الجولة.';
+
+  @override
+  String get tourHubCardTitle => 'مشاريعك';
+
+  @override
+  String get tourHubCardBody =>
+      'المس بطاقة مشروع لجعله المشروع النشط. البطاقة المميزة هي التي يستخدمها المحرر وأدوات التشغيل.';
+
+  @override
+  String get tourHubOpenTitle => 'فتح المحرر';
+
+  @override
+  String get tourHubOpenBody =>
+      'انتقل إلى مساحة العمل للمشروع النشط. المس «التالي» للبقاء في الجولة — فالضغط على البلاطة الآن يغادر المركز ويُنهي الجولة مبكرًا.';
+
+  @override
+  String get tourHubRecentTitle => 'الملفات الأخيرة';
+
+  @override
+  String get tourHubRecentBody =>
+      'أعد فتح آخر الملفات التي حررتها عبر كل المشاريع. لمس أحدها يفتحه مباشرة في المحرر.';
+
+  @override
+  String get tourHubNavTitle => 'التنقل في التطبيق';
+
+  @override
+  String get tourHubNavBody =>
+      'وجهات الشريط السفلي: المشاريع (هنا)، المحرر (مساحة العمل)، بيئة التشغيل (إعداد اللغات)، الإعدادات. زر «؟» يعيد تشغيل أي جولة في أي وقت.';
+
+  @override
+  String get tourEdProjectTitle => 'مبدّل المشروع';
+
+  @override
+  String get tourEdProjectBody =>
+      'بدّل المشروع النشط — فيتبعه المستكشف والمحرر وأدوات التشغيل. الضغط يفتح القائمة: لا تختر شيئًا (رجوع) أو المس «التالي» للمتابعة.';
+
+  @override
+  String get tourEdPaletteTitle => 'لوحة الأوامر';
+
+  @override
+  String get tourEdPaletteBody =>
+      'ابحث عن الملفات ونفّذ أوامر الأدوات والسمة بالبحث التقريبي. الضغط يفتح اللوحة — ارجع (أو المس «التالي») لمتابعة الجولة.';
+
+  @override
+  String get tourEdEntryTitle => 'ملفات المشروع';
+
+  @override
+  String get tourEdEntryBody =>
+      'المس ملفًا لفتحه في المحرر — هذا يضمن وجود لسان مفتوح للخطوات التالية. اضغط مطولًا لإعادة التسمية والحذف.';
+
+  @override
+  String get tourEdNewFileTitle => 'ملف جديد';
+
+  @override
+  String get tourEdNewFileBody =>
+      'أنشئ ملفًا في المجلد الحالي. الضغط يطلب اسمًا — ألغِ الحوار (أو المس «التالي») للمتابعة.';
+
+  @override
+  String get tourEdGoUpTitle => 'الانتقال للمجلد الأب';
+
+  @override
+  String get tourEdGoUpBody =>
+      'انقل المستكشف إلى المجلد الأب. يكون معطلًا عند جذر المشروع.';
+
+  @override
+  String get tourEdExplorerTitle => 'إظهار المستكشف';
+
+  @override
+  String get tourEdExplorerBody =>
+      'أخفِ لوحة الملفات لتوسيع المحرر. انتهت كل خطوات الملفات فالضغط آمن الآن — اضغط مجددًا لاستعادة اللوحة.';
+
+  @override
+  String get tourEdTabsTitle => 'الألسنة المفتوحة';
+
+  @override
+  String get tourEdTabsBody =>
+      'كل ملف مفتوح له لسان. المس اللسان للانتقال إليه.';
+
+  @override
+  String get tourEdSaveTitle => 'حفظ';
+
+  @override
+  String get tourEdSaveBody =>
+      'اكتب الملف الحالي على القرص. مع ملف غير معدل يؤكد فقط أن كل شيء محفوظ.';
+
+  @override
+  String get tourEdReloadTitle => 'إعادة التحميل';
+
+  @override
+  String get tourEdReloadBody =>
+      'أعد قراءة الملف من القرص. الملفات غير المعدلة تُحمَّل بصمت، والمعدلة تطلب التأكيد أولًا.';
+
+  @override
+  String get tourEdAiTitle => 'مساعد الذكاء الاصطناعي';
+
+  @override
+  String get tourEdAiBody =>
+      'اشرح الكود المحدد أو أكمله أو حرره بالذكاء الاصطناعي. الضغط يفتح ورقة المساعد — أغلقها لمتابعة الجولة.';
+
+  @override
+  String get tourEdPreviewTitle => 'معاينة ماركداون';
+
+  @override
+  String get tourEdPreviewBody =>
+      'ملفات ماركداون تتبدل هنا بين التحرير والمعاينة المعروضة. مخفي لملفات الكود.';
+
+  @override
+  String get tourEdRunTabTitle => 'أدوات التشغيل';
+
+  @override
+  String get tourEdRunTabBody =>
+      'بدّل الدرج السفلي: التشغيل، الطرفية، غيت، العمليات. هذه الخطوة تختار التشغيل لتظهر الخطوات التالية.';
+
+  @override
+  String get tourEdTaskTitle => 'مهمة التشغيل';
+
+  @override
+  String get tourEdTaskBody =>
+      'اختر المهمة المكتشفة للتشغيل، مثل التشغيل أو الاختبار لهذا المشروع. الضغط يفتح القائمة — اختر مهمة أو المس «التالي».';
+
+  @override
+  String get tourEdRunTitle => 'تشغيل';
+
+  @override
+  String get tourEdRunBody =>
+      'ابدأ المهمة المحددة — يتدفق الخرج أدناه. الضغط يبدأ عملية حقيقية؛ أوقفها من الزر نفسه.';
+
+  @override
+  String get tourEdDefTitle => 'الانتقال إلى التعريف';
+
+  @override
+  String get tourEdDefBody =>
+      'اقفز إلى الرمز تحت المؤشر. قد تهبط في ملف آخر — الخطوات المتبقية تعمل هناك أيضًا.';
+
+  @override
+  String get tourEdTabCloseTitle => 'إغلاق اللسان';
+
+  @override
+  String get tourEdTabCloseBody =>
+      'أغلق هذا اللسان؛ التعديلات غير المحفوظة تطلب التأكيد. إن كان لسانك الوحيد، المس «التالي» بدل × للحفاظ على الجولة.';
+
+  @override
+  String get tourEdDeleteTitle => 'حذف المشروع';
+
+  @override
+  String get tourEdDeleteBody =>
+      'احذف المشروع كاملًا بعد التأكيد. الضغط يفتح الحوار — اختر «إلغاء» للاحتفاظ بالمشروع وكشف الخطوة الأخيرة.';
+
+  @override
+  String get tourEdFocusTitle => 'وضع التركيز';
+
+  @override
+  String get tourEdFocusBody =>
+      'أخفِ كل الواجهة للتحرير دون تشتيت. الضغط يدخل وضع التركيز — استخدم زر الخروج في الشريط الرفيع للعودة.';
+
+  @override
+  String get tourRtSearchTitle => 'ابحث عن بيئة تشغيل';
+
+  @override
+  String get tourRtSearchBody =>
+      'اكتب هنا لتصفية قائمة بيئات التشغيل. آمن للتجربة — يقوم بالتصفية فقط ولا يثبّت شيئًا.';
+
+  @override
+  String get tourRtSetupTitle => 'إعداد التمهيد';
+
+  @override
+  String get tourRtSetupBody =>
+      'يُنزّل زر بدء الإعداد نظام لينكس التمهيدي. اضغطه فعليًا فقط عندما تكون مستعدًا للتنزيل.';
+
+  @override
+  String get tourRtInstallTitle => 'تثبيت بيئة تشغيل';
+
+  @override
+  String get tourRtInstallBody =>
+      'يبدأ زر التثبيت هذا تنزيلًا وتثبيتًا حقيقيًا. اضغطه فعليًا فقط إذا كنت تريد بيئة التشغيل هذه الآن — لهذا هو في النهاية.';
+
+  @override
+  String get tourTermPasteTitle => 'اللصق في الطرفية';
+
+  @override
+  String get tourTermPasteBody =>
+      'يلصق نص الحافظة في الصدفة. ضغطة حقيقية لكنها غير ضارة — يكتب النص دون الضغط على إدخال.';
+
+  @override
+  String get tourTermTabTitle => 'مفتاح Tab';
+
+  @override
+  String get tourTermTabBody =>
+      'يرسل Tab للإكمال التلقائي. ضغطة حقيقية غير ضارة.';
+
+  @override
+  String get tourTermCtrlCTitle => 'مفتاح Ctrl+C';
+
+  @override
+  String get tourTermCtrlCBody =>
+      'يرسل مقاطعة (Ctrl+C). غير ضار على موجّه فارغ؛ وقد يلغي أمرًا جاريًا.';
+
+  @override
+  String get tourTermNewTabTitle => 'تبويب طرفية جديد';
+
+  @override
+  String get tourTermNewTabBody =>
+      'يفتح تبويب صدفة جديدًا حقيقيًا (حتى ٥). غير ضار — أغلقه بزر × على رقاقته. في النهاية لأنه يغيّر شريط التبويبات.';
+
+  @override
+  String get tourSetAccountTitle => 'الحساب';
+
+  @override
+  String get tourSetAccountBody =>
+      'توجد هنا حالة تسجيل الدخول وإجراءات الحساب.';
+
+  @override
+  String get tourSetLangTitle => 'اللغة';
+
+  @override
+  String get tourSetLangBody =>
+      'بدّل لغة التطبيق هنا. الضغطة الحقيقية تُطبَّق فورًا.';
+
+  @override
+  String get tourSetAiKeyTitle => 'مفتاح API للذكاء الاصطناعي';
+
+  @override
+  String get tourSetAiKeyBody =>
+      'الصق مفتاح مزوّد الذكاء الاصطناعي هنا. يبقى في التخزين الآمن ولا يُعرض مجددًا.';
+
+  @override
+  String get tourSetSaveTitle => 'حفظ الإعدادات';
+
+  @override
+  String get tourSetSaveBody =>
+      'يحفظ كل ما في هذه الصفحة فعليًا. غير ضار — يمكنك التراجع في أي وقت. في النهاية لهذا السبب.';
+
+  @override
+  String get tourGitStatusTitle => 'تحديث الحالة';
+
+  @override
+  String get tourGitStatusBody =>
+      'يعيد تحميل حالة git للمشروع الحالي. تحديث حقيقي غير ضار.';
+
+  @override
+  String get tourGitCommitTitle => 'تثبيت (Commit)';
+
+  @override
+  String get tourGitCommitBody =>
+      'يفتح نافذة رسالة التثبيت. يمكنك الإلغاء — لا يُثبَّت شيء حتى التأكيد. في النهاية لهذا السبب.';
+
+  @override
+  String get tourNotifMarkReadTitle => 'تعليم الكل كمقروء';
+
+  @override
+  String get tourNotifMarkReadBody =>
+      'يُعلّم كل الإشعارات كمقروءة. حقيقي لكن غير ضار — تبقى العناصر وتختفي نقاط غير المقروء فقط.';
+
+  @override
+  String get tourReplay => 'إعادة تشغيل الجولة التعريفية';
+
+  @override
+  String get tourResetDone => 'صفّرت الجولات — المس ؟ في أي شاشة';
+
+  @override
+  String get tourEdNewProjectTitle => 'مشروع جديد';
+
+  @override
+  String get tourEdNewProjectBody =>
+      'أنشئ مشروعًا آخر من قالب. للقراءة فقط أثناء الجولة — جرّبه بنفسك لاحقًا من هذا الزر نفسه.';
+
+  @override
+  String get tourEdTermTabTitle => 'درج الطرفية';
+
+  @override
+  String get tourEdTermTabBody =>
+      'بدّل الدرج السفلي إلى الطرفية المدمجة. ضغطة حقيقية — تبقى جلسة الصدفة حية عند الانتقال بعيدًا.';
+
+  @override
+  String get tourEdGitTabTitle => 'درج Git';
+
+  @override
+  String get tourEdGitTabBody =>
+      'بدّل الدرج السفلي إلى Git: الحالة والتجهيز والتثبيت والفروع لهذا المشروع.';
+
+  @override
+  String get tourEdProcTabTitle => 'درج العمليات';
+
+  @override
+  String get tourEdProcTabBody =>
+      'بدّل الدرج السفلي إلى العمليات: كل أمر جارٍ مع خرجه وزر إيقاف.';
+
+  @override
+  String get tourEdToolsTitle => 'إخفاء الأدوات';
+
+  @override
+  String get tourEdToolsBody =>
+      'اطوِ الدرج السفلي كاملًا لأقصى ارتفاع للمحرر. الضغط يخفيه الآن — أعده بشريط السحب الرفيع أو المس «التالي».';
+
+  @override
+  String get tourEdToolbarTitle => 'إخفاء شريط الأدوات';
+
+  @override
+  String get tourEdToolbarBody =>
+      'اطوِ الشريط العلوي إلى شريط رفيع. الضغط يخفيه الآن — استعده بزر التوسيع في الشريط ثم خذ الخطوة الأخيرة.';
 }

@@ -13,6 +13,7 @@ import "package:nova/src/features/auth/auth.dart";
 import "../../../l10n/generated/app_localizations.dart";
 import "../../core/services/app_info_service.dart";
 import "../../core/settings_store.dart";
+import "../tour/tour.dart";
 import "about_screen.dart";
 import "../ai/ai_client.dart";
 import "../ai/ai_presets.dart";
@@ -131,11 +132,19 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         OutlineInputBorder(borderRadius: BorderRadius.circular(4));
 
     return Scaffold(
-      appBar: AppBar(title: Text(AppLocalizations.of(context).navSettings)),
+      appBar: AppBar(
+        title: Text(AppLocalizations.of(context).navSettings),
+        actions: const [
+          TourButton(tourId: 'settings', buildTargets: buildSettingsTargets),
+        ],
+      ),
       body: ListView(
         padding: const EdgeInsets.all(8),
         children: [
-          const AccountCard(),
+          KeyedSubtree(
+            key: TourKeys.settingsAccount,
+            child: const AccountCard(),
+          ),
           Card(
             elevation: 0,
             color: scheme.surfaceContainer,
@@ -149,6 +158,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   sectionTitle(AppLocalizations.of(context).settingsAppearance),
                   const SizedBox(height: 8),
                   DropdownButtonFormField<String?>(
+                    key: TourKeys.settingsLanguage,
                     initialValue: settings.appLocale,
                     decoration: InputDecoration(
                       labelText: AppLocalizations.of(context).settingsLanguage,
@@ -463,6 +473,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   ),
                   const SizedBox(height: 8),
                   TextField(
+                    key: TourKeys.settingsAiKey,
                     controller: _apiKeyCtrl,
                     obscureText: true,
                     enableSuggestions: false,
@@ -517,6 +528,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ),
           const SizedBox(height: 8),
           FilledButton(
+            key: TourKeys.settingsAiSave,
             style: FilledButton.styleFrom(
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(4),
@@ -549,6 +561,29 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               }
             },
             child: Text(AppLocalizations.of(context).actionSave),
+          ),
+          const SizedBox(height: 8),
+          Card(
+            elevation: 0,
+            color: scheme.surfaceContainer,
+            shape: sectionShape(),
+            margin: const EdgeInsets.only(bottom: 8),
+            child: ListTile(
+              leading: Icon(Icons.refresh, color: scheme.primary),
+              title: Text(AppLocalizations.of(context).tourReplay),
+              trailing: const Icon(Icons.chevron_right_outlined),
+              onTap: () async {
+                await TourService.resetAll();
+                if (!context.mounted) return;
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      AppLocalizations.of(context).tourResetDone,
+                    ),
+                  ),
+                );
+              },
+            ),
           ),
           const SizedBox(height: 8),
           // About card with the platform version/build (see AppInfo).

@@ -3,6 +3,7 @@ import "package:flutter_riverpod/flutter_riverpod.dart";
 import "../../../l10n/generated/app_localizations.dart";
 import "../../core/services/search_service.dart";
 import "../../core/ui/empty_state.dart";
+import "../tour/tour.dart";
 import "../workspace/workspace_providers.dart";
 
 /// Preview of [hit.lineText] with the matched range swapped for
@@ -358,6 +359,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             child: Column(
               children: [
                 TextField(
+                  key: TourKeys.searchField,
                   controller: _queryController,
                   autofocus: true,
                   decoration: InputDecoration(
@@ -396,6 +398,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                     ),
                     const Spacer(),
                     FilledButton.icon(
+                      key: TourKeys.searchButton,
                       onPressed: _searching ? null : _search,
                       icon: const Icon(Icons.search, size: 18),
                       label: Text(hits == 0 ? l10n.searchButton : l10n.searchButtonCount(hits)),

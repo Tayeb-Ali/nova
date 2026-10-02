@@ -8,6 +8,7 @@ import "package:nova/l10n/generated/app_localizations.dart";
 
 import "../../core/services/fcm_service.dart";
 import "../../core/ui/empty_state.dart";
+import "../tour/tour.dart";
 import "notification_model.dart";
 import "notifications_store.dart";
 
@@ -114,12 +115,17 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
         actions: [
           if (unread > 0)
             IconButton(
+              key: TourKeys.notifMarkRead,
               tooltip: l10n.notifMarkAllRead,
               icon: const Icon(Icons.done_all_outlined),
               onPressed: () => unawaited(
                 ref.read(notificationsStoreProvider.notifier).markAllRead(),
               ),
             ),
+          const TourButton(
+            tourId: 'notif',
+            buildTargets: buildNotifTargets,
+          ),
         ],
       ),
       body: Column(

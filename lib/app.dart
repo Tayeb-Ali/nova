@@ -19,6 +19,8 @@ import "src/features/editor/theme/theme_pack_store.dart";
 import "src/features/notifications/notifications_bell.dart";
 import "src/features/notifications/notifications_screen.dart";
 import "src/features/notifications/notifications_store.dart";
+import "src/features/tour/tour_service.dart";
+import "src/features/tour/tour_state.dart";
 import "src/features/runtime/runtime_screen.dart";
 import "src/features/settings/settings_screen.dart";
 import "src/features/splash/splash_screen.dart";
@@ -154,6 +156,10 @@ class _IdeShellState extends ConsumerState<IdeShell> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _checkBootstrap();
       _initFcm();
+      // First-run hub tour: TourService owns the flags + 1s settle delay;
+      // the hub content agent assigns TourService.hubTargetsBuilder when it
+      // lands (no-op until then).
+      unawaited(TourService.autoStartHubIfNeeded(context, ref));
     });
     MemberRegistry.ensureLoaded();
   }
@@ -277,11 +283,14 @@ class _IdeShellState extends ConsumerState<IdeShell> {
   /// floating circle would sit exactly on the tab strip's trailing actions
   /// (overflow menu) on phone widths and swallow their taps. The bell stays
   /// one tap away on every other tab, and tray deep-links still work.
-  Widget _withBell(Widget child) {
+  ///
+  /// While a tour overlay is up ([tourActive]) the bell is hidden too: it
+  /// must never cover a tour target or swallow a real press.
+  Widget _withBell(Widget child, bool tourActive) {
     return Stack(
       children: [
         child,
-        if (_index != 1)
+        if (_index != 1 && !tourActive)
           PositionedDirectional(
             top: MediaQuery.paddingOf(context).top + kToolbarHeight + 8,
             end: 12,
@@ -339,6 +348,9 @@ class _IdeShellState extends ConsumerState<IdeShell> {
         label: l10n.navSettings,
       ),
     ];
+    // Tour overlay up: shell chrome (floating bell, bottom bar) hides so
+    // it never covers a target or swallows a real press.
+    final tourActive = ref.watch(tourActiveProvider);
     // Wide screens (tablet/landscape/desktop): side rail instead of bottom bar.
     // Both layouts share one PopScope exit guard at the end, so the shell
     // is built into a local first.
@@ -371,7 +383,7 @@ class _IdeShellState extends ConsumerState<IdeShell> {
               ],
             ),
             const VerticalDivider(width: 1),
-            Expanded(child: _withBell(visibleBody)),
+            Expanded(child: _withBell(visibleBody, tourActive)),
           ],
         ),
       );
@@ -387,7 +399,7 @@ class _IdeShellState extends ConsumerState<IdeShell> {
         onPointerMove: _onPointerMove,
         onPointerUp: _onPointerEnd,
         onPointerCancel: _onPointerEnd,
-        child: _withBell(visibleBody),
+        child: _withBell(visibleBody, tourActive),
       ),
       // Distraction-free typing: while the keyboard is up the bottom bar
       // is pure chrome. Hide it so the editor keeps maximum height; it
@@ -396,9 +408,10 @@ class _IdeShellState extends ConsumerState<IdeShell> {
       // instant (space reclaimed now); appearance animates via
       // [NovaNavBarEntrance].
       bottomNavigationBar:
-          (keyboardVisible ||
-              ref.watch(focusModeProvider) ||
-              (_index == 1 && !_editorBarVisible))
+          (tourActive ||
+                  keyboardVisible ||
+                  ref.watch(focusModeProvider) ||
+                  (_index == 1 && !_editorBarVisible))
           ? null
             : NovaNavBarEntrance(
                 child: NovaNavBar(

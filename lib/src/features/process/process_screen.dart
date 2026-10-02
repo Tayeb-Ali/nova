@@ -6,6 +6,7 @@ import 'package:nova/l10n/generated/app_localizations.dart';
 import '../../core/models/process_info.dart';
 import '../../core/services/process_service.dart';
 import '../../core/ui/empty_state.dart';
+import '../tour/tour.dart';
 
 /// Process manager: running tasks list + kill + ad-hoc run (task.md §21).
 class ProcessScreen extends StatefulWidget {
@@ -159,6 +160,7 @@ class _ProcessScreenState extends State<ProcessScreen> {
         children: [
           Expanded(
             child: TextField(
+              key: TourKeys.procCommandField,
               controller: _commandController,
               decoration: InputDecoration(
                 hintText: AppLocalizations.of(context).processRunHint,
@@ -171,6 +173,7 @@ class _ProcessScreenState extends State<ProcessScreen> {
           ),
           const SizedBox(width: 8),
           IconButton.filled(
+            key: TourKeys.procRun,
             tooltip: AppLocalizations.of(context).actionRun,
             onPressed: (_running)
                 ? null

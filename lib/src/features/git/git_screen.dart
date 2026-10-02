@@ -9,6 +9,7 @@ import '../../core/models/project.dart';
 import '../../core/services/git_service.dart';
 import '../../core/services/project_service.dart';
 import '../../core/ui/text_prompt_dialog.dart';
+import '../tour/tour.dart';
 import 'branch_picker.dart';
 import 'diff_view.dart';
 
@@ -340,7 +341,12 @@ class _GitScreenState extends State<GitScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(AppLocalizations.of(context).gitTitle)),
+      appBar: AppBar(
+        title: Text(AppLocalizations.of(context).gitTitle),
+        actions: const [
+          TourButton(tourId: 'git', buildTargets: buildGitTargets),
+        ],
+      ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -426,6 +432,7 @@ class _GitScreenState extends State<GitScreen> {
       runSpacing: 8,
       children: [
         FilledButton.icon(
+          key: TourKeys.gitStatusBtn,
           onPressed: hasPath ? _loadStatus : null,
           icon: const Icon(Icons.refresh),
           label: Text(l10n.gitStatus),
@@ -436,6 +443,7 @@ class _GitScreenState extends State<GitScreen> {
           label: Text(l10n.gitStageAll),
         ),
         OutlinedButton.icon(
+          key: TourKeys.gitCommitBtn,
           onPressed: usable ? _commit : null,
           icon: const Icon(Icons.commit),
           label: Text(l10n.gitCommit),

@@ -6,6 +6,7 @@ import "package:nova/l10n/generated/app_localizations.dart";
 
 import "../../core/models/task.dart";
 import "../../core/services/process_service.dart";
+import "../tour/tour.dart";
 import "workspace_providers.dart";
 
 /// Run toolbar + live output stream from the active project (task.md §20–§21).
@@ -139,6 +140,7 @@ class _RunPanelState extends ConsumerState<RunPanel> {
                 children: [
                   // Primary action — the ONLY run/stop affordance.
                   SizedBox(
+                    key: TourKeys.wsRunButton,
                     height: 44,
                     child: running
                         ? FilledButton.icon(
@@ -176,6 +178,7 @@ class _RunPanelState extends ConsumerState<RunPanel> {
                   // Task selector — fixed height, text always clipped INSIDE.
                   Expanded(
                     child: Container(
+                      key: TourKeys.wsTaskDropdown,
                       height: 44,
                       padding: const EdgeInsets.symmetric(horizontal: 4),
                       decoration: BoxDecoration(
