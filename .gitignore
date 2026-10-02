@@ -55,3 +55,4 @@ app.*.map.json
 skills-lock.json
 
 /themes/
+/integration_test
