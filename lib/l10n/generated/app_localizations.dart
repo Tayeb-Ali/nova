@@ -2656,6 +2656,12 @@ abstract class AppLocalizations {
   /// **'Guest mode: nothing is locked. Sign-in is optional.'**
   String get authGuestNote;
 
+  /// Auth: anonymous guest label
+  ///
+  /// In en, this message translates to:
+  /// **'Guest'**
+  String get authGuest;
+
   /// Auth: invalid email message
   ///
   /// In en, this message translates to:

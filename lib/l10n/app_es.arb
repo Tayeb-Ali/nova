@@ -846,6 +846,8 @@
   "@authGoogle": { "description": "Auth: Google sign-in button" },
   "authGuestNote": "Modo invitado: nada está bloqueado. Iniciar sesión es opcional.",
   "@authGuestNote": { "description": "Auth: guest-first note" },
+  "authGuest": "Invitado",
+  "@authGuest": { "description": "Auth: anonymous guest label" },
   "authInvalidEmail": "Ingresa un correo válido",
   "@authInvalidEmail": { "description": "Auth: invalid email message" },
   "authLogin": "Iniciar sesión",

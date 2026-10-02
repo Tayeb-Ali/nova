@@ -1441,6 +1441,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get authGuestNote => 'وضع الضيف: لا شيء مقفل. تسجيل الدخول اختياري.';
 
   @override
+  String get authGuest => 'ضيف';
+
+  @override
   String get authInvalidEmail => 'أدخل بريدًا صالحًا';
 
   @override

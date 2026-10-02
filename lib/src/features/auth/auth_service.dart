@@ -165,6 +165,21 @@ class AuthService {
     }
   }
 
+  /// Anonymous flow. The user appears in the Firebase Console
+  /// (Authentication > Users) with the Anonymous provider, so the owner can
+  /// monitor guest adoption. Never throws; offline just fails gracefully and
+  /// the caller falls back to a fully local guest.
+  Future<AuthResult> signInAnonymously() async {
+    try {
+      await _auth.signInAnonymously();
+      return const AuthResult.ok();
+    } on FirebaseAuthException catch (e) {
+      return AuthResult.fail(_shortCode(e));
+    } catch (_) {
+      return const AuthResult.fail("unknown-error");
+    }
+  }
+
   Future<AuthResult> signOut() async {
     try {
       await _auth.signOut();

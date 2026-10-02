@@ -846,6 +846,8 @@
   "@authGoogle": { "description": "Auth: Google sign-in button" },
   "authGuestNote": "Гостевой режим: ничего не заблокировано. Вход необязателен.",
   "@authGuestNote": { "description": "Auth: guest-first note" },
+  "authGuest": "Гость",
+  "@authGuest": { "description": "Auth: anonymous guest label" },
   "authInvalidEmail": "Введите корректный адрес электронной почты",
   "@authInvalidEmail": { "description": "Auth: invalid email message" },
   "authLogin": "Вход",

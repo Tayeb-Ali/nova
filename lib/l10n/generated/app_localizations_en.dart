@@ -1445,6 +1445,9 @@ class AppLocalizationsEn extends AppLocalizations {
       'Guest mode: nothing is locked. Sign-in is optional.';
 
   @override
+  String get authGuest => 'Guest';
+
+  @override
   String get authInvalidEmail => 'Enter a valid email';
 
   @override

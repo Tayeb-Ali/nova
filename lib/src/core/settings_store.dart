@@ -27,6 +27,8 @@ class Settings {
   // First-run flow: language picker shown until true, onboarding until true.
   final bool languageChosen;
   final bool onboardingDone;
+  // Post-slides auth choice (sign in/up or guest). Shown once when set.
+  final bool authPromptDone;
   const Settings({
     this.themeMode = ThemeMode.system,
     this.timeoutMs = AppConfig.defaultTimeoutMs,
@@ -43,6 +45,7 @@ class Settings {
     this.appLocale,
     this.languageChosen = false,
     this.onboardingDone = false,
+    this.authPromptDone = false,
   });
   Settings copyWith({
     ThemeMode? themeMode,
@@ -60,6 +63,7 @@ class Settings {
     String? appLocale,
     bool? languageChosen,
     bool? onboardingDone,
+    bool? authPromptDone,
   }) {
     return Settings(
       themeMode: themeMode ?? this.themeMode,
@@ -77,6 +81,7 @@ class Settings {
       appLocale: appLocale ?? this.appLocale,
       languageChosen: languageChosen ?? this.languageChosen,
       onboardingDone: onboardingDone ?? this.onboardingDone,
+      authPromptDone: authPromptDone ?? this.authPromptDone,
     );
   }
 }
@@ -100,6 +105,7 @@ class SettingsStore extends StateNotifier<Settings> {
   static const kAppLocale = "nova.appLocale";
   static const kLanguageChosen = "nova.languageChosen";
   static const kOnboardingDone = "nova.onboardingDone";
+  static const kAuthPromptDone = "nova.authPromptDone";
   // Languages offered in the first-launch picker and Settings.
   // Codes must match lib/l10n/app_<code>.arb files. Default is English.
   static const supportedLocales = ["en", "ar", "fr", "es", "ru", "zh"];
@@ -129,6 +135,7 @@ class SettingsStore extends StateNotifier<Settings> {
         : null;
     final languageChosen = prefs.getBool(kLanguageChosen) ?? false;
     final onboardingDone = prefs.getBool(kOnboardingDone) ?? false;
+    final authPromptDone = prefs.getBool(kAuthPromptDone) ?? false;
     ThemeMode mode = ThemeMode.system;
     if (themeIndex != null &&
         themeIndex >= 0 &&
@@ -151,6 +158,7 @@ class SettingsStore extends StateNotifier<Settings> {
       appLocale: appLocale,
       languageChosen: languageChosen,
       onboardingDone: onboardingDone,
+      authPromptDone: authPromptDone,
     );
   }
 
@@ -252,6 +260,7 @@ class SettingsStore extends StateNotifier<Settings> {
       appLocale: v,
       languageChosen: state.languageChosen,
       onboardingDone: state.onboardingDone,
+      authPromptDone: state.authPromptDone,
     );
     final prefs = await SharedPreferences.getInstance();
     if (v == null) {
@@ -275,6 +284,13 @@ class SettingsStore extends StateNotifier<Settings> {
     state = state.copyWith(onboardingDone: true);
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(kOnboardingDone, true);
+  }
+
+  /// Marks the post-slides auth choice done (signed in or guest).
+  Future<void> markAuthPromptDone() async {
+    state = state.copyWith(authPromptDone: true);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(kAuthPromptDone, true);
   }
 }
 

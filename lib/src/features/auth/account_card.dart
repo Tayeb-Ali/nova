@@ -59,18 +59,28 @@ class AccountCard extends ConsumerWidget {
                 child: Text(l10n.authTitle),
               ),
             ] else ...[
+              // Anonymous guests: no email, so no verify banner; the title
+              // shows the Guest label and sign-out/delete still apply.
               ListTile(
                 contentPadding: EdgeInsets.zero,
                 leading: CircleAvatar(
-                  child: Text(_initialFor(user.displayName ?? user.email ?? "")),
+                  child: Text(
+                    user.isAnonymous
+                        ? l10n.authGuest.characters.first
+                        : _initialFor(user.displayName ?? user.email ?? ""),
+                  ),
                 ),
                 title: Text(
-                  user.displayName ?? user.email ?? l10n.authAccount,
+                  user.isAnonymous
+                      ? l10n.authGuest
+                      : (user.displayName ?? user.email ?? l10n.authAccount),
                   overflow: TextOverflow.ellipsis,
                 ),
-                subtitle: user.displayName != null
-                    ? Text(user.email ?? "", overflow: TextOverflow.ellipsis)
-                    : null,
+                subtitle: user.isAnonymous || user.displayName == null
+                    ? (user.isAnonymous
+                          ? Text(l10n.authGuestNote)
+                          : null)
+                    : Text(user.email ?? "", overflow: TextOverflow.ellipsis),
               ),
               if (user.providerData.isNotEmpty)
                 Wrap(
@@ -86,7 +96,7 @@ class AccountCard extends ConsumerWidget {
                       ),
                   ],
                 ),
-              if (!user.emailVerified) ...[
+              if (!user.emailVerified && !user.isAnonymous) ...[
                 const SizedBox(height: 8),
                 _VerifyBanner(onResend: () => _resend(context, ref)),
               ],

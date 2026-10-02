@@ -1456,6 +1456,9 @@ class AppLocalizationsFr extends AppLocalizations {
       'Mode invité : rien n’est verrouillé. La connexion est facultative.';
 
   @override
+  String get authGuest => 'Invité';
+
+  @override
   String get authInvalidEmail => 'Saisis un e-mail valide';
 
   @override

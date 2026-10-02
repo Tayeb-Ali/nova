@@ -13,8 +13,16 @@ import "auth_service.dart";
 
 /// Push with `Navigator.of(context).push(MaterialPageRoute(...))`.
 /// Pops itself on success; nothing else in the app redirects because of auth.
+///
+/// Gate mode: pass [onExit] (used by the first-run flow where this screen is
+/// root content, not pushed — there is nothing to pop). Then success and
+/// "continue as guest" call [onExit] instead of popping, and the AppBar shows
+/// no back button so the user picks one of the offered choices.
 class LoginScreen extends ConsumerStatefulWidget {
-  const LoginScreen({super.key});
+  const LoginScreen({super.key, this.onExit});
+
+  /// Called instead of [Navigator.pop] on success and on guest-continue.
+  final VoidCallback? onExit;
 
   @override
   ConsumerState<LoginScreen> createState() => _LoginScreenState();
@@ -76,7 +84,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     if (!mounted) return;
     setState(() => _loading = false);
     if (result.ok) {
-      navigator.pop();
+      final exit = widget.onExit;
+      if (exit != null) {
+        exit();
+      } else {
+        navigator.pop();
+      }
     } else {
       setState(() => _error = result.message);
     }
@@ -158,15 +171,40 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     }
   }
 
+  /// Guest entry: best-effort Firebase anonymous sign-in (the user then shows
+  /// up in the owner's Firebase Console under Authentication > Users), then
+  /// always proceeds — offline just means a fully local guest.
+  Future<void> _continueAsGuest() async {
+    final navigator = Navigator.of(context);
+    final exit = widget.onExit;
+    try {
+      await ref.read(authServiceProvider).signInAnonymously();
+    } catch (_) {
+      // Best-effort only; guest mode never depends on the network.
+    }
+    if (!mounted) return;
+    if (exit != null) {
+      exit();
+    } else {
+      navigator.pop();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final user = ref.watch(currentUserProvider);
-    final showVerifyBanner = user != null && !user.emailVerified;
+    // Anonymous guests have no email: no verify banner for them.
+    final showVerifyBanner =
+        user != null && user.email != null && !user.emailVerified;
     final scheme = Theme.of(context).colorScheme;
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.authTitle)),
+      // Gate mode is root content: no back button, the user picks a choice.
+      appBar: AppBar(
+        title: Text(l10n.authTitle),
+        automaticallyImplyLeading: widget.onExit == null,
+      ),
       body: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 480),
@@ -317,7 +355,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               Align(
                 alignment: AlignmentDirectional.centerStart,
                 child: TextButton(
-                  onPressed: () => Navigator.of(context).pop(),
+                  onPressed: _loading ? null : () => _continueAsGuest(),
                   child: Text(l10n.authContinueAsGuest),
                 ),
               ),

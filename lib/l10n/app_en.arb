@@ -852,6 +852,8 @@
   "@authGoogle": { "description": "Auth: Google sign-in button" },
   "authGuestNote": "Guest mode: nothing is locked. Sign-in is optional.",
   "@authGuestNote": { "description": "Auth: guest-first note" },
+  "authGuest": "Guest",
+  "@authGuest": { "description": "Auth: anonymous guest label" },
   "authInvalidEmail": "Enter a valid email",
   "@authInvalidEmail": { "description": "Auth: invalid email message" },
   "authLogin": "Login",

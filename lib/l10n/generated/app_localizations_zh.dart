@@ -1422,6 +1422,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get authGuestNote => '访客模式：无任何功能锁定，登录为可选项。';
 
   @override
+  String get authGuest => '访客';
+
+  @override
   String get authInvalidEmail => '请输入有效的邮箱';
 
   @override

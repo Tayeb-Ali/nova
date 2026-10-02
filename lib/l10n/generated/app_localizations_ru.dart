@@ -1450,6 +1450,9 @@ class AppLocalizationsRu extends AppLocalizations {
       'Гостевой режим: ничего не заблокировано. Вход необязателен.';
 
   @override
+  String get authGuest => 'Гость';
+
+  @override
   String get authInvalidEmail => 'Введите корректный адрес электронной почты';
 
   @override

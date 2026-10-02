@@ -1451,6 +1451,9 @@ class AppLocalizationsEs extends AppLocalizations {
       'Modo invitado: nada está bloqueado. Iniciar sesión es opcional.';
 
   @override
+  String get authGuest => 'Invitado';
+
+  @override
   String get authInvalidEmail => 'Ingresa un correo válido';
 
   @override

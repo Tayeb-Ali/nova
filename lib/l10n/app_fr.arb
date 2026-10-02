@@ -846,6 +846,8 @@
   "@authGoogle": { "description": "Auth: Google sign-in button" },
   "authGuestNote": "Mode invité : rien n’est verrouillé. La connexion est facultative.",
   "@authGuestNote": { "description": "Auth: guest-first note" },
+  "authGuest": "Invité",
+  "@authGuest": { "description": "Auth: anonymous guest label" },
   "authInvalidEmail": "Saisis un e-mail valide",
   "@authInvalidEmail": { "description": "Auth: invalid email message" },
   "authLogin": "Connexion",

@@ -846,6 +846,8 @@
   "@authGoogle": { "description": "Auth: Google sign-in button" },
   "authGuestNote": "访客模式：无任何功能锁定，登录为可选项。",
   "@authGuestNote": { "description": "Auth: guest-first note" },
+  "authGuest": "访客",
+  "@authGuest": { "description": "Auth: anonymous guest label" },
   "authInvalidEmail": "请输入有效的邮箱",
   "@authInvalidEmail": { "description": "Auth: invalid email message" },
   "authLogin": "登录",

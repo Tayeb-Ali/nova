@@ -426,6 +426,7 @@
   "authGithub": "المتابعة عبر GitHub",
   "authGoogle": "المتابعة عبر Google",
   "authGuestNote": "وضع الضيف: لا شيء مقفل. تسجيل الدخول اختياري.",
+  "authGuest": "ضيف",
   "authInvalidEmail": "أدخل بريدًا صالحًا",
   "authLogin": "دخول",
   "authLogout": "تسجيل الخروج",
