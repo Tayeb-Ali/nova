@@ -23,9 +23,11 @@ android {
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion
-        // Target 28 to allow exec() from app data directory (Termux bootstrap) on Android 10+;
-        // targetSdk 29+ blocks untrusted_app -> app_data_file execute_no_trans (see logcat avc denied).
-        targetSdk = 28 //TODO: check this line  to targetSdk = flutter.targetSdkVersion
+        // Default tracks Flutter's targetSdk so release lint
+        // (ExpiredTargetSdkVersion) passes; the github flavor pins 28
+        // below (deliberate: targetSdk 29+ SELinux blocks exec from the app
+        // data dir, killing the embedded runtime — see github flavor).
+        targetSdk = flutter.targetSdkVersion
 
         // Uses the version code from pubspec.yaml. When using split APKs, 1000 * ABI_VERSION
         // is added automatically by Flutter. (https://developer.android.com/studio/build/configure-apk-splits#configure-APK-versions)
@@ -71,7 +73,10 @@ android {
     productFlavors {
         create("github") {
             dimension = "store"
-            // Inherits defaultConfig targetSdk = 28.
+            // INTENTIONAL (do NOT "fix"): targetSdk 28 allows exec() from
+            // the app data dir (Termux bootstrap) on Android 10+; 29+
+            // blocks untrusted_app -> app_data_file execute_no_trans.
+            targetSdk = 28
             buildConfigField("String", "DEFAULT_EXEC_MODE", "\"direct\"")
             buildConfigField("String", "NOVA_REPO_URL", "\"http://elteyab.sd/nova/apt\"")
             buildConfigField("String", "NOVA_REPO_SUITE", "\"stable\"")

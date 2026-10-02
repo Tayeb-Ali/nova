@@ -44,9 +44,10 @@ looks for the non-existent `app-debug.apk`. Always pass `--flavor`:
 
 ## Android constraints (deliberate, don't "fix")
 
-- `targetSdk = 28` is INTENTIONAL (comment in `android/app/build.gradle.kts`): targetSdk 29+ blocks exec from the app data dir via SELinux, killing the embedded runtime. Same reason for `useLegacyPackaging = true`. The "TODO: check this line" comment does not mean change it.
+- `targetSdk = 28` on the **github** flavor is INTENTIONAL (comment in `android/app/build.gradle.kts`): targetSdk 29+ blocks exec from the app data dir via SELinux, killing the embedded runtime. `defaultConfig` tracks Flutter's targetSdk so release lint passes; the github flavor pins 28. Same reason for `useLegacyPackaging = true`.
 - Internal storage path `run-as sd.adaa.codeide` is used because `pm clear` does not truly wipe app files.
-- Release signing is conditional: with `NOVA_KEYSTORE_PATH` (+ passwords/alias) set it signs release properly, otherwise it falls back to debug keys (local/CI only — never ship a fallback build to Play).
+- Release signing reads `android/key.properties` (never committed) with `NOVA_KEYSTORE_*` env fallback, else debug keys (local only — never ship a fallback build to Play).
+- `android/app/src/release/java/pl/leancode/patrol/PatrolPlugin.java` is a no-op stub: `patrol` is a dev_dependency (debug-only classes) but the generated registrant references it in all builds. Do NOT delete it and do NOT move `patrol` to `dependencies` (would bundle test libs into the Play APK).
 - Native C (`pty`) lives in `android/app/src/main/cpp` via CMake; ABIs are arm64-v8a + x86_64.
 
 ## Runtime / Termux gotchas
