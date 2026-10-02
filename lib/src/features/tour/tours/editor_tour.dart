@@ -5,16 +5,14 @@ import "package:tutorial_coach_mark/tutorial_coach_mark.dart";
 import "../tour_keys.dart";
 import "../tour_service.dart";
 
-// Editor tour content: full workspace coverage in 24 steps.
+// Editor tour content: full workspace coverage in 22 steps.
 //
 // Order rationale (all-real-press: a tap on the highlighted widget BOTH
 // performs its real action AND advances after 600ms; TourService filters
 // only at tour start, so a mid-tour press that unmounts later targets
 // strands the tour — bodies on dangerous steps say "tap Next to stay"):
-//   1-3.  wsProjectDropdown, wsPalette, wsNewProject — AppBar anchors.
+//   1-2.  wsProjectDropdown, wsPalette — AppBar anchors.
 //          Dropdown/palette open menus (dismiss with Back, or Next).
-//          NewProject is EXPLAIN-ONLY (live: false): a real press would open
-//          the create dialog over the tour overlay.
 //   4-6.  explorerEntry, explorerNewFile, explorerGoUp — BEFORE the pane
 //          toggle. Entry first: tapping it opens a tab, guaranteeing the
 //          tab strip is populated for steps 8+. NewFile opens a name
@@ -32,15 +30,13 @@ import "../tour_service.dart";
 //          editor area and survives it.
 //   20. wsDefinition — navigates, possibly to another file; every later
 //        step is AppBar/strip level and survives a file switch.
-//   21. wsTabClose — AFTER every tab-content step (a clean press closes
+//   20. wsTabClose — AFTER every tab-content step (a clean press closes
 //        the tab; dirty asks first). Body warns single-tab users to use
 //        Next instead.
-//   22. wsDeleteProject — AppBar-level, survives the tab close. Opens the
-//        confirm dialog; Cancel reveals the next step.
-//   23. wsToolbarHide — collapses the AppBar into the 28px strip. The next
+//   21. wsToolbarHide — collapses the AppBar into the 28px strip. The next
 //        (last) step lives in the tab strip and survives it; the body tells
 //        how to restore via the strip button.
-//   24. wsFocus — ABSOLUTE LAST: entering focus mode unmounts the normal
+//   22. wsFocus — ABSOLUTE LAST: entering focus mode unmounts the normal
 //        chrome (AppBar, strip, drawer), so nothing may follow it.
 //
 // Deliberately NOT stepped: paletteField (targets a dialog that opens above
@@ -91,12 +87,6 @@ List<TargetFocus> buildEditorTargets(AppLocalizations l10n) {
       keyTarget: TourKeys.wsPalette,
       title: l10n.tourEdPaletteTitle,
       body: l10n.tourEdPaletteBody,
-    ),
-    step(
-      keyTarget: TourKeys.wsNewProject,
-      title: l10n.tourEdNewProjectTitle,
-      body: l10n.tourEdNewProjectBody,
-      live: false,
     ),
     step(
       keyTarget: TourKeys.explorerEntry,
@@ -187,11 +177,6 @@ List<TargetFocus> buildEditorTargets(AppLocalizations l10n) {
       keyTarget: TourKeys.wsTabClose,
       title: l10n.tourEdTabCloseTitle,
       body: l10n.tourEdTabCloseBody,
-    ),
-    step(
-      keyTarget: TourKeys.wsDeleteProject,
-      title: l10n.tourEdDeleteTitle,
-      body: l10n.tourEdDeleteBody,
     ),
     step(
       keyTarget: TourKeys.wsToolbarHide,

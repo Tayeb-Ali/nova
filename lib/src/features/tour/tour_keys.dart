@@ -25,8 +25,6 @@ abstract final class TourKeys {
   static final GlobalKey wsToolbarShow = GlobalKey();
   static final GlobalKey wsPalette = GlobalKey();
   static final GlobalKey wsExplorerToggle = GlobalKey();
-  static final GlobalKey wsNewProject = GlobalKey();
-  static final GlobalKey wsDeleteProject = GlobalKey();
   static final GlobalKey wsTabStrip = GlobalKey();
   static final GlobalKey wsTabClose = GlobalKey();
   static final GlobalKey wsSave = GlobalKey();
@@ -84,8 +82,6 @@ abstract final class TourKeys {
     ("wsToolbarShow", wsToolbarShow),
     ("wsPalette", wsPalette),
     ("wsExplorerToggle", wsExplorerToggle),
-    ("wsNewProject", wsNewProject),
-    ("wsDeleteProject", wsDeleteProject),
     ("wsTabStrip", wsTabStrip),
     ("wsTabClose", wsTabClose),
     ("wsSave", wsSave),

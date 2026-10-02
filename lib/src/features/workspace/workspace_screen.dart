@@ -275,45 +275,6 @@ class _WorkspaceScreenState extends ConsumerState<WorkspaceScreen> {
     await _loadProjects(select: created);
   }
 
-  Future<void> _deleteProject(ProjectInfo project) async {
-    final l10n = AppLocalizations.of(context);
-    final ok = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(l10n.projectDeleteTitle),
-        content: Text(l10n.projectDeleteBody(project.name)),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: Text(l10n.actionCancel),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: Text(l10n.actionDelete),
-          ),
-        ],
-      ),
-    );
-    if (ok != true) return;
-    final pid = ref.read(runningPidProvider);
-    if (pid != null) {
-      try {
-        await ref.read(processServiceProvider).kill(pid);
-      } catch (_) {
-        // Ignore: process may already be gone.
-      }
-      ref.read(runningPidProvider.notifier).state = null;
-    }
-    try {
-      await ref.read(projectServiceProvider).deleteProject(project.path);
-    } catch (e) {
-      if (!mounted) return;
-      _toast(l10n.commonDeleteFailed(e.toString()));
-      return;
-    }
-    await _loadProjects();
-  }
-
   Widget _projectSelector(
     BuildContext context,
     List<ProjectInfo>? projects,
@@ -461,20 +422,6 @@ class _WorkspaceScreenState extends ConsumerState<WorkspaceScreen> {
                       ? AppLocalizations.of(context).explorerHide
                       : AppLocalizations.of(context).explorerShow,
                   icon: Icon(_explorerVisible ? Icons.menu_open : Icons.menu),
-                ),
-                IconButton(
-                  key: TourKeys.wsNewProject,
-                  onPressed: _newProject,
-                  tooltip: AppLocalizations.of(context).projectNew,
-                  icon: const Icon(Icons.create_new_folder),
-                ),
-                IconButton(
-                  key: TourKeys.wsDeleteProject,
-                  onPressed: activeProject == null
-                      ? null
-                      : () => _deleteProject(activeProject),
-                  tooltip: AppLocalizations.of(context).projectDelete,
-                  icon: const Icon(Icons.delete_outline),
                 ),
                 TourButton(tourId: "editor", buildTargets: buildEditorTargets),
               ],
