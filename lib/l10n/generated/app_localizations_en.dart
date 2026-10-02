@@ -1396,4 +1396,103 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get aboutOpenFailed => 'Could not open the link';
+
+  @override
+  String get authAccount => 'Account';
+
+  @override
+  String get authContinueAsGuest => 'Continue as guest';
+
+  @override
+  String get authDelete => 'Delete account';
+
+  @override
+  String get authDeleteBody =>
+      'This permanently deletes your account. Continue?';
+
+  @override
+  String get authDeleteTitle => 'Delete account?';
+
+  @override
+  String get authEmail => 'Email';
+
+  @override
+  String get authForgot => 'Forgot password?';
+
+  @override
+  String get authForgotHint => 'We will email you a reset link.';
+
+  @override
+  String get authForgotTitle => 'Reset password';
+
+  @override
+  String get authGithub => 'Continue with GitHub';
+
+  @override
+  String get authGoogle => 'Continue with Google';
+
+  @override
+  String get authGuestNote =>
+      'Guest mode: nothing is locked. Sign-in is optional.';
+
+  @override
+  String get authInvalidEmail => 'Enter a valid email';
+
+  @override
+  String get authLogin => 'Login';
+
+  @override
+  String get authLogout => 'Sign out';
+
+  @override
+  String get authPassword => 'Password';
+
+  @override
+  String get authPasswordTooShort => 'Password must be at least 6 characters';
+
+  @override
+  String get authResend => 'Resend';
+
+  @override
+  String get authResent => 'Verification email sent';
+
+  @override
+  String get authSend => 'Send';
+
+  @override
+  String get authSent => 'Reset email sent';
+
+  @override
+  String get authSignup => 'Signup';
+
+  @override
+  String get authSignedOut => 'Signed out';
+
+  @override
+  String get authTitle => 'Sign in';
+
+  @override
+  String get authVerifyBanner =>
+      'Email not verified. Verify to secure your account.';
+
+  @override
+  String get authX => 'Continue with X';
+
+  @override
+  String get notifCopyToken => 'Copy push token';
+
+  @override
+  String get notifDelete => 'Delete';
+
+  @override
+  String get notifEmpty => 'No notifications yet';
+
+  @override
+  String get notifMarkAllRead => 'Mark all read';
+
+  @override
+  String get notifTitle => 'Notifications';
+
+  @override
+  String get notifTokenCopied => 'Push token copied';
 }

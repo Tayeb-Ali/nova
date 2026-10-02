@@ -1,5 +1,8 @@
 plugins {
     id("com.android.application")
+    // START: FlutterFire Configuration
+    id("com.google.gms.google-services")
+    // END: FlutterFire Configuration
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
 }
@@ -15,6 +18,9 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
+        // Required by flutter_local_notifications v22 (uses java.time APIs):
+        // without this, checkGithubDebugAarMetadata fails the build.
+        isCoreLibraryDesugaringEnabled = true
     }
 
     defaultConfig {
@@ -166,6 +172,8 @@ android {
 
 dependencies {
     implementation("org.apache.commons:commons-compress:1.27.1")
+    // Desugared java.time backport for flutter_local_notifications v22.
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
     // Patrol E2E instrumentation runner.
     androidTestImplementation("androidx.test.ext:junit:1.2.1")
     androidTestImplementation("androidx.test:runner:1.5.1")

@@ -1393,4 +1393,101 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get aboutOpenFailed => 'تعذّر فتح الرابط';
+
+  @override
+  String get authAccount => 'الحساب';
+
+  @override
+  String get authContinueAsGuest => 'المتابعة كضيف';
+
+  @override
+  String get authDelete => 'حذف الحساب';
+
+  @override
+  String get authDeleteBody =>
+      'سيؤدي هذا إلى حذف حسابك نهائيًا. هل تريد المتابعة؟';
+
+  @override
+  String get authDeleteTitle => 'حذف الحساب؟';
+
+  @override
+  String get authEmail => 'البريد الإلكتروني';
+
+  @override
+  String get authForgot => 'نسيت كلمة المرور؟';
+
+  @override
+  String get authForgotHint => 'سنرسل رابط إعادة التعيين إلى بريدك.';
+
+  @override
+  String get authForgotTitle => 'إعادة تعيين كلمة المرور';
+
+  @override
+  String get authGithub => 'المتابعة عبر GitHub';
+
+  @override
+  String get authGoogle => 'المتابعة عبر Google';
+
+  @override
+  String get authGuestNote => 'وضع الضيف: لا شيء مقفل. تسجيل الدخول اختياري.';
+
+  @override
+  String get authInvalidEmail => 'أدخل بريدًا صالحًا';
+
+  @override
+  String get authLogin => 'دخول';
+
+  @override
+  String get authLogout => 'تسجيل الخروج';
+
+  @override
+  String get authPassword => 'كلمة المرور';
+
+  @override
+  String get authPasswordTooShort => 'كلمة المرور ٦ أحرف على الأقل';
+
+  @override
+  String get authResend => 'إعادة الإرسال';
+
+  @override
+  String get authResent => 'تم إرسال رسالة التحقق';
+
+  @override
+  String get authSend => 'إرسال';
+
+  @override
+  String get authSent => 'تم إرسال رابط التعيين';
+
+  @override
+  String get authSignup => 'حساب جديد';
+
+  @override
+  String get authSignedOut => 'غير مسجّل';
+
+  @override
+  String get authTitle => 'تسجيل الدخول';
+
+  @override
+  String get authVerifyBanner => 'بريدك غير مؤكّد. أكّده لتأمين حسابك.';
+
+  @override
+  String get authX => 'المتابعة عبر X';
+
+  @override
+  String get notifCopyToken => 'نسخ رمز الدفع';
+
+  @override
+  String get notifDelete => 'حذف';
+
+  @override
+  String get notifEmpty => 'لا توجد إشعارات بعد';
+
+  @override
+  String get notifMarkAllRead => 'تعليم الكل كمقروء';
+
+  @override
+  String get notifTitle => 'الإشعارات';
+
+  @override
+  String get notifTokenCopied => 'تم نسخ رمز الدفع';
 }

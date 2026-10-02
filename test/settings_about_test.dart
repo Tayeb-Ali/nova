@@ -84,6 +84,12 @@ void main() {
       await tester.pump();
     }
     expect(find.text('AI completion'), findsOneWidget);
+    // Presence in the tree is not visibility: the row may sit below the fold
+    // (e.g. under the account card), where tap() would miss. Scroll it into
+    // view first.
+    await tester.ensureVisible(find.text('AI completion'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
     final container = ProviderScope.containerOf(
       tester.element(find.byType(SettingsScreen)),
     );

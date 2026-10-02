@@ -2557,6 +2557,198 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Could not open the link'**
   String get aboutOpenFailed;
+
+  /// Auth: account section header
+  ///
+  /// In en, this message translates to:
+  /// **'Account'**
+  String get authAccount;
+
+  /// Auth: continue without signing in
+  ///
+  /// In en, this message translates to:
+  /// **'Continue as guest'**
+  String get authContinueAsGuest;
+
+  /// Auth: delete account action
+  ///
+  /// In en, this message translates to:
+  /// **'Delete account'**
+  String get authDelete;
+
+  /// Auth: delete confirmation body
+  ///
+  /// In en, this message translates to:
+  /// **'This permanently deletes your account. Continue?'**
+  String get authDeleteBody;
+
+  /// Auth: delete confirmation title
+  ///
+  /// In en, this message translates to:
+  /// **'Delete account?'**
+  String get authDeleteTitle;
+
+  /// Auth: email field label
+  ///
+  /// In en, this message translates to:
+  /// **'Email'**
+  String get authEmail;
+
+  /// Auth: forgot password link
+  ///
+  /// In en, this message translates to:
+  /// **'Forgot password?'**
+  String get authForgot;
+
+  /// Auth: reset dialog hint
+  ///
+  /// In en, this message translates to:
+  /// **'We will email you a reset link.'**
+  String get authForgotHint;
+
+  /// Auth: reset dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Reset password'**
+  String get authForgotTitle;
+
+  /// Auth: GitHub sign-in button
+  ///
+  /// In en, this message translates to:
+  /// **'Continue with GitHub'**
+  String get authGithub;
+
+  /// Auth: Google sign-in button
+  ///
+  /// In en, this message translates to:
+  /// **'Continue with Google'**
+  String get authGoogle;
+
+  /// Auth: guest-first note
+  ///
+  /// In en, this message translates to:
+  /// **'Guest mode: nothing is locked. Sign-in is optional.'**
+  String get authGuestNote;
+
+  /// Auth: invalid email message
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid email'**
+  String get authInvalidEmail;
+
+  /// Auth: login tab and button
+  ///
+  /// In en, this message translates to:
+  /// **'Login'**
+  String get authLogin;
+
+  /// Auth: sign out action
+  ///
+  /// In en, this message translates to:
+  /// **'Sign out'**
+  String get authLogout;
+
+  /// Auth: password field label
+  ///
+  /// In en, this message translates to:
+  /// **'Password'**
+  String get authPassword;
+
+  /// Auth: short password message
+  ///
+  /// In en, this message translates to:
+  /// **'Password must be at least 6 characters'**
+  String get authPasswordTooShort;
+
+  /// Auth: resend verification action
+  ///
+  /// In en, this message translates to:
+  /// **'Resend'**
+  String get authResend;
+
+  /// Auth: verification sent confirmation
+  ///
+  /// In en, this message translates to:
+  /// **'Verification email sent'**
+  String get authResent;
+
+  /// Auth: send reset link action
+  ///
+  /// In en, this message translates to:
+  /// **'Send'**
+  String get authSend;
+
+  /// Auth: reset sent confirmation
+  ///
+  /// In en, this message translates to:
+  /// **'Reset email sent'**
+  String get authSent;
+
+  /// Auth: signup tab and button
+  ///
+  /// In en, this message translates to:
+  /// **'Signup'**
+  String get authSignup;
+
+  /// Auth: signed-out state
+  ///
+  /// In en, this message translates to:
+  /// **'Signed out'**
+  String get authSignedOut;
+
+  /// Auth: login screen title
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in'**
+  String get authTitle;
+
+  /// Auth: verify-email banner
+  ///
+  /// In en, this message translates to:
+  /// **'Email not verified. Verify to secure your account.'**
+  String get authVerifyBanner;
+
+  /// Auth: X sign-in button
+  ///
+  /// In en, this message translates to:
+  /// **'Continue with X'**
+  String get authX;
+
+  /// Notifications: copy FCM token action
+  ///
+  /// In en, this message translates to:
+  /// **'Copy push token'**
+  String get notifCopyToken;
+
+  /// Notifications: delete one action
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get notifDelete;
+
+  /// Notifications: empty state
+  ///
+  /// In en, this message translates to:
+  /// **'No notifications yet'**
+  String get notifEmpty;
+
+  /// Notifications: mark all read action
+  ///
+  /// In en, this message translates to:
+  /// **'Mark all read'**
+  String get notifMarkAllRead;
+
+  /// Notifications: screen title
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications'**
+  String get notifTitle;
+
+  /// Notifications: token copied confirmation
+  ///
+  /// In en, this message translates to:
+  /// **'Push token copied'**
+  String get notifTokenCopied;
 }
 
 class _AppLocalizationsDelegate

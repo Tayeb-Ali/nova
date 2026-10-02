@@ -3,6 +3,8 @@ import "dart:async";
 import "package:flutter/material.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "l10n/generated/app_localizations.dart";
+import "src/core/services/fcm_service.dart";
+import "src/core/services/notification_service.dart";
 import "src/core/services/setup_service.dart";
 import "src/core/ui/keyboard_visibility.dart";
 import "src/core/ui/nova_nav_bar.dart";
@@ -12,6 +14,9 @@ import "src/core/settings_store.dart";
 import "src/features/editor/autocomplete/language_members.dart";
 import "src/features/editor/theme/app_theme.dart";
 import "src/features/editor/theme/theme_pack_store.dart";
+import "src/features/notifications/notifications_bell.dart";
+import "src/features/notifications/notifications_screen.dart";
+import "src/features/notifications/notifications_store.dart";
 import "src/features/runtime/runtime_screen.dart";
 import "src/features/settings/settings_screen.dart";
 import "src/features/splash/splash_screen.dart";
@@ -46,6 +51,11 @@ class NovaApp extends ConsumerWidget {
       // Branded splash first: holds a loader until the engine is warm, then
       // fades into the shell. Kills the white first-frame flash.
       home: const SplashGate(child: IdeShell()),
+      // Deep-link targets for notification taps (FCM data["route"] and the
+      // system-tray payload). Pushes are best-effort and never guarded.
+      routes: {
+        NotificationsScreen.routeName: (_) => const NotificationsScreen(),
+      },
     );
   }
 }
@@ -61,6 +71,16 @@ class IdeShell extends ConsumerStatefulWidget {
 class _IdeShellState extends ConsumerState<IdeShell> {
   int _index = 0;
   bool _bootstrapPromptShown = false;
+  // FCM foreground wiring (guest-first, best-effort): foreground messages land
+  // in the in-app center via the store, and tap routes deep-link via
+  // pushNamed. The native event channel is untouched (IdeEventBus still owns
+  // its single listener); FCM/NotificationService use their own channels.
+  //
+  // Created lazily inside [_initFcm]: the constructor touches
+  // `FirebaseMessaging.instance`, which throws with no Firebase app (widget
+  // tests, offline first-run), so it must never run during State creation.
+  StreamSubscription<String>? _fcmRouteSub;
+  StreamSubscription<String>? _trayRouteSub;
   // Editor-tab immersion: the editor opens with NO bottom bar so code keeps
   // maximum space. A swipe up from the bottom edge reveals the full bar for
   // a few seconds (then it hides again); any tab switch resets the state.
@@ -120,8 +140,56 @@ class _IdeShellState extends ConsumerState<IdeShell> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _checkBootstrap());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkBootstrap();
+      _initFcm();
+    });
     MemberRegistry.ensureLoaded();
+  }
+
+  /// Starts FCM (permission, topic, token, foreground display) and wires tap
+  /// routes. Never throws; SplashGate/bootstrap logic is untouched.
+  Future<void> _initFcm() async {
+    if (!mounted) return;
+    // Capture the notifier once: the onNotification callback stays safe even
+    // if this State is disposed before a message arrives.
+    final store = ref.read(notificationsStoreProvider.notifier);
+    late final FcmService fcm;
+    try {
+      fcm = FcmService();
+    } catch (_) {
+      // No Firebase app (widget tests, offline first-run): nothing to wire.
+      return;
+    }
+    try {
+      await fcm.init(onNotification: store.push);
+    } catch (_) {
+      // FCM unavailable (offline / no Play services): guest mode continues.
+    }
+    // Cold-start tap: terminated-app FCM tap first, then the system-tray tap.
+    try {
+      final pending =
+          await fcm.getInitialRoute() ??
+          await NotificationService.instance.getInitialRoute();
+      if (pending != null && pending.isNotEmpty) _openRoute(pending);
+    } catch (_) {}
+    // Background taps while alive: FCM + tray streams merged to one handler.
+    try {
+      _fcmRouteSub = fcm.onRouteOpened.listen(_openRoute);
+      _trayRouteSub = NotificationService.instance.onRouteTap.listen(
+        _openRoute,
+      );
+    } catch (_) {}
+  }
+
+  /// Best-effort deep-link: unknown routes are ignored, never crash.
+  void _openRoute(String route) {
+    if (!mounted || route.isEmpty) return;
+    try {
+      Navigator.of(context).pushNamed(route);
+    } catch (_) {
+      // Route not registered: the notification itself already landed.
+    }
   }
 
   Future<void> _checkBootstrap() async {
@@ -151,7 +219,42 @@ class _IdeShellState extends ConsumerState<IdeShell> {
   @override
   void dispose() {
     _editorBarTimer?.cancel();
+    _fcmRouteSub?.cancel();
+    _trayRouteSub?.cancel();
     super.dispose();
+  }
+
+  /// Wraps a shell body with the notification bell: a compact floating
+  /// circle just below the screen AppBar (top-end, RTL-aware) with the
+  /// unread badge. Overlay-only — screens, nav, and Scaffold structure
+  /// are untouched; the bell pushes the notifications screen.
+  ///
+  /// The Stack itself is ALWAYS built (swapping it conditionally would
+  /// remount the whole shell on every tab switch and wipe screen state —
+  /// same rule as the editor edge-swipe Listener below); only the badge
+  /// overlay is skipped on the editor tab ([_index] == 1), where the
+  /// floating circle would sit exactly on the tab strip's trailing actions
+  /// (overflow menu) on phone widths and swallow their taps. The bell stays
+  /// one tap away on every other tab, and tray deep-links still work.
+  Widget _withBell(Widget child) {
+    return Stack(
+      children: [
+        child,
+        if (_index != 1)
+          PositionedDirectional(
+            top: MediaQuery.paddingOf(context).top + kToolbarHeight + 8,
+            end: 12,
+            child: Material(
+              type: MaterialType.circle,
+              color: Theme.of(
+                context,
+              ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.94),
+              elevation: 3,
+              child: const NotificationsBell(),
+            ),
+          ),
+      ],
+    );
   }
 
   @override
@@ -224,7 +327,7 @@ class _IdeShellState extends ConsumerState<IdeShell> {
               ],
             ),
             const VerticalDivider(width: 1),
-            Expanded(child: visibleBody),
+            Expanded(child: _withBell(visibleBody)),
           ],
         ),
       );
@@ -240,7 +343,7 @@ class _IdeShellState extends ConsumerState<IdeShell> {
         onPointerMove: _onPointerMove,
         onPointerUp: _onPointerEnd,
         onPointerCancel: _onPointerEnd,
-        child: visibleBody,
+        child: _withBell(visibleBody),
       ),
       // Distraction-free typing: while the keyboard is up the bottom bar
       // is pure chrome. Hide it so the editor keeps maximum height; it

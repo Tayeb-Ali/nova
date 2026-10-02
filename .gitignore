@@ -53,6 +53,23 @@ android/key.properties
 *.keystore
 *.p12
 
+# Firebase: the values in lib/firebase_options.dart (apiKey, appId,
+# projectId...) are PUBLIC identifiers by design — they ship inside every
+# APK and are readable by anyone in seconds. Real protection is server-side:
+# restrict the Android API key (package + SHA-1) in Google Cloud Console,
+# enable App Check, and lock Security Rules. NEVER commit these instead:
+**/google-services.json
+**/GoogleService-Info.plist
+**/*service-account*.json
+**/firebase-adminsdk*.json
+firebase-service-account.json
+# FlutterFire-generated (regenerate with the command below). Kept out of the
+# public repo so each clone binds its own Firebase project; contributors
+# without one copy lib/firebase_options.dart.example and run in guest mode:
+#   flutterfire configure --project=<PROJECT_ID> --platforms=android --android-package-name=sd.adaa.codeide
+/lib/firebase_options.dart
+/firebase.json
+
 #docs and examples
 /docs
 

@@ -8,6 +8,7 @@ import "package:re_editor/re_editor.dart";
 import "package:re_highlight/languages/dart.dart";
 
 import "package:flutter_secure_storage/flutter_secure_storage.dart";
+import "package:nova/src/features/auth/auth.dart";
 
 import "../../../l10n/generated/app_localizations.dart";
 import "../../core/services/app_info_service.dart";
@@ -134,6 +135,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       body: ListView(
         padding: const EdgeInsets.all(8),
         children: [
+          const AccountCard(),
           Card(
             elevation: 0,
             color: scheme.surfaceContainer,
