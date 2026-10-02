@@ -223,6 +223,8 @@
   "settingsTimeoutLabel": "المهلة (مللي ثانية، 1000-120000)",
   "settingsAutocomplete": "الإكمال التلقائي",
   "settingsAutocompleteSub": "اقتراحات الكلمات والمقاطع أثناء الكتابة",
+  "settingsAiCompletion": "الإكمال بالذكاء الاصطناعي",
+  "settingsAiCompletionSub": "اقتراحات النموذج في قائمة الإكمال",
   "settingsMatchTheme": "مطابقة التطبيق مع سمة المحرر",
   "settingsMatchThemeSub": "التطبيق كله يتبع ألوان سمة المحرر",
   "settingsWordWrap": "التفاف الأسطر",

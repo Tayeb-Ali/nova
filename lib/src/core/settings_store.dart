@@ -13,6 +13,9 @@ class Settings {
   final String aiModel;
   final String aiProvider;
   final bool autocompleteEnabled;
+  // Independent AI-completion toggle: the master autocomplete switch gates
+  // the whole popup system, this flag gates only the AI source within it.
+  final bool aiCompletionEnabled;
   final bool followEditorTheme;
   final String editorFont;
   final double editorFontSize;
@@ -27,6 +30,7 @@ class Settings {
     this.aiModel = SettingsStore.defaultModel,
     this.aiProvider = "openai",
     this.autocompleteEnabled = true,
+    this.aiCompletionEnabled = true,
     this.followEditorTheme = true,
     this.editorFont = "system",
     this.editorFontSize = 13.0,
@@ -41,6 +45,7 @@ class Settings {
     String? aiModel,
     String? aiProvider,
     bool? autocompleteEnabled,
+    bool? aiCompletionEnabled,
     bool? followEditorTheme,
     String? editorFont,
     double? editorFontSize,
@@ -55,6 +60,7 @@ class Settings {
       aiModel: aiModel ?? this.aiModel,
       aiProvider: aiProvider ?? this.aiProvider,
       autocompleteEnabled: autocompleteEnabled ?? this.autocompleteEnabled,
+      aiCompletionEnabled: aiCompletionEnabled ?? this.aiCompletionEnabled,
       followEditorTheme: followEditorTheme ?? this.followEditorTheme,
       editorFont: editorFont ?? this.editorFont,
       editorFontSize: editorFontSize ?? this.editorFontSize,
@@ -75,6 +81,7 @@ class SettingsStore extends StateNotifier<Settings> {
   static const kModel = "nova.aiModel";
   static const kAiProvider = "nova.aiProvider";
   static const kAutocomplete = "nova.autocomplete";
+  static const kAiCompletion = "nova.aiCompletion";
   static const kFollowTheme = "nova.followEditorTheme";
   static const kEditorFont = "nova.editorFont";
   static const kEditorFontSize = "nova.editorFontSize";
@@ -92,6 +99,7 @@ class SettingsStore extends StateNotifier<Settings> {
     final model = prefs.getString(kModel);
     final aiProvider = prefs.getString(kAiProvider);
     final autocomplete = prefs.getBool(kAutocomplete);
+    final aiCompletion = prefs.getBool(kAiCompletion);
     final followTheme = prefs.getBool(kFollowTheme);
     final editorFont = prefs.getString(kEditorFont);
     final editorFontSize = prefs.getDouble(kEditorFontSize);
@@ -115,6 +123,7 @@ class SettingsStore extends StateNotifier<Settings> {
       aiModel: model ?? defaultModel,
       aiProvider: aiProvider ?? "openai",
       autocompleteEnabled: autocomplete ?? true,
+      aiCompletionEnabled: aiCompletion ?? true,
       followEditorTheme: followTheme ?? true,
       editorFont: editorFont ?? "system",
       editorFontSize: (editorFontSize ?? 13.0).clamp(10.0, 24.0),
@@ -163,6 +172,12 @@ class SettingsStore extends StateNotifier<Settings> {
     await prefs.setBool(kAutocomplete, enabled);
   }
 
+  Future<void> setAiCompletionEnabled(bool enabled) async {
+    state = state.copyWith(aiCompletionEnabled: enabled);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(kAiCompletion, enabled);
+  }
+
   Future<void> setFollowEditorTheme(bool follow) async {
     state = state.copyWith(followEditorTheme: follow);
     final prefs = await SharedPreferences.getInstance();
@@ -205,6 +220,7 @@ class SettingsStore extends StateNotifier<Settings> {
       aiModel: state.aiModel,
       aiProvider: state.aiProvider,
       autocompleteEnabled: state.autocompleteEnabled,
+      aiCompletionEnabled: state.aiCompletionEnabled,
       followEditorTheme: state.followEditorTheme,
       editorFont: state.editorFont,
       editorFontSize: state.editorFontSize,

@@ -448,8 +448,11 @@ class _ReEditorAdapterState extends ConsumerState<ReEditorAdapter> {
           after.write(_controller.codeLines[i].text);
         }
         final String prefix = before.toString();
+        // AI source has its own toggle within the master autocomplete
+        // switch (which gates the whole popup system above).
+        final settings = ref.read(settingsStoreProvider);
         final bool enabled =
-            ref.read(settingsStoreProvider).autocompleteEnabled;
+            settings.autocompleteEnabled && settings.aiCompletionEnabled;
         if (!AiCompletionPolicy.shouldFetch(
           enabled: enabled,
           documentText: _controller.text,

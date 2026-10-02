@@ -227,6 +227,15 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   ),
                   SwitchListTile(
                     contentPadding: EdgeInsets.zero,
+                    title: Text(AppLocalizations.of(context).settingsAiCompletion),
+                    subtitle: Text(
+                      AppLocalizations.of(context).settingsAiCompletionSub,
+                    ),
+                    value: settings.aiCompletionEnabled,
+                    onChanged: (v) => store.setAiCompletionEnabled(v),
+                  ),
+                  SwitchListTile(
+                    contentPadding: EdgeInsets.zero,
                     title: Text(AppLocalizations.of(context).settingsMatchTheme),
                     subtitle: Text(
                       AppLocalizations.of(context).settingsMatchThemeSub,

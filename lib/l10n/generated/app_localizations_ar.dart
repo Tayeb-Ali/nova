@@ -755,6 +755,12 @@ class AppLocalizationsAr extends AppLocalizations {
       'اقتراحات الكلمات والمقاطع أثناء الكتابة';
 
   @override
+  String get settingsAiCompletion => 'الإكمال بالذكاء الاصطناعي';
+
+  @override
+  String get settingsAiCompletionSub => 'اقتراحات النموذج في قائمة الإكمال';
+
+  @override
   String get settingsMatchTheme => 'مطابقة التطبيق مع سمة المحرر';
 
   @override

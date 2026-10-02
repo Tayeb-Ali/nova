@@ -755,6 +755,13 @@ class AppLocalizationsEn extends AppLocalizations {
       'Keyword, snippet and word suggestions while typing';
 
   @override
+  String get settingsAiCompletion => 'AI completion';
+
+  @override
+  String get settingsAiCompletionSub =>
+      'Model suggestions in the autocomplete popup';
+
+  @override
   String get settingsMatchTheme => 'Match app to editor theme';
 
   @override

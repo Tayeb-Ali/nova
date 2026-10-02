@@ -1436,6 +1436,18 @@ abstract class AppLocalizations {
   /// **'Keyword, snippet and word suggestions while typing'**
   String get settingsAutocompleteSub;
 
+  /// Settings: AI completion title
+  ///
+  /// In en, this message translates to:
+  /// **'AI completion'**
+  String get settingsAiCompletion;
+
+  /// Settings: AI completion subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Model suggestions in the autocomplete popup'**
+  String get settingsAiCompletionSub;
+
   /// Settings: follow editor theme
   ///
   /// In en, this message translates to:

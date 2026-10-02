@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:nova/l10n/generated/app_localizations.dart';
 import 'package:nova/src/core/services/app_info_service.dart';
+import 'package:nova/src/core/settings_store.dart';
 import 'package:nova/src/features/settings/settings_screen.dart';
 
 void main() {
@@ -51,6 +52,47 @@ void main() {
     }
     expect(find.text('About'), findsOneWidget);
     expect(find.text('v0.1.6 (build 6)'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('Settings AI completion toggle flips the flag', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        child: MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: const SettingsScreen(),
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    // The editor card may sit below the fold: drag until the row appears.
+    for (
+      var i = 0;
+      i < 10 && find.text('AI completion').evaluate().isEmpty;
+      i++
+    ) {
+      await tester.drag(find.byType(ListView), const Offset(0, -500));
+      await tester.pump();
+    }
+    expect(find.text('AI completion'), findsOneWidget);
+    final container = ProviderScope.containerOf(
+      tester.element(find.byType(SettingsScreen)),
+    );
+    expect(
+      container.read(settingsStoreProvider).aiCompletionEnabled,
+      isTrue,
+    );
+    await tester.tap(find.text('AI completion'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(
+      container.read(settingsStoreProvider).aiCompletionEnabled,
+      isFalse,
+    );
     expect(tester.takeException(), isNull);
   });
 }
