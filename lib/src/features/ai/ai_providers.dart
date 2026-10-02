@@ -1,4 +1,5 @@
-﻿import 'package:flutter_riverpod/flutter_riverpod.dart';
+﻿import 'package:dio/dio.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
@@ -42,6 +43,7 @@ class AiState {
 /// Runs AI requests and exposes loading/result/error.
 class AiNotifier extends StateNotifier<AiState> {
   final AiClient _client;
+  CancelToken? _cancelToken;
 
   AiNotifier(this._client) : super(const AiState());
 
@@ -67,6 +69,53 @@ class AiNotifier extends StateNotifier<AiState> {
     } catch (e) {
       state = state.copyWith(loading: false, error: e.toString());
     }
+  }
+
+  /// Streams the response, appending each chunk to [AiState.result] as it
+  /// arrives. Cancellation via [cancel] keeps the partial result and only
+  /// clears the loading flag.
+  Future<void> runStream({
+    required String baseUrl,
+    required String apiKey,
+    required String model,
+    required List<Map<String, String>> messages,
+    int? maxTokens,
+  }) async {
+    _cancelToken?.cancel();
+    final token = CancelToken();
+    _cancelToken = token;
+    state = state.copyWith(loading: true, result: '', error: '');
+    final buffer = StringBuffer();
+    try {
+      await for (final chunk in _client.stream(
+        baseUrl: baseUrl,
+        apiKey: apiKey,
+        model: model,
+        messages: messages,
+        maxTokens: maxTokens,
+        cancelToken: token,
+      )) {
+        buffer.write(chunk);
+        state = state.copyWith(result: buffer.toString());
+      }
+      state = state.copyWith(loading: false);
+    } on AiException catch (e) {
+      if (token.isCancelled) {
+        // User stopped it: keep the partial result, no error.
+        state = state.copyWith(loading: false);
+      } else {
+        state = state.copyWith(loading: false, error: e.message);
+      }
+    } catch (e) {
+      state = state.copyWith(loading: false, error: e.toString());
+    } finally {
+      if (identical(_cancelToken, token)) _cancelToken = null;
+    }
+  }
+
+  /// Cancels the in-flight streamed request, if any.
+  void cancel() {
+    _cancelToken?.cancel();
   }
 
   void clear() {

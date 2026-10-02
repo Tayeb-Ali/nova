@@ -222,6 +222,24 @@ abstract class GitApi {
   void stashPop(String projectPath, int index);
 
   void stashDrop(String projectPath, int index);
+
+  /// Clone [url] into [directory] (parent must exist). Long-running.
+  void clone(String url, String directory);
+
+  /// Fetch all remotes with prune (uses SSH key when the URL needs it).
+  void fetch(String projectPath);
+
+  /// Fast-forward-only pull of the current branch.
+  void pull(String projectPath);
+
+  /// Push the current branch to its upstream.
+  void push(String projectPath);
+
+  /// Ensure an ed25519 SSH key exists and return the public key text.
+  String generateSshKey();
+
+  /// Current public key text, or empty when none exists yet.
+  String getSshPublicKey();
 }
 
 @HostApi()

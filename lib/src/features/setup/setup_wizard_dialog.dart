@@ -5,6 +5,7 @@ import 'package:nova/l10n/generated/app_localizations.dart';
 
 import '../../core/app_config.dart';
 import '../../core/bridge/events_bus.dart';
+import '../../core/services/repo_health_service.dart';
 import '../../core/services/setup_service.dart';
 
 /// First-run setup wizard (NEXT_PLAN 3.2): slim/full choice + progress +
@@ -30,10 +31,13 @@ Future<bool?> showSetupWizard(BuildContext context) {
 /// `StreamController` instead of touching the native event channel).
 /// [setupService] is injectable for the same reason.
 class SetupWizardDialog extends StatefulWidget {
-  const SetupWizardDialog({super.key, this.events, this.setupService});
+  const SetupWizardDialog({super.key, this.events, this.setupService, this.repoHealth});
 
   final Stream<dynamic>? events;
   final SetupService? setupService;
+
+  /// Source probe shown when setup fails (tests inject a fake).
+  final RepoHealthService? repoHealth;
 
   @override
   State<SetupWizardDialog> createState() => _SetupWizardDialogState();
@@ -50,6 +54,7 @@ class _SetupWizardDialogState extends State<SetupWizardDialog> {
   String? _phase;
   double _fraction = 0;
   String? _error;
+  List<RepoEndpointReport>? _sources;
 
   @override
   void initState() {
@@ -98,6 +103,7 @@ class _SetupWizardDialogState extends State<SetupWizardDialog> {
       _running = true;
       _done = false;
       _error = null;
+      _sources = null;
       _phase = null;
       _fraction = 0;
     });
@@ -142,12 +148,28 @@ class _SetupWizardDialogState extends State<SetupWizardDialog> {
           _error =
               raw['error'] as String? ??
               AppLocalizations.of(context).runtimeSetupFailed;
+          _sources = null;
         });
+        // Best-effort and unawaited: the probe must never gate the error
+        // display (offline device => every source just reports unreachable).
+        unawaited(_probeSources());
         break;
     }
   }
 
   int get _step => _done ? 2 : (_started ? 1 : 0);
+
+  /// Best-effort source probe after a failure; never throws.
+  Future<void> _probeSources() async {
+    try {
+      final reports = await (widget.repoHealth ?? RepoHealthService())
+          .checkAll();
+      if (!mounted) return;
+      setState(() => _sources = reports);
+    } catch (_) {
+      // Probe is informational only; the error text already shows.
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -252,6 +274,24 @@ class _SetupWizardDialogState extends State<SetupWizardDialog> {
               l10n.setupResumeNote,
               style: TextStyle(fontSize: 12),
             ),
+            if (_sources != null) ...[
+              const SizedBox(height: 8),
+              Text(
+                l10n.setupSources,
+                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+              ),
+              for (final s in _sources!)
+                Text(
+                  '• ${s.name}: ${s.ok ? l10n.setupSourceOk : l10n.setupSourceDown}',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontFamily: 'monospace',
+                    color: s.ok
+                        ? Theme.of(context).colorScheme.tertiary
+                        : Theme.of(context).colorScheme.error,
+                  ),
+                ),
+            ],
           ],
         ],
       );

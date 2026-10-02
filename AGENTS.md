@@ -7,7 +7,7 @@ Nova: a Flutter/Android IDE app that runs code in an embedded Termux Linux runti
 - `flutter pub get` — deps (then re-apply the inappwebview proguard patch, see below).
 - `dart run pigeon --input pigeons/ide_api.dart` — regenerate the bridge after editing the Pigeon contract (never hand-write bridge code).
 - `flutter analyze` — must end in `No issues found`.
-- `flutter test` — 36 unit/widget tests, all native APIs mocked (`TestDefaultBinaryMessenger`); no device needed.
+- `flutter test` — 224 unit/widget tests, all native APIs mocked (`TestDefaultBinaryMessenger`); no device needed.
 - `flutter build apk --debug --flavor github` — the only trustworthy APK path. Running Gradle directly can produce stale APKs missing recent Dart changes.
 
 ## Product flavors (hard rule: ALWAYS pass `--flavor`)
@@ -34,6 +34,7 @@ looks for the non-existent `app-debug.apk`. Always pass `--flavor`:
 
 - `pigeons/ide_api.dart` is the single contract between Dart and Kotlin. Do NOT edit generated files by hand.
 - Outputs are configured in the `@ConfigurePigeon` annotation: `lib/src/core/bridge/generated/ide_api.g.dart` and `android/app/src/main/kotlin/sd/adaa/codeide/bridge/IdeApi.g.kt`. Regenerate, then commit both.
+- Regen keeps the `codeide` channel prefix ONLY if run with the pubspec name temporarily set to `codeide` (backup `pubspec.yaml`, rename `nova`→`codeide`, run pigeon, restore — no `pub get` in between). A plain regen emits `pigeon.nova.*` and breaks the bridge + every test mock.
 - Flutter side talks to the platform through `NativeBridge` (`lib/src/core/bridge/native_bridge.dart`); screen-facing services wrap it in `lib/src/core/services/`.
 
 ## Event channel (hard rule)
@@ -45,7 +46,7 @@ looks for the non-existent `app-debug.apk`. Always pass `--flavor`:
 
 - `targetSdk = 28` is INTENTIONAL (comment in `android/app/build.gradle.kts`): targetSdk 29+ blocks exec from the app data dir via SELinux, killing the embedded runtime. Same reason for `useLegacyPackaging = true`. The "TODO: check this line" comment does not mean change it.
 - Internal storage path `run-as sd.adaa.codeide` is used because `pm clear` does not truly wipe app files.
-- Release build currently signs with debug keys (fine, it's how it ships).
+- Release signing is conditional: with `NOVA_KEYSTORE_PATH` (+ passwords/alias) set it signs release properly, otherwise it falls back to debug keys (local/CI only — never ship a fallback build to Play).
 - Native C (`pty`) lives in `android/app/src/main/cpp` via CMake; ABIs are arm64-v8a + x86_64.
 
 ## Runtime / Termux gotchas
@@ -78,4 +79,4 @@ adb shell "run-as sd.adaa.codeide sh -c 'ls files/usr/bin | head'"
 ## Stale references
 
 - Code comments and README reference `DECISIONS.md`, `plan.md`, `task.md` (e.g. `task.md §27`) — these files are NOT in the repo; don't chase them.
-- README's "22 tests" is outdated (36 pass today).
+- README's "22 tests" is outdated (224 pass today).

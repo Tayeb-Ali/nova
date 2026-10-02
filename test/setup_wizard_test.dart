@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:nova/l10n/generated/app_localizations.dart';
 import 'package:nova/src/core/app_config.dart';
 import 'package:nova/src/core/bridge/generated/ide_api.g.dart' as bridge;
+import 'package:nova/src/core/services/repo_health_service.dart';
 import 'package:nova/src/core/services/setup_service.dart';
 import 'package:nova/src/features/setup/setup_wizard_dialog.dart';
 
@@ -46,7 +47,15 @@ void main() {
       MaterialApp(
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
-        home: Scaffold(body: SetupWizardDialog(events: events.stream)),
+        home: Scaffold(
+          body: SetupWizardDialog(
+            events: events.stream,
+            // Fake probe: no real network in widget tests.
+            repoHealth: RepoHealthService(
+              fetchStatus: (_, _) async => 200,
+            ),
+          ),
+        ),
       ),
     );
     await tester.pumpAndSettle();
@@ -87,6 +96,10 @@ void main() {
     await tester.pump();
     await tester.pump();
     expect(find.textContaining('boom'), findsOneWidget);
+    // The fake probe reports all sources reachable.
+    await tester.pumpAndSettle();
+    expect(find.text('Download sources:'), findsOneWidget);
+    expect(find.textContaining('apt: reachable'), findsOneWidget);
     expect(find.widgetWithText(FilledButton, 'Retry'), findsOneWidget);
 
     await tester.tap(find.widgetWithText(FilledButton, 'Retry'));

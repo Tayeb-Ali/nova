@@ -4,6 +4,7 @@ import android.content.Context
 import sd.adaa.codeide.EnvironmentManager
 import sd.adaa.codeide.bridge.GitStatus
 import sd.adaa.codeide.process.ShellExecutor
+import java.io.File
 
 /**
  * Git integration through the embedded git binary (task.md §24).
@@ -121,6 +122,125 @@ class GitManager(private val context: Context) {
 
     fun stashDrop(projectPath: String, index: Long) {
         runGit(projectPath, listOf("stash", "drop", "stash@{$index}")).getOrThrow()
+    }
+
+    // ---- Remote operations over SSH (Phase 1: SSH first, no HTTPS tokens).
+    //
+    // The key lives at home/.ssh/id_nova_ed25519 (created on demand via the
+    // embedded openssh `ssh-keygen`). Every remote command runs with
+    // GIT_SSH_COMMAND in batch mode so a missing key/host fails fast with a
+    // mappable error instead of hanging on an interactive prompt (there is
+    // no TTY on device).
+
+    private val sshDir: File
+        get() = File(EnvironmentManager.home(context), ".ssh")
+
+    private val sshKey: File
+        get() = File(sshDir, "id_nova_ed25519")
+
+    fun getSshPublicKey(): String {
+        val pub = File(sshKey.absolutePath + ".pub")
+        return if (pub.exists()) pub.readText().trim() else ""
+    }
+
+    fun generateSshKey(): String {
+        val existing = getSshPublicKey()
+        if (existing.isNotEmpty()) return existing
+        if (!sshDir.exists() && !sshDir.mkdirs()) {
+            error("Cannot create ${sshDir.absolutePath}")
+        }
+        shell.execute(
+            command = "ssh-keygen",
+            args = listOf("-t", "ed25519", "-N", "", "-f", sshKey.absolutePath),
+            env = EnvironmentManager.buildEnvironment(context),
+            timeoutMs = 60_000,
+        ).getOrThrow()
+        return getSshPublicKey().ifBlank {
+            error("ssh-keygen produced no public key")
+        }
+    }
+
+    /** Extra env forcing non-interactive SSH with our key. */
+    private fun gitSshEnv(): Map<String, String> {
+        val key = sshKey.absolutePath
+        return mapOf(
+            "GIT_SSH_COMMAND" to
+                "ssh -i $key -o BatchMode=yes " +
+                "-o StrictHostKeyChecking=accept-new -o ConnectTimeout=20",
+        )
+    }
+
+    private fun runGitRemote(
+        projectPath: String?,
+        args: List<String>,
+        timeoutMs: Long = 300_000,
+    ): Result<String> = shell.execute(
+        command = "git",
+        args = args,
+        cwd = projectPath,
+        env = EnvironmentManager.buildEnvironment(context, projectPath) + gitSshEnv(),
+        timeoutMs = timeoutMs,
+    )
+
+    fun clone(url: String, directory: String) {
+        val dest = File(directory)
+        if (dest.exists()) error("Directory already exists: $directory")
+        val parent = dest.parentFile ?: error("Invalid directory: $directory")
+        if (!parent.exists() && !parent.mkdirs()) {
+            error("Cannot create parent directory: ${parent.absolutePath}")
+        }
+        runGitRemote(
+            projectPath = null,
+            args = listOf("clone", url, directory),
+            timeoutMs = 600_000,
+        ).onFailure { throw remapRemoteError(it, url) }.getOrThrow()
+    }
+
+    fun fetch(projectPath: String) {
+        runGitRemote(projectPath, listOf("fetch", "--all", "--prune"))
+            .onFailure { throw remapRemoteError(it, null) }.getOrThrow()
+    }
+
+    fun pull(projectPath: String) {
+        runGitRemote(projectPath, listOf("pull", "--ff-only"))
+            .onFailure { throw remapRemoteError(it, null) }.getOrThrow()
+    }
+
+    fun push(projectPath: String) {
+        runGitRemote(projectPath, listOf("push"))
+            .onFailure { throw remapRemoteError(it, null) }.getOrThrow()
+    }
+
+    /**
+     * Maps raw git/ssh failures to actionable messages. Merge conflicts are
+     * reported as-is (conflict UI is out of scope); everything else keeps
+     * the raw tail for diagnosability.
+     */
+    private fun remapRemoteError(e: Throwable, url: String?): Throwable {
+        val msg = e.message.orEmpty()
+        val hint = when {
+            msg.contains("Permission denied (publickey)", ignoreCase = true) ->
+                "SSH authentication failed. Add this app's public key " +
+                    "(Git > Remote > SSH key) to your hosting account and retry."
+            msg.contains("Could not resolve hostname", ignoreCase = true) ||
+                msg.contains("Network is unreachable", ignoreCase = true) ||
+                msg.contains("Connection timed out", ignoreCase = true) ||
+                msg.contains("Temporary failure in name resolution", ignoreCase = true) ->
+                "Network unreachable. Check the connection and retry."
+            msg.contains("Host key verification failed", ignoreCase = true) ->
+                "SSH host key rejected. Retry once to accept the host key."
+            msg.contains("CONFLICT", ignoreCase = true) ||
+                msg.contains("Automatic merge failed", ignoreCase = true) ->
+                "Merge conflict: resolve it in the terminal, then commit."
+            msg.contains("no upstream", ignoreCase = true) ||
+                msg.contains("has no upstream branch", ignoreCase = true) ->
+                "No upstream branch. Push once from the terminal with " +
+                    "`git push -u origin <branch>`."
+            msg.contains("already exists", ignoreCase = true) -> msg
+            else -> msg.ifBlank { "Git remote operation failed" }
+        }
+        val where = if (url != null) " ($url)" else ""
+        return RuntimeException("$hint$where\n$msg".trim())
     }
 
     private fun runGit(projectPath: String, args: List<String>): Result<String> =

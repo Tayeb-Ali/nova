@@ -31,6 +31,8 @@ import "package:re_highlight/languages/dockerfile.dart";
 import "package:re_highlight/languages/makefile.dart";
 
 import "../../core/settings_store.dart";
+import "ai_insert.dart";
+import "editor_engine.dart";
 import "autocomplete/autocomplete_popup.dart";
 import "autocomplete/nova_prompts_builder.dart";
 import "theme/editor_fonts.dart";
@@ -73,6 +75,12 @@ class ReEditorAdapter extends ConsumerStatefulWidget {
   final Future<List<CodePrompt>> Function(String filePath, int line, int char)?
       lspCompletion;
 
+  /// Optional bridge for AI insert + selection reads. When provided, the
+  /// adapter publishes `readContent`/`readSelection`/`insertAtCursor` on
+  /// mount and clears them on dispose (same convention as the Markdown
+  /// view's `readContent`).
+  final TabContentBridge? bridge;
+
   const ReEditorAdapter({
     super.key,
     required this.initialText,
@@ -82,6 +90,7 @@ class ReEditorAdapter extends ConsumerStatefulWidget {
     this.onFindControllerReady,
     this.filePath,
     this.lspCompletion,
+    this.bridge,
   });
 
   @override
@@ -120,9 +129,43 @@ class _ReEditorAdapterState extends ConsumerState<ReEditorAdapter> {
       languageId: widget.language,
     );
     widget.onFindControllerReady?.call(_findController);
+    _publishBridge();
     if (widget.initialLine != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) => _jumpToInitialLine());
     }
+  }
+
+  /// Publishes text/selection/insert hooks for AI actions and save paths.
+  void _publishBridge() {
+    final bridge = widget.bridge;
+    if (bridge == null) return;
+    bridge.readContent = () => _controller.text;
+    bridge.readSelection = () {
+      final selected = _controller.selectedText;
+      return selected.isEmpty ? null : selected;
+    };
+    bridge.insertAtCursor = (String insert) {
+      final sel = _controller.selection;
+      final result = applyInsert(
+        text: _controller.text,
+        baseLine: sel.baseIndex,
+        baseColumn: sel.baseOffset,
+        extentLine: sel.extentIndex,
+        extentColumn: sel.extentOffset,
+        insert: insert,
+      );
+      _controller.text = result.text;
+      _controller.selection = CodeLineSelection.collapsed(
+        index: result.cursorLine,
+        offset: result.cursorColumn,
+      );
+    };
+  }
+
+  void _clearBridge() {
+    widget.bridge?.readContent = null;
+    widget.bridge?.readSelection = null;
+    widget.bridge?.insertAtCursor = null;
   }
 
   /// Move the cursor to [ReEditorAdapter.initialLine] and scroll it into view.
@@ -152,6 +195,7 @@ class _ReEditorAdapterState extends ConsumerState<ReEditorAdapter> {
   @override
   void dispose() {
     _lspDebounce?.cancel();
+    _clearBridge();
     _findController.dispose();
     _controller.dispose();
     _scrollController.verticalScroller.dispose();

@@ -11,6 +11,7 @@ import "../../core/ui/empty_state.dart";
 import "../lsp/lsp_completion_provider.dart";
 import "../lsp/lsp_providers.dart";
 import "../lsp/server_registry.dart";
+import "../ai/ai_actions.dart";
 import "../editor/editor_engine.dart";
 import "../editor/re_editor_adapter.dart";
 import "../markdown/markdown_editor_view.dart";
@@ -137,12 +138,28 @@ class _TabStrip extends ConsumerWidget {
 
   void _close(WidgetRef ref, String id) {
     final wasActive = ref.read(activeEditorTabProvider) == id;
+    EditorTabModel? closed;
+    for (final t in ref.read(workspaceTabsProvider)) {
+      if (t.id == id) closed = t;
+    }
     ref.read(workspaceTabsProvider.notifier).close(id);
     if (wasActive) {
       final remaining = ref.read(workspaceTabsProvider);
       ref.read(activeEditorTabProvider.notifier).state = remaining.isEmpty
           ? null
           : remaining.last.id;
+    }
+    // Best-effort didClose so servers drop the document (no-op otherwise).
+    final done = closed;
+    if (done != null && serverArgvFor(done.language) != null) {
+      final project = ref.read(activeProjectProvider);
+      if (project != null) {
+        unawaited(
+          ref
+              .read(goLspManagerProvider)
+              .didCloseFile(project.path, done.path, done.language),
+        );
+      }
     }
   }
 
@@ -297,10 +314,11 @@ class _TabStrip extends ConsumerWidget {
                     onSelected: (value) {
                       if (value == "preview") {
                         actions.togglePreview?.call();
-                      } else if (value == "save") {
-                        actions.save?.call();
+                      } else if (value == "save") {                        actions.save?.call();
                       } else if (value == "reload") {
                         actions.reload?.call();
+                      } else if (value == "ai") {
+                        actions.askAi?.call();
                       } else if (value == "focus") {
                         ref.read(focusModeProvider.notifier).state = !focus;
                       }
@@ -323,6 +341,11 @@ class _TabStrip extends ConsumerWidget {
                         value: "reload",
                         child: Text(l10n.actionRefresh),
                       ),
+                      if (actions.askAi != null)
+                        PopupMenuItem(
+                          value: "ai",
+                          child: Text(l10n.aiTitle),
+                        ),
                       PopupMenuItem(
                         value: "focus",
                         child: Text(
@@ -365,6 +388,13 @@ class _TabStrip extends ConsumerWidget {
                     tooltip: l10n.actionRefresh,
                     icon: const Icon(Icons.refresh, size: 18),
                   ),
+                  if (actions.askAi != null)
+                    IconButton(
+                      onPressed: actions.askAi,
+                      visualDensity: VisualDensity.compact,
+                      tooltip: l10n.aiTitle,
+                      icon: const Icon(Icons.auto_awesome, size: 18),
+                    ),
                   IconButton(
                     onPressed: actions.save,
                     visualDensity: VisualDensity.compact,
@@ -446,6 +476,10 @@ class _EditorTabBodyState extends ConsumerState<_EditorTabBody> {
         // Re-publish so the button icon flips.
         _updateActions();
       }),
+      // AI insert needs the code bridge (Markdown view has none).
+      askAi: _loaded && widget.tab.kind != EditorKind.markdown
+          ? _askAi
+          : null,
       loaded: _loaded,
       showPreview: _showPreview,
       isMarkdown: widget.tab.kind == EditorKind.markdown,
@@ -467,7 +501,7 @@ class _EditorTabBodyState extends ConsumerState<_EditorTabBody> {
       _recoveryAsked = false;
       _contentGen = 0;
       _mountOverride = null;
-      _bridge.readContent = null;
+      _clearBridge();
       _loadFuture = _load();
     }
   }
@@ -511,12 +545,15 @@ class _EditorTabBodyState extends ConsumerState<_EditorTabBody> {
     });
   }
 
-  /// Best-effort gopls didOpen for Go files (silently skipped otherwise).
+  /// Best-effort didOpen for files whose language has a registered stdio
+  /// server (silently skipped otherwise).
   void _notifyGoOpen() {
-    if (!widget.tab.path.endsWith('.go')) return;
+    if (serverArgvFor(widget.tab.language) == null) return;
     final project = ref.read(activeProjectProvider);
     if (project == null) return;
-    ref.read(goLspManagerProvider).didOpenGoFile(project.path, widget.tab.path);
+    ref
+        .read(goLspManagerProvider)
+        .didOpenFile(project.path, widget.tab.path, widget.tab.language);
   }
 
   /// Live server completions for languages with a registered stdio server
@@ -541,14 +578,44 @@ class _EditorTabBodyState extends ConsumerState<_EditorTabBody> {
     };
   }
 
-  /// Best-effort gopls didChange after save (sends what was written).
+  /// Best-effort didChange after save (sends what was written).
   void _notifyGoSave(String written) {
-    if (!widget.tab.path.endsWith('.go')) return;
+    if (serverArgvFor(widget.tab.language) == null) return;
     final project = ref.read(activeProjectProvider);
     if (project == null) return;
     ref
         .read(goLspManagerProvider)
-        .didChangeGoFile(project.path, widget.tab.path, written);
+        .didChangeFile(project.path, widget.tab.path, widget.tab.language, written);
+  }
+
+  /// Clears every published bridge hook (called before remounts so a
+  /// disposed adapter never serves stale callbacks).
+  void _clearBridge() {
+    _bridge.readContent = null;
+    _bridge.readSelection = null;
+    _bridge.insertAtCursor = null;
+  }
+
+  /// Opens the AI sheet for the selection (or the whole file) and
+  /// inserts the result at the cursor. Best-effort: silently skipped when
+  /// the bridge is not published yet.
+  void _askAi() {
+    final l10n = AppLocalizations.of(context);
+    final selected = _bridge.readSelection?.call();
+    final code = (selected != null && selected.trim().isNotEmpty)
+        ? selected
+        : (_bridge.readContent?.call() ?? _currentText);
+    if (code.trim().isEmpty) {
+      _toast(l10n.aiNoCode);
+      return;
+    }
+    AiActionsSheet.show(
+      context,
+      selectedCode: code,
+      onInsert: (String result) {
+        _bridge.insertAtCursor?.call(result);
+      },
+    );
   }
 
   void _toast(String message) {
@@ -595,7 +662,7 @@ class _EditorTabBodyState extends ConsumerState<_EditorTabBody> {
       _recoveryAsked = false;
       _mountOverride = null;
       _contentGen++;
-      _bridge.readContent = null;
+      _clearBridge();
       _loadFuture = _load();
     });
     ref.read(workspaceTabsProvider.notifier).markDirty(widget.tab.id, false);
@@ -790,6 +857,7 @@ class _EditorTabBodyState extends ConsumerState<_EditorTabBody> {
                 onChanged: _onChanged,
                 filePath: widget.tab.path,
                 lspCompletion: _lspCompletionFor(),
+                bridge: _bridge,
               );
       },
     );

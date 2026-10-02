@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:nova/l10n/generated/app_localizations.dart';
 
 import '../../core/bridge/generated/ide_api.g.dart' as bridge;
@@ -23,6 +24,8 @@ class _GitScreenState extends State<GitScreen> {
   final _git = GitService();
   final _projectService = ProjectService();
   final _pathController = TextEditingController();
+  final _cloneUrlController = TextEditingController();
+  final _cloneDirController = TextEditingController();
 
   List<ProjectInfo> _projects = const [];
   bridge.GitStatus? _status;
@@ -30,16 +33,23 @@ class _GitScreenState extends State<GitScreen> {
   bool _loading = false;
   String? _error;
   String? _diff;
+  bool _remoteBusy = false;
+  String? _sshKey;
 
   @override
   void initState() {
     super.initState();
     _loadProjects();
+    // Best-effort and unawaited: the SSH key is independent of projects
+    // and must never gate the screen.
+    unawaited(_loadSshKey());
   }
 
   @override
   void dispose() {
     _pathController.dispose();
+    _cloneUrlController.dispose();
+    _cloneDirController.dispose();
     super.dispose();
   }
 
@@ -103,6 +113,81 @@ class _GitScreenState extends State<GitScreen> {
     } catch (_) {
       // Stash unavailable (e.g. unmocked in tests): keep the old list.
     }
+  }
+
+  /// Best-effort SSH public key refresh; never throws.
+  Future<void> _loadSshKey() async {
+    try {
+      final String key = await _git.getSshPublicKey();
+      if (!mounted) return;
+      setState(() => _sshKey = key);
+    } catch (_) {
+      // Native SSH unavailable (e.g. unmocked in tests): hide the section.
+    }
+  }
+
+  Future<void> _runRemote(
+    Future<void> Function() op,
+    String okMessage,
+  ) async {
+    final l10n = AppLocalizations.of(context);
+    setState(() => _remoteBusy = true);
+    try {
+      await op();
+      if (!mounted) return;
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(okMessage)));
+      await _loadStatus();
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.gitRemoteFailed('$e'))),
+      );
+    } finally {
+      if (mounted) setState(() => _remoteBusy = false);
+    }
+  }
+
+  Future<void> _clone() async {
+    final l10n = AppLocalizations.of(context);
+    final String url = _cloneUrlController.text.trim();
+    final String dir = _cloneDirController.text.trim();
+    if (url.isEmpty || dir.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.gitRemoteFailed('URL + directory?'))),
+      );
+      return;
+    }
+    await _runRemote(() => _git.clone(url, dir), l10n.gitCloned);
+  }
+
+  Future<void> _generateSshKey() async {
+    final l10n = AppLocalizations.of(context);
+    setState(() => _remoteBusy = true);
+    try {
+      final String key = await _git.generateSshKey();
+      if (!mounted) return;
+      setState(() => _sshKey = key);
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(l10n.gitSshCopied)));
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.gitRemoteFailed('$e'))),
+      );
+    } finally {
+      if (mounted) setState(() => _remoteBusy = false);
+    }
+  }
+
+  Future<void> _copySshKey() async {
+    final l10n = AppLocalizations.of(context);
+    final String? key = _sshKey;
+    if (key == null || key.isEmpty) return;
+    await Clipboard.setData(ClipboardData(text: key));
+    if (!mounted) return;
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(l10n.gitSshCopied)));
   }
 
   Future<void> _stageAll() async {
@@ -263,6 +348,8 @@ class _GitScreenState extends State<GitScreen> {
           const SizedBox(height: 16),
           _buildActions(),
           const SizedBox(height: 16),
+          _buildRemote(),
+          const SizedBox(height: 16),
           _buildStatus(),
         ],
       ),
@@ -364,6 +451,148 @@ class _GitScreenState extends State<GitScreen> {
           label: Text(l10n.gitBranches),
         ),
       ],
+    );
+  }
+
+  Widget _buildRemote() {
+    final l10n = AppLocalizations.of(context);
+    final bool hasPath = _path.isNotEmpty;
+    final bool usable = hasPath && _error == null && !_remoteBusy;
+    final String? key = _sshKey;
+    return Card(
+      child: ExpansionTile(
+        leading: const Icon(Icons.cloud_sync_outlined, size: 20),
+        title: Text(
+          l10n.gitRemote,
+          overflow: TextOverflow.ellipsis,
+          style: Theme.of(context).textTheme.titleSmall,
+        ),
+        trailing: _remoteBusy
+            ? const SizedBox(
+                width: 16,
+                height: 16,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              )
+            : null,
+        tilePadding: const EdgeInsets.symmetric(horizontal: 12),
+        childrenPadding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+        children: [
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                OutlinedButton.icon(
+                  onPressed: usable
+                      ? () => _runRemote(
+                            () => _git.fetch(_path),
+                            l10n.gitFetched,
+                          )
+                      : null,
+                  icon: const Icon(Icons.sync, size: 18),
+                  label: Text(l10n.gitFetch),
+                ),
+                OutlinedButton.icon(
+                  onPressed: usable
+                      ? () => _runRemote(
+                            () => _git.pull(_path),
+                            l10n.gitPulled,
+                          )
+                      : null,
+                  icon: const Icon(Icons.arrow_downward, size: 18),
+                  label: Text(l10n.gitPull),
+                ),
+                OutlinedButton.icon(
+                  onPressed: usable
+                      ? () => _runRemote(
+                            () => _git.push(_path),
+                            l10n.gitPushed,
+                          )
+                      : null,
+                  icon: const Icon(Icons.upload_outlined, size: 18),
+                  label: Text(l10n.gitPush),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            TextField(
+              controller: _cloneUrlController,
+              decoration: InputDecoration(
+                labelText: l10n.gitCloneUrl,
+                hintText: 'git@github.com:user/repo.git',
+                border: const OutlineInputBorder(),
+                isDense: true,
+                prefixIcon: const Icon(Icons.link),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _cloneDirController,
+                    decoration: InputDecoration(
+                      labelText: l10n.gitCloneDir,
+                      border: const OutlineInputBorder(),
+                      isDense: true,
+                      prefixIcon: const Icon(Icons.folder_outlined),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                FilledButton.icon(
+                  onPressed: _remoteBusy ? null : _clone,
+                  icon: const Icon(Icons.link, size: 18),
+                  label: Text(l10n.gitClone),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            const Divider(height: 1),
+            const SizedBox(height: 8),
+            Text(
+              l10n.gitSshKey,
+              style: Theme.of(context).textTheme.titleSmall,
+            ),
+            const SizedBox(height: 4),
+            Wrap(
+              spacing: 8,
+              runSpacing: 4,
+              children: [
+                OutlinedButton.icon(
+                  onPressed: _remoteBusy ? null : _generateSshKey,
+                  icon: const Icon(Icons.key_outlined, size: 18),
+                  label: Text(l10n.gitSshGenerate),
+                ),
+                if (key != null && key.isNotEmpty)
+                  OutlinedButton.icon(
+                    onPressed: _copySshKey,
+                    icon: const Icon(Icons.copy_outlined, size: 18),
+                    label: Text(l10n.gitSshCopy),
+                  ),
+              ],
+            ),
+            if (key == null || key.isEmpty)
+              Text(
+                l10n.gitSshNoKey,
+                style: Theme.of(context).textTheme.bodySmall,
+              )
+            else
+              Container(
+                width: double.maxFinite,
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  key,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        fontFamily: 'monospace',
+                      ),
+                ),
+              ),
+        ],
+      ),
     );
   }
 

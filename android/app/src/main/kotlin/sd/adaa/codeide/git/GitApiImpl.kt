@@ -50,4 +50,24 @@ object GitApiImpl : GitApi {
     override fun stashDrop(projectPath: String, index: Long) {
         IdeCore.git.stashDrop(projectPath, index)
     }
+
+    override fun clone(url: String, directory: String) {
+        IdeCore.git.clone(url, directory)
+    }
+
+    override fun fetch(projectPath: String) {
+        IdeCore.git.fetch(projectPath)
+    }
+
+    override fun pull(projectPath: String) {
+        IdeCore.git.pull(projectPath)
+    }
+
+    override fun push(projectPath: String) {
+        IdeCore.git.push(projectPath)
+    }
+
+    override fun generateSshKey(): String = IdeCore.git.generateSshKey()
+
+    override fun getSshPublicKey(): String = IdeCore.git.getSshPublicKey()
 }

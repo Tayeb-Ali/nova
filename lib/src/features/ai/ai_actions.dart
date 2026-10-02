@@ -17,12 +17,17 @@ class AiActionsSheet extends ConsumerStatefulWidget {
   final String? model;
   final AiClient? clientOverride;
 
+  /// Called with the AI result when the user taps "Insert into editor".
+  /// Null hides the insert action (read-only contexts).
+  final ValueChanged<String>? onInsert;
+
   const AiActionsSheet({
     super.key,
     required this.selectedCode,
     this.baseUrl,
     this.model,
     this.clientOverride,
+    this.onInsert,
   });
 
   /// Convenience helper to show the sheet (uses settings when omitted).
@@ -31,6 +36,8 @@ class AiActionsSheet extends ConsumerStatefulWidget {
     required String selectedCode,
     String? baseUrl,
     String? model,
+    ValueChanged<String>? onInsert,
+    AiClient? clientOverride,
   }) {
     return showModalBottomSheet<void>(
       context: context,
@@ -39,6 +46,8 @@ class AiActionsSheet extends ConsumerStatefulWidget {
         selectedCode: selectedCode,
         baseUrl: baseUrl,
         model: model,
+        onInsert: onInsert,
+        clientOverride: clientOverride,
       ),
     );
   }
@@ -152,7 +161,8 @@ try {
       return;
     }
 
-    await notifier.run(
+    // Streamed by default: the result grows live and can be stopped.
+    await notifier.runStream(
       baseUrl: _baseUrl,
       apiKey: apiKey,
       model: _model,
@@ -246,7 +256,23 @@ try {
             ),
             const SizedBox(height: 12),
             if (aiState.loading)
-              const Center(child: CircularProgressIndicator()),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  ),
+                  const SizedBox(width: 12),
+                  OutlinedButton.icon(
+                    onPressed: () =>
+                        ref.read(aiStateProvider.notifier).cancel(),
+                    icon: const Icon(Icons.stop, size: 18),
+                    label: Text(l10n.aiStop),
+                  ),
+                ],
+              ),
             if (aiState.error.isNotEmpty)
               Container(
                 padding: const EdgeInsets.all(8),
@@ -266,6 +292,17 @@ try {
                 constraints: const BoxConstraints(maxHeight: 240),
                 child: SingleChildScrollView(child: Text(aiState.result)),
               ),
+            if (aiState.result.isNotEmpty && widget.onInsert != null) ...[
+              const SizedBox(height: 8),
+              FilledButton.icon(
+                onPressed: () {
+                  widget.onInsert!(ref.read(aiStateProvider).result);
+                  Navigator.of(context).pop();
+                },
+                icon: const Icon(Icons.input, size: 18),
+                label: Text(l10n.aiInsert),
+              ),
+            ],
           ],
         ),
       ),

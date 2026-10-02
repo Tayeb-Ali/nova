@@ -1249,6 +1249,18 @@ interface GitApi {
   fun stashSave(projectPath: String, message: String)
   fun stashPop(projectPath: String, index: Long)
   fun stashDrop(projectPath: String, index: Long)
+  /** Clone [url] into [directory] (parent must exist). Long-running. */
+  fun clone(url: String, directory: String)
+  /** Fetch all remotes with prune (uses SSH key when the URL needs it). */
+  fun fetch(projectPath: String)
+  /** Fast-forward-only pull of the current branch. */
+  fun pull(projectPath: String)
+  /** Push the current branch to its upstream. */
+  fun push(projectPath: String)
+  /** Ensure an ed25519 SSH key exists and return the public key text. */
+  fun generateSshKey(): String
+  /** Current public key text, or empty when none exists yet. */
+  fun getSshPublicKey(): String
 
   companion object {
     /** The codec used by GitApi. */
@@ -1487,6 +1499,109 @@ interface GitApi {
             val wrapped: List<Any?> = try {
               api.stashDrop(projectPathArg, indexArg)
               listOf(null)
+            } catch (exception: Throwable) {
+              IdeApiPigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.codeide.GitApi.clone$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val urlArg = args[0] as String
+            val directoryArg = args[1] as String
+            val wrapped: List<Any?> = try {
+              api.clone(urlArg, directoryArg)
+              listOf(null)
+            } catch (exception: Throwable) {
+              IdeApiPigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.codeide.GitApi.fetch$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val projectPathArg = args[0] as String
+            val wrapped: List<Any?> = try {
+              api.fetch(projectPathArg)
+              listOf(null)
+            } catch (exception: Throwable) {
+              IdeApiPigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.codeide.GitApi.pull$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val projectPathArg = args[0] as String
+            val wrapped: List<Any?> = try {
+              api.pull(projectPathArg)
+              listOf(null)
+            } catch (exception: Throwable) {
+              IdeApiPigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.codeide.GitApi.push$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val projectPathArg = args[0] as String
+            val wrapped: List<Any?> = try {
+              api.push(projectPathArg)
+              listOf(null)
+            } catch (exception: Throwable) {
+              IdeApiPigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.codeide.GitApi.generateSshKey$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { _, reply ->
+            val wrapped: List<Any?> = try {
+              listOf(api.generateSshKey())
+            } catch (exception: Throwable) {
+              IdeApiPigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.codeide.GitApi.getSshPublicKey$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { _, reply ->
+            val wrapped: List<Any?> = try {
+              listOf(api.getSshPublicKey())
             } catch (exception: Throwable) {
               IdeApiPigeonUtils.wrapError(exception)
             }

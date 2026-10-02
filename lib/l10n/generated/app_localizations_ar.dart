@@ -341,6 +341,61 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
+  String get gitRemote => 'البعيد (SSH)';
+
+  @override
+  String get gitClone => 'استنساخ';
+
+  @override
+  String get gitCloneUrl => 'رابط المستودع (SSH)';
+
+  @override
+  String get gitCloneDir => 'مجلد الوجهة';
+
+  @override
+  String get gitCloned => 'تم الاستنساخ بنجاح';
+
+  @override
+  String get gitFetch => 'جلب';
+
+  @override
+  String get gitFetched => 'تم الجلب';
+
+  @override
+  String get gitPull => 'سحب';
+
+  @override
+  String get gitPulled => 'تم السحب';
+
+  @override
+  String get gitPush => 'دفع';
+
+  @override
+  String get gitPushed => 'تم الدفع';
+
+  @override
+  String gitRemoteFailed(String error) {
+    return 'فشلت العملية البعيدة: $error';
+  }
+
+  @override
+  String get gitSshKey => 'مفتاح SSH العام للتطبيق';
+
+  @override
+  String get gitSshNoKey =>
+      'لا يوجد مفتاح بعد — ولّد واحدًا ثم أضفه إلى حساب الاستضافة.';
+
+  @override
+  String get gitSshGenerate => 'توليد مفتاح';
+
+  @override
+  String get gitSshCopy => 'نسخ';
+
+  @override
+  String get gitSshCopied =>
+      'تم نسخ المفتاح العام — أضفه ضمن مفاتيح SSH في حسابك';
+
+  @override
   String get gitStashEmpty => '(لا توجد تغييرات مخزنة)';
 
   @override
@@ -659,6 +714,12 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get aiCompleteCode => 'أكمل الكود';
+
+  @override
+  String get aiStop => 'إيقاف';
+
+  @override
+  String get aiInsert => 'إدراج في المحرر';
 
   @override
   String aiPromptExplain(String code) {
@@ -1152,6 +1213,15 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get setupResumeNote =>
       'إعادة المحاولة تعيد استخدام التنزيل المتحقق منه (استئناف).';
+
+  @override
+  String get setupSources => 'مصادر التنزيل:';
+
+  @override
+  String get setupSourceOk => 'متاح';
+
+  @override
+  String get setupSourceDown => 'غير متاح — تحقق من الاتصال';
 
   @override
   String get webPreviewTitle => 'معاينة الويب';

@@ -112,9 +112,24 @@ android {
 
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.getByName("debug")
+            // Play signing (Phase 4): provide the keystore via environment —
+            // NOVA_KEYSTORE_PATH, NOVA_KEYSTORE_PASSWORD, NOVA_KEY_ALIAS,
+            // NOVA_KEY_PASSWORD (CI: repository secrets). Without them the
+            // build falls back to debug keys so local/CI debug builds keep
+            // working; a fallback build must NEVER ship to Play.
+            val keystorePath = System.getenv("NOVA_KEYSTORE_PATH")
+            if (!keystorePath.isNullOrBlank() && file(keystorePath).exists()) {
+                signingConfig = signingConfigs.create("novaRelease") {
+                    storeFile = file(keystorePath)
+                    storePassword = System.getenv("NOVA_KEYSTORE_PASSWORD")
+                    keyAlias = System.getenv("NOVA_KEY_ALIAS")
+                    keyPassword = System.getenv("NOVA_KEY_PASSWORD")
+                }
+            } else {
+                // TODO(play-release): wire NOVA_KEYSTORE_* secrets, then
+                // switch this fallback to the release config unconditionally.
+                signingConfig = signingConfigs.getByName("debug")
+            }
         }
     }
 }

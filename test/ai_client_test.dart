@@ -12,7 +12,15 @@ class FakeAdapter implements HttpClientAdapter {
   final Map<String, dynamic> json;
   final DioException? throwError;
 
-  FakeAdapter({required this.json, this.statusCode = 200, this.throwError});
+  /// Raw SSE body for streaming tests (takes precedence over [json]).
+  final String? rawBody;
+
+  FakeAdapter({
+    required this.json,
+    this.statusCode = 200,
+    this.throwError,
+    this.rawBody,
+  });
 
   @override
   Future<ResponseBody> fetch(
@@ -29,6 +37,15 @@ class FakeAdapter implements HttpClientAdapter {
       lastBodyString = jsonEncode(options.data);
     } else {
       lastBodyString = options.data?.toString();
+    }
+    if (rawBody != null) {
+      return ResponseBody.fromString(
+        rawBody!,
+        statusCode,
+        headers: {
+          Headers.contentTypeHeader: ['text/event-stream'],
+        },
+      );
     }
     return ResponseBody.fromString(
       jsonEncode(json),
@@ -198,5 +215,82 @@ void main() {
     } on AiException catch (e) {
       expect(e.message, 'invalid key');
     }
+  });
+
+  test('stream yields SSE deltas and stops at [DONE]', () async {
+    const sse =
+        'data: {"choices":[{"delta":{"content":"Hello"}}]}\n'
+        '\n'
+        'data: {"choices":[{"delta":{"content":" world"}}]}\n'
+        'data: [DONE]\n';
+    final adapter = FakeAdapter(rawBody: sse, json: {});
+    final client = AiClient(dio: Dio()..httpClientAdapter = adapter);
+
+    final chunks = await client
+        .stream(
+          baseUrl: 'https://api.openai.com/v1',
+          apiKey: 'k',
+          model: 'm',
+          messages: [
+            {'role': 'user', 'content': 'x'},
+          ],
+        )
+        .toList();
+
+    expect(chunks, ['Hello', ' world']);
+    final body = jsonDecode(adapter.lastBodyString!) as Map<String, dynamic>;
+    expect(body['stream'], isTrue);
+  });
+
+  test('stream ignores comments and non-data lines', () async {
+    const sse =
+        ': keep-alive\n'
+        '\n'
+        'data: {"choices":[{"delta":{}}]}\n'
+        'data: not-json\n'
+        'data: {"choices":[{"delta":{"content":"ok"}}]}\n'
+        'data: [DONE]\n';
+    final adapter = FakeAdapter(rawBody: sse, json: {});
+    final client = AiClient(dio: Dio()..httpClientAdapter = adapter);
+
+    final chunks = await client
+        .stream(
+          baseUrl: 'https://x/v1',
+          apiKey: 'k',
+          model: 'm',
+          messages: [
+            {'role': 'user', 'content': 'x'},
+          ],
+        )
+        .toList();
+
+    expect(chunks, ['ok']);
+  });
+
+  test('pre-cancelled token surfaces AiException cancelled', () async {
+    final adapter = FakeAdapter(rawBody: '', json: {});
+    final client = AiClient(dio: Dio()..httpClientAdapter = adapter);
+    final token = CancelToken()..cancel();
+
+    expect(
+      () => client
+          .stream(
+            baseUrl: 'https://x/v1',
+            apiKey: 'k',
+            model: 'm',
+            messages: [
+              {'role': 'user', 'content': 'x'},
+            ],
+            cancelToken: token,
+          )
+          .toList(),
+      throwsA(
+        isA<AiException>().having(
+          (e) => e.message,
+          'message',
+          contains('cancelled'),
+        ),
+      ),
+    );
   });
 }

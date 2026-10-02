@@ -40,4 +40,19 @@ class GitService {
 
   Future<void> stashDrop(String projectPath, int index) =>
       NativeBridge.git.stashDrop(projectPath, index);
+
+  /// Remote operations over SSH (clone/fetch/pull/push).
+  Future<void> clone(String url, String directory) =>
+      NativeBridge.git.clone(url, directory);
+
+  Future<void> fetch(String projectPath) => NativeBridge.git.fetch(projectPath);
+
+  Future<void> pull(String projectPath) => NativeBridge.git.pull(projectPath);
+
+  Future<void> push(String projectPath) => NativeBridge.git.push(projectPath);
+
+  /// SSH key management (ed25519, created on demand in the app home).
+  Future<String> generateSshKey() => NativeBridge.git.generateSshKey();
+
+  Future<String> getSshPublicKey() => NativeBridge.git.getSshPublicKey();
 }

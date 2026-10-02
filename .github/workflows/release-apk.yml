@@ -80,10 +80,17 @@ jobs:
             sed -i '/^-optimize/d' "$f"
           done
 
-      - name: Build APK (github flavor, debug)
+      - name: Static analysis + unit tests (release gate)
+        run: |
+          set -euo pipefail
+          flutter analyze
+          flutter test
+
+      - name: Build APKs (github + play flavors, debug)
         run: |
           set -euo pipefail
           flutter build apk --debug --flavor github
+          flutter build apk --debug --flavor play
           ls -la build/app/outputs/flutter-apk/
 
       - name: Resolve release tag
@@ -99,23 +106,27 @@ jobs:
           fi
           cat "${GITHUB_OUTPUT}"
 
-      - name: Stage APK for release
+      - name: Stage APKs for release
         run: |
           set -euo pipefail
-          src="build/app/outputs/flutter-apk/app-github-debug.apk"
-          test -f "$src"
-          dest="nova-${{ steps.tag.outputs.name }}-github-debug.apk"
-          cp "$src" "$dest"
-          sha256sum "$dest" > "$dest.sha256"
-          ls -la "$dest" "$dest.sha256"
+          for flavor in github play; do
+            src="build/app/outputs/flutter-apk/app-${flavor}-debug.apk"
+            test -f "$src"
+            dest="nova-${{ steps.tag.outputs.name }}-${flavor}-debug.apk"
+            cp "$src" "$dest"
+            sha256sum "$dest" > "$dest.sha256"
+            ls -la "$dest" "$dest.sha256"
+          done
 
-      - name: Upload APK artifact
+      - name: Upload APK artifacts
         uses: actions/upload-artifact@v4
         with:
           name: nova-apk-${{ steps.tag.outputs.name }}
           path: |
             nova-${{ steps.tag.outputs.name }}-github-debug.apk
             nova-${{ steps.tag.outputs.name }}-github-debug.apk.sha256
+            nova-${{ steps.tag.outputs.name }}-play-debug.apk
+            nova-${{ steps.tag.outputs.name }}-play-debug.apk.sha256
           if-no-files-found: error
 
       - name: Create GitHub Release with auto changelog
@@ -127,5 +138,7 @@ jobs:
           files: |
             nova-${{ steps.tag.outputs.name }}-github-debug.apk
             nova-${{ steps.tag.outputs.name }}-github-debug.apk.sha256
+            nova-${{ steps.tag.outputs.name }}-play-debug.apk
+            nova-${{ steps.tag.outputs.name }}-play-debug.apk.sha256
         env:
           GITHUB_TOKEN: ${{ github.token }}

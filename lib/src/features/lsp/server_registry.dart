@@ -5,7 +5,12 @@ const Map<String, String> lspInstallHints = <String, String>{
   'node': 'npm i -g typescript-language-server typescript',
   'python': 'pip install pyright',
   'go': 'apt install gopls',
-  'rust': 'rustup component add rust-analyzer',
+  'rust': 'apt install rust-analyzer',
+  'ruby': 'gem install ruby-lsp',
+  'java': 'apt install jdtls',
+  'kotlin': 'apt install kotlin-lsp',
+  'dart': 'included with the Dart runtime (no install needed)',
+  'c': 'apt install clangd',
 };
 
 /// The command that would be used to launch the LSP server for [language],
@@ -45,6 +50,9 @@ List<String>? serverArgvFor(String language) {
       return const ['phpactor', 'language-server'];
     case 'rust':
       return const ['rust-analyzer'];
+    case 'dart':
+      // Ships inside the Dart SDK: no extra package needed.
+      return const ['dart', 'language-server'];
     default:
       return null;
   }

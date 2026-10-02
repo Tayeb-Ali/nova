@@ -686,6 +686,108 @@ abstract class AppLocalizations {
   /// **'Stash action failed: {error}'**
   String gitStashActionFailed(String error);
 
+  /// Git: remote section header
+  ///
+  /// In en, this message translates to:
+  /// **'Remote (SSH)'**
+  String get gitRemote;
+
+  /// Git: clone action
+  ///
+  /// In en, this message translates to:
+  /// **'Clone'**
+  String get gitClone;
+
+  /// Git: clone URL label
+  ///
+  /// In en, this message translates to:
+  /// **'Repository URL (SSH)'**
+  String get gitCloneUrl;
+
+  /// Git: clone destination label
+  ///
+  /// In en, this message translates to:
+  /// **'Destination directory'**
+  String get gitCloneDir;
+
+  /// Git: cloned confirmation
+  ///
+  /// In en, this message translates to:
+  /// **'Cloned successfully'**
+  String get gitCloned;
+
+  /// Git: fetch action
+  ///
+  /// In en, this message translates to:
+  /// **'Fetch'**
+  String get gitFetch;
+
+  /// Git: fetched confirmation
+  ///
+  /// In en, this message translates to:
+  /// **'Fetched'**
+  String get gitFetched;
+
+  /// Git: pull action
+  ///
+  /// In en, this message translates to:
+  /// **'Pull'**
+  String get gitPull;
+
+  /// Git: pulled confirmation
+  ///
+  /// In en, this message translates to:
+  /// **'Pulled'**
+  String get gitPulled;
+
+  /// Git: push action
+  ///
+  /// In en, this message translates to:
+  /// **'Push'**
+  String get gitPush;
+
+  /// Git: pushed confirmation
+  ///
+  /// In en, this message translates to:
+  /// **'Pushed'**
+  String get gitPushed;
+
+  /// Git: remote failure
+  ///
+  /// In en, this message translates to:
+  /// **'Remote operation failed: {error}'**
+  String gitRemoteFailed(String error);
+
+  /// Git: SSH public key label
+  ///
+  /// In en, this message translates to:
+  /// **'App SSH public key'**
+  String get gitSshKey;
+
+  /// Git: no SSH key hint
+  ///
+  /// In en, this message translates to:
+  /// **'No key yet — generate one, then add it to your hosting account.'**
+  String get gitSshNoKey;
+
+  /// Git: generate SSH key action
+  ///
+  /// In en, this message translates to:
+  /// **'Generate key'**
+  String get gitSshGenerate;
+
+  /// Git: copy SSH key action
+  ///
+  /// In en, this message translates to:
+  /// **'Copy'**
+  String get gitSshCopy;
+
+  /// Git: key copied confirmation
+  ///
+  /// In en, this message translates to:
+  /// **'Public key copied — add it under your account\'s SSH keys'**
+  String get gitSshCopied;
+
   /// Git: empty stash placeholder
   ///
   /// In en, this message translates to:
@@ -1273,6 +1375,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Complete code'**
   String get aiCompleteCode;
+
+  /// AI: stop streaming
+  ///
+  /// In en, this message translates to:
+  /// **'Stop'**
+  String get aiStop;
+
+  /// AI: insert result into editor
+  ///
+  /// In en, this message translates to:
+  /// **'Insert into editor'**
+  String get aiInsert;
 
   /// AI prompt: explain
   ///
@@ -2107,6 +2221,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Retry reuses the verified download (resume).'**
   String get setupResumeNote;
+
+  /// Setup wizard: sources status title
+  ///
+  /// In en, this message translates to:
+  /// **'Download sources:'**
+  String get setupSources;
+
+  /// Setup wizard: source reachable
+  ///
+  /// In en, this message translates to:
+  /// **'reachable'**
+  String get setupSourceOk;
+
+  /// Setup wizard: source unreachable
+  ///
+  /// In en, this message translates to:
+  /// **'unreachable — check connection'**
+  String get setupSourceDown;
 
   /// Web preview title
   ///

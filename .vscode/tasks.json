@@ -22,7 +22,7 @@
         {
             "label": "Flutter: Build APK (Debug)",
             "type": "shell",
-            "command": "flutter build apk --debug --flavor target36spike",
+            "command": "flutter build apk --debug --flavor github",
             "problemMatcher": "$dart-analyze",
             "group": {
                 "kind": "build",

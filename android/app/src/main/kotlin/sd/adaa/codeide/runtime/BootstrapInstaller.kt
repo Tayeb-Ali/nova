@@ -63,6 +63,7 @@ class BootstrapInstaller(private val context: Context) {
     private fun install(onProgress: (String, Float) -> Unit) {
         val variant = readVariant()
         val arch = EnvironmentManager.arch()
+        requireFreeSpace(variant)
         val zipFile = EnvironmentManager.bootstrapZip(context)
         val prefix = EnvironmentManager.prefix(context)
         val expectedSha = EnvironmentManager.bootstrapVariantSha256(variant)
@@ -106,6 +107,24 @@ class BootstrapInstaller(private val context: Context) {
             .writeText(EnvironmentManager.currentOrigin())
 
         onProgress("done", 1.0f)
+    }
+
+    /**
+     * Fails fast when the device cannot hold the download + extraction.
+     * Budgets 4x the zip size (download + unpacked prefix + headroom) so a
+     * half-extracted prefix never bricks setup mid-way.
+     */
+    private fun requireFreeSpace(variant: String) {
+        val zipBytes = when (variant) {
+            EnvironmentManager.BOOTSTRAP_VARIANT_FULL -> 320_000_000L
+            else -> 90_000_000L
+        }
+        val need = zipBytes * 4
+        val free = context.filesDir.usableSpace
+        require(free > need) {
+            "Not enough storage: need ~${need / 1024 / 1024}MB free " +
+                "for the $variant bootstrap, have ${free / 1024 / 1024}MB"
+        }
     }
 
     /**

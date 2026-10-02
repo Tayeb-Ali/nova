@@ -6,7 +6,7 @@
 ![Version](https://img.shields.io/badge/Version-0.1.0-blue)
 ![Bridge](https://img.shields.io/badge/Bridge-Pigeon_29-7B61FF)
 ![State](https://img.shields.io/badge/State-Riverpod-FF6B6B)
-![Tests](https://img.shields.io/badge/Tests-79_passing-success)
+![Tests](https://img.shields.io/badge/Tests-224_passing-success)
 [![License: Waqf-1.0](https://img.shields.io/badge/License-Waqf--1.0-green)](LICENSE)
 [![Google Play](https://img.shields.io/badge/Google_Play-Download-414D0B?logo=google-play&logoColor=white)](https://play.google.com/store/apps/details?id=sd.adaa.codeide)
 
@@ -216,12 +216,28 @@ dart run pigeon --input pigeons/ide_api.dart
 flutter analyze
 flutter test
 
-# 4. التشغيل على الجهاز/المحاكي
-flutter run
+# 4. التشغيل على الجهاز/المحاكي (النكهة إجبارية: `github` للتطوير، `play` لبوابة Play)
+flutter run --flavor github
 
-# 5. نسخة APK للتثبيت
-flutter build apk --debug
+# 5. نسخة APK للتثبيت (البناء عبر `flutter` فقط، لا Gradle مباشرة)
+flutter build apk --debug --flavor github
+# نسخة Play (targetSdk 36 + وضع linker):
+flutter build apk --debug --flavor play
 ```
+
+### توقيع نسخة Play
+
+بمفتاحك الجاهز، عرّف المتغيرات قبل البناء (لا تُدخل المفتاح في المستودع):
+
+```bash
+$env:NOVA_KEYSTORE_PATH="C:\keys\nova.jks"
+$env:NOVA_KEYSTORE_PASSWORD="..."
+$env:NOVA_KEY_ALIAS="nova"
+$env:NOVA_KEY_PASSWORD="..."
+flutter build apk --release --flavor play
+```
+
+بدون هذه المتغيرات يوقَّع الإصدار بمفاتيح debug (للتطوير فقط — لا تُرسلها إلى Play).
 
 > **ملاحظتان توفّران عليك ساعات:**
 >
@@ -240,7 +256,7 @@ flutter build apk --debug
 
 ```bash
 flutter analyze   # يجب: No issues found
-flutter test      # يجب: كل الاختبارات ناجحة (79 اختبارًا حاليًا)
+flutter test      # يجب: كل الاختبارات ناجحة (224 اختبارًا حاليًا)
 ```
 
 - `test/comprehensive_inapp_test.dart` — اختبار شامل يغطي (Node / Python / Terminal) داخل التطبيق.

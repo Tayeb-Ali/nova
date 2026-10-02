@@ -4,9 +4,13 @@ import 'server_registry.dart';
 
 /// Lifecycle for per-project `gopls` servers.
 ///
-/// One [LspClient] per project root, started on demand and stopped when the
-/// project closes. The client is returned uninitialized-safe: [ensureFor]
-/// performs the LSP handshake before returning.
+/// One [LspClient] per (language, project root), started on demand and
+/// stopped when the project closes. The client is returned
+/// uninitialized-safe: [ensureFor] performs the LSP handshake before
+/// returning.
+///
+/// Phone guard: at most [maxServers] live servers; the least-recently-added
+/// is evicted first so a many-project workspace cannot exhaust the device.
 class GoLspManager {
   GoLspManager({LspTransport Function(String cwd)? transportFactory})
       : _transportFactory = transportFactory ??
@@ -18,6 +22,9 @@ class GoLspManager {
                 cwd: cwd,
               );
             });
+
+  /// Maximum concurrently managed language servers.
+  static const int maxServers = 4;
 
   final LspTransport Function(String cwd) _transportFactory;
   final Map<String, LspClient> _clients = {};
@@ -42,6 +49,7 @@ class GoLspManager {
     if (argv == null) {
       throw StateError('no LSP server registered for $language');
     }
+    await _evictIfFull();
     // The injected factory only knows the Go layout; other servers are
     // spawned directly from the registry argv.
     final LspTransport transport = language == 'go'
@@ -56,6 +64,20 @@ class GoLspManager {
     _transports[key] = transport;
     _clients[key] = client;
     return client;
+  }
+
+  /// Evicts least-recently-added servers while at capacity. Never throws:
+  /// eviction is best-effort so a stuck server cannot block a new one.
+  Future<void> _evictIfFull() async {
+    while (_transports.length >= maxServers) {
+      final oldest = _transports.keys.first;
+      try {
+        await _stopKey(oldest);
+      } catch (_) {
+        _clients.remove(oldest);
+        _transports.remove(oldest);
+      }
+    }
   }
 
   /// Best-effort completion fetch for any registered language: returns the
@@ -90,6 +112,36 @@ class GoLspManager {
     }
   }
 
+  /// Best-effort didChange for any registered language (called on save).
+  Future<void> didChangeFile(
+    String projectPath,
+    String filePath,
+    String language,
+    String text,
+  ) async {
+    try {
+      final client = await ensureForLanguage(projectPath, language);
+      client.didOpen(filePath, language);
+      client.didChange(filePath, text);
+    } catch (_) {
+      // Server unavailable: ignore.
+    }
+  }
+
+  /// Best-effort didClose for any registered language (called on tab close).
+  Future<void> didCloseFile(
+    String projectPath,
+    String filePath,
+    String language,
+  ) async {
+    try {
+      final client = await ensureForLanguage(projectPath, language);
+      client.didClose(filePath);
+    } catch (_) {
+      // Server unavailable: ignore.
+    }
+  }
+
   /// Best-effort didOpen for a Go file (no-op when the server is down).
   Future<void> didOpenGoFile(String projectPath, String filePath) async {
     try {
@@ -112,10 +164,20 @@ class GoLspManager {
     }
   }
 
-  /// Stop the server for [projectPath] (idempotent).
+  /// Stop every server for [projectPath] (legacy bare key plus all
+  /// `language@path` keys). Idempotent.
   Future<void> stopFor(String projectPath) async {
-    _clients.remove(projectPath);
-    final transport = _transports.remove(projectPath);
+    final keys = _transports.keys
+        .where((k) => k == projectPath || k.endsWith('@$projectPath'))
+        .toList();
+    for (final key in keys) {
+      await _stopKey(key);
+    }
+  }
+
+  Future<void> _stopKey(String key) async {
+    _clients.remove(key);
+    final transport = _transports.remove(key);
     if (transport != null) {
       try {
         await transport.stop();
@@ -127,8 +189,11 @@ class GoLspManager {
 
   /// Stop every managed server.
   Future<void> stopAll() async {
-    for (final path in _transports.keys.toList()) {
-      await stopFor(path);
+    for (final key in _transports.keys.toList()) {
+      await _stopKey(key);
     }
   }
+
+  /// Number of live servers (for tests/diagnostics).
+  int get liveServerCount => _transports.length;
 }

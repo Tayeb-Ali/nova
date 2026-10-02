@@ -10,6 +10,12 @@ abstract class EditorEngine {
 /// text to the tab shell that owns the Save button.
 class TabContentBridge {
   String Function()? readContent;
+
+  /// Currently selected text, or null/empty when there is no selection.
+  String? Function()? readSelection;
+
+  /// Inserts [insert] at the cursor (replacing the selection, if any).
+  void Function(String insert)? insertAtCursor;
 }
 
 /// How a tab is rendered: plain code editor or rich Markdown editor.

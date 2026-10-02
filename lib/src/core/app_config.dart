@@ -47,4 +47,16 @@ abstract final class AppConfig {
     'full-aarch64': 297616258,
     'full-x86_64': 296451792,
   };
+
+  // -- Binary distribution sources (Phase 2). --
+  // Dart-side mirror of the BuildConfig fields in
+  // android/app/build.gradle.kts (github/play flavors). Used only for
+  // reachability probing (RepoHealthService) — the Kotlin installer owns
+  // the real download logic. Keep in sync when the flavors change.
+  static const String repoUrl = 'http://elteyab.sd/nova/apt';
+  static const String repoSuite = 'stable';
+  static const String bootstrapSlimBaseUrl =
+      'http://elteyab.sd/nova/bootstrap';
+  static const String bootstrapFullBaseUrl =
+      'https://github.com/Tayeb-Ali/nova/releases/download/bootstrap-v1';
 }

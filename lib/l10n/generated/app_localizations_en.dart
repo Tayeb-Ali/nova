@@ -341,6 +341,61 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get gitRemote => 'Remote (SSH)';
+
+  @override
+  String get gitClone => 'Clone';
+
+  @override
+  String get gitCloneUrl => 'Repository URL (SSH)';
+
+  @override
+  String get gitCloneDir => 'Destination directory';
+
+  @override
+  String get gitCloned => 'Cloned successfully';
+
+  @override
+  String get gitFetch => 'Fetch';
+
+  @override
+  String get gitFetched => 'Fetched';
+
+  @override
+  String get gitPull => 'Pull';
+
+  @override
+  String get gitPulled => 'Pulled';
+
+  @override
+  String get gitPush => 'Push';
+
+  @override
+  String get gitPushed => 'Pushed';
+
+  @override
+  String gitRemoteFailed(String error) {
+    return 'Remote operation failed: $error';
+  }
+
+  @override
+  String get gitSshKey => 'App SSH public key';
+
+  @override
+  String get gitSshNoKey =>
+      'No key yet — generate one, then add it to your hosting account.';
+
+  @override
+  String get gitSshGenerate => 'Generate key';
+
+  @override
+  String get gitSshCopy => 'Copy';
+
+  @override
+  String get gitSshCopied =>
+      'Public key copied — add it under your account\'s SSH keys';
+
+  @override
   String get gitStashEmpty => '(no stashed changes)';
 
   @override
@@ -659,6 +714,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get aiCompleteCode => 'Complete code';
+
+  @override
+  String get aiStop => 'Stop';
+
+  @override
+  String get aiInsert => 'Insert into editor';
 
   @override
   String aiPromptExplain(String code) {
@@ -1154,6 +1215,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get setupResumeNote => 'Retry reuses the verified download (resume).';
+
+  @override
+  String get setupSources => 'Download sources:';
+
+  @override
+  String get setupSourceOk => 'reachable';
+
+  @override
+  String get setupSourceDown => 'unreachable — check connection';
 
   @override
   String get webPreviewTitle => 'Web Preview';
