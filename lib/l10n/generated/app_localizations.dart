@@ -182,6 +182,18 @@ abstract class AppLocalizations {
   /// **'Close'**
   String get actionClose;
 
+  /// Common action: restore
+  ///
+  /// In en, this message translates to:
+  /// **'Restore'**
+  String get actionRestore;
+
+  /// Common action: discard
+  ///
+  /// In en, this message translates to:
+  /// **'Discard'**
+  String get actionDiscard;
+
   /// Common action: search
   ///
   /// In en, this message translates to:
@@ -943,6 +955,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Tab actions'**
   String get editorTabActions;
+
+  /// Editor: reload confirm title
+  ///
+  /// In en, this message translates to:
+  /// **'Reload file?'**
+  String get editorReloadConfirmTitle;
+
+  /// Editor: reload confirm body
+  ///
+  /// In en, this message translates to:
+  /// **'Discard unsaved changes and reload from disk?'**
+  String get editorReloadConfirmBody;
+
+  /// Editor: reloaded confirmation
+  ///
+  /// In en, this message translates to:
+  /// **'Reloaded {name}'**
+  String editorReloaded(String name);
+
+  /// Editor: recovery dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Unsaved changes found'**
+  String get editorRecoverTitle;
+
+  /// Editor: recovery dialog body
+  ///
+  /// In en, this message translates to:
+  /// **'Restore unsaved changes for {name}?'**
+  String editorRecoverBody(String name);
+
+  /// Editor: close dirty tab title
+  ///
+  /// In en, this message translates to:
+  /// **'Close without saving?'**
+  String get editorCloseDirtyTitle;
+
+  /// Editor: close dirty tab body
+  ///
+  /// In en, this message translates to:
+  /// **'Discard unsaved changes to {name}?'**
+  String editorCloseDirtyBody(String name);
 
   /// Explorer: section header
   ///

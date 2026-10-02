@@ -14,6 +14,8 @@ import "../lsp/server_registry.dart";
 import "../editor/editor_engine.dart";
 import "../editor/re_editor_adapter.dart";
 import "../markdown/markdown_editor_view.dart";
+import "recovery_store.dart";
+import "save_coordinator.dart";
 import "workspace_providers.dart";
 
 /// Editor: tab strip + the active file edited with re_editor (task.md §35).
@@ -67,6 +69,39 @@ class _TabStrip extends ConsumerWidget {
     }
   }
 
+  /// Close with a guard: a dirty tab keeps its recovery draft (reopening
+  /// offers restore), but the user must confirm abandoning unsaved edits.
+  Future<void> _closeGuarded(
+    BuildContext context,
+    WidgetRef ref,
+    EditorTabModel tab,
+  ) async {
+    if (tab.dirty) {
+      final l10n = AppLocalizations.of(context);
+      final discard = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text(l10n.editorCloseDirtyTitle),
+          content: Text(
+            l10n.editorCloseDirtyBody(p.basename(tab.path)),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: Text(l10n.actionCancel),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: Text(l10n.actionDiscard),
+            ),
+          ],
+        ),
+      );
+      if (discard != true) return;
+    }
+    _close(ref, tab.id);
+  }
+
   Widget _tabChip(BuildContext context, WidgetRef ref, EditorTabModel tab) {
     final selected = tab.id == activeId;
     final scheme = Theme.of(context).colorScheme;
@@ -115,7 +150,7 @@ class _TabStrip extends ConsumerWidget {
                   ),
                   const SizedBox(width: 2),
                   InkWell(
-                    onTap: () => _close(ref, tab.id),
+                    onTap: () => _closeGuarded(context, ref, tab),
                     child: Padding(
                       padding: const EdgeInsets.all(2),
                       child: Icon(
@@ -169,9 +204,21 @@ class _EditorTabBodyState extends ConsumerState<_EditorTabBody> {
   String _currentText = "";
   String _savedText = "";
   bool _loaded = false;
+  bool _dirty = false;
   bool _showPreview = false;
   final TabContentBridge _bridge = TabContentBridge();
   Timer? _autoSaveTimer;
+  Timer? _recoveryTimer;
+  final SaveGate _saveGate = SaveGate();
+  final RecoveryStore _recovery = RecoveryStore();
+  String? _pendingRecovery;
+  bool _recoveryAsked = false;
+  int _contentGen = 0;
+  int _loadGen = 0;
+  // Mount override for the editor content (crash-draft restore). The load
+  // future still carries the disk text, so without this a remount would
+  // clobber the restored draft with stale bytes.
+  String? _mountOverride;
 
   @override
   void initState() {
@@ -182,6 +229,7 @@ class _EditorTabBodyState extends ConsumerState<_EditorTabBody> {
   @override
   void dispose() {
     _autoSaveTimer?.cancel();
+    _recoveryTimer?.cancel();
     super.dispose();
   }
 
@@ -190,10 +238,16 @@ class _EditorTabBodyState extends ConsumerState<_EditorTabBody> {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.tab.path != widget.tab.path) {
       _autoSaveTimer?.cancel();
+      _recoveryTimer?.cancel();
       _loaded = false;
       _currentText = "";
       _savedText = "";
+      _dirty = false;
       _showPreview = false;
+      _pendingRecovery = null;
+      _recoveryAsked = false;
+      _contentGen = 0;
+      _mountOverride = null;
       _bridge.readContent = null;
       _loadFuture = _load();
     }
@@ -205,15 +259,35 @@ class _EditorTabBodyState extends ConsumerState<_EditorTabBody> {
       final text = await service.readFile(widget.tab.path);
       _currentText = text;
       _savedText = text;
+      _dirty = false;
       _loaded = true;
       _notifyGoOpen();
+      // Crash recovery (never blocks content): a draft left by unsaved
+      // edits is offered once the editor sits pristine on disk text —
+      // never applied silently, never clobbering fresh typing.
+      final int gen = ++_loadGen;
+      unawaited(_checkRecoveryDraft(text, gen));
       return text;
     } catch (_) {
       _currentText = "";
       _savedText = "";
+      _dirty = false;
       _loaded = true;
       return "";
     }
+  }
+
+  Future<void> _checkRecoveryDraft(String diskText, int gen) async {
+    final draft = await _recovery.readDraft(widget.tab.path);
+    if (!mounted || gen != _loadGen) return;
+    if (draft == null || draft.text == diskText) return;
+    // Offer only while the editor still shows pristine disk content;
+    // keystrokes that landed meanwhile always win over the old draft.
+    if (!_loaded || _currentText != diskText) return;
+    setState(() {
+      _pendingRecovery = draft.text;
+      _recoveryAsked = false;
+    });
   }
 
   /// Best-effort gopls didOpen for Go files (silently skipped otherwise).
@@ -245,14 +319,14 @@ class _EditorTabBodyState extends ConsumerState<_EditorTabBody> {
       }
     };
   }
-  /// Best-effort gopls didChange after save.
-  void _notifyGoSave() {
+  /// Best-effort gopls didChange after save (sends what was written).
+  void _notifyGoSave(String written) {
     if (!widget.tab.path.endsWith('.go')) return;
     final project = ref.read(activeProjectProvider);
     if (project == null) return;
     ref
         .read(goLspManagerProvider)
-        .didChangeGoFile(project.path, widget.tab.path, _currentText);
+        .didChangeGoFile(project.path, widget.tab.path, written);
   }
 
   void _toast(String message) {
@@ -261,11 +335,107 @@ class _EditorTabBodyState extends ConsumerState<_EditorTabBody> {
         .showSnackBar(SnackBar(content: Text(message)));
   }
 
+  /// Reload the file from disk (refresh). With unsaved edits, asks first;
+  /// confirming discards the edits AND the recovery draft, then remounts
+  /// the editor on the fresh content.
+  Future<void> _reload() async {
+    if (!_loaded) return;
+    final l10n = AppLocalizations.of(context);
+    if (_dirty) {
+      final discard = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text(l10n.editorReloadConfirmTitle),
+          content: Text(l10n.editorReloadConfirmBody),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: Text(l10n.actionCancel),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: Text(l10n.actionDiscard),
+            ),
+          ],
+        ),
+      );
+      if (discard != true || !mounted) return;
+    }
+    _autoSaveTimer?.cancel();
+    _recoveryTimer?.cancel();
+    unawaited(_recovery.clearDraft(widget.tab.path));
+    setState(() {
+      _loaded = false;
+      _currentText = "";
+      _savedText = "";
+      _dirty = false;
+      _pendingRecovery = null;
+      _recoveryAsked = false;
+      _mountOverride = null;
+      _contentGen++;
+      _bridge.readContent = null;
+      _loadFuture = _load();
+    });
+    ref.read(workspaceTabsProvider.notifier).markDirty(widget.tab.id, false);
+    _toast(l10n.editorReloaded(p.basename(widget.tab.path)));
+  }
+
+  /// One-shot restore offer for a crash-recovery draft, shown after the
+  /// editor mounts on disk content. Restore remounts the editor on the
+  /// draft (kept dirty); discard deletes the draft.
+  void _maybeOfferRecovery() {
+    if (_pendingRecovery == null || _recoveryAsked || !_loaded) return;
+    _recoveryAsked = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) => _askRecovery());
+  }
+
+  Future<void> _askRecovery() async {
+    final draft = _pendingRecovery;
+    if (!mounted || draft == null) return;
+    final l10n = AppLocalizations.of(context);
+    final restore = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.editorRecoverTitle),
+        content: Text(
+          l10n.editorRecoverBody(p.basename(widget.tab.path)),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text(l10n.actionDiscard),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: Text(l10n.actionRestore),
+          ),
+        ],
+      ),
+    );
+    if (!mounted) return;
+    _pendingRecovery = null;
+    if (restore == true) {
+      setState(() {
+        _currentText = draft;
+        _mountOverride = draft;
+        _dirty = true;
+        _contentGen++;
+      });
+      ref.read(workspaceTabsProvider.notifier).markDirty(widget.tab.id, true);
+      _scheduleRecoveryWrite();
+    } else {
+      unawaited(_recovery.clearDraft(widget.tab.path));
+    }
+  }
+
   void _onChanged(String text) {
     _currentText = text;
     final dirty = _loaded && text != _savedText;
+    _dirty = dirty;
     ref.read(workspaceTabsProvider.notifier).markDirty(widget.tab.id, dirty);
     _scheduleAutoSave(dirty);
+    _scheduleRecoveryWrite();
   }
 
   // Debounced auto-save: 1.5s after the last keystroke, reuses [_save].
@@ -280,20 +450,63 @@ class _EditorTabBodyState extends ConsumerState<_EditorTabBody> {
     });
   }
 
+  /// Debounced crash-recovery snapshot: the dirty buffer is parked 2s after
+  /// the last keystroke so a killed app (or closed tab) can offer restore.
+  void _scheduleRecoveryWrite() {
+    _recoveryTimer?.cancel();
+    if (!_dirty || !_loaded) return;
+    _recoveryTimer = Timer(const Duration(seconds: 2), () {
+      if (!mounted || !_dirty) return;
+      final latest = _bridge.readContent?.call() ?? _currentText;
+      // Fire-and-forget: the store never throws.
+      unawaited(_recovery.writeDraft(widget.tab.path, latest));
+    });
+  }
+
+  /// Serialized save: overlapping saves (manual + auto, double-tap) are
+  /// coalesced through [SaveGate] so an older write can never finish after
+  /// a newer one and regress the disk to stale content. A manual save also
+  /// cancels any pending auto-save for the same snapshot.
   Future<void> _save({bool silent = false}) async {
+    _autoSaveTimer?.cancel();
+    if (!_saveGate.begin()) return;
+    do {
+      await _writeCurrent(silent: silent);
+    } while (_saveGate.end() && mounted);
+  }
+
+  Future<void> _writeCurrent({bool silent = false}) async {
     final l10n = AppLocalizations.of(context);
     final service = ref.read(projectServiceProvider);
     final text = _bridge.readContent?.call() ?? _currentText;
     try {
       await service.writeFile(widget.tab.path, text);
     } catch (e) {
+      if (!mounted) return;
       _toast(l10n.editorSaveFailed("$e"));
       return;
     }
-    _currentText = text;
-    _savedText = text;
-    ref.read(workspaceTabsProvider.notifier).markDirty(widget.tab.id, false);
-    _notifyGoSave();
+    if (!mounted) return;
+    unawaited(_recovery.clearDraft(widget.tab.path));
+    // The editor may have moved on while the write was in flight: only a
+    // tab that still holds exactly what was written may go clean. Anything
+    // newer keeps its dirty dot (and re-arms auto-save) instead of faking
+    // a clean state over stale bytes.
+    final current = _bridge.readContent?.call() ?? _currentText;
+    if (settleSave(written: text, current: current) == SaveSettle.clean) {
+      _currentText = text;
+      _savedText = text;
+      _dirty = false;
+      ref.read(workspaceTabsProvider.notifier).markDirty(widget.tab.id, false);
+    } else {
+      _currentText = current;
+      _savedText = text;
+      _dirty = true;
+      ref.read(workspaceTabsProvider.notifier).markDirty(widget.tab.id, true);
+      _scheduleRecoveryWrite();
+      _scheduleAutoSave(true);
+    }
+    _notifyGoSave(text);
     if (!silent) _toast(l10n.editorSaved(p.basename(widget.tab.path)));
   }
 
@@ -342,8 +555,9 @@ class _EditorTabBodyState extends ConsumerState<_EditorTabBody> {
             ),
           );
         }
-        final initialText = snapshot.data ?? "";
+        final initialText = _mountOverride ?? snapshot.data ?? "";
         final isMarkdown = widget.tab.kind == EditorKind.markdown;
+        _maybeOfferRecovery();
         return Column(
           children: [
             // Squeeze-safe file header (the Column:294 overflow): when the
@@ -430,6 +644,8 @@ class _EditorTabBodyState extends ConsumerState<_EditorTabBody> {
                               setState(() => _showPreview = !_showPreview);
                             } else if (value == "save") {
                               _save();
+                            } else if (value == "reload") {
+                              _reload();
                             }
                           },
                           itemBuilder: (context) => [
@@ -449,11 +665,34 @@ class _EditorTabBodyState extends ConsumerState<_EditorTabBody> {
                                 AppLocalizations.of(context).actionSave,
                               ),
                             ),
+                            PopupMenuItem(
+                              value: "reload",
+                              child: Text(
+                                AppLocalizations.of(context).actionRefresh,
+                              ),
+                            ),
                           ],
                         )
                       else
-                        TextButton.icon(
-                          onPressed: _loaded ? _save : null,
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                              onPressed: _loaded ? _reload : null,
+                              style: IconButton.styleFrom(
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                padding: const EdgeInsets.all(8),
+                              ),
+                              visualDensity: VisualDensity.compact,
+                              tooltip: AppLocalizations.of(
+                                context,
+                              ).actionRefresh,
+                              icon: const Icon(Icons.refresh, size: 18),
+                            ),
+                            TextButton.icon(
+                              onPressed: _loaded ? _save : null,
                           style: TextButton.styleFrom(
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(4),
@@ -467,6 +706,8 @@ class _EditorTabBodyState extends ConsumerState<_EditorTabBody> {
                           icon: const Icon(Icons.save, size: 18),
                           label: Text(AppLocalizations.of(context).actionSave),
                         ),
+                          ],
+                        ),
                     ],
                   );
                 },
@@ -477,14 +718,14 @@ class _EditorTabBodyState extends ConsumerState<_EditorTabBody> {
             Expanded(
               child: isMarkdown
                   ? MarkdownEditorView(
-                      key: ValueKey(widget.tab.path),
+                      key: ValueKey("${widget.tab.path}#$_contentGen"),
                       initialText: initialText,
                       onChanged: _onChanged,
                       bridge: _bridge,
                       preview: _showPreview,
                     )
                   : ReEditorAdapter(
-                      key: ValueKey(widget.tab.path),
+                      key: ValueKey("${widget.tab.path}#$_contentGen"),
                       initialText: initialText,
                       language: widget.tab.language,
                       onChanged: _onChanged,
@@ -498,3 +739,4 @@ class _EditorTabBodyState extends ConsumerState<_EditorTabBody> {
     );
   }
 }
+

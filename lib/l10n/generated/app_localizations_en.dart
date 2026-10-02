@@ -52,6 +52,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get actionClose => 'Close';
 
   @override
+  String get actionRestore => 'Restore';
+
+  @override
+  String get actionDiscard => 'Discard';
+
+  @override
   String get actionSearch => 'Search';
 
   @override
@@ -477,6 +483,34 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get editorTabActions => 'Tab actions';
+
+  @override
+  String get editorReloadConfirmTitle => 'Reload file?';
+
+  @override
+  String get editorReloadConfirmBody =>
+      'Discard unsaved changes and reload from disk?';
+
+  @override
+  String editorReloaded(String name) {
+    return 'Reloaded $name';
+  }
+
+  @override
+  String get editorRecoverTitle => 'Unsaved changes found';
+
+  @override
+  String editorRecoverBody(String name) {
+    return 'Restore unsaved changes for $name?';
+  }
+
+  @override
+  String get editorCloseDirtyTitle => 'Close without saving?';
+
+  @override
+  String editorCloseDirtyBody(String name) {
+    return 'Discard unsaved changes to $name?';
+  }
 
   @override
   String get explorerTitle => 'EXPLORER';

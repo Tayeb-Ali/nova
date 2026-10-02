@@ -52,6 +52,12 @@ class AppLocalizationsAr extends AppLocalizations {
   String get actionClose => 'إغلاق';
 
   @override
+  String get actionRestore => 'استعادة';
+
+  @override
+  String get actionDiscard => 'تجاهل';
+
+  @override
   String get actionSearch => 'بحث';
 
   @override
@@ -477,6 +483,34 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get editorTabActions => 'إجراءات التبويب';
+
+  @override
+  String get editorReloadConfirmTitle => 'إعادة تحميل الملف؟';
+
+  @override
+  String get editorReloadConfirmBody =>
+      'تجاهل التغييرات غير المحفوظة وإعادة التحميل من القرص؟';
+
+  @override
+  String editorReloaded(String name) {
+    return 'تمت إعادة تحميل $name';
+  }
+
+  @override
+  String get editorRecoverTitle => 'تم العثور على تغييرات غير محفوظة';
+
+  @override
+  String editorRecoverBody(String name) {
+    return 'استعادة التغييرات غير المحفوظة لـ $name؟';
+  }
+
+  @override
+  String get editorCloseDirtyTitle => 'إغلاق بدون حفظ؟';
+
+  @override
+  String editorCloseDirtyBody(String name) {
+    return 'تجاهل التغييرات غير المحفوظة في $name؟';
+  }
 
   @override
   String get explorerTitle => 'المستكشف';
