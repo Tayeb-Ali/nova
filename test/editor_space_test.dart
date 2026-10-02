@@ -133,7 +133,8 @@ void main() {
     container.read(activeEditorTabProvider.notifier).state = id;
     await tester.pump(const Duration(seconds: 1));
     await tester.pump(const Duration(seconds: 1));
-    expect(find.byType(NovaNavBar), findsOneWidget);
+    // Editor tab is immersive: no bottom bar until revealed by swipe.
+    expect(find.byType(NovaNavBar), findsNothing);
     expect(find.byType(AppBar), findsOneWidget);
 
     // Enter focus: shell nav, app bar, tab strip and tool drawer go away.
@@ -148,10 +149,11 @@ void main() {
     expect(find.byType(AppBar), findsNothing);
 
     // Exit restores everything (focus bar keeps save + exit-focus).
+    // In the editor tab the bottom bar stays hidden until swipe-revealed.
     await tester.tap(find.byTooltip('Exit focus mode'));
     await tester.pump();
     await tester.pump();
-    expect(find.byType(NovaNavBar), findsOneWidget);
+    expect(find.byType(NovaNavBar), findsNothing);
     expect(find.byType(AppBar), findsOneWidget);
     expect(tester.takeException(), isNull);
   });

@@ -1,6 +1,7 @@
+import "dart:async";
+
 import "package:flutter/material.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
-
 import "l10n/generated/app_localizations.dart";
 import "src/core/services/setup_service.dart";
 import "src/core/ui/keyboard_visibility.dart";
@@ -60,10 +61,61 @@ class IdeShell extends ConsumerStatefulWidget {
 class _IdeShellState extends ConsumerState<IdeShell> {
   int _index = 0;
   bool _bootstrapPromptShown = false;
+  // Editor-tab immersion: the editor opens with NO bottom bar so code keeps
+  // maximum space. A swipe up from the bottom edge reveals the full bar for
+  // a few seconds (then it hides again); any tab switch resets the state.
+  // Keyboard/focus hiding still wins over both states.
+  bool _editorBarVisible = false;
+  Timer? _editorBarTimer;
+  Offset? _edgeSwipeStart;
 
-  void _selectNav(int nav) => setState(() => _index = nav);
+  void _selectNav(int nav) {
+    _editorBarTimer?.cancel();
+    _editorBarTimer = null;
+    setState(() {
+      _index = nav;
+      _editorBarVisible = false;
+    });
+  }
 
-  void _openEditor() => setState(() => _index = 1);
+  void _openEditor() => _selectNav(1);
+
+  void _revealEditorBar() {
+    if (_index != 1 || _editorBarVisible) return;
+    _editorBarTimer?.cancel();
+    setState(() => _editorBarVisible = true);
+    // Immersive-style auto-hide: the bar goes away on its own; selecting a
+    // tab hides it immediately via [_selectNav].
+    _editorBarTimer = Timer(const Duration(seconds: 4), () {
+      if (!mounted) return;
+      setState(() => _editorBarVisible = false);
+    });
+  }
+
+  // Bottom-edge swipe-up detector (passive [Listener]: never competes with
+  // editor scrolling). Only the editor tab uses it; everywhere else the
+  // full bar is always visible.
+  void _onPointerDown(PointerDownEvent event) {
+    _edgeSwipeStart = event.position;
+  }
+
+  void _onPointerMove(PointerEvent event) {
+    final start = _edgeSwipeStart;
+    if (start == null || _index != 1 || _editorBarVisible) return;
+    final height = MediaQuery.sizeOf(context).height;
+    if (start.dy >= height - _edgeSwipeZone &&
+        start.dy - event.position.dy >= _edgeSwipeDistance) {
+      _edgeSwipeStart = null;
+      _revealEditorBar();
+    }
+  }
+
+  void _onPointerEnd(PointerEvent event) {
+    _edgeSwipeStart = null;
+  }
+
+  static const double _edgeSwipeZone = 48;
+  static const double _edgeSwipeDistance = 48;
 
   @override
   void initState() {
@@ -94,6 +146,12 @@ class _IdeShellState extends ConsumerState<IdeShell> {
     final done = await showSetupWizard(context);
     if (!mounted) return;
     if (done == true) _selectNav(2);
+  }
+
+  @override
+  void dispose() {
+    _editorBarTimer?.cancel();
+    super.dispose();
   }
 
   @override
@@ -172,7 +230,18 @@ class _IdeShellState extends ConsumerState<IdeShell> {
       );
     }
     return Scaffold(
-      body: visibleBody,
+      // Editor immersion: no bottom bar in the editor tab — a swipe up
+      // from the bottom edge reveals it for a few seconds (see the
+      // edge-swipe detector below). The Listener ALWAYS wraps the body
+      // (never swapped conditionally): changing the widget type here would
+      // remount the whole shell on every tab switch and wipe screen state.
+      body: Listener(
+        onPointerDown: _onPointerDown,
+        onPointerMove: _onPointerMove,
+        onPointerUp: _onPointerEnd,
+        onPointerCancel: _onPointerEnd,
+        child: visibleBody,
+      ),
       // Distraction-free typing: while the keyboard is up the bottom bar
       // is pure chrome. Hide it so the editor keeps maximum height; it
       // slides back up the moment the keyboard closes. Focus mode hides
@@ -180,7 +249,9 @@ class _IdeShellState extends ConsumerState<IdeShell> {
       // instant (space reclaimed now); appearance animates via
       // [NovaNavBarEntrance].
       bottomNavigationBar:
-          (keyboardVisible || ref.watch(focusModeProvider))
+          (keyboardVisible ||
+              ref.watch(focusModeProvider) ||
+              (_index == 1 && !_editorBarVisible))
           ? null
           : NovaNavBarEntrance(
               child: NovaNavBar(

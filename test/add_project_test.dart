@@ -93,7 +93,11 @@ void main() {
     expect(tester.takeException(), isNull);
 
     // Creating a project must land the user in the editor with that project
-    // active, not leave them on the projects hub.
+    // active, not leave them on the projects hub. The editor tab hides
+    // the bar, so reveal it with a bottom-edge swipe first.
+    await tester.flingFrom(const Offset(180, 790), const Offset(0, -80), 400);
+    await tester.pump();
+    await tester.pump();
     final navBar = tester.widget<NovaNavBar>(find.byType(NovaNavBar));
     expect(navBar.selectedIndex, 1, reason: 'editor tab should be selected');
     final container = ProviderScope.containerOf(

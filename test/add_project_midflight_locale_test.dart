@@ -108,6 +108,11 @@ void main() {
 
     expect(tester.takeException(), isNull);
 
+    // The editor tab hides the bar: reveal it with a bottom-edge swipe
+    // before asserting the landed tab.
+    await tester.flingFrom(const Offset(180, 790), const Offset(0, -80), 400);
+    await tester.pump();
+    await tester.pump();
     final navBar = tester.widget<NovaNavBar>(find.byType(NovaNavBar));
     expect(navBar.selectedIndex, 1, reason: 'editor tab should be selected');
     final checkContainer = ProviderScope.containerOf(
