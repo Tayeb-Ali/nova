@@ -1468,6 +1468,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get authLogout => 'Se déconnecter';
 
   @override
+  String get authOr => 'ou continuer avec';
+
+  @override
   String get authPassword => 'Mot de passe';
 
   @override
@@ -1571,46 +1574,53 @@ class AppLocalizationsFr extends AppLocalizations {
   String get tourBack => 'Retour';
 
   @override
-  String get tourHubSearchTitle => 'Rechercher des projets';
+  String get tourHubSearchTitle => 'Trouver un projet';
 
   @override
   String get tourHubSearchBody =>
-      'Filtre la liste des projets par nom. Touche le champ et tape — la liste se réduit au fur et à mesure.';
+      'Tape ici pour filtrer tes projets par nom — essaie tout de suite, filtrer ne change jamais rien.';
 
   @override
-  String get tourHubNewTitle => 'Créer un projet';
+  String get tourHubNewTitle => 'Nouveau projet';
 
   @override
   String get tourHubNewBody =>
-      'Démarre un nouveau projet depuis un modèle. Le bouton ouvre le dialogue de création — annule-le (ou touche Suivant) pour rester dans la visite.';
+      'Crée un projet depuis un modèle prêt (Python, Node.js et plus). Un vrai appui ouvre le formulaire — annule-le, ou touche Suivant, pour continuer la visite.';
 
   @override
-  String get tourHubCardTitle => 'Tes projets';
+  String get tourHubCardTitle => 'Projet actif';
 
   @override
   String get tourHubCardBody =>
-      'Touche une carte de projet pour en faire le projet actif. La carte surlignée est celle qu’utilisent l’éditeur et les outils d’exécution.';
+      'Touche une carte pour choisir le projet qu’utilisent tous les autres outils : éditeur, terminal, exécution et Git. La carte surlignée est celle qui est active.';
 
   @override
-  String get tourHubOpenTitle => 'Ouvrir l’éditeur';
+  String get tourHubOpenTitle => 'Ouvrir dans l’éditeur';
 
   @override
   String get tourHubOpenBody =>
-      'Ouvre l’espace de travail du projet actif. Touche Suivant pour rester dans la visite — toucher la tuile maintenant quitte l’accueil et termine la visite plus tôt.';
+      'Va directement dans l’espace de travail du projet actif. Lecture seule pendant la visite — touche Suivant, puis essaie par toi-même ensuite.';
 
   @override
-  String get tourHubRecentTitle => 'Fichiers récents';
+  String get tourHubRefreshTitle => 'Actualiser la liste';
+
+  @override
+  String get tourHubRefreshBody =>
+      'Recharge la liste des projets depuis le disque. Un vrai appui, toujours sans risque — utilise-le après avoir ajouté des fichiers hors de l’app.';
+
+  @override
+  String get tourHubRecentTitle => 'Reprends où tu étais';
 
   @override
   String get tourHubRecentBody =>
-      'Rouvre les derniers fichiers que tu as modifiés, tous projets confondus. En toucher un l’ouvre directement dans l’éditeur.';
+      'Tes derniers fichiers, tous projets confondus, à un toucher. Lecture seule pendant la visite — touche Suivant pour finir avec le plan de la visite.';
 
   @override
-  String get tourHubNavTitle => 'Se repérer';
+  String get tourHubNavTitle => 'Et ensuite ?';
 
   @override
   String get tourHubNavBody =>
-      'Destinations de la barre du bas : Projets (ici), Éditeur (espace de travail), Runtime (configuration des langages), Paramètres. Le bouton ? rejoue une visite à tout moment.';
+      'Barre du bas : Projets (tu es ici), Éditeur (code + outils), Runtime (installe les langages), Paramètres (IA, thème, compte). Chaque écran a un bouton ? qui rejoue sa propre visite.';
 
   @override
   String get tourEdProjectTitle => 'Sélecteur de projet';

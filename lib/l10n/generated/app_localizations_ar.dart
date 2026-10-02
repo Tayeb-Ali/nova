@@ -1453,6 +1453,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get authLogout => 'تسجيل الخروج';
 
   @override
+  String get authOr => 'أو تابع عبر';
+
+  @override
   String get authPassword => 'كلمة المرور';
 
   @override
@@ -1552,46 +1555,53 @@ class AppLocalizationsAr extends AppLocalizations {
   String get tourBack => 'رجوع';
 
   @override
-  String get tourHubSearchTitle => 'البحث في المشاريع';
+  String get tourHubSearchTitle => 'ابحث عن مشروع';
 
   @override
   String get tourHubSearchBody =>
-      'صفِّ قائمة المشاريع بالاسم. المس حقل البحث واكتب — تضيق القائمة أثناء الكتابة.';
+      'اكتب هنا لتصفية مشاريعك بالاسم — جرّب الآن، فالتصفية لا تغيّر شيئًا أبدًا.';
 
   @override
-  String get tourHubNewTitle => 'إنشاء مشروع';
+  String get tourHubNewTitle => 'مشروع جديد';
 
   @override
   String get tourHubNewBody =>
-      'ابدأ مشروعًا جديدًا من قالب. الضغط يفتح حوار الإنشاء — ألغه (أو المس «التالي») للبقاء في الجولة.';
+      'أنشئ مشروعًا من قالب جاهز (بايثون وNode.js وغيرها). الضغط الحقيقي يفتح الاستمارة — ألغها أو المس «التالي» لمتابعة الجولة.';
 
   @override
-  String get tourHubCardTitle => 'مشاريعك';
+  String get tourHubCardTitle => 'المشروع النشط';
 
   @override
   String get tourHubCardBody =>
-      'المس بطاقة مشروع لجعله المشروع النشط. البطاقة المميزة هي التي يستخدمها المحرر وأدوات التشغيل.';
+      'المس بطاقة لتحديد المشروع الذي يعمل عليه كل شيء آخر: المحرر والطرفية والتشغيل وGit. البطاقة المميزة هي النشطة.';
 
   @override
-  String get tourHubOpenTitle => 'فتح المحرر';
+  String get tourHubOpenTitle => 'فتح في المحرر';
 
   @override
   String get tourHubOpenBody =>
-      'انتقل إلى مساحة العمل للمشروع النشط. المس «التالي» للبقاء في الجولة — فالضغط على البلاطة الآن يغادر المركز ويُنهي الجولة مبكرًا.';
+      'يقفز مباشرة إلى مساحة العمل للمشروع النشط. للقراءة فقط أثناء الجولة — المس «التالي» ثم جرّبه بنفسك بعدها.';
 
   @override
-  String get tourHubRecentTitle => 'الملفات الأخيرة';
+  String get tourHubRefreshTitle => 'تحديث القائمة';
+
+  @override
+  String get tourHubRefreshBody =>
+      'يعيد تحميل قائمة المشاريع من القرص. ضغطة حقيقية وآمنة دائمًا — استخدمها بعد إضافة ملفات من خارج التطبيق.';
+
+  @override
+  String get tourHubRecentTitle => 'عُد من حيث توقفت';
 
   @override
   String get tourHubRecentBody =>
-      'أعد فتح آخر الملفات التي حررتها عبر كل المشاريع. لمس أحدها يفتحه مباشرة في المحرر.';
+      'أحدث ملفاتك عبر كل المشاريع على بعد لمسة. للقراءة فقط أثناء الجولة — المس «التالي» لختم الجولة بخريطة التنقل.';
 
   @override
-  String get tourHubNavTitle => 'التنقل في التطبيق';
+  String get tourHubNavTitle => 'إلى أين بعد؟';
 
   @override
   String get tourHubNavBody =>
-      'وجهات الشريط السفلي: المشاريع (هنا)، المحرر (مساحة العمل)، بيئة التشغيل (إعداد اللغات)، الإعدادات. زر «؟» يعيد تشغيل أي جولة في أي وقت.';
+      'الشريط السفلي: المشاريع (أنت هنا)، المحرر (الكود والأدوات)، بيئة التشغيل (تثبيت اللغات)، الإعدادات (الذكاء الاصطناعي والسمة والحساب). كل شاشة فيها زر ؟ يعيد تشغيل جولتها الخاصة.';
 
   @override
   String get tourEdProjectTitle => 'مبدّل المشروع';

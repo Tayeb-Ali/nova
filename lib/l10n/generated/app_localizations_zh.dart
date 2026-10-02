@@ -1434,6 +1434,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get authLogout => '退出登录';
 
   @override
+  String get authOr => '或通过以下方式继续';
+
+  @override
   String get authPassword => '密码';
 
   @override
@@ -1530,42 +1533,48 @@ class AppLocalizationsZh extends AppLocalizations {
   String get tourBack => '返回';
 
   @override
-  String get tourHubSearchTitle => '搜索项目';
+  String get tourHubSearchTitle => '查找项目';
 
   @override
-  String get tourHubSearchBody => '按名称筛选项目列表。点击输入框并输入 — 列表会随输入实时缩小范围。';
+  String get tourHubSearchBody => '在此输入按名称筛选项目 — 现在就可以试试，筛选不会更改任何内容。';
 
   @override
-  String get tourHubNewTitle => '创建项目';
+  String get tourHubNewTitle => '新建项目';
 
   @override
-  String get tourHubNewBody => '从模板开始一个新项目。点击会打开创建对话框 — 选择“取消”（或点击下一步）即可留在导览中。';
+  String get tourHubNewBody =>
+      '从现成模板创建项目（Python、Node.js 等）。实际点击会打开创建表单 — 选择“取消”或点击“下一步”即可继续导览。';
 
   @override
-  String get tourHubCardTitle => '你的项目';
+  String get tourHubCardTitle => '当前项目';
 
   @override
-  String get tourHubCardBody => '点击项目卡片将其设为当前项目。高亮的卡片即编辑器与运行工具所使用的项目。';
+  String get tourHubCardBody => '点击卡片即可选中项目，编辑器、终端、运行与 Git 都会使用该项目。高亮的卡片即当前项目。';
 
   @override
-  String get tourHubOpenTitle => '打开编辑器';
+  String get tourHubOpenTitle => '在编辑器中打开';
 
   @override
-  String get tourHubOpenBody =>
-      '进入当前项目的工作区。点击下一步可留在导览中 — 若现在点击该磁贴，将离开项目中心并提前结束导览。';
+  String get tourHubOpenBody => '直接进入当前项目的工作区。导览期间为只读 — 点击“下一步”，之后再亲自试用。';
 
   @override
-  String get tourHubRecentTitle => '最近的文件';
+  String get tourHubRefreshTitle => '刷新列表';
 
   @override
-  String get tourHubRecentBody => '重新打开你在所有项目中最近编辑过的文件。点击其中一个即可直接在编辑器中打开。';
+  String get tourHubRefreshBody => '从磁盘重新加载项目列表。实际点击，始终安全 — 在应用之外添加文件后可使用此操作。';
 
   @override
-  String get tourHubNavTitle => '应用导航';
+  String get tourHubRecentTitle => '快速回到上次工作';
+
+  @override
+  String get tourHubRecentBody => '所有项目中的最新文件，一触即达。导览期间为只读 — 点击“下一步”查看导览总览以收尾。';
+
+  @override
+  String get tourHubNavTitle => '接下来去哪里？';
 
   @override
   String get tourHubNavBody =>
-      '底部栏目的地：项目（当前页）、编辑器（工作区）、运行时（语言配置）、设置。? 按钮可随时重播导览。';
+      '底部栏：项目（当前位置）、编辑器（代码与工具）、运行时（安装语言）、设置（AI、主题、账户）。每个页面都有 ? 按钮，可重播该页面的导览。';
 
   @override
   String get tourEdProjectTitle => '项目切换器';

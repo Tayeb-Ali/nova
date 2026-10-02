@@ -1457,6 +1457,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get authLogout => 'Sign out';
 
   @override
+  String get authOr => 'or continue with';
+
+  @override
   String get authPassword => 'Password';
 
   @override
@@ -1558,46 +1561,53 @@ class AppLocalizationsEn extends AppLocalizations {
   String get tourBack => 'Back';
 
   @override
-  String get tourHubSearchTitle => 'Search projects';
+  String get tourHubSearchTitle => 'Find a project';
 
   @override
   String get tourHubSearchBody =>
-      'Filter the project list by name. Tap the field and type — the list narrows as you type.';
+      'Type here to filter your projects by name — try it now, filtering never changes anything.';
 
   @override
-  String get tourHubNewTitle => 'Create a project';
+  String get tourHubNewTitle => 'New project';
 
   @override
   String get tourHubNewBody =>
-      'Start a new project from a template. Pressing it opens the create dialog — Cancel it (or tap Next) to stay in the tour.';
+      'Create a project from a ready template (Python, Node.js and more). A real press opens the form — Cancel it, or tap Next, to keep touring.';
 
   @override
-  String get tourHubCardTitle => 'Your projects';
+  String get tourHubCardTitle => 'Active project';
 
   @override
   String get tourHubCardBody =>
-      'Tap a project card to make it the active project. The highlighted card is the one the editor and run tools use.';
+      'Tap a card to select the project everything else uses: editor, terminal, run and Git. The highlighted card is the active one.';
 
   @override
-  String get tourHubOpenTitle => 'Open the editor';
+  String get tourHubOpenTitle => 'Open in editor';
 
   @override
   String get tourHubOpenBody =>
-      'Jump into the workspace for the active project. Tap Next to stay in the tour — pressing the tile now leaves the hub and ends the tour early.';
+      'Jumps straight into the workspace for the active project. Read-only during the tour — tap Next, then try it yourself afterwards.';
 
   @override
-  String get tourHubRecentTitle => 'Recent files';
+  String get tourHubRefreshTitle => 'Refresh the list';
+
+  @override
+  String get tourHubRefreshBody =>
+      'Reload the project list from disk. A real press, always safe — use it after adding files outside the app.';
+
+  @override
+  String get tourHubRecentTitle => 'Jump back in';
 
   @override
   String get tourHubRecentBody =>
-      'Reopen the last files you edited, across all projects. Tapping one opens it straight in the editor.';
+      'Your latest files across all projects, one tap away. Read-only during the tour — tap Next to finish with the tour map.';
 
   @override
-  String get tourHubNavTitle => 'Getting around';
+  String get tourHubNavTitle => 'Where to next?';
 
   @override
   String get tourHubNavBody =>
-      'Bottom bar destinations: Projects (here), Editor (workspace), Runtime (language setup), Settings. The ? button replays a tour anytime.';
+      'Bottom bar: Projects (you are here), Editor (code + tools), Runtime (install languages), Settings (AI, theme, account). Every screen has a ? button that replays its own tour.';
 
   @override
   String get tourEdProjectTitle => 'Project switcher';

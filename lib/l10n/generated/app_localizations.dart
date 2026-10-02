@@ -2680,6 +2680,12 @@ abstract class AppLocalizations {
   /// **'Sign out'**
   String get authLogout;
 
+  /// Auth: divider between email form and social buttons
+  ///
+  /// In en, this message translates to:
+  /// **'or continue with'**
+  String get authOr;
+
   /// Auth: password field label
   ///
   /// In en, this message translates to:
@@ -2875,73 +2881,85 @@ abstract class AppLocalizations {
   /// Tour: hub search step title
   ///
   /// In en, this message translates to:
-  /// **'Search projects'**
+  /// **'Find a project'**
   String get tourHubSearchTitle;
 
   /// Tour: hub search step body
   ///
   /// In en, this message translates to:
-  /// **'Filter the project list by name. Tap the field and type — the list narrows as you type.'**
+  /// **'Type here to filter your projects by name — try it now, filtering never changes anything.'**
   String get tourHubSearchBody;
 
   /// Tour: hub new-project step title
   ///
   /// In en, this message translates to:
-  /// **'Create a project'**
+  /// **'New project'**
   String get tourHubNewTitle;
 
   /// Tour: hub new-project step body
   ///
   /// In en, this message translates to:
-  /// **'Start a new project from a template. Pressing it opens the create dialog — Cancel it (or tap Next) to stay in the tour.'**
+  /// **'Create a project from a ready template (Python, Node.js and more). A real press opens the form — Cancel it, or tap Next, to keep touring.'**
   String get tourHubNewBody;
 
   /// Tour: hub project-card step title
   ///
   /// In en, this message translates to:
-  /// **'Your projects'**
+  /// **'Active project'**
   String get tourHubCardTitle;
 
   /// Tour: hub project-card step body
   ///
   /// In en, this message translates to:
-  /// **'Tap a project card to make it the active project. The highlighted card is the one the editor and run tools use.'**
+  /// **'Tap a card to select the project everything else uses: editor, terminal, run and Git. The highlighted card is the active one.'**
   String get tourHubCardBody;
 
   /// Tour: hub open-editor step title
   ///
   /// In en, this message translates to:
-  /// **'Open the editor'**
+  /// **'Open in editor'**
   String get tourHubOpenTitle;
 
   /// Tour: hub open-editor step body
   ///
   /// In en, this message translates to:
-  /// **'Jump into the workspace for the active project. Tap Next to stay in the tour — pressing the tile now leaves the hub and ends the tour early.'**
+  /// **'Jumps straight into the workspace for the active project. Read-only during the tour — tap Next, then try it yourself afterwards.'**
   String get tourHubOpenBody;
+
+  /// Tour: hub refresh step title
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh the list'**
+  String get tourHubRefreshTitle;
+
+  /// Tour: hub refresh step body
+  ///
+  /// In en, this message translates to:
+  /// **'Reload the project list from disk. A real press, always safe — use it after adding files outside the app.'**
+  String get tourHubRefreshBody;
 
   /// Tour: hub recent-files step title
   ///
   /// In en, this message translates to:
-  /// **'Recent files'**
+  /// **'Jump back in'**
   String get tourHubRecentTitle;
 
   /// Tour: hub recent-files step body
   ///
   /// In en, this message translates to:
-  /// **'Reopen the last files you edited, across all projects. Tapping one opens it straight in the editor.'**
+  /// **'Your latest files across all projects, one tap away. Read-only during the tour — tap Next to finish with the tour map.'**
   String get tourHubRecentBody;
 
   /// Tour: hub navigation step title
   ///
   /// In en, this message translates to:
-  /// **'Getting around'**
+  /// **'Where to next?'**
   String get tourHubNavTitle;
 
   /// Tour: hub navigation step body
   ///
   /// In en, this message translates to:
-  /// **'Bottom bar destinations: Projects (here), Editor (workspace), Runtime (language setup), Settings. The ? button replays a tour anytime.'**
+  /// **'Bottom bar: Projects (you are here), Editor (code + tools), Runtime (install languages), Settings (AI, theme, account). Every screen has a ? button that replays its own tour.'**
   String get tourHubNavBody;
 
   /// Tour: editor project-switcher step title
