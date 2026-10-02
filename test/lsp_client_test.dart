@@ -222,6 +222,138 @@ void main() {
     expect(location.line, 7);
   });
 
+  test('signatureHelp sends the request and parses signatures', () async {
+    final transport = FakeTransport(
+      cannedResult: <String, dynamic>{
+        'signatures': <Map<String, dynamic>>[
+          <String, dynamic>{
+            'label': 'foo(a: int, b: string)',
+            'documentation': 'Does foo.',
+            'parameters': <Map<String, dynamic>>[
+              <String, dynamic>{'label': 'a: int'},
+              // Offset pair into the signature label resolving to 'b: string'.
+              <String, dynamic>{'label': <int>[12, 21]},
+            ],
+          },
+          <String, dynamic>{
+            'label': 'foo(a: int)',
+            'documentation': <String, dynamic>{
+              'kind': 'markdown',
+              'value': '**foo** docs',
+            },
+            'parameters': <Map<String, dynamic>>[
+              <String, dynamic>{'label': 'a: int'},
+            ],
+          },
+        ],
+        'activeSignature': 0,
+        'activeParameter': 1,
+      },
+    );
+    final client = LspClient(transport);
+
+    final LspSignatureHelp? help = await client.signatureHelp(
+      'lib/main.dart',
+      3,
+      7,
+    );
+
+    expect(transport.sent, hasLength(1));
+    final Map<String, dynamic> request =
+        jsonDecode(transport.sent.single) as Map<String, dynamic>;
+    expect(request['method'], 'textDocument/signatureHelp');
+    final Map<String, dynamic> params =
+        request['params'] as Map<String, dynamic>;
+    expect(params['textDocument']['uri'], 'file://lib/main.dart');
+    expect(params['position'], <String, dynamic>{'line': 3, 'character': 7});
+
+    expect(help, isNotNull);
+    expect(help!.signatures, hasLength(2));
+    expect(help.activeSignature, 0);
+    expect(help.activeParameter, 1);
+    expect(help.signatures[0].label, 'foo(a: int, b: string)');
+    expect(help.signatures[0].documentation, 'Does foo.');
+    expect(
+      help.signatures[0].parameters.map((p) => p.label).toList(),
+      ['a: int', 'b: string'],
+    );
+    expect(help.signatures[1].documentation, '**foo** docs');
+  });
+
+  test('signatureHelp returns null on empty or malformed results', () async {
+    final List<Object?> results = <Object?>[
+      null,
+      <String, dynamic>{},
+      <String, dynamic>{'signatures': <Object?>[]},
+      <String, dynamic>{'signatures': 'nope'},
+      // No signature with a string label.
+      <String, dynamic>{
+        'signatures': <Object?>[
+          <String, dynamic>{'label': 42},
+        ],
+      },
+    ];
+    for (final Object? result in results) {
+      final transport = FakeTransport();
+      final client = LspClient(transport);
+      final Future<LspSignatureHelp?> pending =
+          client.signatureHelp('a.dart', 0, 0);
+      // Queued before the transport's own canned `{}` microtask reply, so
+      // the malformed payload always wins the race deterministically.
+      transport.serverSends(<String, dynamic>{
+        'jsonrpc': '2.0',
+        'id': 1,
+        'result': result,
+      });
+      expect(await pending, isNull);
+    }
+  });
+
+  test('signatureHelp returns null when the server replies with an error',
+      () async {
+    final transport = FakeTransport();
+    final client = LspClient(transport);
+    final Future<LspSignatureHelp?> pending =
+        client.signatureHelp('a.dart', 0, 0);
+    // Queued before the transport's own canned `{}` microtask reply, so
+    // the error always wins the race deterministically.
+    transport.serverSends(<String, dynamic>{
+      'jsonrpc': '2.0',
+      'id': 1,
+      'error': <String, dynamic>{'code': -32601, 'message': 'unknown method'},
+    });
+    expect(await pending, isNull);
+  });
+
+  test('signatureHelp skips parameters with unresolvable labels', () async {
+    final transport = FakeTransport(
+      cannedResult: <String, dynamic>{
+        'signatures': <Map<String, dynamic>>[
+          <String, dynamic>{
+            'label': 'foo(a: int)',
+            'parameters': <Object?>[
+              <String, dynamic>{'label': 'a: int'},
+              // Out-of-range offsets and a missing label are dropped.
+              <String, dynamic>{'label': <int>[0, 99]},
+              <String, dynamic>{},
+            ],
+          },
+        ],
+      },
+    );
+    final client = LspClient(transport);
+
+    final LspSignatureHelp? help = await client.signatureHelp('a.dart', 0, 0);
+
+    expect(help, isNotNull);
+    expect(
+      help!.signatures.single.parameters.map((p) => p.label).toList(),
+      ['a: int'],
+    );
+    expect(help.activeSignature, isNull);
+    expect(help.activeParameter, isNull);
+  });
+
   test('definition returns null on empty or malformed results', () async {
     final List<Object?> results = <Object?>[
       null,

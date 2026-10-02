@@ -110,6 +110,24 @@ Future<DefinitionTarget?> _resolve(
   );
 }
 
+Future<List<DefinitionTarget>> _resolveAll(
+  DefinitionService service, {
+  String language = "python",
+  String file = "/proj/main.py",
+  int line = 1,
+  int char = 0,
+  String word = "foo",
+}) {
+  return service.resolveAll(
+    projectPath: "/proj",
+    language: language,
+    filePath: file,
+    line: line,
+    character: char,
+    word: word,
+  );
+}
+
 void main() {
   group("wordAtCaret", () {
     test("extracts a call name", () {
@@ -216,6 +234,73 @@ void main() {
     test("empty word resolves to null without searching", () async {
       final service = _service(files: const {});
       expect(await _resolve(service, word: ""), isNull);
+    });
+  });
+
+  group("resolveAll", () {
+    test("LSP hit comes first, then text hits", () async {
+      final service = _service(
+        location: const LspLocation(path: "/proj/b.py", line: 4, character: 0),
+        files: {
+          "/proj/main.py": "foo()\n",
+          "/proj/c.py": "def foo():\n    pass\n",
+        },
+      );
+      final targets = await _resolveAll(service, line: 0);
+      expect(targets, hasLength(2));
+      expect(targets[0].path, "/proj/b.py");
+      expect(targets[0].line, 4);
+      expect(targets[1].path, "/proj/c.py");
+      expect(targets[1].line, 0);
+    });
+
+    test("dedupes an LSP hit also found by text search", () async {
+      final service = _service(
+        location:
+            const LspLocation(path: "/proj/util.py", line: 0, character: 0),
+        files: {
+          "/proj/main.py": "foo()\n",
+          "/proj/util.py": "def foo():\n    pass\n",
+        },
+      );
+      final targets = await _resolveAll(service, line: 0);
+      expect(targets, hasLength(1));
+      expect(targets.single.path, "/proj/util.py");
+      expect(targets.single.line, 0);
+    });
+
+    test("same-file text hits come before other files", () async {
+      final service = _service(files: {
+        "/proj/main.py": "def foo():\n    pass\nfoo()\n",
+        "/proj/util.py": "def foo():\n    pass\n",
+      });
+      final targets = await _resolveAll(service, line: 2);
+      expect(targets, hasLength(2));
+      expect(targets[0].path, "/proj/main.py");
+      expect(targets[1].path, "/proj/util.py");
+    });
+
+    test("caps the list so the picker stays tappable", () async {
+      final files = <String, String>{"/proj/main.py": "foo()\n"};
+      for (var i = 0; i < 10; i++) {
+        files["/proj/f$i.py"] = "def foo():\n    pass\n";
+      }
+      final targets = await _resolveAll(_service(files: files), line: 0);
+      expect(targets, hasLength(8));
+      final paths = targets.map((t) => t.path).toSet();
+      expect(paths, hasLength(8));
+      expect(paths, contains("/proj/f0.py"));
+      expect(paths, isNot(contains("/proj/f9.py")));
+    });
+
+    test("empty word and misses resolve to an empty list", () async {
+      final empty = _service(files: const {});
+      expect(await _resolveAll(empty, word: ""), isEmpty);
+      final miss = _service(files: {
+        "/proj/main.py": "foo()\n",
+        "/proj/util.py": "x = 1\n",
+      });
+      expect(await _resolveAll(miss, line: 0), isEmpty);
     });
   });
 }

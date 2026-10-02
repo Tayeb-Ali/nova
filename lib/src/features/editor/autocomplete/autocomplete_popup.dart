@@ -246,14 +246,29 @@ IconData _iconFor(CodePrompt prompt) {
   return Icons.key;
 }
 
+/// Maximum rendered length of a function signature hint in the popup.
+const int kMaxSignatureDetailLength = 80;
+
+/// Renders a JetBrains-style signature hint for [prompt]:
+/// `name(param: Type, ...) → ReturnType`, tail-truncated with `…` past
+/// [maxLength] so long overloads never blow out the popup row.
+String signatureDetailFor(
+  CodeFunctionPrompt prompt, {
+  int maxLength = kMaxSignatureDetailLength,
+}) {
+  final String params = prompt.parameters.entries
+      .map((MapEntry<String, String> entry) =>
+          "${entry.key}: ${entry.value}")
+      .join(", ");
+  final String signature = "${prompt.word}($params) → ${prompt.type}";
+  if (signature.length <= maxLength) return signature;
+  return "${signature.substring(0, maxLength - 1)}…";
+}
+
 /// Optional detail text shown after the word.
 String? _detailFor(CodePrompt prompt) {
   if (prompt is CodeFunctionPrompt) {
-    final String params = prompt.parameters.entries
-        .map((MapEntry<String, String> entry) =>
-            "${entry.key}: ${entry.value}")
-        .join(", ");
-    return "($params) -> ${prompt.type}";
+    return signatureDetailFor(prompt);
   }
   if (prompt is CodeFieldPrompt) {
     return prompt.type;

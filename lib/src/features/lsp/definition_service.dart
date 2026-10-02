@@ -54,6 +54,10 @@ class DefinitionService {
   /// would hang the tap forever instead of degrading to text search.
   static const Duration _lspBudget = Duration(seconds: 10);
 
+  /// Max sites returned: enough for overloads/overrides, small enough for
+  /// a tappable phone picker.
+  static const int _maxTargets = 8;
+
   /// Resolve the definition of [word] used at ([line], [character],
   /// 0-based) in [filePath]. [currentText] is the unsaved buffer, synced
   /// to the server first so positions stay accurate while typing.
@@ -96,6 +100,60 @@ class DefinitionService {
     return _searchText(projectPath, language, filePath, word);
   }
 
+  /// Every definition site for [word]: the LSP hit first (when the server
+  /// answers), then unique text-search hits — same-file declarations
+  /// first, then the rest of the project. Deduped by path+line and capped
+  /// at [_maxTargets]; empty when nothing resolves. [resolve] stays the
+  /// single-hit path (first entry here) for backward compatibility.
+  Future<List<DefinitionTarget>> resolveAll({
+    required String projectPath,
+    required String language,
+    required String filePath,
+    required int line,
+    required int character,
+    required String word,
+    String? currentText,
+  }) async {
+    if (word.isEmpty) return const [];
+    final List<DefinitionTarget> all = <DefinitionTarget>[];
+    final Set<String> seen = <String>{};
+    void add(DefinitionTarget target) {
+      if (all.length >= _maxTargets) return;
+      if (seen.add('${target.path}:${target.line}')) all.add(target);
+    }
+    // 1. Language server: exact, scope-aware (methods, imports, generics).
+    try {
+      final LspLocation? location = await (() async {
+        if (currentText != null) {
+          await _lsp.didChangeFile(
+            projectPath,
+            filePath,
+            language,
+            currentText,
+          );
+        }
+        return _lsp.definitionFor(
+          projectPath,
+          language,
+          filePath,
+          line,
+          character,
+        );
+      })().timeout(_lspBudget);
+      if (location != null) {
+        add(DefinitionTarget(path: location.path, line: location.line));
+      }
+    } catch (_) {
+      // Fall through to text search.
+    }
+    // 2. Text fallback: every declaration-shaped line for [word].
+    for (final DefinitionTarget target
+        in await _searchAllText(projectPath, language, filePath, word)) {
+      add(target);
+    }
+    return all;
+  }
+
   Future<DefinitionTarget?> _searchText(
     String projectPath,
     String language,
@@ -129,6 +187,45 @@ class DefinitionService {
       }
     }
     return DefinitionTarget(path: best.path, line: best.line - 1);
+  }
+
+  /// Every declaration-shaped line for [word]: same-file hits first (a
+  /// declaration next to the usage wins), then the rest of the project in
+  /// search order. Same pattern and options as [_searchText].
+  Future<List<DefinitionTarget>> _searchAllText(
+    String projectPath,
+    String language,
+    String filePath,
+    String word,
+  ) async {
+    final String pattern = _definitionPattern(language, word);
+    ProjectSearchResult result;
+    try {
+      result = await _search.search(
+        projectPath,
+        pattern,
+        const SearchOptions(
+          regex: true,
+          caseSensitive: true,
+          maxFiles: 200,
+          maxHits: 50,
+        ),
+      );
+    } catch (_) {
+      return const [];
+    }
+    final List<DefinitionTarget> same = <DefinitionTarget>[];
+    final List<DefinitionTarget> rest = <DefinitionTarget>[];
+    for (final SearchHit hit in result.hits) {
+      final DefinitionTarget target =
+          DefinitionTarget(path: hit.path, line: hit.line - 1);
+      if (hit.path == filePath) {
+        same.add(target);
+      } else {
+        rest.add(target);
+      }
+    }
+    return <DefinitionTarget>[...same, ...rest];
   }
 
   /// Single regex matching declaration lines for [word] in [language].

@@ -27,6 +27,7 @@ import "package:re_highlight/languages/makefile.dart";
 import "package:re_highlight/re_highlight.dart";
 
 import "language_members.dart";
+import "completion_assists.dart";
 import "completion_ranker.dart";
 import "language_snippets.dart";
 
@@ -195,6 +196,15 @@ class NovaPromptsBuilder implements CodeAutocompletePromptsBuilder {
   static final RegExp _scopePattern =
       RegExp(r"([A-Za-z_][A-Za-z0-9_$]*)::([A-Za-z_$][A-Za-z0-9_$]*)?$");
 
+  /// Matches `receiver.postfix|` at the caret, where the receiver may be a
+  /// dotted chain (`a.b.if` keeps the whole chain). Same `$`-anchoring
+  /// style as the member patterns: the match must end exactly at the caret.
+  /// The segment after the LAST dot must be exactly a postfix keyword.
+  static final RegExp _postfixPattern = RegExp(
+    r"([A-Za-z_$][A-Za-z0-9_$]*(?:\.[A-Za-z_$][A-Za-z0-9_$]*)*)"
+    r"\.(if|else|for|while|log|not|null)$",
+  );
+
   @override
   CodeAutocompleteEditingValue? build(
     BuildContext context,
@@ -211,6 +221,14 @@ class NovaPromptsBuilder implements CodeAutocompletePromptsBuilder {
     final memberResult = _memberCompletion(codeLine.text, selection);
     if (memberResult != null) {
       return memberResult;
+    }
+    // Postfix templates (`expr.if` -> `if (expr) {}`) win over keywords but
+    // never over real members: the check above already returned for any
+    // receiver whose table fuzzy-matches, and [_postfixCompletion] itself
+    // stays silent while the receiver owns a member table at all.
+    final postfixResult = _postfixCompletion(codeLine.text, selection);
+    if (postfixResult != null) {
+      return postfixResult;
     }
     final CodeAutocompleteEditingValue? base =
         _delegate.build(context, codeLine, selection);
@@ -344,6 +362,73 @@ class NovaPromptsBuilder implements CodeAutocompletePromptsBuilder {
       prompts: ranked,
       index: 0,
     );
+  }
+
+  /// Detects `receiver.postfixKeyword|` immediately before the caret and
+  /// returns the single snippet-style prompt expanding around the receiver,
+  /// or null to use the normal flow.
+  ///
+  /// The offered prompt's word is the full typed text (for example
+  /// `expr.if`) so accepting it REPLACES the whole `receiver.keyword`
+  /// span; the expansion parks the caret per [postfixExpansion]. Fires
+  /// only when the receiver's last segment owns NO member table (real
+  /// member completion always wins) and the language supports the
+  /// keyword's syntax. The string-literal guard in [build] already ran.
+  CodeAutocompleteEditingValue? _postfixCompletion(
+    String lineText,
+    CodeLineSelection selection,
+  ) {
+    final int end = selection.extentOffset.clamp(0, lineText.length);
+    final String before = lineText.substring(0, end);
+    final RegExpMatch? match = _postfixPattern.firstMatch(before);
+    if (match == null || match.end != end) {
+      return null;
+    }
+    final String receiver = match.group(1)!;
+    final String keyword = match.group(2)!;
+    // Real members always win: suppress while the immediate receiver (last
+    // chain segment) owns a member table. PHP `$x` tries raw, then bare.
+    final String immediate = receiver.split(".").last;
+    if (_hasMemberTable(immediate)) {
+      return null;
+    }
+    final ({String expansion, int caretOffset})? template =
+        postfixExpansion(languageId, receiver, keyword);
+    if (template == null) {
+      return null;
+    }
+    final String fullTyped = "$receiver.$keyword";
+    return CodeAutocompleteEditingValue(
+      input: fullTyped,
+      prompts: <CodePrompt>[
+        CodeFieldPrompt(
+          word: fullTyped,
+          type: snippetPromptType,
+          customAutocomplete: CodeAutocompleteResult(
+            input: "",
+            word: template.expansion,
+            selection: TextSelection.collapsed(offset: template.caretOffset),
+          ),
+        ),
+      ],
+      index: 0,
+    );
+  }
+
+  /// True when [receiver] owns a member table in the current language
+  /// (PHP `$`-prefixed receivers also try the stripped name).
+  bool _hasMemberTable(String receiver) {
+    if (MemberRegistry.membersFor(languageId, receiver) != null) {
+      return true;
+    }
+    if (receiver.startsWith(r"$") && receiver.length > 1) {
+      return MemberRegistry.membersFor(
+            languageId,
+            receiver.substring(1),
+          ) !=
+          null;
+    }
+    return false;
   }
 
   /// Raw identifier candidates from [source] (unfiltered); fuzzy ranking

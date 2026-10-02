@@ -31,11 +31,14 @@ import "package:re_highlight/languages/dockerfile.dart";
 import "package:re_highlight/languages/makefile.dart";
 
 import "../../core/settings_store.dart";
+import "../ai/ai_completion_provider.dart";
+import "../ai/ai_providers.dart";
 import "../../../l10n/generated/app_localizations.dart";
 import "ai_insert.dart";
 import "editor_engine.dart";
 import "selection_toolbar.dart";
 import "autocomplete/autocomplete_popup.dart";
+import "autocomplete/completion_assists.dart";
 import "autocomplete/nova_prompts_builder.dart";
 import "theme/editor_fonts.dart";
 import "theme/font_loader.dart";
@@ -77,6 +80,12 @@ class ReEditorAdapter extends ConsumerStatefulWidget {
   final Future<List<CodePrompt>> Function(String filePath, int line, int char)?
       lspCompletion;
 
+  /// Optional AI completion provider override (tests / explicit wiring).
+  /// When null, the adapter lazily builds one from the persisted AI
+  /// settings plus the secure-storage key on the first eligible keystroke;
+  /// with no saved API key, AI fetching stays dormant.
+  final AiCompletionProvider? aiCompletion;
+
   /// Optional bridge for AI insert + selection reads. When provided, the
   /// adapter publishes `readContent`/`readSelection`/`insertAtCursor` plus
   /// `readCaret`/`jumpToLine` (go to definition) on mount and clears them
@@ -99,6 +108,7 @@ class ReEditorAdapter extends ConsumerStatefulWidget {
     this.onFindControllerReady,
     this.filePath,
     this.lspCompletion,
+    this.aiCompletion,
     this.bridge,
     this.onGoToDefinition,
   });
@@ -116,6 +126,11 @@ class _ReEditorAdapterState extends ConsumerState<ReEditorAdapter> {
   bool _didInitialJump = false;
   Timer? _lspDebounce;
   int _lspRequestId = 0;
+  Timer? _aiDebounce;
+  int _aiRequestId = 0;
+  AiCompletionProvider? _aiProvider;
+  List<CodePrompt> _lspPrompts = const [];
+  List<CodePrompt> _aiPrompts = const [];
 
   @override
   void initState() {
@@ -248,12 +263,22 @@ class _ReEditorAdapterState extends ConsumerState<ReEditorAdapter> {
         language: _modeFor(widget.language),
         languageId: widget.language,
       );
+      // The fresh builder drops parked async prompts; re-apply them.
+      _mergeExternal();
+    }
+    if (oldWidget.filePath != widget.filePath) {
+      // Fresh file, fresh AI backoff budget (the failure mute ends here).
+      _aiRequestId++;
+      _aiProvider = null;
+      _aiPrompts = const [];
+      _mergeExternal();
     }
   }
 
   @override
   void dispose() {
     _lspDebounce?.cancel();
+    _aiDebounce?.cancel();
     _clearBridge();
     _findController.dispose();
     _controller.dispose();
@@ -334,13 +359,177 @@ class _ReEditorAdapterState extends ConsumerState<ReEditorAdapter> {
       final int request = ++_lspRequestId;
       final List<CodePrompt> prompts = await fetch(path, line, character);
       if (!mounted || request != _lspRequestId) return;
-      _promptsBuilder.externalPrompts = prompts;
+      _lspPrompts = prompts;
+      _mergeExternal();
+    });
+  }
+
+  /// Applies parked async prompts with AI first so stable ties keep the
+  /// AI suggestion on top (see [rankPrompts]).
+  void _mergeExternal() {
+    _promptsBuilder.externalPrompts = <CodePrompt>[
+      ..._aiPrompts,
+      ..._lspPrompts,
+    ];
+  }
+
+  /// Trailing identifier before the caret (mirrors the extraction in
+  /// `NovaPromptsBuilder`, digits accepted so `var2` keeps working).
+  static String _inputBeforeCaret(String lineText, int character) {
+    final int end = character.clamp(0, lineText.length);
+    int start = end;
+    while (start > 0 && _isAiWordChar(lineText.codeUnitAt(start - 1))) {
+      start--;
+    }
+    return lineText.substring(start, end);
+  }
+
+  static bool _isAiWordChar(int codeUnit) {
+    return (codeUnit >= 65 && codeUnit <= 90) ||
+        (codeUnit >= 97 && codeUnit <= 122) ||
+        (codeUnit >= 48 && codeUnit <= 57) ||
+        codeUnit == 95;
+  }
+
+  /// Lazily builds the AI provider from settings + the saved API key.
+  /// Null when no key is saved (fetching stays dormant) or the key read
+  /// fails; an explicit [ReEditorAdapter.aiCompletion] override wins.
+  Future<AiCompletionProvider?> _aiProviderForFetch() async {
+    final AiCompletionProvider? override = widget.aiCompletion;
+    if (override != null) return override;
+    final AiCompletionProvider? cached = _aiProvider;
+    if (cached != null) return cached;
+    try {
+      final Settings settings = ref.read(settingsStoreProvider);
+      final String? apiKey = await ref.read(aiKeyProvider.future);
+      if (apiKey == null || apiKey.trim().isEmpty) return null;
+      final AiCompletionProvider built = AiCompletionProvider(
+        baseUrl: settings.aiBaseUrl,
+        apiKey: apiKey,
+        model: settings.aiModel,
+      );
+      _aiProvider = built;
+      return built;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// Debounced AI completion fetch, mirroring [_scheduleLspFetch]: the
+  /// suggestion is parked as a top-ranked `CodeFieldPrompt` (see
+  /// [AiCompletionProvider.promptFor]) and merged on the next keystroke.
+  /// re_editor has no ghost-text API, so the existing popup carries the
+  /// suggestion with free keyboard/mouse acceptance. Never throws:
+  /// [AiCompletionProvider.suggest] resolves null on any failure, and the
+  /// key/config reads above are guarded (plus belt-and-braces below, so a
+  /// debounced callback can never raise an unhandled async error).
+  void _scheduleAiFetch() {
+    _aiDebounce?.cancel();
+    _aiDebounce = Timer(AiCompletionPolicy.debounce, () async {
+      final int request = ++_aiRequestId;
+      try {
+        if (_controller.lineCount <= 0) return;
+        final CodeLineSelection sel = _controller.selection;
+        final int caretLine =
+            sel.extentIndex.clamp(0, _controller.lineCount - 1);
+        final String lineText = _controller.codeLines[caretLine].text;
+        final int caretOffset =
+            sel.extentOffset.clamp(0, lineText.length);
+        final StringBuffer before = StringBuffer();
+        for (int i = 0; i < caretLine; i++) {
+          before.write(_controller.codeLines[i].text);
+          before.write('\n');
+        }
+        before.write(lineText.substring(0, caretOffset));
+        final StringBuffer after =
+            StringBuffer(lineText.substring(caretOffset));
+        for (int i = caretLine + 1; i < _controller.lineCount; i++) {
+          after.write('\n');
+          after.write(_controller.codeLines[i].text);
+        }
+        final String prefix = before.toString();
+        final bool enabled =
+            ref.read(settingsStoreProvider).autocompleteEnabled;
+        if (!AiCompletionPolicy.shouldFetch(
+          enabled: enabled,
+          documentText: _controller.text,
+          prefix: prefix,
+        )) {
+          return;
+        }
+        final AiCompletionProvider? provider =
+            await _aiProviderForFetch();
+        if (provider == null || provider.isMuted) return;
+        final String? suggestion = await provider.suggest(
+          language: widget.language,
+          prefix: prefix,
+          suffix: after.toString(),
+        );
+        if (!mounted || request != _aiRequestId) return;
+        if (suggestion == null || suggestion.isEmpty) {
+          if (_aiPrompts.isNotEmpty) {
+            _aiPrompts = const [];
+            _mergeExternal();
+          }
+          return;
+        }
+        _aiPrompts = <CodePrompt>[
+          AiCompletionProvider.promptFor(
+            input: _inputBeforeCaret(lineText, caretOffset),
+            suggestion: suggestion,
+          ),
+        ];
+        _mergeExternal();
+      } catch (_) {
+        // Guarded above; never let a debounced fetch escape.
+      }
     });
   }
 
   void _onTextChanged() {
     widget.onChanged(_controller.text);
     _scheduleLspFetch();
+    _scheduleAiFetch();
+  }
+
+  /// Leading identifier of an accepted expansion (`Widget` from `Widget`,
+  /// `print` from `print(object)`, `console` from `console.log();`).
+  /// Importable symbols complete to their bare name, so their leading
+  /// identifier is the table key; snippet expansions resolve to a
+  /// non-table word and become a no-op.
+  static final RegExp _leadingIdentifierPattern =
+      RegExp(r"[A-Za-z_$][A-Za-z0-9_$]*");
+
+  /// JetBrains-style auto-import after a tap-accept: when the accepted
+  /// expansion starts with a known external symbol whose import line is
+  /// missing, inserts `<import>\n` at the top of the file (line 1 past a
+  /// shebang) and shifts the caret down one line to stay on the edit.
+  void _applyAutoImport(CodeAutocompleteResult result) {
+    final RegExpMatch? match = _leadingIdentifierPattern.firstMatch(result.word);
+    if (match == null || match.start != 0) {
+      return;
+    }
+    final String text = _controller.text;
+    final String updated = applyAutoImport(
+      text: text,
+      languageId: widget.language,
+      acceptedWord: match.group(0)!,
+    );
+    if (updated == text) {
+      return;
+    }
+    final int insertLine = autoImportInsertLine(text);
+    final CodeLineSelection selection = _controller.selection;
+    _controller.text = updated;
+    _controller.selection = CodeLineSelection(
+      baseIndex:
+          insertLine <= selection.baseIndex ? selection.baseIndex + 1 : selection.baseIndex,
+      baseOffset: selection.baseOffset,
+      extentIndex: insertLine <= selection.extentIndex
+          ? selection.extentIndex + 1
+          : selection.extentIndex,
+      extentOffset: selection.extentOffset,
+    );
   }
 
   CodeEditorStyle? _styleFor(
@@ -425,7 +614,16 @@ class _ReEditorAdapterState extends ConsumerState<ReEditorAdapter> {
     if (autocompleteEnabled) {
       _promptsBuilder.documentText = _controller.text;
       editorTree = CodeAutocomplete(
-        viewBuilder: buildAutocompletePopup,
+        // Tap-accept interception: the wrapper forwards to the popup and
+        // then applies the auto-import for the accepted symbol. Enter-key
+        // acceptance is dispatched inside re_editor's private shortcut
+        // action and bypasses this callback, so Enter does not auto-import
+        // (documented limitation; no re_editor fork).
+        viewBuilder: (context, notifier, onSelected) =>
+            buildAutocompletePopup(context, notifier, (result) {
+          onSelected(result);
+          _applyAutoImport(result);
+        }),
         promptsBuilder: _promptsBuilder,
         child: editorTree,
       );

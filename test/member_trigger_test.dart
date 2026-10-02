@@ -313,4 +313,28 @@ void main() {
     expect(result, isNotNull);
     expect(wordsOf(result), contains('echo "";'));
   });
+
+  testWidgets('console.if postfix stays silent: the table owns console',
+      (tester) async {
+    final BuildContext ctx = await pumpContext(tester);
+    // `if` matches no console member, yet no `console.if` template may
+    // appear: real member tables always beat postfix.
+    final CodeAutocompleteEditingValue? result =
+        buildAt(ctx, 'javascript', 'console.if');
+    expect(wordsOf(result), isNot(contains('console.if')));
+  });
+
+  testWidgets('console.log resolves members, not a postfix template',
+      (tester) async {
+    final BuildContext ctx = await pumpContext(tester);
+    final CodeAutocompleteEditingValue? result =
+        buildAt(ctx, 'javascript', 'console.log');
+    expect(result, isNotNull);
+    // Member path (input `log`), not the postfix path (input
+    // `console.log`); the fully-typed `log` hides as an exact match while
+    // `logo` proves the member list came back.
+    expect(result!.input, 'log');
+    expect(wordsOf(result), contains('logo'));
+    expect(wordsOf(result), isNot(contains('console.log')));
+  });
 }

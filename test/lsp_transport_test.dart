@@ -90,6 +90,30 @@ void main() {
     expect(serverCommandFor('rust'), 'rust-analyzer');
     expect(serverArgvFor('rust'), ['rust-analyzer']);
     expect(serverArgvFor('cobol'), isNull);
+    // Kotlin: fwcd kotlin-language-server over stdio (no args); the hint
+    // names the Nova apt package, like the other entries.
+    expect(serverCommandFor('kotlin'), 'kotlin-language-server');
+    expect(serverArgvFor('kotlin'), ['kotlin-language-server']);
+    expect(lspInstallHints['kotlin'], isNotEmpty);
+  });
+
+  test('kotlin registration degrades gracefully when the binary is missing',
+      () async {
+    // Throwing factory (existing pattern): the spawn attempt for a missing
+    // server must surface as a fast failure that the best-effort wrappers
+    // swallow — editing never breaks and no server entry leaks.
+    final manager = GoLspManager(
+      transportFactory: (_) => throw StateError('no spawn'),
+    );
+    expect(
+      await manager.definitionFor('/proj', 'kotlin', '/proj/A.kt', 0, 0),
+      isNull,
+    );
+    expect(
+      await manager.completionFor('/proj', 'kotlin', '/proj/A.kt', 0, 0),
+      isEmpty,
+    );
+    expect(manager.liveServerCount, 0);
   });
 
   test('transport decodes split Content-Length frames', () async {

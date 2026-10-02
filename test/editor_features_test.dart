@@ -3,6 +3,7 @@ import "package:flutter_test/flutter_test.dart";
 import "package:re_editor/re_editor.dart";
 
 import "package:nova/src/features/editor/autocomplete/language_snippets.dart";
+import "package:nova/src/features/editor/autocomplete/completion_assists.dart";
 import "package:nova/src/features/editor/theme/editor_theme_pack.dart";
 
 void main() {
@@ -208,6 +209,56 @@ void main() {
           reason: lang,
         );
       }
+    });
+  });
+
+  group("auto-import tables", () {
+    test("bounded tables for dart/js/ts/python only", () {
+      for (final lang in ["dart", "javascript", "typescript", "python"]) {
+        expect(
+          importEditsFor(lang).length,
+          inInclusiveRange(10, 17),
+          reason: lang,
+        );
+      }
+      expect(importEditsFor("java"), isEmpty);
+      expect(importEditsFor(null), isEmpty);
+    });
+
+    test("high-value symbols map to their import lines", () {
+      expect(
+        importLineFor("dart", "Widget"),
+        "import 'package:flutter/widgets.dart';",
+      );
+      expect(
+        importLineFor("javascript", "useState"),
+        "import { useState } from 'react';",
+      );
+      expect(
+        importLineFor("python", "Path"),
+        "from pathlib import Path",
+      );
+    });
+
+    test("import inserted once, skipped when present", () {
+      expect(
+        applyAutoImport(
+          text: "void main() {}",
+          languageId: "dart",
+          acceptedWord: "Widget",
+        ),
+        "import 'package:flutter/widgets.dart';\nvoid main() {}",
+      );
+      const present =
+          "import 'package:flutter/widgets.dart';\nWidget build() {}";
+      expect(
+        applyAutoImport(
+          text: present,
+          languageId: "dart",
+          acceptedWord: "Widget",
+        ),
+        same(present),
+      );
     });
   });
 }

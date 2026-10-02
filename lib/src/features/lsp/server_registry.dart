@@ -27,6 +27,8 @@ String? serverCommandFor(String language) {
       return 'gopls serve';
     case 'rust':
       return 'rust-analyzer';
+    case 'kotlin':
+      return 'kotlin-language-server';
     default:
       return null;
   }
@@ -50,6 +52,9 @@ List<String>? serverArgvFor(String language) {
       return const ['phpactor', 'language-server'];
     case 'rust':
       return const ['rust-analyzer'];
+    case 'kotlin':
+      // fwcd kotlin-language-server speaks stdio by default: no args needed.
+      return const ['kotlin-language-server'];
     case 'dart':
       // Ships inside the Dart SDK: no extra package needed.
       return const ['dart', 'language-server'];

@@ -102,6 +102,59 @@ class LspLocation {
   final int character;
 }
 
+/// One parameter of an LSP `SignatureInformation`.
+///
+/// `label` is already resolved: servers send either the parameter text
+/// itself or a `[start, end]` offset pair into the enclosing signature
+/// label, and the client normalizes both to the substring form.
+class LspSignatureParameter {
+  const LspSignatureParameter({required this.label, this.documentation});
+
+  /// Parameter text (e.g. `a: int`).
+  final String label;
+
+  /// Parameter documentation, when the server sent any.
+  final String? documentation;
+}
+
+/// One signature inside a `textDocument/signatureHelp` response.
+class LspSignatureInformation {
+  const LspSignatureInformation({
+    required this.label,
+    this.documentation,
+    this.parameters = const [],
+  });
+
+  /// Full signature text (e.g. `foo(a: int, b: string)`).
+  final String label;
+
+  /// Signature documentation, when the server sent any.
+  final String? documentation;
+
+  /// The signature's parameters, in order.
+  final List<LspSignatureParameter> parameters;
+}
+
+/// Signature help for the call site at a cursor position
+/// (`textDocument/signatureHelp`).
+class LspSignatureHelp {
+  const LspSignatureHelp({
+    required this.signatures,
+    this.activeSignature,
+    this.activeParameter,
+  });
+
+  /// Available overloads; the list is never empty.
+  final List<LspSignatureInformation> signatures;
+
+  /// Index into [signatures] of the active overload, when reported.
+  final int? activeSignature;
+
+  /// Index of the active parameter within the active signature, when
+  /// reported.
+  final int? activeParameter;
+}
+
 /// Wire-level transport for JSON-RPC messages.
 ///
 /// The transport owns framing and the connection. A real stdio-backed
@@ -235,6 +288,27 @@ class LspClient {
         'position': <String, dynamic>{'line': line, 'character': char},
       });
       return _parseDefinition(result);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// Request signature help for the call site at [line]/[char]
+  /// (0-based). Returns the parsed overloads, or null when the server
+  /// answers empty, the payload is malformed, or the request fails —
+  /// callers treat that as "no hint", never as an editing failure.
+  Future<LspSignatureHelp?> signatureHelp(
+    String path,
+    int line,
+    int char,
+  ) async {
+    try {
+      final Object? result = await _request('textDocument/signatureHelp',
+          <String, dynamic>{
+        'textDocument': <String, dynamic>{'uri': uriFor(path)},
+        'position': <String, dynamic>{'line': line, 'character': char},
+      });
+      return _parseSignatureHelp(result);
     } catch (_) {
       return null;
     }
@@ -430,5 +504,94 @@ class LspClient {
       line: line,
       character: character,
     );
+  }
+
+  /// Normalizes a `textDocument/signatureHelp` result. Anything but a map
+  /// with a non-empty `signatures` list — including a list with no valid
+  /// signature — yields null.
+  LspSignatureHelp? _parseSignatureHelp(Object? result) {
+    try {
+      if (result is! Map<String, dynamic>) return null;
+      final Object? rawSignatures = result['signatures'];
+      if (rawSignatures is! List || rawSignatures.isEmpty) return null;
+      final List<LspSignatureInformation> signatures =
+          <LspSignatureInformation>[];
+      for (final Object? raw in rawSignatures) {
+        final LspSignatureInformation? signature = _parseSignature(raw);
+        if (signature != null) signatures.add(signature);
+      }
+      if (signatures.isEmpty) return null;
+      return LspSignatureHelp(
+        signatures: List.unmodifiable(signatures),
+        activeSignature: result['activeSignature'] is int
+            ? result['activeSignature'] as int
+            : null,
+        activeParameter: result['activeParameter'] is int
+            ? result['activeParameter'] as int
+            : null,
+      );
+    } catch (_) {
+      return null;
+    }
+  }
+
+  LspSignatureInformation? _parseSignature(Object? raw) {
+    if (raw is! Map<String, dynamic>) return null;
+    final Object? label = raw['label'];
+    if (label is! String) return null;
+    final List<LspSignatureParameter> parameters = <LspSignatureParameter>[];
+    final Object? rawParameters = raw['parameters'];
+    if (rawParameters is List) {
+      for (final Object? parameter in rawParameters) {
+        final LspSignatureParameter? parsed =
+            _parseSignatureParameter(parameter, label);
+        if (parsed != null) parameters.add(parsed);
+      }
+    }
+    return LspSignatureInformation(
+      label: label,
+      documentation: _parseSignatureDoc(raw['documentation']),
+      parameters: List.unmodifiable(parameters),
+    );
+  }
+
+  LspSignatureParameter? _parseSignatureParameter(
+    Object? raw,
+    String signatureLabel,
+  ) {
+    if (raw is! Map<String, dynamic>) return null;
+    final String? label =
+        _resolveParameterLabel(raw['label'], signatureLabel);
+    if (label == null) return null;
+    return LspSignatureParameter(
+      label: label,
+      documentation: _parseSignatureDoc(raw['documentation']),
+    );
+  }
+
+  /// Resolves an LSP parameter label: either the literal text or a
+  /// `[start, end]` offset pair into [signatureLabel]. Out-of-range
+  /// offsets yield null (the parameter is skipped).
+  String? _resolveParameterLabel(Object? label, String signatureLabel) {
+    if (label is String) return label;
+    if (label is List && label.length == 2) {
+      final Object? start = label[0];
+      final Object? end = label[1];
+      if (start is int && end is int && start >= 0 && start <= end &&
+          end <= signatureLabel.length) {
+        return signatureLabel.substring(start, end);
+      }
+    }
+    return null;
+  }
+
+  /// Documentation is either a plain string or a `MarkupContent` map
+  /// (`{'kind': ..., 'value': ...}`); anything else yields null.
+  String? _parseSignatureDoc(Object? raw) {
+    if (raw is String) return raw;
+    if (raw is Map<String, dynamic> && raw['value'] is String) {
+      return raw['value'] as String;
+    }
+    return null;
   }
 }

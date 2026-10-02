@@ -218,6 +218,41 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets("several sites offer a picker and jump to the choice",
+      (tester) async {
+    tester.view.physicalSize = const Size(360, 800);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(() => tester.view.resetPhysicalSize());
+
+    final container = await _pumpEditor(
+      tester,
+      canned: null,
+      openPath: "/data/demo/main.py",
+      files: {
+        "/data/demo/main.py": "foo()\nfoo",
+        "/data/demo/a.py": "def foo():\n    pass\n",
+        "/data/demo/b.py": "def foo():\n    pass\n",
+      },
+    );
+
+    await _tapDefinition(tester);
+
+    // Two declaration sites: the picker lists both (1-based lines).
+    expect(find.text("Go to definition"), findsOneWidget);
+    expect(find.text("a.py : 1"), findsOneWidget);
+    expect(find.text("b.py : 1"), findsOneWidget);
+
+    await tester.tap(find.text("b.py : 1"));
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pump(const Duration(seconds: 1));
+
+    final tabs = container.read(workspaceTabsProvider);
+    expect(tabs.any((t) => t.path == "/data/demo/b.py"), isTrue);
+    expect(container.read(activeEditorTabProvider), "/data/demo/b.py");
+    await _releaseFocus(tester);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets("miss shows a toast and opens nothing", (tester) async {
     tester.view.physicalSize = const Size(360, 800);
     tester.view.devicePixelRatio = 1.0;

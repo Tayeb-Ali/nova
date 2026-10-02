@@ -543,7 +543,8 @@ class _EditorTabBodyState extends ConsumerState<_EditorTabBody> {
 
   /// Shared resolution + navigation behind the header action (caret word)
   /// and the long-press toolbar item (pre-extracted word/position, immune
-  /// to caret races from tapping the menu itself).
+  /// to caret races from tapping the menu itself). One site jumps
+  /// directly; several sites offer a picker.
   Future<void> _resolveDefinition({
     required String word,
     required int line,
@@ -556,7 +557,7 @@ class _EditorTabBodyState extends ConsumerState<_EditorTabBody> {
       lsp: ref.read(goLspManagerProvider),
       search: SearchService(ref.read(projectServiceProvider)),
     );
-    final target = await service.resolve(
+    final targets = await service.resolveAll(
       projectPath: project.path,
       language: widget.tab.language,
       filePath: widget.tab.path,
@@ -566,10 +567,49 @@ class _EditorTabBodyState extends ConsumerState<_EditorTabBody> {
       currentText: _bridge.readContent?.call() ?? _currentText,
     );
     if (!mounted) return;
-    if (target == null) {
+    if (targets.isEmpty) {
       _toast(l10n.editorDefinitionNotFound(word));
       return;
     }
+    if (targets.length == 1) {
+      _jumpTo(targets.single);
+      return;
+    }
+    final chosen = await showDialog<DefinitionTarget>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.editorGoToDefinition),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: ListView(
+            shrinkWrap: true,
+            children: [
+              for (final target in targets)
+                ListTile(
+                  dense: true,
+                  title: Text(
+                    '${p.basename(target.path)} : ${target.line + 1}',
+                  ),
+                  onTap: () => Navigator.of(context).pop(target),
+                ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(l10n.actionCancel),
+          ),
+        ],
+      ),
+    );
+    if (chosen == null || !mounted) return;
+    _jumpTo(chosen);
+  }
+
+  /// Navigate to [target]: jump within the current file, or open the
+  /// target file (even when unopened) at the definition site.
+  void _jumpTo(DefinitionTarget target) {
     if (target.path == widget.tab.path) {
       _bridge.jumpToLine?.call(target.line);
       return;

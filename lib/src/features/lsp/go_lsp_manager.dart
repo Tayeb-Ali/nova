@@ -117,6 +117,25 @@ class GoLspManager {
     }
   }
 
+  /// Best-effort signature help for any registered language: returns the
+  /// parsed overloads, or null when the server is down, unknown, too slow,
+  /// or reports nothing. Callers treat null as "no hint", never as an
+  /// editing failure.
+  Future<LspSignatureHelp?> signatureHelpFor(
+    String projectPath,
+    String language,
+    String filePath,
+    int line,
+    int character,
+  ) async {
+    try {
+      final client = await ensureForLanguage(projectPath, language);
+      return await client.signatureHelp(filePath, line, character);
+    } catch (_) {
+      return null;
+    }
+  }
+
   /// Best-effort didOpen for any registered language (no-op otherwise).
   Future<void> didOpenFile(
     String projectPath,
