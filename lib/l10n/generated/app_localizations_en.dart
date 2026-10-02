@@ -1495,4 +1495,50 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get notifTokenCopied => 'Push token copied';
+
+  @override
+  String get langTitle => 'Choose your language';
+
+  @override
+  String get langSubtitle => 'You can change it anytime from Settings';
+
+  @override
+  String get langContinue => 'Continue';
+
+  @override
+  String get onboardSkip => 'Skip';
+
+  @override
+  String get onboardNext => 'Next';
+
+  @override
+  String get onboardStart => 'Get started';
+
+  @override
+  String get onboard1Title => 'A real code editor';
+
+  @override
+  String get onboard1Body =>
+      'Syntax highlighting, smart autocomplete, and themes for every language.';
+
+  @override
+  String get onboard2Title => 'Linux terminal on your phone';
+
+  @override
+  String get onboard2Body =>
+      'Node.js, Python and Git run natively inside the app — no root needed.';
+
+  @override
+  String get onboard3Title => 'AI pair programmer';
+
+  @override
+  String get onboard3Body =>
+      'Explain code, fix errors, and generate snippets with any provider.';
+
+  @override
+  String get onboard4Title => 'Projects and Git';
+
+  @override
+  String get onboard4Body =>
+      'Open folders, browse files, and commit from anywhere.';
 }

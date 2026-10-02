@@ -1490,4 +1490,49 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get notifTokenCopied => 'تم نسخ رمز الدفع';
+
+  @override
+  String get langTitle => 'اختر لغتك';
+
+  @override
+  String get langSubtitle => 'يمكنك تغييرها في أي وقت من الإعدادات';
+
+  @override
+  String get langContinue => 'متابعة';
+
+  @override
+  String get onboardSkip => 'تخطي';
+
+  @override
+  String get onboardNext => 'التالي';
+
+  @override
+  String get onboardStart => 'ابدأ الآن';
+
+  @override
+  String get onboard1Title => 'محرر أكواد حقيقي';
+
+  @override
+  String get onboard1Body => 'تلوين الأكواد، إكمال ذكي، وثيمات لكل اللغات.';
+
+  @override
+  String get onboard2Title => 'طرفية لينكس على هاتفك';
+
+  @override
+  String get onboard2Body =>
+      'تشغيل Node.js وبايثون وGit داخل التطبيق — بدون روت.';
+
+  @override
+  String get onboard3Title => 'مساعد ذكاء اصطناعي';
+
+  @override
+  String get onboard3Body =>
+      'اشرح الأكواد، أصلح الأخطاء، وولّد المقاطع مع أي مزود.';
+
+  @override
+  String get onboard4Title => 'المشاريع وGit';
+
+  @override
+  String get onboard4Body =>
+      'افتح المجلدات، تصفح الملفات، ونفّذ الـ commit من أي مكان.';
 }

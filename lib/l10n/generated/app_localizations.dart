@@ -7,6 +7,10 @@ import 'package:intl/intl.dart' as intl;
 
 import 'app_localizations_ar.dart';
 import 'app_localizations_en.dart';
+import 'app_localizations_es.dart';
+import 'app_localizations_fr.dart';
+import 'app_localizations_ru.dart';
+import 'app_localizations_zh.dart';
 
 // ignore_for_file: type=lint
 
@@ -96,6 +100,10 @@ abstract class AppLocalizations {
   static const List<Locale> supportedLocales = <Locale>[
     Locale('ar'),
     Locale('en'),
+    Locale('es'),
+    Locale('fr'),
+    Locale('ru'),
+    Locale('zh'),
   ];
 
   /// Search: no results placeholder
@@ -2749,6 +2757,90 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Push token copied'**
   String get notifTokenCopied;
+
+  /// First-launch language picker title
+  ///
+  /// In en, this message translates to:
+  /// **'Choose your language'**
+  String get langTitle;
+
+  /// First-launch language picker subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'You can change it anytime from Settings'**
+  String get langSubtitle;
+
+  /// First-launch language picker confirm button
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get langContinue;
+
+  /// Onboarding: skip everything
+  ///
+  /// In en, this message translates to:
+  /// **'Skip'**
+  String get onboardSkip;
+
+  /// Onboarding: next slide
+  ///
+  /// In en, this message translates to:
+  /// **'Next'**
+  String get onboardNext;
+
+  /// Onboarding: finish button
+  ///
+  /// In en, this message translates to:
+  /// **'Get started'**
+  String get onboardStart;
+
+  /// Onboarding slide 1 title
+  ///
+  /// In en, this message translates to:
+  /// **'A real code editor'**
+  String get onboard1Title;
+
+  /// Onboarding slide 1 body
+  ///
+  /// In en, this message translates to:
+  /// **'Syntax highlighting, smart autocomplete, and themes for every language.'**
+  String get onboard1Body;
+
+  /// Onboarding slide 2 title
+  ///
+  /// In en, this message translates to:
+  /// **'Linux terminal on your phone'**
+  String get onboard2Title;
+
+  /// Onboarding slide 2 body
+  ///
+  /// In en, this message translates to:
+  /// **'Node.js, Python and Git run natively inside the app — no root needed.'**
+  String get onboard2Body;
+
+  /// Onboarding slide 3 title
+  ///
+  /// In en, this message translates to:
+  /// **'AI pair programmer'**
+  String get onboard3Title;
+
+  /// Onboarding slide 3 body
+  ///
+  /// In en, this message translates to:
+  /// **'Explain code, fix errors, and generate snippets with any provider.'**
+  String get onboard3Body;
+
+  /// Onboarding slide 4 title
+  ///
+  /// In en, this message translates to:
+  /// **'Projects and Git'**
+  String get onboard4Title;
+
+  /// Onboarding slide 4 body
+  ///
+  /// In en, this message translates to:
+  /// **'Open folders, browse files, and commit from anywhere.'**
+  String get onboard4Body;
 }
 
 class _AppLocalizationsDelegate
@@ -2761,8 +2853,14 @@ class _AppLocalizationsDelegate
   }
 
   @override
-  bool isSupported(Locale locale) =>
-      <String>['ar', 'en'].contains(locale.languageCode);
+  bool isSupported(Locale locale) => <String>[
+    'ar',
+    'en',
+    'es',
+    'fr',
+    'ru',
+    'zh',
+  ].contains(locale.languageCode);
 
   @override
   bool shouldReload(_AppLocalizationsDelegate old) => false;
@@ -2775,6 +2873,14 @@ AppLocalizations lookupAppLocalizations(Locale locale) {
       return AppLocalizationsAr();
     case 'en':
       return AppLocalizationsEn();
+    case 'es':
+      return AppLocalizationsEs();
+    case 'fr':
+      return AppLocalizationsFr();
+    case 'ru':
+      return AppLocalizationsRu();
+    case 'zh':
+      return AppLocalizationsZh();
   }
 
   throw FlutterError(

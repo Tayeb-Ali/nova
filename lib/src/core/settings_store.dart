@@ -21,8 +21,12 @@ class Settings {
   final double editorFontSize;
   final bool wordWrap;
   final bool autoSave;
-  // Locale override: null follows the system, otherwise 'ar' or 'en'.
+  // Locale override: null follows the system, otherwise a code from
+  // [SettingsStore.supportedLocales].
   final String? appLocale;
+  // First-run flow: language picker shown until true, onboarding until true.
+  final bool languageChosen;
+  final bool onboardingDone;
   const Settings({
     this.themeMode = ThemeMode.system,
     this.timeoutMs = AppConfig.defaultTimeoutMs,
@@ -37,6 +41,8 @@ class Settings {
     this.wordWrap = false,
     this.autoSave = false,
     this.appLocale,
+    this.languageChosen = false,
+    this.onboardingDone = false,
   });
   Settings copyWith({
     ThemeMode? themeMode,
@@ -52,6 +58,8 @@ class Settings {
     bool? wordWrap,
     bool? autoSave,
     String? appLocale,
+    bool? languageChosen,
+    bool? onboardingDone,
   }) {
     return Settings(
       themeMode: themeMode ?? this.themeMode,
@@ -67,6 +75,8 @@ class Settings {
       wordWrap: wordWrap ?? this.wordWrap,
       autoSave: autoSave ?? this.autoSave,
       appLocale: appLocale ?? this.appLocale,
+      languageChosen: languageChosen ?? this.languageChosen,
+      onboardingDone: onboardingDone ?? this.onboardingDone,
     );
   }
 }
@@ -88,6 +98,12 @@ class SettingsStore extends StateNotifier<Settings> {
   static const kWordWrap = "nova.wordWrap";
   static const kAutoSave = "nova.autoSave";
   static const kAppLocale = "nova.appLocale";
+  static const kLanguageChosen = "nova.languageChosen";
+  static const kOnboardingDone = "nova.onboardingDone";
+  // Languages offered in the first-launch picker and Settings.
+  // Codes must match lib/l10n/app_<code>.arb files. Default is English.
+  static const supportedLocales = ["en", "ar", "fr", "es", "ru", "zh"];
+  static const defaultLocale = "en";
   SettingsStore() : super(const Settings()) {
     load();
   }
@@ -107,9 +123,12 @@ class SettingsStore extends StateNotifier<Settings> {
     final autoSave = prefs.getBool(kAutoSave);
     final storedLocale = prefs.getString(kAppLocale);
     // Only accepted locale codes survive; anything else falls back to system.
-    final appLocale = (storedLocale == "ar" || storedLocale == "en")
+    final appLocale = (storedLocale != null &&
+            supportedLocales.contains(storedLocale))
         ? storedLocale
         : null;
+    final languageChosen = prefs.getBool(kLanguageChosen) ?? false;
+    final onboardingDone = prefs.getBool(kOnboardingDone) ?? false;
     ThemeMode mode = ThemeMode.system;
     if (themeIndex != null &&
         themeIndex >= 0 &&
@@ -130,6 +149,8 @@ class SettingsStore extends StateNotifier<Settings> {
       wordWrap: wordWrap ?? false,
       autoSave: autoSave ?? false,
       appLocale: appLocale,
+      languageChosen: languageChosen,
+      onboardingDone: onboardingDone,
     );
   }
 
@@ -212,7 +233,9 @@ class SettingsStore extends StateNotifier<Settings> {
   // Sets the locale override (null follows the system); copyWith keeps the
   // old value on null, so rebuild explicitly to allow clearing to system.
   Future<void> setAppLocale(String? locale) async {
-    final v = (locale == "ar" || locale == "en") ? locale : null;
+    final v = (locale != null && supportedLocales.contains(locale))
+        ? locale
+        : null;
     state = Settings(
       themeMode: state.themeMode,
       timeoutMs: state.timeoutMs,
@@ -227,6 +250,8 @@ class SettingsStore extends StateNotifier<Settings> {
       wordWrap: state.wordWrap,
       autoSave: state.autoSave,
       appLocale: v,
+      languageChosen: state.languageChosen,
+      onboardingDone: state.onboardingDone,
     );
     final prefs = await SharedPreferences.getInstance();
     if (v == null) {
@@ -234,6 +259,22 @@ class SettingsStore extends StateNotifier<Settings> {
     } else {
       await prefs.setString(kAppLocale, v);
     }
+  }
+
+  /// Marks the first-launch language choice done (with the given locale).
+  Future<void> chooseLanguage(String code) async {
+    final v = supportedLocales.contains(code) ? code : defaultLocale;
+    await setAppLocale(v);
+    state = state.copyWith(languageChosen: true);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(kLanguageChosen, true);
+  }
+
+  /// Marks the intro slides seen so they never show again.
+  Future<void> completeOnboarding() async {
+    state = state.copyWith(onboardingDone: true);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(kOnboardingDone, true);
   }
 }
 

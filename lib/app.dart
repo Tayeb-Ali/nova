@@ -9,6 +9,7 @@ import "src/core/services/setup_service.dart";
 import "src/core/ui/keyboard_visibility.dart";
 import "src/core/ui/nova_nav_bar.dart";
 import "src/features/workspace/workspace_providers.dart";
+import "src/features/onboarding/first_run_flow.dart";
 import "src/features/setup/setup_wizard_dialog.dart";
 import "src/core/settings_store.dart";
 import "src/features/editor/autocomplete/language_members.dart";
@@ -43,14 +44,21 @@ class NovaApp extends ConsumerWidget {
           ? AppTheme.fromPack(themeStore.packFor(Brightness.dark))
           : AppTheme.fallback(Brightness.dark),
       themeMode: settings.themeMode,
-      locale: settings.appLocale == null
-          ? null
-          : Locale(settings.appLocale!),
+      // Before the first-launch language choice the UI is English
+      // (the requirement default); afterwards the saved locale — or the
+      // system locale when the user picked "System".
+      locale: !settings.languageChosen
+          ? const Locale("en")
+          : (settings.appLocale == null
+                ? null
+                : Locale(settings.appLocale!)),
       supportedLocales: AppLocalizations.supportedLocales,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       // Branded splash first: holds a loader until the engine is warm, then
       // fades into the shell. Kills the white first-frame flash.
-      home: const SplashGate(child: IdeShell()),
+      // FirstRunFlow inserts the language picker + intro slides on a fresh
+      // install (skipped for returning users and in widget tests).
+      home: const SplashGate(child: FirstRunFlow(child: IdeShell())),
       // Deep-link targets for notification taps (FCM data["route"] and the
       // system-tray payload). Pushes are best-effort and never guarded.
       routes: {

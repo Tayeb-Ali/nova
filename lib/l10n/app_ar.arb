@@ -442,5 +442,19 @@
   "notifEmpty": "لا توجد إشعارات بعد",
   "notifMarkAllRead": "تعليم الكل كمقروء",
   "notifTitle": "الإشعارات",
-  "notifTokenCopied": "تم نسخ رمز الدفع"
+  "notifTokenCopied": "تم نسخ رمز الدفع",
+  "langTitle": "اختر لغتك",
+  "langSubtitle": "يمكنك تغييرها في أي وقت من الإعدادات",
+  "langContinue": "متابعة",
+  "onboardSkip": "تخطي",
+  "onboardNext": "التالي",
+  "onboardStart": "ابدأ الآن",
+  "onboard1Title": "محرر أكواد حقيقي",
+  "onboard1Body": "تلوين الأكواد، إكمال ذكي، وثيمات لكل اللغات.",
+  "onboard2Title": "طرفية لينكس على هاتفك",
+  "onboard2Body": "تشغيل Node.js وبايثون وGit داخل التطبيق — بدون روت.",
+  "onboard3Title": "مساعد ذكاء اصطناعي",
+  "onboard3Body": "اشرح الأكواد، أصلح الأخطاء، وولّد المقاطع مع أي مزود.",
+  "onboard4Title": "المشاريع وGit",
+  "onboard4Body": "افتح المجلدات، تصفح الملفات، ونفّذ الـ commit من أي مكان."
 }
