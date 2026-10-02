@@ -67,6 +67,19 @@ void main() {
     });
   });
 
+  group("definitionFor", () {
+    test("unregistered language yields null without spawning", () async {
+      final manager = GoLspManager(
+        transportFactory: (_) => throw StateError("must not spawn"),
+      );
+      expect(
+        await manager.definitionFor("/tmp", "cobol", "/tmp/x.cob", 0, 0),
+        isNull,
+      );
+      await manager.stopAll();
+    });
+  });
+
   group("membersFor (fuzzy source)", () {
     test("returns full table for fuzzy filtering", () {
       MemberRegistry.debugFill("javascript", const {

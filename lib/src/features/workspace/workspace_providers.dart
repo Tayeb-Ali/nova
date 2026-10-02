@@ -179,6 +179,7 @@ class ActiveEditorActions {
   final Future<void> Function()? reload;
   final void Function()? togglePreview;
   final void Function()? askAi;
+  final Future<void> Function()? goToDefinition;
   final bool loaded;
   final bool showPreview;
   final bool isMarkdown;
@@ -188,6 +189,7 @@ class ActiveEditorActions {
     this.reload,
     this.togglePreview,
     this.askAi,
+    this.goToDefinition,
     this.loaded = false,
     this.showPreview = false,
     this.isMarkdown = false,

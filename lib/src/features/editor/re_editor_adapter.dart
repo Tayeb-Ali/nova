@@ -76,9 +76,9 @@ class ReEditorAdapter extends ConsumerStatefulWidget {
       lspCompletion;
 
   /// Optional bridge for AI insert + selection reads. When provided, the
-  /// adapter publishes `readContent`/`readSelection`/`insertAtCursor` on
-  /// mount and clears them on dispose (same convention as the Markdown
-  /// view's `readContent`).
+  /// adapter publishes `readContent`/`readSelection`/`insertAtCursor` plus
+  /// `readCaret`/`jumpToLine` (go to definition) on mount and clears them
+  /// on dispose (same convention as the Markdown view's `readContent`).
   final TabContentBridge? bridge;
 
   const ReEditorAdapter({
@@ -160,12 +160,33 @@ class _ReEditorAdapterState extends ConsumerState<ReEditorAdapter> {
         offset: result.cursorColumn,
       );
     };
+    bridge.readCaret = () {
+      if (_controller.lineCount <= 0) return null;
+      final sel = _controller.selection;
+      final line = sel.extentIndex.clamp(0, _controller.lineCount - 1);
+      return CaretPosition(
+        line: line,
+        character: sel.extentOffset,
+        lineText: _controller.codeLines[line].text,
+      );
+    };
+    bridge.jumpToLine = (int line) {
+      if (!mounted || _controller.lineCount <= 0) return;
+      final target = line.clamp(0, _controller.lineCount - 1);
+      _controller.selection =
+          CodeLineSelection.collapsed(index: target, offset: 0);
+      _controller.makePositionCenterIfInvisible(
+        CodeLinePosition(index: target, offset: 0),
+      );
+    };
   }
 
   void _clearBridge() {
     widget.bridge?.readContent = null;
     widget.bridge?.readSelection = null;
     widget.bridge?.insertAtCursor = null;
+    widget.bridge?.readCaret = null;
+    widget.bridge?.jumpToLine = null;
   }
 
   /// Move the cursor to [ReEditorAdapter.initialLine] and scroll it into view.

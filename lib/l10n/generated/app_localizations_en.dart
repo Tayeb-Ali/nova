@@ -958,6 +958,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get editorFindInFile => 'Find in file';
 
   @override
+  String get editorGoToDefinition => 'Go to definition';
+
+  @override
+  String get editorNoSymbolAtCaret => 'Place the caret on a symbol first';
+
+  @override
+  String editorDefinitionNotFound(String name) {
+    return 'No definition found for \'$name\'';
+  }
+
+  @override
   String get editorFindHint => 'Find';
 
   @override

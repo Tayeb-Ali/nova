@@ -98,6 +98,25 @@ class GoLspManager {
     }
   }
 
+  /// Best-effort definition lookup for any registered language: returns the
+  /// first location, or null when the server is down, unknown, too slow,
+  /// or reports nothing. Callers treat null as "fall back to text
+  /// search", never as an editing failure.
+  Future<LspLocation?> definitionFor(
+    String projectPath,
+    String language,
+    String filePath,
+    int line,
+    int character,
+  ) async {
+    try {
+      final client = await ensureForLanguage(projectPath, language);
+      return await client.definition(filePath, line, character);
+    } catch (_) {
+      return null;
+    }
+  }
+
   /// Best-effort didOpen for any registered language (no-op otherwise).
   Future<void> didOpenFile(
     String projectPath,

@@ -54,8 +54,7 @@ class LspCompletionItem {
 }
 
 /// One diagnostic entry inside a published document.
-class LspDiagnostic {
-  const LspDiagnostic({
+class LspDiagnostic {  const LspDiagnostic({
     required this.message,
     this.severity,
     required this.line,
@@ -82,6 +81,25 @@ class LspDiagnostics {
 
   final String path;
   final List<LspDiagnostic> diagnostics;
+}
+
+/// One definition site returned by `textDocument/definition`.
+///
+/// LSP answers with a single Location, a list of Locations, or a list of
+/// LocationLinks; the client normalizes all three to this (first hit wins).
+class LspLocation {
+  const LspLocation({
+    required this.path,
+    required this.line,
+    required this.character,
+  });
+
+  /// Filesystem path decoded from the `file://` URI.
+  final String path;
+
+  /// 0-based line and character of the definition start.
+  final int line;
+  final int character;
 }
 
 /// Wire-level transport for JSON-RPC messages.
@@ -199,6 +217,27 @@ class LspClient {
       'position': <String, dynamic>{'line': line, 'character': char},
     });
     return _parseCompletion(result);
+  }
+
+  /// Request the definition site(s) of the symbol at [line]/[char]
+  /// (0-based). Returns the first location, or null when the server
+  /// answers empty (or the request fails — callers treat that as
+  /// "fall back to text search", never as an editing failure).
+  Future<LspLocation?> definition(
+    String path,
+    int line,
+    int char,
+  ) async {
+    try {
+      final Object? result = await _request('textDocument/definition',
+          <String, dynamic>{
+        'textDocument': <String, dynamic>{'uri': uriFor(path)},
+        'position': <String, dynamic>{'line': line, 'character': char},
+      });
+      return _parseDefinition(result);
+    } catch (_) {
+      return null;
+    }
   }
 
   /// Shut the server down and stop the transport.
@@ -319,8 +358,7 @@ class LspClient {
     );
   }
 
-  List<LspCompletionItem> _parseCompletion(Object? result) {
-    if (result is List) {
+  List<LspCompletionItem> _parseCompletion(Object? result) {    if (result is List) {
       return _itemsFromList(result);
     }
     if (result is Map<String, dynamic>) {
@@ -351,6 +389,46 @@ class LspClient {
       kind: item['kind'] is int ? item['kind'] as int : null,
       detail: item['detail'] is String ? item['detail'] as String : null,
       insertText: insertText,
+    );
+  }
+
+  /// Normalizes a `textDocument/definition` result to the first location.
+  /// Accepts a single Location, a list of Locations, or a list of
+  /// LocationLinks (using `targetUri`/`targetRange`). Anything else —
+  /// including an empty list — yields null.
+  LspLocation? _parseDefinition(Object? result) {
+    final List<Object?> candidates;
+    if (result is List) {
+      candidates = result;
+    } else if (result is Map<String, dynamic>) {
+      candidates = <Object?>[result];
+    } else {
+      return null;
+    }
+    for (final Object? candidate in candidates) {
+      final LspLocation? location = _parseLocation(candidate);
+      if (location != null) return location;
+    }
+    return null;
+  }
+
+  LspLocation? _parseLocation(Object? raw) {
+    if (raw is! Map<String, dynamic>) return null;
+    // LocationLink carries targetUri/targetRange instead of uri/range.
+    final Object? uri = raw['uri'] ?? raw['targetUri'];
+    final Object? range = raw['range'] ?? raw['targetRange'];
+    if (uri is! String || range is! Map<String, dynamic>) return null;
+    final Object? start = range['start'];
+    if (start is! Map<String, dynamic>) return null;
+    final Object? line = start['line'];
+    final Object? character = start['character'];
+    if (line is! int || character is! int) return null;
+    return LspLocation(
+      path: uri.startsWith('file://')
+          ? uri.substring('file://'.length)
+          : uri,
+      line: line,
+      character: character,
     );
   }
 }

@@ -16,6 +16,28 @@ class TabContentBridge {
 
   /// Inserts [insert] at the cursor (replacing the selection, if any).
   void Function(String insert)? insertAtCursor;
+
+  /// Caret position for caret-based actions (go to definition): the
+  /// 0-based [CaretPosition.line], 0-based [CaretPosition.character], and
+  /// the full [CaretPosition.lineText]. Null when no code editor is mounted.
+  CaretPosition? Function()? readCaret;
+
+  /// Moves the caret to 0-based [line] (clamped) and scrolls it into view.
+  /// Used for same-file jumps that must not remount the editor.
+  void Function(int line)? jumpToLine;
+}
+
+/// 0-based caret position snapshot (see [TabContentBridge.readCaret]).
+class CaretPosition {
+  const CaretPosition({
+    required this.line,
+    required this.character,
+    required this.lineText,
+  });
+
+  final int line;
+  final int character;
+  final String lineText;
 }
 
 /// How a tab is rendered: plain code editor or rich Markdown editor.

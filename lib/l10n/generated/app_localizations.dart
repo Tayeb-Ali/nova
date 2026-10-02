@@ -1778,6 +1778,24 @@ abstract class AppLocalizations {
   /// **'Find in file'**
   String get editorFindInFile;
 
+  /// Editor: go to definition tooltip
+  ///
+  /// In en, this message translates to:
+  /// **'Go to definition'**
+  String get editorGoToDefinition;
+
+  /// Editor: definition with no symbol toast
+  ///
+  /// In en, this message translates to:
+  /// **'Place the caret on a symbol first'**
+  String get editorNoSymbolAtCaret;
+
+  /// Editor: definition lookup miss toast
+  ///
+  /// In en, this message translates to:
+  /// **'No definition found for \'{name}\''**
+  String editorDefinitionNotFound(String name);
+
   /// Editor: find hint
   ///
   /// In en, this message translates to:

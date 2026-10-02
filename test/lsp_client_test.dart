@@ -135,4 +135,115 @@ void main() {
       expect(transport.started, isFalse);
     },
   );
+
+  test('definition sends the request and parses a single Location', () async {
+    final transport = FakeTransport(
+      cannedResult: <String, dynamic>{
+        'uri': 'file:///proj/lib/util.dart',
+        'range': <String, dynamic>{
+          'start': <String, dynamic>{'line': 12, 'character': 6},
+          'end': <String, dynamic>{'line': 12, 'character': 10},
+        },
+      },
+    );
+    final client = LspClient(transport);
+
+    final LspLocation? location = await client.definition(
+      '/proj/lib/main.dart',
+      3,
+      7,
+    );
+
+    final Map<String, dynamic> request =
+        jsonDecode(transport.sent.single) as Map<String, dynamic>;
+    expect(request['method'], 'textDocument/definition');
+    final Map<String, dynamic> params =
+        request['params'] as Map<String, dynamic>;
+    expect(params['textDocument']['uri'], 'file:///proj/lib/main.dart');
+    expect(params['position'], <String, dynamic>{'line': 3, 'character': 7});
+
+    expect(location, isNotNull);
+    expect(location!.path, '/proj/lib/util.dart');
+    expect(location.line, 12);
+    expect(location.character, 6);
+  });
+
+  test('definition takes the first of a Location list', () async {
+    Map<String, dynamic> loc(String uri, int line) => <String, dynamic>{
+          'uri': uri,
+          'range': <String, dynamic>{
+            'start': <String, dynamic>{'line': line, 'character': 0},
+            'end': <String, dynamic>{'line': line, 'character': 1},
+          },
+        };
+    final transport = FakeTransport(
+      cannedResult: <String, dynamic>{
+        'items': <Map<String, dynamic>>[],
+      },
+    );
+    // FakeTransport only serves one canned result; feed a list manually.
+    final client = LspClient(transport);
+    final Future<LspLocation?> pending = client.definition('a.dart', 0, 0);
+    transport.serverSends(<String, dynamic>{
+      'jsonrpc': '2.0',
+      'id': 1,
+      'result': <Map<String, dynamic>>[
+        loc('file:///b.dart', 4),
+        loc('file:///c.dart', 9),
+      ],
+    });
+    expect((await pending)!.path, '/b.dart');
+  });
+
+  test('definition understands LocationLink targets', () async {
+    final transport = FakeTransport();
+    final client = LspClient(transport);
+    final Future<LspLocation?> pending = client.definition('a.dart', 0, 0);
+    transport.serverSends(<String, dynamic>{
+      'jsonrpc': '2.0',
+      'id': 1,
+      'result': <Map<String, dynamic>>[
+        <String, dynamic>{
+          'originSelectionRange': <String, dynamic>{
+            'start': <String, dynamic>{'line': 1, 'character': 1},
+            'end': <String, dynamic>{'line': 1, 'character': 2},
+          },
+          'targetUri': 'file:///proj/x.dart',
+          'targetRange': <String, dynamic>{
+            'start': <String, dynamic>{'line': 7, 'character': 3},
+            'end': <String, dynamic>{'line': 7, 'character': 4},
+          },
+        },
+      ],
+    });
+    final LspLocation? location = await pending;
+    expect(location, isNotNull);
+    expect(location!.path, '/proj/x.dart');
+    expect(location.line, 7);
+  });
+
+  test('definition returns null on empty or malformed results', () async {
+    final List<Object?> results = <Object?>[
+      null,
+      <Object?>[],
+      <String, dynamic>{'uri': 'file:///x.dart'},
+      <String, dynamic>{
+        'uri': 'file:///x.dart',
+        'range': <String, dynamic>{},
+      },
+    ];
+    for (final Object? result in results) {
+      final transport = FakeTransport();
+      final client = LspClient(transport);
+      final Future<LspLocation?> pending = client.definition('a.dart', 0, 0);
+      // Queued before the transport's own canned `{}` microtask reply, so
+      // the malformed payload always wins the race deterministically.
+      transport.serverSends(<String, dynamic>{
+        'jsonrpc': '2.0',
+        'id': 1,
+        'result': result,
+      });
+      expect(await pending, isNull);
+    }
+  });
 }

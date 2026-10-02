@@ -955,6 +955,17 @@ class AppLocalizationsAr extends AppLocalizations {
   String get editorFindInFile => 'بحث في الملف';
 
   @override
+  String get editorGoToDefinition => 'الذهاب إلى التعريف';
+
+  @override
+  String get editorNoSymbolAtCaret => 'ضع المؤشر على رمز أولًا';
+
+  @override
+  String editorDefinitionNotFound(String name) {
+    return 'لم يتم العثور على تعريف \'$name\'';
+  }
+
+  @override
   String get editorFindHint => 'بحث';
 
   @override

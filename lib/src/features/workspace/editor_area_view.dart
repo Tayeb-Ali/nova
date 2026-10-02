@@ -7,7 +7,9 @@ import "package:path/path.dart" as p;
 import "package:re_editor/re_editor.dart";
 
 import "../../core/settings_store.dart";
+import "../../core/services/search_service.dart";
 import "../../core/ui/empty_state.dart";
+import "../lsp/definition_service.dart";
 import "../lsp/lsp_completion_provider.dart";
 import "../lsp/lsp_providers.dart";
 import "../lsp/server_registry.dart";
@@ -319,6 +321,8 @@ class _TabStrip extends ConsumerWidget {
                         actions.reload?.call();
                       } else if (value == "ai") {
                         actions.askAi?.call();
+                      } else if (value == "definition") {
+                        actions.goToDefinition?.call();
                       } else if (value == "focus") {
                         ref.read(focusModeProvider.notifier).state = !focus;
                       }
@@ -345,6 +349,11 @@ class _TabStrip extends ConsumerWidget {
                         PopupMenuItem(
                           value: "ai",
                           child: Text(l10n.aiTitle),
+                        ),
+                      if (actions.goToDefinition != null)
+                        PopupMenuItem(
+                          value: "definition",
+                          child: Text(l10n.editorGoToDefinition),
                         ),
                       PopupMenuItem(
                         value: "focus",
@@ -395,6 +404,13 @@ class _TabStrip extends ConsumerWidget {
                       tooltip: l10n.aiTitle,
                       icon: const Icon(Icons.auto_awesome, size: 18),
                     ),
+                  if (actions.goToDefinition != null)
+                    IconButton(
+                      onPressed: actions.goToDefinition,
+                      visualDensity: VisualDensity.compact,
+                      tooltip: l10n.editorGoToDefinition,
+                      icon: const Icon(Icons.open_in_new, size: 18),
+                    ),
                   IconButton(
                     onPressed: actions.save,
                     visualDensity: VisualDensity.compact,
@@ -437,6 +453,10 @@ class _EditorTabBodyState extends ConsumerState<_EditorTabBody> {
   bool _recoveryAsked = false;
   int _contentGen = 0;
   int _loadGen = 0;
+  // Jump target consumed once on mount (search hits, go to definition).
+  // The pending entry is written by `open(path, initialLine:)`; taking it
+  // here (not in build) guarantees one-shot delivery to the fresh editor.
+  int? _initialLine;
   // Mount override for the editor content (crash-draft restore). The load
   // future still carries the disk text, so without this a remount would
   // clobber the restored draft with stale bytes.
@@ -445,16 +465,18 @@ class _EditorTabBodyState extends ConsumerState<_EditorTabBody> {
   @override
   void initState() {
     super.initState();
+    // Peek only: mutating providers is illegal during mount (initState runs
+    // inside the parent build). The destructive take is deferred below.
+    _initialLine = ref.read(pendingInitialLineProvider)[widget.tab.id];
     _loadFuture = _load();
-  }
-
-  @override
-  void deactivate() {
-    // Clear actions before the widget leaves the tree so the tab strip
-    // does not hold stale callbacks from a disposed state.
-    ref.read(activeEditorActionsProvider.notifier).state =
-        ActiveEditorActions.empty;
-    super.deactivate();
+    if (_initialLine != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        ref
+            .read(workspaceTabsProvider.notifier)
+            .takeInitialLine(widget.tab.id);
+      });
+    }
   }
 
   @override
@@ -466,24 +488,80 @@ class _EditorTabBodyState extends ConsumerState<_EditorTabBody> {
 
   /// Push the current save / reload / preview callbacks into the shared
   /// provider so the combined tab strip (or focus bar) can render them.
+  /// Every callback is mounted-guarded: the strip can briefly hold a
+  /// previous tab's actions across a switch (until the new body publishes),
+  /// and invoking those on a disposed state must be a no-op, never a crash.
   void _updateActions() {
     if (!mounted) return;
     ref.read(activeEditorActionsProvider.notifier).state = ActiveEditorActions(
       save: _loaded ? () => _save() : null,
       reload: _loaded ? _reload : null,
-      togglePreview: () => setState(() {
-        _showPreview = !_showPreview;
-        // Re-publish so the button icon flips.
-        _updateActions();
-      }),
+      togglePreview: () {
+        if (!mounted) return;
+        setState(() {
+          _showPreview = !_showPreview;
+          // Re-publish so the button icon flips.
+          _updateActions();
+        });
+      },
       // AI insert needs the code bridge (Markdown view has none).
       askAi: _loaded && widget.tab.kind != EditorKind.markdown
           ? _askAi
           : null,
+      // Same gate: definition needs the code bridge caret.
+      goToDefinition:
+          _loaded && widget.tab.kind != EditorKind.markdown
+              ? _goToDefinition
+              : null,
       loaded: _loaded,
       showPreview: _showPreview,
       isMarkdown: widget.tab.kind == EditorKind.markdown,
     );
+  }
+
+  /// Jump to the definition of the symbol under the caret: opens the
+  /// target file (even when unopened) at the definition site, or jumps
+  /// within the current file. LSP first, text fallback; toasts when the
+  /// caret is off-symbol or nothing resolves.
+  Future<void> _goToDefinition() async {
+    if (!_loaded) return;
+    final l10n = AppLocalizations.of(context);
+    final caret = _bridge.readCaret?.call();
+    final word = caret == null
+        ? null
+        : wordAtCaret(caret.lineText, caret.character);
+    if (word == null || word.isEmpty) {
+      _toast(l10n.editorNoSymbolAtCaret);
+      return;
+    }
+    final project = ref.read(activeProjectProvider);
+    if (project == null) return;
+    final service = DefinitionService(
+      lsp: ref.read(goLspManagerProvider),
+      search: SearchService(ref.read(projectServiceProvider)),
+    );
+    final target = await service.resolve(
+      projectPath: project.path,
+      language: widget.tab.language,
+      filePath: widget.tab.path,
+      line: caret!.line,
+      character: caret.character,
+      word: word,
+      currentText: _bridge.readContent?.call() ?? _currentText,
+    );
+    if (!mounted) return;
+    if (target == null) {
+      _toast(l10n.editorDefinitionNotFound(word));
+      return;
+    }
+    if (target.path == widget.tab.path) {
+      _bridge.jumpToLine?.call(target.line);
+      return;
+    }
+    final id = ref
+        .read(workspaceTabsProvider.notifier)
+        .open(target.path, initialLine: target.line);
+    ref.read(activeEditorTabProvider.notifier).state = id;
   }
 
   @override
@@ -598,8 +676,9 @@ class _EditorTabBodyState extends ConsumerState<_EditorTabBody> {
 
   /// Opens the AI sheet for the selection (or the whole file) and
   /// inserts the result at the cursor. Best-effort: silently skipped when
-  /// the bridge is not published yet.
+  /// the bridge is not published yet or the state is disposed.
   void _askAi() {
+    if (!mounted) return;
     final l10n = AppLocalizations.of(context);
     final selected = _bridge.readSelection?.call();
     final code = (selected != null && selected.trim().isNotEmpty)
@@ -858,6 +937,7 @@ class _EditorTabBodyState extends ConsumerState<_EditorTabBody> {
                 filePath: widget.tab.path,
                 lspCompletion: _lspCompletionFor(),
                 bridge: _bridge,
+                initialLine: _initialLine,
               );
       },
     );
