@@ -31,8 +31,10 @@ import "package:re_highlight/languages/dockerfile.dart";
 import "package:re_highlight/languages/makefile.dart";
 
 import "../../core/settings_store.dart";
+import "../../../l10n/generated/app_localizations.dart";
 import "ai_insert.dart";
 import "editor_engine.dart";
+import "selection_toolbar.dart";
 import "autocomplete/autocomplete_popup.dart";
 import "autocomplete/nova_prompts_builder.dart";
 import "theme/editor_fonts.dart";
@@ -81,6 +83,13 @@ class ReEditorAdapter extends ConsumerStatefulWidget {
   /// on dispose (same convention as the Markdown view's `readContent`).
   final TabContentBridge? bridge;
 
+  /// Long-press selection action. When provided, the adapter shows a
+  /// selection toolbar (cut/copy/paste/select-all + go to definition) on
+  /// mobile long-press and desktop secondary-click; the definition item
+  /// resolves [word] at ([line], [character], 0-based) through this
+  /// callback. Null (default) keeps re_editor's behavior: no toolbar menu.
+  final void Function(String word, int line, int character)? onGoToDefinition;
+
   const ReEditorAdapter({
     super.key,
     required this.initialText,
@@ -91,6 +100,7 @@ class ReEditorAdapter extends ConsumerStatefulWidget {
     this.filePath,
     this.lspCompletion,
     this.bridge,
+    this.onGoToDefinition,
   });
 
   @override
@@ -102,6 +112,7 @@ class _ReEditorAdapterState extends ConsumerState<ReEditorAdapter> {
   late final CodeScrollController _scrollController;
   late final CodeFindController _findController;
   late NovaPromptsBuilder _promptsBuilder;
+  MobileSelectionToolbarController? _toolbarController;
   bool _didInitialJump = false;
   Timer? _lspDebounce;
   int _lspRequestId = 0;
@@ -128,6 +139,33 @@ class _ReEditorAdapterState extends ConsumerState<ReEditorAdapter> {
       language: _modeFor(widget.language),
       languageId: widget.language,
     );
+    // Selection toolbar is opt-in per tab wiring (the shell passes its
+    // definition callback for code files; nothing else does). The menu
+    // items resolve against the controller re_editor hands the builder at
+    // show time, so they always see the live caret — no caching here.
+    final onGoToDefinition = widget.onGoToDefinition;
+    if (onGoToDefinition != null) {
+      _toolbarController = MobileSelectionToolbarController(
+        builder: ({
+          required BuildContext context,
+          required TextSelectionToolbarAnchors anchors,
+          required CodeLineEditingController controller,
+          required VoidCallback onDismiss,
+          required VoidCallback onRefresh,
+        }) {
+          return AdaptiveTextSelectionToolbar.buttonItems(
+            anchors: anchors,
+            buttonItems: selectionMenuItems(
+              controller: controller,
+              definitionLabel:
+                  AppLocalizations.of(context).editorGoToDefinition,
+              onDismiss: onDismiss,
+              onGoToDefinition: onGoToDefinition,
+            ),
+          );
+        },
+      );
+    }
     widget.onFindControllerReady?.call(_findController);
     _publishBridge();
     if (widget.initialLine != null) {
@@ -369,6 +407,7 @@ class _ReEditorAdapterState extends ConsumerState<ReEditorAdapter> {
       controller: _controller,
       findController: _findController,
       scrollController: _scrollController,
+      toolbarController: _toolbarController,
       style: editorStyle,
       wordWrap: appSettings.wordWrap,
       indicatorBuilder: (context, editingController, chunkController, notifier) {

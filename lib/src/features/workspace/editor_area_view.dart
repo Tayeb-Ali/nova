@@ -534,8 +534,24 @@ class _EditorTabBodyState extends ConsumerState<_EditorTabBody> {
       _toast(l10n.editorNoSymbolAtCaret);
       return;
     }
+    await _resolveDefinition(
+      word: word,
+      line: caret!.line,
+      character: caret.character,
+    );
+  }
+
+  /// Shared resolution + navigation behind the header action (caret word)
+  /// and the long-press toolbar item (pre-extracted word/position, immune
+  /// to caret races from tapping the menu itself).
+  Future<void> _resolveDefinition({
+    required String word,
+    required int line,
+    required int character,
+  }) async {
     final project = ref.read(activeProjectProvider);
-    if (project == null) return;
+    if (project == null || !mounted) return;
+    final l10n = AppLocalizations.of(context);
     final service = DefinitionService(
       lsp: ref.read(goLspManagerProvider),
       search: SearchService(ref.read(projectServiceProvider)),
@@ -544,8 +560,8 @@ class _EditorTabBodyState extends ConsumerState<_EditorTabBody> {
       projectPath: project.path,
       language: widget.tab.language,
       filePath: widget.tab.path,
-      line: caret!.line,
-      character: caret.character,
+      line: line,
+      character: character,
       word: word,
       currentText: _bridge.readContent?.call() ?? _currentText,
     );
@@ -938,6 +954,13 @@ class _EditorTabBodyState extends ConsumerState<_EditorTabBody> {
                 lspCompletion: _lspCompletionFor(),
                 bridge: _bridge,
                 initialLine: _initialLine,
+                onGoToDefinition: (word, line, character) => unawaited(
+                  _resolveDefinition(
+                    word: word,
+                    line: line,
+                    character: character,
+                  ),
+                ),
               );
       },
     );
