@@ -1,5 +1,7 @@
 # Nova — بيئة تطوير كاملة على أندرويد
 
+**العربية** | [English](README.en.md)
+
 ![Flutter](https://img.shields.io/badge/Flutter-3.47-02569B?logo=flutter&logoColor=white)
 ![Dart](https://img.shields.io/badge/Dart-3.13-0175C2?logo=dart&logoColor=white)
 ![Platform](https://img.shields.io/badge/Platform-Android-3DDC84?logo=android&logoColor=white)
@@ -31,6 +33,7 @@
 - [مشاكل شائعة وحلولها](#مشاكل-شائعة-وحلولها)
 - [الحالة الحالية وخارطة الطريق](#الحالة-الحالية-وخارطة-الطريق)
 - [المساهمة](#المساهمة)
+- [المساهمون](#المساهمون)
 - [الرخصة](#الرخصة)
 
 ---
@@ -320,6 +323,16 @@ adb shell "run-as sd.adaa.codeide sh -c 'ls files/usr/bin | head'"
 2. أي API جديد بين الواجهة والمحرك يُضاف في `pigeons/ide_api.dart` ثم يُولَّد، لا يُكتب يدويًا.
 3. بعد أي تعديل: `flutter analyze` ثم `flutter test` — لا تُسلَّم نسخة مكسورة.
 4. ميزة جديدة = اختبار يغطيها إن أمكن.
+
+---
+
+## المساهمون
+
+| المساهم | الدور |
+|---|---|
+| [الطيب علي](https://github.com/Tayeb-Ali) ([elteyab@smart.sd](mailto:elteyab@smart.sd)) | مالك المشروع والمطور |
+| opencode (نموذجا GLM و Muse Spark) | مساعد تطوير بالذكاء الاصطناعي |
+| ChatGPT | مساعد تطوير بالذكاء الاصطناعي |
 
 ---
 
