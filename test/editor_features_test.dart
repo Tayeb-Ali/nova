@@ -1,5 +1,6 @@
 import "package:flutter/material.dart";
 import "package:flutter_test/flutter_test.dart";
+import "package:re_editor/re_editor.dart";
 
 import "package:nova/src/features/editor/autocomplete/language_snippets.dart";
 import "package:nova/src/features/editor/theme/editor_theme_pack.dart";
@@ -150,6 +151,63 @@ void main() {
       expect(normalizeLanguageId("kt"), "kotlin");
       expect(snippetsForLanguage("cobol"), isEmpty);
       expect(snippetsForLanguage(null), isEmpty);
+    });
+
+    test("abbreviation aliases expand with the caret parked", () {
+      CodePrompt alias(String lang, String trigger) {
+        return snippetsForLanguage(lang).firstWhere(
+          (p) => p.word == trigger,
+          orElse: () => throw StateError("missing $trigger for $lang"),
+        );
+      }
+
+      // PHP: puf / prif / prof.
+      expect(
+        alias("php", "puf").autocomplete.word,
+        "public function name() {}",
+      );
+      expect(alias("php", "puf").autocomplete.selection.extentOffset, 21);
+      expect(
+        alias("php", "prif").autocomplete.word,
+        "private function name() {}",
+      );
+      expect(alias("php", "prif").autocomplete.selection.extentOffset, 22);
+      expect(
+        alias("php", "prof").autocomplete.word,
+        "protected function name() {}",
+      );
+      expect(alias("php", "prof").autocomplete.selection.extentOffset, 24);
+      // Java: psvm / sout.
+      expect(
+        alias("java", "psvm").autocomplete.word,
+        "public static void main(String[] args) {}",
+      );
+      expect(
+        alias("java", "sout").autocomplete.word,
+        "System.out.println();",
+      );
+      expect(alias("java", "sout").autocomplete.selection.extentOffset, 19);
+      // JS/TS: cl.
+      for (final lang in ["javascript", "typescript"]) {
+        expect(
+          alias(lang, "cl").autocomplete.word,
+          "console.log();",
+          reason: lang,
+        );
+      }
+    });
+
+    test("js/ts snippets include bare globals", () {
+      for (final lang in ["javascript", "typescript"]) {
+        final words = snippetsForLanguage(
+          lang,
+        ).map((p) => p.word).toSet();
+        expect(
+          words,
+          containsAll(["console", "process", "document", "fetch"]),
+          reason: lang,
+        );
+      }
     });
   });
 }

@@ -243,4 +243,74 @@ void main() {
     expect(result, isNotNull);
     expect(wordsOf(result), containsAll(['os', 'ok']));
   });
+
+  String? expansionOf(CodeAutocompleteEditingValue? result, String alias) {
+    if (result == null) return null;
+    for (final CodePrompt p in result.prompts) {
+      if (p.word == alias) return p.autocomplete.word;
+    }
+    return null;
+  }
+
+  testWidgets('pu suggests the puf alias with its expansion', (tester) async {
+    final BuildContext ctx = await pumpContext(tester);
+    final CodeAutocompleteEditingValue? result = buildAt(ctx, 'php', 'pu');
+    expect(result, isNotNull);
+    expect(wordsOf(result), contains('puf'));
+    expect(
+      expansionOf(result, 'puf'),
+      'public function name() {}',
+    );
+  });
+
+  testWidgets('full puf still offers a function expansion', (tester) async {
+    final BuildContext ctx = await pumpContext(tester);
+    final CodeAutocompleteEditingValue? result = buildAt(ctx, 'php', 'puf');
+    expect(result, isNotNull);
+    // The alias row itself is an exact match (hidden by contract), but the
+    // full-text snippet still fuzzy-matches the abbreviation.
+    expect(
+      result!.prompts.any(
+        (p) => p.autocomplete.word.contains('public function'),
+      ),
+      isTrue,
+    );
+  });
+
+  testWidgets('psv and sou suggest psvm and sout aliases', (tester) async {
+    final BuildContext ctx = await pumpContext(tester);
+    final CodeAutocompleteEditingValue? psvm = buildAt(ctx, 'java', 'psv');
+    expect(wordsOf(psvm), contains('psvm'));
+    expect(
+      expansionOf(psvm, 'psvm'),
+      'public static void main(String[] args) {}',
+    );
+    final CodeAutocompleteEditingValue? sout = buildAt(ctx, 'java', 'sou');
+    expect(wordsOf(sout), contains('sout'));
+    expect(expansionOf(sout, 'sout'), 'System.out.println();');
+  });
+
+  testWidgets('conso suggests the console global', (tester) async {
+    final BuildContext ctx = await pumpContext(tester);
+    final CodeAutocompleteEditingValue? result =
+        buildAt(ctx, 'javascript', 'conso');
+    expect(result, isNotNull);
+    expect(wordsOf(result), contains('console'));
+  });
+
+  testWidgets('bare console. offers log and error members', (tester) async {
+    final BuildContext ctx = await pumpContext(tester);
+    final CodeAutocompleteEditingValue? result =
+        buildAt(ctx, 'javascript', 'console.');
+    expect(result, isNotNull);
+    expect(result!.input, isEmpty);
+    expect(wordsOf(result), containsAll(['log', 'error']));
+  });
+
+  testWidgets('ech suggests the echo snippet', (tester) async {
+    final BuildContext ctx = await pumpContext(tester);
+    final CodeAutocompleteEditingValue? result = buildAt(ctx, 'php', 'ech');
+    expect(result, isNotNull);
+    expect(wordsOf(result), contains('echo "";'));
+  });
 }

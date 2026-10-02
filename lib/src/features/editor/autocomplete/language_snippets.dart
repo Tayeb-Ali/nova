@@ -22,8 +22,48 @@ const String snippetPromptType = "snippet";
 /// [CodeAutocompleteResult] with a cursor offset), so
 /// [CodeAutocompleteEditingValue.autocomplete] can apply them by replacing
 /// the typed `input` with the completion `word`.
+/// Bare global names shared by JavaScript and TypeScript (objects like
+/// `console`/`process`, plus global functions like `fetch`/`alert`).
+/// Typing `conso` prefix-matches `console` here, while `console.` member
+/// lookup lives in the JSON member tables. Spread into both languages so
+/// the two stay in sync.
+const List<CodePrompt> _jsTsGlobals = [
+  CodeKeywordPrompt(word: "console"),
+  CodeKeywordPrompt(word: "process"),
+  CodeKeywordPrompt(word: "require"),
+  CodeKeywordPrompt(word: "module"),
+  CodeKeywordPrompt(word: "exports"),
+  CodeKeywordPrompt(word: "Buffer"),
+  CodeKeywordPrompt(word: "document"),
+  CodeKeywordPrompt(word: "window"),
+  CodeKeywordPrompt(word: "navigator"),
+  CodeKeywordPrompt(word: "localStorage"),
+  CodeKeywordPrompt(word: "location"),
+  CodeKeywordPrompt(word: "history"),
+  CodeKeywordPrompt(word: "fetch"),
+  CodeKeywordPrompt(word: "alert"),
+  CodeKeywordPrompt(word: "confirm"),
+  CodeKeywordPrompt(word: "globalThis"),
+];
+
+/// Abbreviation snippets (`puf` -> `public function name() {}`).
+///
+/// Same mechanism as the `arrow` alias above: [word] holds the short
+/// trigger users actually type, `customAutocomplete` carries the full
+/// expansion (with the caret parked where typing continues). Both the
+/// prefix-only delegate and the fuzzy pool match on the trigger.
 const Map<String, List<CodePrompt>> languageSnippets = {
   "javascript": [
+    ..._jsTsGlobals,
+    CodeFieldPrompt(
+      word: "cl",
+      type: snippetPromptType,
+      customAutocomplete: CodeAutocompleteResult(
+        input: "",
+        word: "console.log();",
+        selection: TextSelection.collapsed(offset: 12),
+      ),
+    ),
     CodeFunctionPrompt(
       word: "console.log",
       type: "void",
@@ -79,6 +119,16 @@ const Map<String, List<CodePrompt>> languageSnippets = {
     CodeKeywordPrompt(word: "@override"),
   ],
   "typescript": [
+    ..._jsTsGlobals,
+    CodeFieldPrompt(
+      word: "cl",
+      type: snippetPromptType,
+      customAutocomplete: CodeAutocompleteResult(
+        input: "",
+        word: "console.log();",
+        selection: TextSelection.collapsed(offset: 12),
+      ),
+    ),
     CodeFunctionPrompt(
       word: "console.log",
       type: "void",
@@ -95,6 +145,26 @@ const Map<String, List<CodePrompt>> languageSnippets = {
     CodeKeywordPrompt(word: "export default "),
   ],
   "java": [
+    // IntelliJ-style abbreviations: `psvm` expands to the main method,
+    // `sout` to a print statement with the caret inside the parens.
+    CodeFieldPrompt(
+      word: "psvm",
+      type: snippetPromptType,
+      customAutocomplete: CodeAutocompleteResult(
+        input: "",
+        word: "public static void main(String[] args) {}",
+        selection: TextSelection.collapsed(offset: 41),
+      ),
+    ),
+    CodeFieldPrompt(
+      word: "sout",
+      type: snippetPromptType,
+      customAutocomplete: CodeAutocompleteResult(
+        input: "",
+        word: "System.out.println();",
+        selection: TextSelection.collapsed(offset: 19),
+      ),
+    ),
     CodeKeywordPrompt(word: "public class  {}"),
     CodeKeywordPrompt(word: "public static void main(String[] args) {}"),
     CodeKeywordPrompt(word: "System.out.println();"),
@@ -233,6 +303,36 @@ const Map<String, List<CodePrompt>> languageSnippets = {
     CodeKeywordPrompt(word: "echo \"\";"),
     CodeKeywordPrompt(word: "require_once \"\";"),
     CodeKeywordPrompt(word: "function () {}"),
+    // Method abbreviations (`puf` -> `public function name() {}`):
+    // the alias is what the user types, the expansion parks the caret
+    // inside the parameter list.
+    CodeFieldPrompt(
+      word: "puf",
+      type: snippetPromptType,
+      customAutocomplete: CodeAutocompleteResult(
+        input: "",
+        word: "public function name() {}",
+        selection: TextSelection.collapsed(offset: 21),
+      ),
+    ),
+    CodeFieldPrompt(
+      word: "prif",
+      type: snippetPromptType,
+      customAutocomplete: CodeAutocompleteResult(
+        input: "",
+        word: "private function name() {}",
+        selection: TextSelection.collapsed(offset: 22),
+      ),
+    ),
+    CodeFieldPrompt(
+      word: "prof",
+      type: snippetPromptType,
+      customAutocomplete: CodeAutocompleteResult(
+        input: "",
+        word: "protected function name() {}",
+        selection: TextSelection.collapsed(offset: 24),
+      ),
+    ),
     CodeKeywordPrompt(word: "if () {}"),
     CodeKeywordPrompt(word: "foreach (\$x as \$y) {}"),
     CodeKeywordPrompt(word: "class  {}"),

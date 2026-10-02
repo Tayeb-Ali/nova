@@ -78,6 +78,10 @@ void main() {
       final table =
           MemberRegistry.parseReceivers(loadTable('javascript'));
       expect(table['console']!.map((p) => p.word), contains('log'));
+      expect(
+        table['console']!.map((p) => p.word),
+        containsAll(['error', 'info', 'warn', 'debug']),
+      );
       expect(table['Math']!.map((p) => p.word), contains('random'));
     });
 
