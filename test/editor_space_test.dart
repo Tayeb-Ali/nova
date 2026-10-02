@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:nova/app.dart';
 import 'package:nova/src/core/models/project.dart';
 import 'package:nova/src/core/services/project_service.dart';
+import 'package:nova/src/core/ui/nova_nav_bar.dart';
 import 'package:nova/src/features/workspace/workspace_providers.dart';
 
 class _FakeProjectService extends ProjectService {
@@ -51,19 +52,19 @@ void main() {
     await tester.pumpWidget(const ProviderScope(child: NovaApp()));
     await tester.pump();
     await tester.pump();
-    expect(find.byType(NavigationBar), findsOneWidget);
+    expect(find.byType(NovaNavBar), findsOneWidget);
 
     // Keyboard opens: the bar (pure chrome while typing) must go away.
     tester.view.viewInsets = const FakeViewPadding(bottom: 300);
     await tester.pump();
     await tester.pump();
-    expect(find.byType(NavigationBar), findsNothing);
+    expect(find.byType(NovaNavBar), findsNothing);
 
     // Keyboard closes: navigation returns.
     tester.view.resetViewInsets();
     await tester.pump();
     await tester.pump();
-    expect(find.byType(NavigationBar), findsOneWidget);
+    expect(find.byType(NovaNavBar), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
@@ -132,7 +133,7 @@ void main() {
     container.read(activeEditorTabProvider.notifier).state = id;
     await tester.pump(const Duration(seconds: 1));
     await tester.pump(const Duration(seconds: 1));
-    expect(find.byType(NavigationBar), findsOneWidget);
+    expect(find.byType(NovaNavBar), findsOneWidget);
     expect(find.byType(AppBar), findsOneWidget);
 
     // Enter focus: shell nav, app bar, tab strip and tool drawer go away.
@@ -143,14 +144,14 @@ void main() {
     await tester.tap(find.text('Focus mode'));
     await tester.pump(const Duration(milliseconds: 500));
     await tester.pump(const Duration(milliseconds: 500));
-    expect(find.byType(NavigationBar), findsNothing);
+    expect(find.byType(NovaNavBar), findsNothing);
     expect(find.byType(AppBar), findsNothing);
 
     // Exit restores everything (focus bar keeps save + exit-focus).
     await tester.tap(find.byTooltip('Exit focus mode'));
     await tester.pump();
     await tester.pump();
-    expect(find.byType(NavigationBar), findsOneWidget);
+    expect(find.byType(NovaNavBar), findsOneWidget);
     expect(find.byType(AppBar), findsOneWidget);
     expect(tester.takeException(), isNull);
   });

@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:nova/app.dart';
+import 'package:nova/src/core/ui/nova_nav_bar.dart';
 
 void main() {
   setUp(() {
@@ -23,6 +24,6 @@ void main() {
     await tester.pump();
     await tester.pump();
     expect(find.byType(IdeShell), findsOneWidget);
-    expect(find.byType(NavigationBar), findsOneWidget);
+    expect(find.byType(NovaNavBar), findsOneWidget);
   });
 }

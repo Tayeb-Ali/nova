@@ -4,6 +4,7 @@ import "package:flutter_riverpod/flutter_riverpod.dart";
 import "l10n/generated/app_localizations.dart";
 import "src/core/services/setup_service.dart";
 import "src/core/ui/keyboard_visibility.dart";
+import "src/core/ui/nova_nav_bar.dart";
 import "src/features/workspace/workspace_providers.dart";
 import "src/features/setup/setup_wizard_dialog.dart";
 import "src/core/settings_store.dart";
@@ -114,21 +115,25 @@ class _IdeShellState extends ConsumerState<IdeShell> {
     );
     // Nav labels only: localized via existing keys.
     final l10n = AppLocalizations.of(context);
-    final destinations = [
-      NavigationDestination(
-        icon: Icon(Icons.folder_open),
+    final navItems = [
+      NovaNavItem(
+        icon: Icons.folder_outlined,
+        selectedIcon: Icons.folder,
         label: l10n.navProjects,
       ),
-      NavigationDestination(
-        icon: Icon(Icons.code),
+      NovaNavItem(
+        icon: Icons.code_outlined,
+        selectedIcon: Icons.code,
         label: l10n.navEditor,
       ),
-      NavigationDestination(
-        icon: Icon(Icons.inventory_2),
+      NovaNavItem(
+        icon: Icons.inventory_2_outlined,
+        selectedIcon: Icons.inventory_2,
         label: l10n.navPackagesSdk,
       ),
-      NavigationDestination(
-        icon: Icon(Icons.tune),
+      NovaNavItem(
+        icon: Icons.tune_outlined,
+        selectedIcon: Icons.tune,
         label: l10n.navSettings,
       ),
     ];
@@ -169,16 +174,20 @@ class _IdeShellState extends ConsumerState<IdeShell> {
     return Scaffold(
       body: visibleBody,
       // Distraction-free typing: while the keyboard is up the bottom bar
-      // is pure chrome (~80px). Hide it so the editor keeps maximum
-      // height; it returns the moment the keyboard closes. Focus mode
-      // hides it too (same chrome argument, no keyboard required).
+      // is pure chrome. Hide it so the editor keeps maximum height; it
+      // slides back up the moment the keyboard closes. Focus mode hides
+      // it too (same chrome argument, no keyboard required). Removal is
+      // instant (space reclaimed now); appearance animates via
+      // [NovaNavBarEntrance].
       bottomNavigationBar:
           (keyboardVisible || ref.watch(focusModeProvider))
           ? null
-          : NavigationBar(
-              selectedIndex: _index,
-              onDestinationSelected: _selectNav,
-              destinations: destinations,
+          : NovaNavBarEntrance(
+              child: NovaNavBar(
+                selectedIndex: _index,
+                onSelect: _selectNav,
+                items: navItems,
+              ),
             ),
     );
   }

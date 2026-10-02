@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:nova/app.dart';
 import 'package:nova/src/core/models/project.dart';
 import 'package:nova/src/core/services/project_service.dart';
+import 'package:nova/src/core/ui/nova_nav_bar.dart';
 import 'package:nova/src/core/settings_store.dart';
 import 'package:nova/src/features/workspace/workspace_providers.dart';
 
@@ -107,10 +108,10 @@ void main() {
 
     expect(tester.takeException(), isNull);
 
-    final navBar = tester.widget<NavigationBar>(find.byType(NavigationBar));
+    final navBar = tester.widget<NovaNavBar>(find.byType(NovaNavBar));
     expect(navBar.selectedIndex, 1, reason: 'editor tab should be selected');
     final checkContainer = ProviderScope.containerOf(
-      tester.element(find.byType(NavigationBar)),
+      tester.element(find.byType(NovaNavBar)),
     );
     expect(
       checkContainer.read(activeProjectProvider)?.name,

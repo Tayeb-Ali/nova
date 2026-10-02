@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:nova/app.dart';
 import 'package:nova/src/core/models/project.dart';
 import 'package:nova/src/core/services/project_service.dart';
+import 'package:nova/src/core/ui/nova_nav_bar.dart';
 import 'package:nova/src/features/workspace/workspace_providers.dart';
 
 class _FakeProjectService extends ProjectService {
@@ -93,10 +94,10 @@ void main() {
 
     // Creating a project must land the user in the editor with that project
     // active, not leave them on the projects hub.
-    final navBar = tester.widget<NavigationBar>(find.byType(NavigationBar));
+    final navBar = tester.widget<NovaNavBar>(find.byType(NovaNavBar));
     expect(navBar.selectedIndex, 1, reason: 'editor tab should be selected');
     final container = ProviderScope.containerOf(
-      tester.element(find.byType(NavigationBar)),
+      tester.element(find.byType(NovaNavBar)),
     );
     expect(
       container.read(activeProjectProvider)?.name,
