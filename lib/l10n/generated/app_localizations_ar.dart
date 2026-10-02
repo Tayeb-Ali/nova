@@ -1495,6 +1495,18 @@ class AppLocalizationsAr extends AppLocalizations {
   String get notifDelete => 'حذف';
 
   @override
+  String get notifDiagLastTap => 'آخر ضغطة';
+
+  @override
+  String get notifDiagPermission => 'الإذن';
+
+  @override
+  String get notifDiagTitle => 'تشخيص الدفع';
+
+  @override
+  String get notifDiagTopics => 'القنوات';
+
+  @override
   String get notifEmpty => 'لا توجد إشعارات بعد';
 
   @override

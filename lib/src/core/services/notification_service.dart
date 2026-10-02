@@ -15,10 +15,25 @@ import "package:shared_preferences/shared_preferences.dart";
 class NotificationService {
   static const String highChannelId = "nova_high";
   static const String runtimeChannelId = "nova_runtime";
-  static const String androidIcon = "@mipmap/ic_launcher";
+  // Flat white silhouette (res/drawable/ic_notif.xml): the adaptive launcher
+  // icon renders as a tinted blob in the status bar on Android 13+.
+  static const String androidIcon = "@drawable/ic_notif";
 
   /// Last-show timestamp key (diagnostics only).
   static const String lastShownKey = "nova.lastNotificationAt";
+
+  /// Last notification-tap route (`route|epochMs`), written by the shell's
+  /// deep-link handler. Read by the push-diagnostics card. Never throws.
+  static const String lastRouteTapKey = "nova.lastRouteTap";
+
+  static Future<String?> readLastRouteTap() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      return prefs.getString(lastRouteTapKey);
+    } catch (_) {
+      return null;
+    }
+  }
 
   static final NotificationService instance = NotificationService();
 
@@ -37,6 +52,20 @@ class NotificationService {
   }) : _plugin = plugin ?? FlutterLocalNotificationsPlugin(),
        _clock = clock ?? DateTime.now,
        _prefsFactory = prefsFactory ?? SharedPreferences.getInstance;
+
+  /// Whether system notifications are currently allowed (Android 13+
+  /// runtime + channel state). Null when undeterminable (tests, failure).
+  /// Never throws.
+  Future<bool?> areNotificationsEnabled() async {
+    try {
+      await _ensureInitialized();
+      final android = _plugin.resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin>();
+      return await android?.areNotificationsEnabled();
+    } catch (_) {
+      return null;
+    }
+  }
 
   /// Routes tapped while the app was alive (payload == in-app route).
   Stream<String> get onRouteTap => _taps.stream;

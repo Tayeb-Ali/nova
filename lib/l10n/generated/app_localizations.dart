@@ -2764,6 +2764,30 @@ abstract class AppLocalizations {
   /// **'Delete'**
   String get notifDelete;
 
+  /// Notifications: diagnostics last tap route
+  ///
+  /// In en, this message translates to:
+  /// **'Last tap'**
+  String get notifDiagLastTap;
+
+  /// Notifications: diagnostics permission state
+  ///
+  /// In en, this message translates to:
+  /// **'Permission'**
+  String get notifDiagPermission;
+
+  /// Notifications: diagnostics card title
+  ///
+  /// In en, this message translates to:
+  /// **'Push diagnostics'**
+  String get notifDiagTitle;
+
+  /// Notifications: diagnostics subscribed topics
+  ///
+  /// In en, this message translates to:
+  /// **'Topics'**
+  String get notifDiagTopics;
+
   /// Notifications: empty state
   ///
   /// In en, this message translates to:

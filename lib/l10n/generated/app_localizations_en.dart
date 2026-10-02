@@ -1500,6 +1500,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get notifDelete => 'Delete';
 
   @override
+  String get notifDiagLastTap => 'Last tap';
+
+  @override
+  String get notifDiagPermission => 'Permission';
+
+  @override
+  String get notifDiagTitle => 'Push diagnostics';
+
+  @override
+  String get notifDiagTopics => 'Topics';
+
+  @override
   String get notifEmpty => 'No notifications yet';
 
   @override

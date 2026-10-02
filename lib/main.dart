@@ -11,6 +11,7 @@ import "package:shared_preferences/shared_preferences.dart";
 import "app.dart";
 import "firebase_options.dart";
 import "src/core/services/app_info_service.dart";
+import "src/core/services/fcm_service.dart";
 import "src/core/services/notification_service.dart";
 import "src/features/notifications/notification_model.dart";
 import "src/features/notifications/notifications_store.dart";
@@ -50,10 +51,13 @@ Future<void> _fcmBackgroundHandler(RemoteMessage message) async {
     // Offline / unconfigured: drop the background message silently.
     return;
   }
-  final title = message.notification?.title ?? "Nova";
-  final body = message.notification?.body ?? "";
-  final dataRoute = message.data["route"];
-  final route = dataRoute is String && dataRoute.isNotEmpty ? dataRoute : null;
+  // Shared resolver: data-only messages fall back to data title/body, and
+  // fully empty messages are dropped (no blank "Nova" tray entries).
+  final content = FcmService.resolveContent(message);
+  if (content == null) return;
+  final title = content.title;
+  final body = content.body;
+  final route = content.route;
   try {
     await NotificationService().showSystem(
       title: title,

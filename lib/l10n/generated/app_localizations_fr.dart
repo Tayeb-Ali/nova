@@ -1512,6 +1512,18 @@ class AppLocalizationsFr extends AppLocalizations {
   String get notifDelete => 'Supprimer';
 
   @override
+  String get notifDiagLastTap => 'Dernier appui';
+
+  @override
+  String get notifDiagPermission => 'Autorisation';
+
+  @override
+  String get notifDiagTitle => 'Diagnostic push';
+
+  @override
+  String get notifDiagTopics => 'Sujets';
+
+  @override
   String get notifEmpty => 'Aucune notification pour le moment';
 
   @override

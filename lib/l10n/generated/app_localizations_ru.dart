@@ -1506,6 +1506,18 @@ class AppLocalizationsRu extends AppLocalizations {
   String get notifDelete => 'Удалить';
 
   @override
+  String get notifDiagLastTap => 'Последнее нажатие';
+
+  @override
+  String get notifDiagPermission => 'Разрешение';
+
+  @override
+  String get notifDiagTitle => 'Диагностика push';
+
+  @override
+  String get notifDiagTopics => 'Темы';
+
+  @override
   String get notifEmpty => 'Уведомлений пока нет';
 
   @override

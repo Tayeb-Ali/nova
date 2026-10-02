@@ -1,20 +1,13 @@
 package sd.adaa.codeide
 
-import android.Manifest
 import android.content.BroadcastReceiver
 import android.content.Intent
 import android.content.IntentFilter
-import android.content.pm.PackageManager
-import android.os.Build
 import android.util.Log
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 
 class MainActivity : FlutterActivity() {
-
-    companion object {
-        private const val NOTIFICATION_PERMISSION_REQUEST = 1001
-    }
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
@@ -37,7 +30,7 @@ class MainActivity : FlutterActivity() {
         intent?.extras?.keySet()?.takeIf { it.isNotEmpty() }?.let {
             Log.i("NovaTest", "onCreate extras=" + it.joinToString())
         }
-        ensureNotificationPermission()
+       
         checkLinkerProbeIntent(intent)
         // Debug receivers (arbitrary setup/install triggers): debug builds
         // only. Release/play builds must never export them.
@@ -80,8 +73,7 @@ class MainActivity : FlutterActivity() {
             }
         }, installFilter, RECEIVER_EXPORTED)
 
-        // Phase 0 linker-exec spike probe (debug only; stripped in the Play
-        // flavor later): forces NOVA_EXEC_MODE=linker with targetSdk still 28.
+      
         // `adb shell am broadcast -a sd.adaa.codeide.DEBUG_LINKER_PROBE -n sd.adaa.codeide/.MainActivity`
         val probeFilter = IntentFilter("sd.adaa.codeide.DEBUG_LINKER_PROBE")
         registerReceiver(object : BroadcastReceiver() {
@@ -117,20 +109,4 @@ class MainActivity : FlutterActivity() {
         }
     }
 
-    private fun ensureNotificationPermission() {
-        // Android 13+ (targetSdk 33+): notification permission is runtime.
-        // While targetSdk stays 28 the system pre-grants it, so this only
-        // starts showing a dialog once the SDK target is raised — keeping the
-        // app Google Play compliant either way. Consent is optional: the app
-        // still works without notifications, so we never gate on the result.
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
-            checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) !=
-            PackageManager.PERMISSION_GRANTED
-        ) {
-            requestPermissions(
-                arrayOf(Manifest.permission.POST_NOTIFICATIONS),
-                NOTIFICATION_PERMISSION_REQUEST,
-            )
-        }
-    }
 }

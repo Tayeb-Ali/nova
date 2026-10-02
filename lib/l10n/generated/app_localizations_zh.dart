@@ -1476,6 +1476,18 @@ class AppLocalizationsZh extends AppLocalizations {
   String get notifDelete => '删除';
 
   @override
+  String get notifDiagLastTap => '上次点击';
+
+  @override
+  String get notifDiagPermission => '权限';
+
+  @override
+  String get notifDiagTitle => '推送诊断';
+
+  @override
+  String get notifDiagTopics => '主题';
+
+  @override
   String get notifEmpty => '暂无通知';
 
   @override

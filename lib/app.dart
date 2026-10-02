@@ -3,6 +3,7 @@ import "dart:async";
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
+import "package:shared_preferences/shared_preferences.dart";
 import "l10n/generated/app_localizations.dart";
 import "src/core/services/fcm_service.dart";
 import "src/core/services/notification_service.dart";
@@ -64,9 +65,13 @@ class NovaApp extends ConsumerWidget {
       home: const SplashGate(child: FirstRunFlow(child: IdeShell())),
       // Deep-link targets for notification taps (FCM data["route"] and the
       // system-tray payload). Pushes are best-effort and never guarded.
+      // Unknown routes fall back to the notifications screen instead of
+      // silently doing nothing (pushNamed would throw).
       routes: {
         NotificationsScreen.routeName: (_) => const NotificationsScreen(),
       },
+      onGenerateRoute: (_) =>
+          MaterialPageRoute(builder: (_) => const NotificationsScreen()),
     );
   }
 }
@@ -199,14 +204,31 @@ class _IdeShellState extends ConsumerState<IdeShell> {
     } catch (_) {}
   }
 
-  /// Best-effort deep-link: unknown routes are ignored, never crash.
+  /// Best-effort deep-link: unknown routes fall back to the notifications
+  /// screen (see onGenerateRoute). Every tap is recorded for the
+  /// push-diagnostics card (see NotificationService.lastRouteTapKey).
+  /// Never throws/crashes.
   void _openRoute(String route) {
     if (!mounted || route.isEmpty) return;
+    unawaited(_recordRouteTap(route));
     try {
       Navigator.of(context).pushNamed(route);
     } catch (_) {
-      // Route not registered: the notification itself already landed.
+      // Route not registered: onGenerateRoute shows the fallback screen.
+      try {
+        Navigator.of(context).pushNamed(NotificationsScreen.routeName);
+      } catch (_) {}
     }
+  }
+
+  Future<void> _recordRouteTap(String route) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(
+        NotificationService.lastRouteTapKey,
+        "$route|${DateTime.now().millisecondsSinceEpoch}",
+      );
+    } catch (_) {}
   }
 
   Future<void> _checkBootstrap() async {

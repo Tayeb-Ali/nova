@@ -27,8 +27,13 @@ class FcmService {
   /// Where the latest FCM registration token is cached.
   static const String fcmTokenKey = "nova.fcmToken";
 
-  /// Broadcast topic for Nova announcements.
-  static const String announcementsTopic = "nova_announcements";
+  /// Where the subscribed topics are cached (for the diagnostics card).
+  static const String fcmTopicsKey = "nova.fcmTopics";
+
+  /// Broadcast topics every install subscribes to: ALL (general), ADS
+  /// (promotions), UPDATE (releases). Server sends to
+  /// `/topics/ALL` etc. to reach everyone.
+  static const List<String> topics = ["ALL", "ADS", "UPDATE"];
 
   final FirebaseMessaging _messaging;
   final NotificationService _system;
@@ -54,7 +59,25 @@ class FcmService {
     return null;
   }
 
-  /// Requests permission, subscribes to [announcementsTopic], caches the
+  /// Resolved display content, or null when the message carries nothing to
+  /// show (empty title AND body AND no route). Prefers the notification
+  /// payload, falls back to `data["title"]` / `data["body"]` so data-only
+  /// messages render instead of an empty "Nova" shell.
+  static ({String title, String body, String? route})? resolveContent(
+    RemoteMessage message,
+  ) {
+    String str(Object? v) => v is String ? v.trim() : "";
+    final n = message.notification;
+    var title = str(n?.title);
+    if (title.isEmpty) title = str(message.data["title"]);
+    var body = str(n?.body);
+    if (body.isEmpty) body = str(message.data["body"]);
+    final route = routeOf(message);
+    if (title.isEmpty && body.isEmpty && route == null) return null;
+    return (title: title.isEmpty ? "Nova" : title, body: body, route: route);
+  }
+
+  /// Requests permission, subscribes to [topics], caches the
   /// token, and routes foreground messages to a system notification PLUS the
   /// in-app center via [onNotification]. Never throws; safe to call once.
   Future<void> init({
@@ -66,11 +89,16 @@ class FcmService {
       await _messaging.requestPermission();
     } catch (_) {}
     try {
-      await _messaging.subscribeToTopic(announcementsTopic);
+      for (final topic in topics) {
+        await _messaging.subscribeToTopic(topic);
+      }
+      final prefs = await _prefsFactory();
+      await prefs.setStringList(fcmTopicsKey, topics);
     } catch (_) {}
     try {
       FirebaseMessaging.onMessage.listen((message) async {
         final item = _toAppNotification(message);
+        if (item == null) return; // Nothing to show — drop silently.
         try {
           await _system.showSystem(
             title: item.title,
@@ -137,6 +165,16 @@ class FcmService {
     }
   }
 
+  /// Topics cached under [fcmTopicsKey] after a successful subscribe.
+  Future<List<String>> readSubscribedTopics() async {
+    try {
+      final prefs = await _prefsFactory();
+      return prefs.getStringList(fcmTopicsKey) ?? const [];
+    } catch (_) {
+      return const [];
+    }
+  }
+
   Future<void> _persistToken(String token) async {
     try {
       final prefs = await _prefsFactory();
@@ -144,16 +182,17 @@ class FcmService {
     } catch (_) {}
   }
 
-  AppNotification _toAppNotification(RemoteMessage message) {
-    final notification = message.notification;
+  AppNotification? _toAppNotification(RemoteMessage message) {
+    final content = resolveContent(message);
+    if (content == null) return null;
     return AppNotification(
       id:
           message.messageId ??
           DateTime.now().microsecondsSinceEpoch.toString(),
-      title: notification?.title ?? "Nova",
-      body: notification?.body ?? "",
+      title: content.title,
+      body: content.body,
       type: "fcm",
-      route: routeOf(message),
+      route: content.route,
       createdAt: DateTime.now(),
     );
   }
