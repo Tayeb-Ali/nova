@@ -4,6 +4,9 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
+import java.io.File
+import java.util.Properties
+
 android {
     namespace = "sd.adaa.codeide"
     compileSdk = flutter.compileSdkVersion
@@ -110,24 +113,46 @@ android {
         }
     }
 
+    // Play signing (Phase 4): keystore via android/key.properties
+    // (storeFile/storePassword/keyAlias/keyPassword — never committed,
+    // see .gitignore) with NOVA_KEYSTORE_* env vars as CI fallback.
+    // Without either, release falls back to debug keys so local builds
+    // keep working; a fallback build must NEVER ship to Play.
+    val keystoreProps = Properties().also { props ->
+        val propFile = rootProject.file("key.properties")
+        if (propFile.exists()) {
+            propFile.inputStream().use { props.load(it) }
+        }
+    }
+    fun signingValue(prop: String, env: String): String? =
+        (keystoreProps.getProperty(prop) ?: System.getenv(env))
+            ?.takeIf { it.isNotBlank() }
+    // storeFile in key.properties is resolved against android/ first
+    // (repo convention: android/app/<name>.jks with key.properties in
+    // android/), then against android/app/.
+    val keystorePathProp = signingValue("storeFile", "NOVA_KEYSTORE_PATH")
+    val keystoreFile = keystorePathProp?.let {
+        val f = File(it)
+        when {
+            f.isAbsolute -> f
+            rootProject.file(it).exists() -> rootProject.file(it)
+            else -> projectDir.resolve(it)
+        }
+    }
+
     buildTypes {
         release {
-            // Play signing (Phase 4): provide the keystore via environment —
-            // NOVA_KEYSTORE_PATH, NOVA_KEYSTORE_PASSWORD, NOVA_KEY_ALIAS,
-            // NOVA_KEY_PASSWORD (CI: repository secrets). Without them the
-            // build falls back to debug keys so local/CI debug builds keep
-            // working; a fallback build must NEVER ship to Play.
-            val keystorePath = System.getenv("NOVA_KEYSTORE_PATH")
-            if (!keystorePath.isNullOrBlank() && file(keystorePath).exists()) {
+            if (keystoreFile != null && keystoreFile.exists()) {
                 signingConfig = signingConfigs.create("novaRelease") {
-                    storeFile = file(keystorePath)
-                    storePassword = System.getenv("NOVA_KEYSTORE_PASSWORD")
-                    keyAlias = System.getenv("NOVA_KEY_ALIAS")
-                    keyPassword = System.getenv("NOVA_KEY_PASSWORD")
+                    storeFile = keystoreFile
+                    storePassword = signingValue(
+                        "storePassword", "NOVA_KEYSTORE_PASSWORD")
+                    keyAlias = signingValue("keyAlias", "NOVA_KEY_ALIAS")
+                    keyPassword = signingValue(
+                        "keyPassword", "NOVA_KEY_PASSWORD")
                 }
             } else {
-                // TODO(play-release): wire NOVA_KEYSTORE_* secrets, then
-                // switch this fallback to the release config unconditionally.
+                // TODO(play-release): with key.properties absent. Local-only.
                 signingConfig = signingConfigs.getByName("debug")
             }
         }
