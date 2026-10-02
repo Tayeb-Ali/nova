@@ -120,8 +120,7 @@ void main() {
     await tester.pump();
     await tester.pump();
 
-    // Enter the workspace and open a file so the file header (with the
-    // focus toggle) renders.
+    // Enter the workspace and open a file so the tab strip actions render.
     await tester.tap(find.text('Editor'));
     await tester.pump();
     await tester.pump();
@@ -137,7 +136,7 @@ void main() {
     expect(find.byType(AppBar), findsOneWidget);
 
     // Enter focus: shell nav, app bar, tab strip and tool drawer go away.
-    // (Explorer open squeezes the file header into its overflow menu.)
+    // (On narrow viewport the actions collapse into a popup menu.)
     await tester.tap(find.byTooltip('Tab actions'));
     await tester.pump(const Duration(milliseconds: 500));
     await tester.pump(const Duration(milliseconds: 500));
@@ -147,7 +146,7 @@ void main() {
     expect(find.byType(NavigationBar), findsNothing);
     expect(find.byType(AppBar), findsNothing);
 
-    // Exit restores everything (header keeps save + exit-focus).
+    // Exit restores everything (focus bar keeps save + exit-focus).
     await tester.tap(find.byTooltip('Exit focus mode'));
     await tester.pump();
     await tester.pump();

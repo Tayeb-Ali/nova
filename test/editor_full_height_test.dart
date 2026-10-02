@@ -81,7 +81,7 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
     await tester.pump(const Duration(seconds: 1));
 
-    // In focus mode without keyboard, editor should fill screen height minus file header (~36px)
+    // In focus mode without keyboard, editor should fill screen height minus focus bar (~41px)
     final editorBox = tester.renderObject<RenderBox>(find.byType(CodeEditor));
     final editorAreaBox = tester.renderObject<RenderBox>(find.byType(EditorAreaView));
     

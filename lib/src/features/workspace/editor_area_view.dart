@@ -36,16 +36,95 @@ class EditorAreaView extends ConsumerWidget {
     }
     return Column(
       children: [
-        // Focus mode: the tab strip is chrome — the header keeps the file
-        // name + save, so nothing needed while typing is lost.
         if (!focus) ...[
           _TabStrip(tabs: tabs, activeId: active.id),
+          Divider(height: 1, color: scheme.outlineVariant),
+        ] else ...[
+          _FocusBar(tab: active),
           Divider(height: 1, color: scheme.outlineVariant),
         ],
         Expanded(
           child: _EditorTabBody(key: ValueKey(active.id), tab: active),
         ),
       ],
+    );
+  }
+}
+
+/// Minimal chrome shown in focus mode: filename + dirty dot + actions.
+class _FocusBar extends ConsumerWidget {
+  final EditorTabModel tab;
+  const _FocusBar({required this.tab});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final scheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context);
+    final actions = ref.watch(activeEditorActionsProvider);
+
+    return Container(
+      height: 40,
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      color: scheme.surfaceContainerLow,
+      child: Row(
+        children: [
+          Expanded(
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (tab.dirty)
+                  Padding(
+                    padding: const EdgeInsets.only(right: 6),
+                    child: Icon(Icons.circle, size: 8, color: scheme.tertiary),
+                  ),
+                Flexible(
+                  child: Tooltip(
+                    message: tab.path,
+                    child: Text(
+                      p.basename(tab.path),
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.bodySmall
+                          ?.copyWith(fontWeight: FontWeight.w600),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          if (actions.isMarkdown)
+            IconButton(
+              onPressed: actions.togglePreview,
+              visualDensity: VisualDensity.compact,
+              tooltip: actions.showPreview
+                  ? l10n.editorEdit
+                  : l10n.editorPreview,
+              icon: Icon(
+                actions.showPreview
+                    ? Icons.edit_outlined
+                    : Icons.visibility_outlined,
+                size: 18,
+              ),
+            ),
+          IconButton(
+            onPressed: actions.loaded ? actions.reload : null,
+            visualDensity: VisualDensity.compact,
+            tooltip: l10n.actionRefresh,
+            icon: const Icon(Icons.refresh, size: 18),
+          ),
+          IconButton(
+            onPressed: actions.loaded ? actions.save : null,
+            visualDensity: VisualDensity.compact,
+            tooltip: l10n.actionSave,
+            icon: const Icon(Icons.save, size: 18),
+          ),
+          IconButton(
+            onPressed: () => ref.read(focusModeProvider.notifier).state = false,
+            visualDensity: VisualDensity.compact,
+            tooltip: l10n.editorFocusExit,
+            icon: const Icon(Icons.fullscreen_exit, size: 18),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -80,9 +159,7 @@ class _TabStrip extends ConsumerWidget {
         context: context,
         builder: (context) => AlertDialog(
           title: Text(l10n.editorCloseDirtyTitle),
-          content: Text(
-            l10n.editorCloseDirtyBody(p.basename(tab.path)),
-          ),
+          content: Text(l10n.editorCloseDirtyBody(p.basename(tab.path))),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),
@@ -176,13 +253,130 @@ class _TabStrip extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final scheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context);
+    final actions = ref.watch(activeEditorActionsProvider);
+    final focus = ref.watch(focusModeProvider);
+
     return Container(
       height: 48,
       color: scheme.surfaceContainerLow,
-      child: ListView(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 8),
-        children: [for (final tab in tabs) _tabChip(context, ref, tab)],
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          // On narrow panes (phone + explorer open) collapse all actions
+          // into a single overflow menu so the strip never overflows.
+          final compact = constraints.maxWidth < 250;
+
+          return Row(
+            children: [
+              // Scrollable tab chips.
+              Expanded(
+                child: ListView(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  children: [
+                    for (final tab in tabs) _tabChip(context, ref, tab),
+                  ],
+                ),
+              ),
+              // Action buttons pinned to the trailing edge.
+              if (actions.loaded) ...[
+                VerticalDivider(
+                  width: 1,
+                  indent: 10,
+                  endIndent: 10,
+                  color: scheme.outlineVariant,
+                ),
+                if (compact)
+                  PopupMenuButton<String>(
+                    tooltip: l10n.editorTabActions,
+                    icon: Icon(
+                      Icons.more_vert,
+                      size: 18,
+                      color: scheme.onSurfaceVariant,
+                    ),
+                    onSelected: (value) {
+                      if (value == "preview") {
+                        actions.togglePreview?.call();
+                      } else if (value == "save") {
+                        actions.save?.call();
+                      } else if (value == "reload") {
+                        actions.reload?.call();
+                      } else if (value == "focus") {
+                        ref.read(focusModeProvider.notifier).state = !focus;
+                      }
+                    },
+                    itemBuilder: (context) => [
+                      if (actions.isMarkdown)
+                        PopupMenuItem(
+                          value: "preview",
+                          child: Text(
+                            actions.showPreview
+                                ? l10n.editorEdit
+                                : l10n.editorPreview,
+                          ),
+                        ),
+                      PopupMenuItem(
+                        value: "save",
+                        child: Text(l10n.actionSave),
+                      ),
+                      PopupMenuItem(
+                        value: "reload",
+                        child: Text(l10n.actionRefresh),
+                      ),
+                      PopupMenuItem(
+                        value: "focus",
+                        child: Text(
+                          focus
+                              ? l10n.editorFocusExit
+                              : l10n.editorFocusEnter,
+                        ),
+                      ),
+                    ],
+                  )
+                else ...[
+                  if (actions.isMarkdown)
+                    IconButton(
+                      onPressed: actions.togglePreview,
+                      visualDensity: VisualDensity.compact,
+                      tooltip: actions.showPreview
+                          ? l10n.editorEdit
+                          : l10n.editorPreview,
+                      icon: Icon(
+                        actions.showPreview
+                            ? Icons.edit_outlined
+                            : Icons.visibility_outlined,
+                        size: 18,
+                      ),
+                    ),
+                  IconButton(
+                    onPressed: () =>
+                        ref.read(focusModeProvider.notifier).state = !focus,
+                    visualDensity: VisualDensity.compact,
+                    tooltip:
+                        focus ? l10n.editorFocusExit : l10n.editorFocusEnter,
+                    icon: Icon(
+                      focus ? Icons.fullscreen_exit : Icons.fullscreen,
+                      size: 18,
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: actions.reload,
+                    visualDensity: VisualDensity.compact,
+                    tooltip: l10n.actionRefresh,
+                    icon: const Icon(Icons.refresh, size: 18),
+                  ),
+                  IconButton(
+                    onPressed: actions.save,
+                    visualDensity: VisualDensity.compact,
+                    tooltip: l10n.actionSave,
+                    icon: const Icon(Icons.save, size: 18),
+                  ),
+                  const SizedBox(width: 4),
+                ],
+              ],
+            ],
+          );
+        },
       ),
     );
   }
@@ -225,10 +419,37 @@ class _EditorTabBodyState extends ConsumerState<_EditorTabBody> {
   }
 
   @override
+  void deactivate() {
+    // Clear actions before the widget leaves the tree so the tab strip
+    // does not hold stale callbacks from a disposed state.
+    ref.read(activeEditorActionsProvider.notifier).state =
+        ActiveEditorActions.empty;
+    super.deactivate();
+  }
+
+  @override
   void dispose() {
     _autoSaveTimer?.cancel();
     _recoveryTimer?.cancel();
     super.dispose();
+  }
+
+  /// Push the current save / reload / preview callbacks into the shared
+  /// provider so the combined tab strip (or focus bar) can render them.
+  void _updateActions() {
+    if (!mounted) return;
+    ref.read(activeEditorActionsProvider.notifier).state = ActiveEditorActions(
+      save: _loaded ? () => _save() : null,
+      reload: _loaded ? _reload : null,
+      togglePreview: () => setState(() {
+        _showPreview = !_showPreview;
+        // Re-publish so the button icon flips.
+        _updateActions();
+      }),
+      loaded: _loaded,
+      showPreview: _showPreview,
+      isMarkdown: widget.tab.kind == EditorKind.markdown,
+    );
   }
 
   @override
@@ -260,6 +481,7 @@ class _EditorTabBodyState extends ConsumerState<_EditorTabBody> {
       _dirty = false;
       _loaded = true;
       _notifyGoOpen();
+      _updateActions();
       // Crash recovery (never blocks content): a draft left by unsaved
       // edits is offered once the editor sits pristine on disk text —
       // never applied silently, never clobbering fresh typing.
@@ -271,6 +493,7 @@ class _EditorTabBodyState extends ConsumerState<_EditorTabBody> {
       _savedText = "";
       _dirty = false;
       _loaded = true;
+      _updateActions();
       return "";
     }
   }
@@ -317,6 +540,7 @@ class _EditorTabBodyState extends ConsumerState<_EditorTabBody> {
       }
     };
   }
+
   /// Best-effort gopls didChange after save (sends what was written).
   void _notifyGoSave(String written) {
     if (!widget.tab.path.endsWith('.go')) return;
@@ -396,9 +620,7 @@ class _EditorTabBodyState extends ConsumerState<_EditorTabBody> {
       barrierDismissible: false,
       builder: (context) => AlertDialog(
         title: Text(l10n.editorRecoverTitle),
-        content: Text(
-          l10n.editorRecoverBody(p.basename(widget.tab.path)),
-        ),
+        content: Text(l10n.editorRecoverBody(p.basename(widget.tab.path))),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
@@ -524,9 +746,7 @@ class _EditorTabBodyState extends ConsumerState<_EditorTabBody> {
           return LayoutBuilder(
             builder: (context, constraints) => SingleChildScrollView(
               child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  minHeight: constraints.maxHeight,
-                ),
+                constraints: BoxConstraints(minHeight: constraints.maxHeight),
                 child: const Center(child: CircularProgressIndicator()),
               ),
             ),
@@ -536,9 +756,7 @@ class _EditorTabBodyState extends ConsumerState<_EditorTabBody> {
           return LayoutBuilder(
             builder: (context, constraints) => SingleChildScrollView(
               child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  minHeight: constraints.maxHeight,
-                ),
+                constraints: BoxConstraints(minHeight: constraints.maxHeight),
                 child: Center(
                   child: Padding(
                     padding: const EdgeInsets.all(16),
@@ -556,218 +774,24 @@ class _EditorTabBodyState extends ConsumerState<_EditorTabBody> {
         final initialText = _mountOverride ?? snapshot.data ?? "";
         final isMarkdown = widget.tab.kind == EditorKind.markdown;
         _maybeOfferRecovery();
-        return Column(
-          children: [
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surfaceContainerLow,
-                border: Border(
-                  bottom: BorderSide(
-                    color: Theme.of(context).colorScheme.outlineVariant,
-                  ),
-                ),
-              ),
-              // Narrow panes (phone + explorer open) get an overflow menu
-              // instead of inline buttons so the header never overflows.
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  final compact = constraints.maxWidth < 200;
-                  return Row(
-                    children: [
-                      Expanded(
-                        child: Tooltip(
-                          message: widget.tab.path,
-                          child: Text(
-                            p.basename(widget.tab.path),
-                            overflow: TextOverflow.ellipsis,
-                            style: Theme.of(context).textTheme.bodySmall,
-                          ),
-                        ),
-                      ),
-                      if (widget.tab.dirty)
-                        Padding(
-                          padding: const EdgeInsets.only(right: 8),
-                          child: Icon(
-                            Icons.circle,
-                            size: 8,
-                            color: Theme.of(context).colorScheme.tertiary,
-                          ),
-                        ),
-                      if (isMarkdown && !compact)
-                        IconButton(
-                          visualDensity: VisualDensity.compact,
-                          style: IconButton.styleFrom(
-                            backgroundColor: Theme.of(context)
-                                .colorScheme
-                                .surfaceContainerHigh,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                            padding: const EdgeInsets.all(8),
-                          ),
-                          onPressed: _loaded
-                              ? () =>
-                                    setState(() => _showPreview = !_showPreview)
-                              : null,
-                          tooltip: _showPreview
-                              ? AppLocalizations.of(context).editorEdit
-                              : AppLocalizations.of(context).editorPreview,
-                          icon: Icon(
-                            _showPreview
-                                ? Icons.edit_outlined
-                                : Icons.visibility_outlined,
-                            size: 18,
-                          ),
-                        ),
-                      if (compact)
-                        PopupMenuButton<String>(
-                          tooltip: AppLocalizations.of(context)
-                              .editorTabActions,
-                          icon: Icon(
-                            Icons.more_vert,
-                            size: 18,
-                            color: Theme.of(context)
-                                .colorScheme
-                                .onSurfaceVariant,
-                          ),
-                          onSelected: (value) {
-                            if (value == "preview") {
-                              setState(() => _showPreview = !_showPreview);
-                            } else if (value == "save") {
-                              _save();
-                            } else if (value == "reload") {
-                              _reload();
-                            } else if (value == "focus") {
-                              ref
-                                  .read(focusModeProvider.notifier)
-                                  .state = !ref.read(focusModeProvider);
-                            }
-                          },
-                          itemBuilder: (context) => [
-                            if (isMarkdown)
-                              PopupMenuItem(
-                                value: "preview",
-                                child: Text(
-                                  _showPreview
-                                      ? AppLocalizations.of(context).editorEdit
-                                      : AppLocalizations.of(context)
-                                            .editorPreview,
-                                ),
-                              ),
-                            PopupMenuItem(
-                              value: "save",
-                              child: Text(
-                                AppLocalizations.of(context).actionSave,
-                              ),
-                            ),
-                            PopupMenuItem(
-                              value: "reload",
-                              child: Text(
-                                AppLocalizations.of(context).actionRefresh,
-                              ),
-                            ),
-                            PopupMenuItem(
-                              value: "focus",
-                              child: Text(
-                                ref.watch(focusModeProvider)
-                                    ? AppLocalizations.of(
-                                        context,
-                                      ).editorFocusExit
-                                    : AppLocalizations.of(
-                                        context,
-                                      ).editorFocusEnter,
-                              ),
-                            ),
-                          ],
-                        )
-                      else
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            IconButton(
-                              onPressed: () => ref
-                                  .read(focusModeProvider.notifier)
-                                  .state = !ref.read(focusModeProvider),
-                              style: IconButton.styleFrom(
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(4),
-                                ),
-                                padding: const EdgeInsets.all(8),
-                              ),
-                              visualDensity: VisualDensity.compact,
-                              tooltip: ref.watch(focusModeProvider)
-                                  ? AppLocalizations.of(
-                                      context,
-                                    ).editorFocusExit
-                                  : AppLocalizations.of(
-                                      context,
-                                    ).editorFocusEnter,
-                              icon: Icon(
-                                ref.watch(focusModeProvider)
-                                    ? Icons.fullscreen_exit
-                                    : Icons.fullscreen,
-                                size: 18,
-                              ),
-                            ),
-                            IconButton(
-                              onPressed: _loaded ? _reload : null,
-                              style: IconButton.styleFrom(
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(4),
-                                ),
-                                padding: const EdgeInsets.all(8),
-                              ),
-                              visualDensity: VisualDensity.compact,
-                              tooltip: AppLocalizations.of(
-                                context,
-                              ).actionRefresh,
-                              icon: const Icon(Icons.refresh, size: 18),
-                            ),
-                            TextButton.icon(
-                              onPressed: _loaded ? _save : null,
-                          style: TextButton.styleFrom(
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 4,
-                            ),
-                            visualDensity: VisualDensity.compact,
-                          ),
-                          icon: const Icon(Icons.save, size: 18),
-                          label: Text(AppLocalizations.of(context).actionSave),
-                        ),
-                          ],
-                        ),
-                    ],
-                  );
-                },
-              ),
-            ),
-            Expanded(
-              child: isMarkdown
-                  ? MarkdownEditorView(
-                      key: ValueKey("${widget.tab.path}#$_contentGen"),
-                      initialText: initialText,
-                      onChanged: _onChanged,
-                      bridge: _bridge,
-                      preview: _showPreview,
-                    )
-                  : ReEditorAdapter(
-                      key: ValueKey("${widget.tab.path}#$_contentGen"),
-                      initialText: initialText,
-                      language: widget.tab.language,
-                      onChanged: _onChanged,
-                      filePath: widget.tab.path,
-                      lspCompletion: _lspCompletionFor(),
-                    ),
-            ),
-          ],
-        );
+
+        return isMarkdown
+            ? MarkdownEditorView(
+                key: ValueKey("${widget.tab.path}#$_contentGen"),
+                initialText: initialText,
+                onChanged: _onChanged,
+                bridge: _bridge,
+                preview: _showPreview,
+              )
+            : ReEditorAdapter(
+                key: ValueKey("${widget.tab.path}#$_contentGen"),
+                initialText: initialText,
+                language: widget.tab.language,
+                onChanged: _onChanged,
+                filePath: widget.tab.path,
+                lspCompletion: _lspCompletionFor(),
+              );
       },
     );
   }
 }
-

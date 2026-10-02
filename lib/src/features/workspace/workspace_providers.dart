@@ -165,11 +165,38 @@ Future<void> saveRecentFiles(List<String> files) async {
 /// Id of the currently visible editor tab.
 final activeEditorTabProvider = StateProvider<String?>((ref) => null);
 
-/// Focus (zen) mode: hides every workspace chrome except the file header
-/// and the editor itself (tab strip, explorer, tool drawer, app bar, and —
-/// via IdeShell — the bottom nav). Off by default; toggled from the editor
-/// file header so it is always reachable and always escapable.
+/// Focus (zen) mode: hides workspace chrome (tab strip, explorer, tool
+/// drawer, app bar, and — via IdeShell — the bottom nav). A slim focus bar
+/// keeps the file name + save / reload / exit-focus, so nothing essential
+/// is lost. Off by default.
 final focusModeProvider = StateProvider<bool>((ref) => false);
+
+/// Actions exposed by the active editor tab body to the combined tab strip.
+/// [_EditorTabBodyState] registers its callbacks after loading; the tab strip
+/// reads this to render save / reload / preview buttons in-line with tabs.
+class ActiveEditorActions {
+  final Future<void> Function()? save;
+  final Future<void> Function()? reload;
+  final void Function()? togglePreview;
+  final bool loaded;
+  final bool showPreview;
+  final bool isMarkdown;
+
+  const ActiveEditorActions({
+    this.save,
+    this.reload,
+    this.togglePreview,
+    this.loaded = false,
+    this.showPreview = false,
+    this.isMarkdown = false,
+  });
+  static const empty = ActiveEditorActions();
+}
+
+final activeEditorActionsProvider = StateProvider<ActiveEditorActions>(
+  (ref) => ActiveEditorActions.empty,
+);
+
 /// The active editor tab model, or null when no tab is selected.
 final activeEditorTabModelProvider = Provider<EditorTabModel?>((ref) {
   final tabs = ref.watch(workspaceTabsProvider);
