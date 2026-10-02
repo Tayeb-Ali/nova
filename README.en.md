@@ -331,7 +331,7 @@ adb shell "run-as sd.adaa.codeide sh -c 'ls files/usr/bin | head'"
 
 | Contributor | Role |
 |---|---|
-| [Tayeb Ali](https://github.com/Tayeb-Ali) ([elteyab@smart.sd](mailto:elteyab@smart.sd)) | Project owner & developer |
+| [Elteyab (Tayeb-Ali)](https://github.com/Tayeb-Ali) ([elteyab@smart.sd](mailto:elteyab@smart.sd)) | Project owner & developer |
 | opencode (GLM, Muse Spark models) | AI development assistant |
 | ChatGPT | AI development assistant |
 
