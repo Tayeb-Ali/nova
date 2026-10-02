@@ -2425,6 +2425,138 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'v{version} (build {build})'**
   String appVersionBuild(String version, String build);
+
+  /// About screen: app bar title
+  ///
+  /// In en, this message translates to:
+  /// **'About & Contact'**
+  String get aboutTitle;
+
+  /// About screen: tagline under the app name
+  ///
+  /// In en, this message translates to:
+  /// **'Your dev environment in your pocket'**
+  String get aboutTagline;
+
+  /// About screen: about section header
+  ///
+  /// In en, this message translates to:
+  /// **'About Nova'**
+  String get aboutSectionAbout;
+
+  /// About screen: short product description
+  ///
+  /// In en, this message translates to:
+  /// **'Nova is a code editor that runs on your Android phone and executes code right on the device — Python, JavaScript, PHP, Go, Rust, Ruby, Java, Kotlin, Dart, C/C++ — with a real terminal, Git, and web preview. No external server, no emulation: write, press Run, and see the result.'**
+  String get aboutDescription;
+
+  /// About screen: download section header
+  ///
+  /// In en, this message translates to:
+  /// **'Download'**
+  String get aboutSectionDownload;
+
+  /// About screen: Play store entry title
+  ///
+  /// In en, this message translates to:
+  /// **'Google Play'**
+  String get aboutPlayTitle;
+
+  /// About screen: Play store entry subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'The easy install for most users, updated via the Play Store'**
+  String get aboutPlaySub;
+
+  /// About screen: GitHub releases entry title
+  ///
+  /// In en, this message translates to:
+  /// **'GitHub releases'**
+  String get aboutGithubTitle;
+
+  /// About screen: GitHub releases entry subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Direct APKs from the project releases page'**
+  String get aboutGithubSub;
+
+  /// About screen: version difference explainer title
+  ///
+  /// In en, this message translates to:
+  /// **'Which version should I use?'**
+  String get aboutVersionsTitle;
+
+  /// About screen: version difference explainer body
+  ///
+  /// In en, this message translates to:
+  /// **'The GitHub build targets Android API 28 with direct execution — the current shipping path where the embedded Linux runtime runs at full power. The Play build targets API 36 and executes through the linker, to comply with current Play Store policies. Same editor and features; only the runtime launch path differs.'**
+  String get aboutVersionsBody;
+
+  /// About screen: project links section header
+  ///
+  /// In en, this message translates to:
+  /// **'Project'**
+  String get aboutSectionProject;
+
+  /// About screen: source code row title
+  ///
+  /// In en, this message translates to:
+  /// **'Source code'**
+  String get aboutSourceCode;
+
+  /// About screen: releases row title
+  ///
+  /// In en, this message translates to:
+  /// **'Releases'**
+  String get aboutReleases;
+
+  /// About screen: apt repository row title
+  ///
+  /// In en, this message translates to:
+  /// **'Package repository'**
+  String get aboutPackageRepo;
+
+  /// About screen: license row title
+  ///
+  /// In en, this message translates to:
+  /// **'License: Waqf General Public License v1'**
+  String get aboutLicense;
+
+  /// About screen: license row subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'A waqf for the sake of Allah — free to use, share, and modify'**
+  String get aboutLicenseSub;
+
+  /// About screen: contact section header
+  ///
+  /// In en, this message translates to:
+  /// **'Contact us'**
+  String get aboutSectionContact;
+
+  /// About screen: email row title
+  ///
+  /// In en, this message translates to:
+  /// **'Email us'**
+  String get aboutEmailUs;
+
+  /// About screen: email row subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'For questions, feedback, and bug reports'**
+  String get aboutEmailHint;
+
+  /// About screen: copied-to-clipboard confirmation
+  ///
+  /// In en, this message translates to:
+  /// **'Copied'**
+  String get aboutCopied;
+
+  /// About screen: link open failure message
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open the link'**
+  String get aboutOpenFailed;
 }
 
 class _AppLocalizationsDelegate

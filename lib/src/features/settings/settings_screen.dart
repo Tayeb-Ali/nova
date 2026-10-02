@@ -12,6 +12,7 @@ import "package:flutter_secure_storage/flutter_secure_storage.dart";
 import "../../../l10n/generated/app_localizations.dart";
 import "../../core/services/app_info_service.dart";
 import "../../core/settings_store.dart";
+import "about_screen.dart";
 import "../ai/ai_client.dart";
 import "../ai/ai_presets.dart";
 import "../ai/ai_providers.dart";
@@ -546,6 +547,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           const SizedBox(height: 8),
           // About card with the platform version/build (see AppInfo).
           // Hidden until loaded so a blank version never shows.
+          // Tapping opens the About & Contact page (project links,
+          // Play/GitHub downloads, license, and contact email).
           if (AppInfo.isLoaded)
             Card(
               elevation: 0,
@@ -559,6 +562,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   AppLocalizations.of(context).appVersionBuild(
                     AppInfo.version,
                     AppInfo.buildNumber,
+                  ),
+                ),
+                trailing: const Icon(Icons.chevron_right_outlined),
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => const AboutScreen(),
                   ),
                 ),
               ),

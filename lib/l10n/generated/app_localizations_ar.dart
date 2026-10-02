@@ -1323,4 +1323,74 @@ class AppLocalizationsAr extends AppLocalizations {
   String appVersionBuild(String version, String build) {
     return 'الإصدار $version (بناء $build)';
   }
+
+  @override
+  String get aboutTitle => 'عنا والاتصال بنا';
+
+  @override
+  String get aboutTagline => 'بيئة التطوير في جيبك';
+
+  @override
+  String get aboutSectionAbout => 'عن نوفا';
+
+  @override
+  String get aboutDescription =>
+      'نوفا محرر كود يشتغل على موبايلك الأندرويد، ويشغّل الكود فعليًا على الجهاز نفسه — بايثون، جافاسكربت، PHP، ‏Go، ‏Rust، ‏Ruby، ‏Java، ‏Kotlin، ‏Dart، ‏C/C++ — مع تيرمينال حقيقي، Git، ومعاينة ويب. لا سيرفر خارجي، لا محاكاة: تكتب، تضغط تشغيل، وتشوف النتيجة.';
+
+  @override
+  String get aboutSectionDownload => 'التحميل';
+
+  @override
+  String get aboutPlayTitle => 'Google Play';
+
+  @override
+  String get aboutPlaySub =>
+      'التثبيت الأسهل لمعظم المستخدمين، مع تحديثات عبر متجر Play';
+
+  @override
+  String get aboutGithubTitle => 'إصدارات GitHub';
+
+  @override
+  String get aboutGithubSub => 'ملفات APK مباشرة من صفحة إصدارات المشروع';
+
+  @override
+  String get aboutVersionsTitle => 'أي نسخة أختار؟';
+
+  @override
+  String get aboutVersionsBody =>
+      'نسخة GitHub تستهدف Android API 28 مع تشغيل مباشر — مسار الشحن الحالي حيث تعمل بيئة لينكس المضمّنة بكامل قوتها. نسخة Play تستهدف API 36 وتشغّل عبر الـ linker التزامًا بسياسات متجر Play الحالية. نفس المحرر والميزات؛ الفرق فقط في طريقة إطلاق بيئة التشغيل.';
+
+  @override
+  String get aboutSectionProject => 'المشروع';
+
+  @override
+  String get aboutSourceCode => 'الكود المصدري';
+
+  @override
+  String get aboutReleases => 'الإصدارات';
+
+  @override
+  String get aboutPackageRepo => 'مستودع الحزم';
+
+  @override
+  String get aboutLicense => 'الرخصة: رخصة وقف العامة — الإصدار الأول';
+
+  @override
+  String get aboutLicenseSub =>
+      'وقف لله تعالى — حر في الاستخدام والمشاركة والتعديل';
+
+  @override
+  String get aboutSectionContact => 'الاتصال بنا';
+
+  @override
+  String get aboutEmailUs => 'راسلنا عبر البريد';
+
+  @override
+  String get aboutEmailHint => 'للأسئلة والملاحظات والتبليغ عن الأخطاء';
+
+  @override
+  String get aboutCopied => 'تم النسخ';
+
+  @override
+  String get aboutOpenFailed => 'تعذّر فتح الرابط';
 }

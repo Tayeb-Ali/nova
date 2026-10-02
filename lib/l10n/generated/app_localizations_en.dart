@@ -1326,4 +1326,74 @@ class AppLocalizationsEn extends AppLocalizations {
   String appVersionBuild(String version, String build) {
     return 'v$version (build $build)';
   }
+
+  @override
+  String get aboutTitle => 'About & Contact';
+
+  @override
+  String get aboutTagline => 'Your dev environment in your pocket';
+
+  @override
+  String get aboutSectionAbout => 'About Nova';
+
+  @override
+  String get aboutDescription =>
+      'Nova is a code editor that runs on your Android phone and executes code right on the device — Python, JavaScript, PHP, Go, Rust, Ruby, Java, Kotlin, Dart, C/C++ — with a real terminal, Git, and web preview. No external server, no emulation: write, press Run, and see the result.';
+
+  @override
+  String get aboutSectionDownload => 'Download';
+
+  @override
+  String get aboutPlayTitle => 'Google Play';
+
+  @override
+  String get aboutPlaySub =>
+      'The easy install for most users, updated via the Play Store';
+
+  @override
+  String get aboutGithubTitle => 'GitHub releases';
+
+  @override
+  String get aboutGithubSub => 'Direct APKs from the project releases page';
+
+  @override
+  String get aboutVersionsTitle => 'Which version should I use?';
+
+  @override
+  String get aboutVersionsBody =>
+      'The GitHub build targets Android API 28 with direct execution — the current shipping path where the embedded Linux runtime runs at full power. The Play build targets API 36 and executes through the linker, to comply with current Play Store policies. Same editor and features; only the runtime launch path differs.';
+
+  @override
+  String get aboutSectionProject => 'Project';
+
+  @override
+  String get aboutSourceCode => 'Source code';
+
+  @override
+  String get aboutReleases => 'Releases';
+
+  @override
+  String get aboutPackageRepo => 'Package repository';
+
+  @override
+  String get aboutLicense => 'License: Waqf General Public License v1';
+
+  @override
+  String get aboutLicenseSub =>
+      'A waqf for the sake of Allah — free to use, share, and modify';
+
+  @override
+  String get aboutSectionContact => 'Contact us';
+
+  @override
+  String get aboutEmailUs => 'Email us';
+
+  @override
+  String get aboutEmailHint => 'For questions, feedback, and bug reports';
+
+  @override
+  String get aboutCopied => 'Copied';
+
+  @override
+  String get aboutOpenFailed => 'Could not open the link';
 }

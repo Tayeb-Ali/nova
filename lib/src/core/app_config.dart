@@ -59,4 +59,16 @@ abstract final class AppConfig {
       'http://elteyab.sd/nova/bootstrap';
   static const String bootstrapFullBaseUrl =
       'https://github.com/Tayeb-Ali/nova/releases/download/bootstrap-v1';
+
+  // -- Public project / contact links (Settings > About & Contact). --
+  // Single source of truth so the UI, tests, and README never drift.
+  static const String githubRepoUrl = 'https://github.com/Tayeb-Ali/nova';
+  static const String githubReleasesUrl =
+      'https://github.com/Tayeb-Ali/nova/releases';
+  static const String playStoreUrl =
+      'https://play.google.com/store/apps/details?id=sd.adaa.codeide';
+  static const String contactEmail = 'elteyab@smart.sd';
+  static const String licenseUrlAr =
+      'https://ojuba.org/waqf:رخصة_وقف_العامة';
+  static const String licenseUrlEn = 'https://ojuba.org/waqf:license';
 }
