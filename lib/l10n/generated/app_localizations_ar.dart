@@ -513,6 +513,12 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
+  String get editorFocusEnter => 'وضع التركيز';
+
+  @override
+  String get editorFocusExit => 'خروج من وضع التركيز';
+
+  @override
   String get explorerTitle => 'المستكشف';
 
   @override

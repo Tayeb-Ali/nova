@@ -165,6 +165,11 @@ Future<void> saveRecentFiles(List<String> files) async {
 /// Id of the currently visible editor tab.
 final activeEditorTabProvider = StateProvider<String?>((ref) => null);
 
+/// Focus (zen) mode: hides every workspace chrome except the file header
+/// and the editor itself (tab strip, explorer, tool drawer, app bar, and —
+/// via IdeShell — the bottom nav). Off by default; toggled from the editor
+/// file header so it is always reachable and always escapable.
+final focusModeProvider = StateProvider<bool>((ref) => false);
 /// The active editor tab model, or null when no tab is selected.
 final activeEditorTabModelProvider = Provider<EditorTabModel?>((ref) {
   final tabs = ref.watch(workspaceTabsProvider);

@@ -72,6 +72,8 @@
   "editorRecoverBody": "استعادة التغييرات غير المحفوظة لـ {name}؟",
   "editorCloseDirtyTitle": "إغلاق بدون حفظ؟",
   "editorCloseDirtyBody": "تجاهل التغييرات غير المحفوظة في {name}؟",
+  "editorFocusEnter": "وضع التركيز",
+  "editorFocusExit": "خروج من وضع التركيز",
   "explorerNewFile": "ملف جديد",
   "explorerNewNameHint": "اسم جديد",
   "explorerDeleteTitle": "حذف؟",

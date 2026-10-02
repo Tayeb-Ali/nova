@@ -513,6 +513,12 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get editorFocusEnter => 'Focus mode';
+
+  @override
+  String get editorFocusExit => 'Exit focus mode';
+
+  @override
   String get explorerTitle => 'EXPLORER';
 
   @override

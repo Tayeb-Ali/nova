@@ -3,6 +3,7 @@ import "package:flutter_riverpod/flutter_riverpod.dart";
 
 import "../../../l10n/generated/app_localizations.dart";
 import "../../core/models/project.dart";
+import "../../core/ui/keyboard_visibility.dart";
 import "../git/git_screen.dart";
 import "../process/process_screen.dart";
 import "../terminal/terminal_screen.dart";
@@ -16,7 +17,14 @@ import "workspace_providers.dart";
 
 /// Workspace: project selector + file explorer + editor + run (task.md §35).
 class WorkspaceScreen extends ConsumerStatefulWidget {
-  const WorkspaceScreen({super.key});
+  const WorkspaceScreen({super.key, this.keyboardVisible = false});
+
+  /// True while the soft keyboard covers part of the window. IdeShell passes
+  /// this from *above* its own Scaffold: a Scaffold consumes the bottom
+  /// viewInset for its body (resizeToAvoidBottomInset), so reading
+  /// `MediaQuery.viewInsetsOf` here always yields 0 and the auto-collapse
+  /// below could never fire (editor_space_test regression).
+  final bool keyboardVisible;
 
   @override
   ConsumerState<WorkspaceScreen> createState() => _WorkspaceScreenState();
@@ -366,9 +374,23 @@ class _WorkspaceScreenState extends ConsumerState<WorkspaceScreen> {
   Widget build(BuildContext context) {
     final projects = ref.watch(projectsProvider);
     final activeProject = ref.watch(activeProjectProvider);
+    // Focus mode hides every chrome except the file header + editor:
+    // app bar, explorer, and the whole tool drawer go away. The header
+    // keeps save + the exit-focus button, so the mode is escapable.
+    final focus = ref.watch(focusModeProvider);
+    // Same distraction-free contract as the shell bottom bar: while typing,
+    // the full AppBar collapses to the slim 28px strip automatically (the
+    // manual toggle keeps working underneath and wins when no keyboard).
+    // NOTE: read through KeyboardVisibility, NOT MediaQuery.viewInsetsOf —
+    // our Scaffold strips the bottom inset from the MediaQuery it gives
+    // its body, so the direct query is always zero here.
+    final barCollapsed =
+        _appBarCollapsed || KeyboardVisibility.of(context);
     return Scaffold(
-      appBar: _appBarCollapsed
-          ? PreferredSize(
+      appBar: focus
+          ? null
+          : barCollapsed
+              ? PreferredSize(
               preferredSize: const Size.fromHeight(28),
               child: Container(
                 height: 28,
@@ -449,7 +471,7 @@ class _WorkspaceScreenState extends ConsumerState<WorkspaceScreen> {
                 Expanded(
                   child: Row(
                     children: [
-                      if (_explorerVisible) ...[
+                      if (_explorerVisible && !focus) ...[
                         const SizedBox(width: 264, child: FileExplorerView()),
                         const VerticalDivider(width: 1),
                       ],
@@ -457,11 +479,12 @@ class _WorkspaceScreenState extends ConsumerState<WorkspaceScreen> {
                     ],
                   ),
                 ),
-                _toolDrawer(
-                  context,
-                  Theme.of(context).colorScheme,
-                  activeProject.path,
-                ),
+                if (!focus)
+                  _toolDrawer(
+                    context,
+                    Theme.of(context).colorScheme,
+                    activeProject.path,
+                  ),
               ],
             ),
     );

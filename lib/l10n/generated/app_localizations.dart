@@ -998,6 +998,18 @@ abstract class AppLocalizations {
   /// **'Discard unsaved changes to {name}?'**
   String editorCloseDirtyBody(String name);
 
+  /// Editor: enter focus mode
+  ///
+  /// In en, this message translates to:
+  /// **'Focus mode'**
+  String get editorFocusEnter;
+
+  /// Editor: exit focus mode
+  ///
+  /// In en, this message translates to:
+  /// **'Exit focus mode'**
+  String get editorFocusExit;
+
   /// Explorer: section header
   ///
   /// In en, this message translates to:

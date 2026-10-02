@@ -3,6 +3,8 @@ import "package:flutter_riverpod/flutter_riverpod.dart";
 
 import "l10n/generated/app_localizations.dart";
 import "src/core/services/setup_service.dart";
+import "src/core/ui/keyboard_visibility.dart";
+import "src/features/workspace/workspace_providers.dart";
 import "src/features/setup/setup_wizard_dialog.dart";
 import "src/core/settings_store.dart";
 import "src/features/editor/autocomplete/language_members.dart";
@@ -47,14 +49,14 @@ class NovaApp extends ConsumerWidget {
 }
 
 /// Bottom navigation shell over the IDE workspaces.
-class IdeShell extends StatefulWidget {
+class IdeShell extends ConsumerStatefulWidget {
   const IdeShell({super.key});
 
   @override
-  State<IdeShell> createState() => _IdeShellState();
+  ConsumerState<IdeShell> createState() => _IdeShellState();
 }
 
-class _IdeShellState extends State<IdeShell> {
+class _IdeShellState extends ConsumerState<IdeShell> {
   int _index = 0;
   bool _bootstrapPromptShown = false;
 
@@ -102,6 +104,14 @@ class _IdeShellState extends State<IdeShell> {
       const SettingsScreen(),
     ];
     final body = SafeArea(child: IndexedStack(index: _index, children: screens));
+    // Captured ABOVE this Scaffold: Scaffold strips the bottom inset from
+    // the MediaQuery it gives its body, so descendants must read the
+    // value through KeyboardVisibility instead.
+    final keyboardVisible = MediaQuery.viewInsetsOf(context).bottom > 0;
+    final visibleBody = KeyboardVisibility(
+      visible: keyboardVisible,
+      child: body,
+    );
     // Nav labels only: localized via existing keys.
     final l10n = AppLocalizations.of(context);
     final destinations = [
@@ -151,18 +161,25 @@ class _IdeShellState extends State<IdeShell> {
               ],
             ),
             const VerticalDivider(width: 1),
-            Expanded(child: body),
+            Expanded(child: visibleBody),
           ],
         ),
       );
     }
     return Scaffold(
-      body: body,
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _index,
-        onDestinationSelected: _selectNav,
-        destinations: destinations,
-      ),
+      body: visibleBody,
+      // Distraction-free typing: while the keyboard is up the bottom bar
+      // is pure chrome (~80px). Hide it so the editor keeps maximum
+      // height; it returns the moment the keyboard closes. Focus mode
+      // hides it too (same chrome argument, no keyboard required).
+      bottomNavigationBar:
+          (keyboardVisible || ref.watch(focusModeProvider))
+          ? null
+          : NavigationBar(
+              selectedIndex: _index,
+              onDestinationSelected: _selectNav,
+              destinations: destinations,
+            ),
     );
   }
 }

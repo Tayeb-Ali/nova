@@ -19,7 +19,10 @@ class RunPanel extends ConsumerStatefulWidget {
 class _RunPanelState extends ConsumerState<RunPanel> {
   final ScrollController _scrollController = ScrollController();
   StreamSubscription<ProcessEvent>? _sub;
-  bool _consoleVisible = true;
+  // Collapsed by default: the 248px console is the tallest chrome in the
+  // workspace, and an empty console earns no pixels. Pressing Run re-shows
+  // it (see _run), so the editor keeps maximum height until output exists.
+  bool _consoleVisible = false;
 
   @override
   void dispose() {

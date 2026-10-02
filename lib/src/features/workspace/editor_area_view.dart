@@ -26,6 +26,7 @@ class EditorAreaView extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final tabs = ref.watch(workspaceTabsProvider);
     final active = ref.watch(activeEditorTabModelProvider);
+    final focus = ref.watch(focusModeProvider);
     final scheme = Theme.of(context).colorScheme;
     if (tabs.isEmpty || active == null) {
       return EmptyState(
@@ -35,15 +36,12 @@ class EditorAreaView extends ConsumerWidget {
     }
     return Column(
       children: [
-        // Squeeze-safe: with keyboard + drawer open the pane can shrink
-        // below the 48px strip — it scrolls instead of overflowing.
-        Flexible(
-          fit: FlexFit.loose,
-          child: SingleChildScrollView(
-            child: _TabStrip(tabs: tabs, activeId: active.id),
-          ),
-        ),
-        Divider(height: 1, color: scheme.outlineVariant),
+        // Focus mode: the tab strip is chrome — the header keeps the file
+        // name + save, so nothing needed while typing is lost.
+        if (!focus) ...[
+          _TabStrip(tabs: tabs, activeId: active.id),
+          Divider(height: 1, color: scheme.outlineVariant),
+        ],
         Expanded(
           child: _EditorTabBody(key: ValueKey(active.id), tab: active),
         ),
@@ -560,13 +558,7 @@ class _EditorTabBodyState extends ConsumerState<_EditorTabBody> {
         _maybeOfferRecovery();
         return Column(
           children: [
-            // Squeeze-safe file header (the Column:294 overflow): when the
-            // pane shrinks below the header, it scrolls instead of
-            // overflowing. Elements stay mounted, so editor focus survives.
-            Flexible(
-              fit: FlexFit.loose,
-              child: SingleChildScrollView(
-                child: Container(
+            Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.surfaceContainerLow,
@@ -646,6 +638,10 @@ class _EditorTabBodyState extends ConsumerState<_EditorTabBody> {
                               _save();
                             } else if (value == "reload") {
                               _reload();
+                            } else if (value == "focus") {
+                              ref
+                                  .read(focusModeProvider.notifier)
+                                  .state = !ref.read(focusModeProvider);
                             }
                           },
                           itemBuilder: (context) => [
@@ -671,12 +667,49 @@ class _EditorTabBodyState extends ConsumerState<_EditorTabBody> {
                                 AppLocalizations.of(context).actionRefresh,
                               ),
                             ),
+                            PopupMenuItem(
+                              value: "focus",
+                              child: Text(
+                                ref.watch(focusModeProvider)
+                                    ? AppLocalizations.of(
+                                        context,
+                                      ).editorFocusExit
+                                    : AppLocalizations.of(
+                                        context,
+                                      ).editorFocusEnter,
+                              ),
+                            ),
                           ],
                         )
                       else
                         Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
+                            IconButton(
+                              onPressed: () => ref
+                                  .read(focusModeProvider.notifier)
+                                  .state = !ref.read(focusModeProvider),
+                              style: IconButton.styleFrom(
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                padding: const EdgeInsets.all(8),
+                              ),
+                              visualDensity: VisualDensity.compact,
+                              tooltip: ref.watch(focusModeProvider)
+                                  ? AppLocalizations.of(
+                                      context,
+                                    ).editorFocusExit
+                                  : AppLocalizations.of(
+                                      context,
+                                    ).editorFocusEnter,
+                              icon: Icon(
+                                ref.watch(focusModeProvider)
+                                    ? Icons.fullscreen_exit
+                                    : Icons.fullscreen,
+                                size: 18,
+                              ),
+                            ),
                             IconButton(
                               onPressed: _loaded ? _reload : null,
                               style: IconButton.styleFrom(
@@ -713,8 +746,6 @@ class _EditorTabBodyState extends ConsumerState<_EditorTabBody> {
                 },
               ),
             ),
-          ),
-        ),
             Expanded(
               child: isMarkdown
                   ? MarkdownEditorView(

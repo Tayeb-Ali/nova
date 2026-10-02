@@ -57,10 +57,17 @@ void main() {
     await tester.tap(find.text("Editor"));
     await tester.pump(const Duration(seconds: 1));
 
-    // Collapse the console via the toggle IconButton.
-    final toggle = find.byIcon(Icons.keyboard_arrow_down);
-    expect(toggle, findsOneWidget);
-    await tester.tap(toggle);
+    // The console starts collapsed (editor-first layout): expand it, then
+    // collapse it again — neither direction may overflow.
+    final expand = find.byIcon(Icons.keyboard_arrow_up);
+    expect(expand, findsOneWidget);
+    await tester.tap(expand);
+    await tester.pump(const Duration(milliseconds: 400));
+    await tester.pump(const Duration(milliseconds: 400));
+
+    final collapse = find.byIcon(Icons.keyboard_arrow_down);
+    expect(collapse, findsOneWidget);
+    await tester.tap(collapse);
     await tester.pump(const Duration(milliseconds: 400));
     await tester.pump(const Duration(milliseconds: 400));
 
