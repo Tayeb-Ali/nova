@@ -49,6 +49,15 @@ class AppLocalizationsFr extends AppLocalizations {
   String get actionRetry => 'Réessayer';
 
   @override
+  String get actionExit => 'Exit';
+
+  @override
+  String get appExitTitle => 'Exit Nova?';
+
+  @override
+  String get appExitBody => 'Press Exit to close the app.';
+
+  @override
   String get actionClose => 'Fermer';
 
   @override

@@ -49,6 +49,15 @@ class AppLocalizationsZh extends AppLocalizations {
   String get actionRetry => '重试';
 
   @override
+  String get actionExit => 'Exit';
+
+  @override
+  String get appExitTitle => 'Exit Nova?';
+
+  @override
+  String get appExitBody => 'Press Exit to close the app.';
+
+  @override
   String get actionClose => '关闭';
 
   @override

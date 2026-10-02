@@ -49,6 +49,15 @@ class AppLocalizationsAr extends AppLocalizations {
   String get actionRetry => 'إعادة المحاولة';
 
   @override
+  String get actionExit => 'خروج';
+
+  @override
+  String get appExitTitle => 'الخروج من نوفا؟';
+
+  @override
+  String get appExitBody => 'اضغط خروج لإغلاق التطبيق.';
+
+  @override
   String get actionClose => 'إغلاق';
 
   @override

@@ -184,6 +184,24 @@ abstract class AppLocalizations {
   /// **'Retry'**
   String get actionRetry;
 
+  /// Common action: exit the app
+  ///
+  /// In en, this message translates to:
+  /// **'Exit'**
+  String get actionExit;
+
+  /// Exit confirm: dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Exit Nova?'**
+  String get appExitTitle;
+
+  /// Exit confirm: dialog body
+  ///
+  /// In en, this message translates to:
+  /// **'Press Exit to close the app.'**
+  String get appExitBody;
+
   /// Common action: close
   ///
   /// In en, this message translates to:

@@ -1,6 +1,7 @@
 import "dart:async";
 
 import "package:flutter/material.dart";
+import "package:flutter/services.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "l10n/generated/app_localizations.dart";
 import "src/core/services/fcm_service.dart";
@@ -79,6 +80,8 @@ class IdeShell extends ConsumerStatefulWidget {
 class _IdeShellState extends ConsumerState<IdeShell> {
   int _index = 0;
   bool _bootstrapPromptShown = false;
+  // Exit confirmation: guards against accidental back-press exits.
+  bool _exitDialogOpen = false;
   // FCM foreground wiring (guest-first, best-effort): foreground messages land
   // in the in-app center via the store, and tap routes deep-link via
   // pushNamed. The native event channel is untouched (IdeEventBus still owns
@@ -224,6 +227,36 @@ class _IdeShellState extends ConsumerState<IdeShell> {
     if (done == true) _selectNav(2);
   }
 
+  // System back button must not kill the app silently: ask first. Pushed
+  // routes (dialogs, About screen) pop normally above this scope — this
+  // only fires at the root, where a pop would mean exiting.
+  Future<void> _confirmExit() async {
+    if (_exitDialogOpen || !mounted) return;
+    _exitDialogOpen = true;
+    final l10n = AppLocalizations.of(context);
+    final exit = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.appExitTitle),
+        content: Text(l10n.appExitBody),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text(l10n.actionCancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: Text(l10n.actionExit),
+          ),
+        ],
+      ),
+    );
+    _exitDialogOpen = false;
+    if (exit == true && mounted) {
+      await SystemNavigator.pop();
+    }
+  }
+
   @override
   void dispose() {
     _editorBarTimer?.cancel();
@@ -307,8 +340,11 @@ class _IdeShellState extends ConsumerState<IdeShell> {
       ),
     ];
     // Wide screens (tablet/landscape/desktop): side rail instead of bottom bar.
+    // Both layouts share one PopScope exit guard at the end, so the shell
+    // is built into a local first.
+    final Widget scaffold;
     if (MediaQuery.sizeOf(context).width >= 700) {
-      return Scaffold(
+      scaffold = Scaffold(
         body: Row(
           children: [
             NavigationRail(
@@ -339,8 +375,8 @@ class _IdeShellState extends ConsumerState<IdeShell> {
           ],
         ),
       );
-    }
-    return Scaffold(
+    } else {
+      scaffold = Scaffold(
       // Editor immersion: no bottom bar in the editor tab — a swipe up
       // from the bottom edge reveals it for a few seconds (see the
       // edge-swipe detector below). The Listener ALWAYS wraps the body
@@ -364,13 +400,22 @@ class _IdeShellState extends ConsumerState<IdeShell> {
               ref.watch(focusModeProvider) ||
               (_index == 1 && !_editorBarVisible))
           ? null
-          : NovaNavBarEntrance(
-              child: NovaNavBar(
-                selectedIndex: _index,
-                onSelect: _selectNav,
-                items: navItems,
+            : NovaNavBarEntrance(
+                child: NovaNavBar(
+                  selectedIndex: _index,
+                  onSelect: _selectNav,
+                  items: navItems,
+                ),
               ),
-            ),
+      );
+    }
+    // Back button guard (both layouts): exiting asks first, never silently.
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) _confirmExit();
+      },
+      child: scaffold,
     );
   }
 }
