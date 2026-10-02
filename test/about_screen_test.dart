@@ -10,6 +10,8 @@ import 'package:nova/src/core/services/app_info_service.dart';
 import 'package:nova/src/features/settings/about_screen.dart';
 import 'package:nova/src/features/settings/settings_screen.dart';
 
+import 'pubspec_version.dart';
+
 Widget _app(Widget home) => ProviderScope(
   child: MaterialApp(
     localizationsDelegates: AppLocalizations.localizationsDelegates,
@@ -32,8 +34,8 @@ void main() {
     PackageInfo.setMockInitialValues(
       appName: 'nova',
       packageName: 'sd.adaa.codeide',
-      version: '0.1.6',
-      buildNumber: '6',
+      version: pubspecVersion,
+      buildNumber: pubspecBuildNumber,
       buildSignature: '',
     );
     await AppInfo.load();
@@ -47,6 +49,11 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 
+    // Header version mirrors pubspec.yaml, never a hardcoded literal.
+    expect(
+      find.text('v$pubspecVersion (build $pubspecBuildNumber)'),
+      findsOneWidget,
+    );
     await _dragTo(tester, AppConfig.contactEmail);
     expect(find.text(AppConfig.contactEmail), findsOneWidget);
     expect(find.text(AppConfig.playStoreUrl), findsOneWidget);

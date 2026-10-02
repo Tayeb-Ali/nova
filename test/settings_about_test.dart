@@ -9,6 +9,8 @@ import 'package:nova/src/core/services/app_info_service.dart';
 import 'package:nova/src/core/settings_store.dart';
 import 'package:nova/src/features/settings/settings_screen.dart';
 
+import 'pubspec_version.dart';
+
 void main() {
   setUp(() async {
     SharedPreferences.setMockInitialValues({});
@@ -18,8 +20,8 @@ void main() {
     PackageInfo.setMockInitialValues(
       appName: 'nova',
       packageName: 'sd.adaa.codeide',
-      version: '0.1.6',
-      buildNumber: '6',
+      version: pubspecVersion,
+      buildNumber: pubspecBuildNumber,
       buildSignature: '',
     );
     await AppInfo.load();
@@ -51,7 +53,10 @@ void main() {
       await tester.pump();
     }
     expect(find.text('About'), findsOneWidget);
-    expect(find.text('v0.1.6 (build 6)'), findsOneWidget);
+    expect(
+      find.text('v$pubspecVersion (build $pubspecBuildNumber)'),
+      findsOneWidget,
+    );
     expect(tester.takeException(), isNull);
   });
 
